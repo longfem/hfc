@@ -1,0 +1,1 @@
+int getAllChannelSignal(char *ip);
