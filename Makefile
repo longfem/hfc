@@ -36,7 +36,7 @@ build:
 	
 	$(CC) $(OBJ) -o tcpclient $(LDFLAGS) $(DBS_LIB) $(BOARDAPI_LD_FLAGS)
 
-	$(LD) $(LIB_OBJ) --shared -o libtcpclient.so
+	$(CC) $(LIB_OBJ) -shared -Wall -fPIC -o libtcpclient.so
 
 	$(STRIP) tcpclient 
 
@@ -44,7 +44,7 @@ install:
 	mkdir -p $(BIN_PATH)
 	cp tcpclient $(BIN_PATH)/
 	mkdir -p $(LIB_PATH)
-	cp libtcpclient.so $(LIB_PATH)/
+	mv libtcpclient.so $(LIB_PATH)/
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
 
