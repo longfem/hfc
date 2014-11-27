@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int communicate(char *ip, char * sendbuf, int slen, char* result, int rlen)
+int communicate(char *ip, char * sendbuf, int slen, char* result, int* rlen)
 {
 
     int sockfd,numbytes;
@@ -65,15 +65,16 @@ int communicate(char *ip, char * sendbuf, int slen, char* result, int rlen)
     printf("\n####Recive from server bytes nums=[%d]\n",numbytes );
 
     if(numbytes == 0){
-        rlen = 0;
+        *rlen = 0;
     }
     else if(numbytes > 0){
-        for(i=0;i<numbytes;i++){
-            printf("Recive from server buf[%d]=0x[%02x]\n",i, buf[i]);
-            result[numbytes -i - 1] = buf[i];
-        }    
+        if(numbytes >= slen){
+            *rlen = numbytes ;        
+            memcpy(result, buf, numbytes);    
+        }
+            
     }else{
-        rlen = -1;
+        *rlen = -1;
     }
  
     ////¹Ø±Õsocket

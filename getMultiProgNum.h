@@ -1,0 +1,1 @@
+int getMultiProgNum(char *ip);

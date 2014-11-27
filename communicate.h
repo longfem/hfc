@@ -1,1 +1,1 @@
-int communicate(char *ip, char * send, int slen, char* result, int rlen);
+int communicate(char *ip, char * send, int slen, char* result, int* rlen);

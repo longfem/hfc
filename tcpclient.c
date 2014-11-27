@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 
 #include "getAllChannelSignal.h"
+#include "getOutRate.h"
+#include "getMultiMethod.h"
 
 
 int main(int argc,char *argv[])
@@ -18,7 +20,17 @@ int main(int argc,char *argv[])
     char ip[256];
     memset(ip,0,sizeof(ip));
     memcpy(ip, argv[1], strlen(argv[1]));
+
+
     getAllChannelSignal(ip);
     getOutRate(ip);
+    getMultiMethod(ip);
+    getMultiProgNum(ip);
+    getMultiProgNum2(ip);
+    setMultiProgNum(ip);
+    getPidMapSumCnt(ip);
+
+    //input
+    curCHNSearched(ip);
     return 0;
 }
