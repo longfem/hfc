@@ -13,10 +13,6 @@ int communicate(char *ip, char * sendbuf, int slen, char* result, int* rlen)
     struct sockaddr_in their_addr;
     int i = 0;
     
-  
-    
-    ////½«»ù±¾Ãû×ÖºÍµØÖ·×ª»»
-    ////he = gethostbyname(argv[1]);
     
     ////½¨Á¢Ò»¸öTCPÌ×½Ó¿Ú
     if((sockfd = socket(AF_INET,SOCK_STREAM,0))==-1)
@@ -61,8 +57,8 @@ int communicate(char *ip, char * sendbuf, int slen, char* result, int* rlen)
         perror("recv");
         exit(1);
     }
-    //buf[numbytes] = '\0'; //×Ö·û´®½áÎ²
-    printf("\n####Recive from server bytes nums=[%d]\n",numbytes );
+    
+    //printf("\n####Recive from server bytes nums=[%d]\n",numbytes );
 
     if(numbytes == 0){
         *rlen = 0;

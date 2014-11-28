@@ -5,76 +5,40 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int getAllChannelSignal(char *ip)
+int getAllChannelSignal(char *ip, char* result, int* rlen)
 {
 
-    int sockfd,numbytes;
+
     char buf[256];
-    struct sockaddr_in their_addr;
     int i = 0;
     char sendbuf[256];
-    char rate[4];
-
+    int slen=0;
   
-    
-    ////½«»ù±¾Ãû×ÖºÍµØÖ·×ª»»
-    ////he = gethostbyname(argv[1]);
-    
-    ////½¨Á¢Ò»¸öTCPÌ×½Ó¿Ú
-    if((sockfd = socket(AF_INET,SOCK_STREAM,0))==-1)
-    {
-        perror("socket");
-        printf("create socket error.½¨Á¢Ò»¸öTCPÌ×½Ó¿ÚÊ§°Ü");
-        exit(1);
-    }
-    
-    ////³õÊ¼»¯½á¹¹Ìå£¬Á¬½Óµ½·þÎñÆ÷µÄ2323¶Ë¿Ú
-    their_addr.sin_family = AF_INET;
-    their_addr.sin_port = htons(161);
-    //// their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-    /* inet_aton: Convert Internet host address from numbers-and-dots notation in CP
-   into binary data and store the result in the structure INP.  */
-    if(inet_pton(AF_INET, ip, &their_addr.sin_addr) <= 0)
-    {
-        printf("[%s] is not a valid IPaddress\n", ip);
-        exit(1);
-    }
-    //inet_aton( "192.168.114.171", &their_addr.sin_addr );
-    bzero(&(their_addr.sin_zero),8);
-    
-    ////ºÍ·þÎñÆ÷½¨Á¢Á¬½Ó
-    if(connect(sockfd,(struct sockaddr *)&their_addr,sizeof(struct sockaddr))==-1)
-    {
-        perror("connect");
-        exit(1);
-    }
-    
+ 
     //get call channal signal status
+    
+
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x11;
     sendbuf[3]=0x04;
-    ////Ïò·þÎñÆ÷·¢ËÍÊý¾Ý, 6¸ö×Ö½ÚÒâÎ¶×ÅÖ»ÓÐhello!±»·¢ËÍ
-    if(send(sockfd,sendbuf,4,0)==-1)
-    {
-        perror("send");
-        exit(1);
-    }
     
-    ////½ÓÊÜ´Ó·þÎñÆ÷·µ»ØµÄÐÅÏ¢
     memset(buf,0,sizeof(buf));
-    if((numbytes = recv(sockfd,buf,256,0))==-1)
-    {
-        perror("recv");
-        exit(1);
-    }
-    //buf[numbytes] = '\0'; //×Ö·û´®½áÎ²
-    printf("\n####Recive from server bytes nums=[%d]\n",numbytes );
-    for(i=0;i<numbytes;i++)
-      printf("Recive from server buf[%d]=0x[%02x]\n",i, buf[i]);
-
+    communicate(ip, sendbuf, 4, buf, &slen);
     
-    ////¹Ø±Õsocket
-    close(sockfd);
+    printf("\n####Recive Convert get getAllChannelSignal receive nums=[%d]\n", slen );
+    if(slen >0){
+         for(i=0;i<slen;i++)
+           printf("Recive Convert get output multi method buf[%d]=0x[%02x]\n",i, buf[i]);    
+
+        *rlen = slen ;        
+        memcpy(result, buf, slen);  
+
+        return slen;
+    }
+    
+    //error
+    *rlen = -1;
+    return -1;
 }
 

@@ -1,10 +1,18 @@
 
+#CROSS_COMPILE=arm-linux-
 CROSS_COMPILE=
 STRIP	= $(CROSS_COMPILE)strip
 CC	= $(CROSS_COMPILE)gcc
 LD      = $(CROSS_COMPILE)ld
 TARGET=arm-linux
 
+
+#cross compile
+#CFLAGS +="-I/opt/eldk-4.0/arm/usr/include/"
+#LDFLAGS += "-Wl,-rpath,/opt/eldk-4.0/arm/lib/"
+
+
+#host compile
 IFLAGS = -I../include 
 CFLAGS +=-g -O2
 LDFLAGS += -L./
@@ -38,7 +46,7 @@ build:
 
 	$(CC) $(LIB_OBJ) -shared -Wall -fPIC -o libtcpclient.so
 
-	$(STRIP) tcpclient 
+	#$(STRIP) tcpclient 
 
 install:
 	mkdir -p $(BIN_PATH)
@@ -47,14 +55,19 @@ install:
 	mv libtcpclient.so $(LIB_PATH)/
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
+	sudo cp -a $(BUILD_PATH) /home/nfs/source
+        sudo chown -R root:root /home/nfs/source/build
+
 
 
 clean:
 	rm -f *.o tcpclient
 	rm -rf $(BUILD_PATH)
+	
+	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 
 distclean:
 	rm -f *.o tcpclient
-	rm -rf $(BIN_PATH)
-	rm -rf $(LIB_PATH)
+	rm -rf $(BUILD_PATH)
+	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 

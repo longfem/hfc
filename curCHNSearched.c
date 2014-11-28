@@ -27,9 +27,9 @@ int curCHNSearched(char *ip)
 
     communicate(ip, sendbuf, 6, buf, &rlen);
     
-    printf("\n####Recive Convert get output multi method nums=[%d]\n",rlen );
+    printf("\n####Recive curCHNSearched  nums=[%d]\n",rlen );
     for(i=0;i<rlen;i++)
-      printf("Recive Convert get output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
+      printf("Recive curCHNSearched method buf[%d]=0x[%02x]\n",i, buf[i]);
 
 }
 
