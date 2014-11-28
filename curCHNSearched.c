@@ -19,13 +19,12 @@ int curCHNSearched(char *ip)
     //get call channal signal status
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
-    sendbuf[2]=0x23;
-    sendbuf[3]=0x11;
-    sendbuf[4]=0x03;
-    sendbuf[5]=0x01;
+    sendbuf[2]=0x11;
+    sendbuf[3]=0x03;
+    sendbuf[4]=0x01;
     
 
-    communicate(ip, sendbuf, 6, buf, &rlen);
+    communicate(ip, sendbuf, 5, buf, &rlen);
     
     printf("\n####Recive curCHNSearched  nums=[%d]\n",rlen );
     for(i=0;i<rlen;i++)

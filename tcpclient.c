@@ -46,15 +46,15 @@ int main(int argc,char *argv[])
     getPidMapSumCnt(ip);
 
     //input
-    //memset(sendbuf,0,sizeof(sendbuf));
-    //curCHNSearched(ip);
+    memset(sendbuf,0,sizeof(sendbuf));
+    curCHNSearched(ip);
 
     //input
-    //memset(sendbuf,0,sizeof(sendbuf));
-    //curCHNSearched(ip);
+    memset(sendbuf,0,sizeof(sendbuf));
+    curCHNSearched(ip);
 
     //input
-    //memset(sendbuf,0,sizeof(sendbuf));
-    //curCHNSearched(ip);
+    memset(sendbuf,0,sizeof(sendbuf));
+    curCHNSearched(ip);
     return 0;
 }
