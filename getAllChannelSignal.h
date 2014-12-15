@@ -1,2 +1,2 @@
 
-int getAllChannelSignal(char *ip, char* result, int* rlen);
+int getAllChannelSignal(char *ip, unsigned char* result);

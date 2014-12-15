@@ -21,9 +21,10 @@ BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
 LIB_PATH = $(BUILD_PATH)/lib
 
-OBJ=  tcpclient.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o setMultiProgNum.o getPidMapSumCnt.o curCHNSearched.o
+OBJ=  tcpclient.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
 
-LIB_OBJ=  communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o setMultiProgNum.o getPidMapSumCnt.o curCHNSearched.o
+
+LIB_OBJ=  communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
 
 .PHONY: all clean distclean
 
@@ -37,9 +38,14 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c getMultiMethod.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getMultiProgNum.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getMultiProgNum2.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c setMultiProgNum.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPidMapSumCnt.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c curCHNSearched.c
+	
+	$(CC) $(CFLAGS) $(IFLAGS) -c getOutPidMapNum.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgCnt.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgramInfo.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getPrograms.c
+
 	
 	
 	$(CC) $(OBJ) -o tcpclient $(LDFLAGS) $(DBS_LIB) $(BOARDAPI_LD_FLAGS)

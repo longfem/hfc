@@ -7,7 +7,7 @@
 
 #include "communicate.h"
 
-int getMultiMethod(char *ip, unsigned char * result)
+int getPrgCnt(char *ip, int inChn,  int * result)
 {
 
     char buf[7];
@@ -21,18 +21,19 @@ int getMultiMethod(char *ip, unsigned char * result)
     //get call 0 auto 1 manual signal status
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
-    sendbuf[2]=0x23;
-    sendbuf[3]=0x01;
-    sendbuf[4]=0x05;
+    sendbuf[2]=0x11;
+    sendbuf[3]=0x02;
+    sendbuf[4]=(unsigned char)inChn;
+    sendbuf[5]=0x00;
 
-    communicate(ip, sendbuf, 5, buf, &rlen);
+    communicate(ip, sendbuf, 6, buf, &rlen);
     
-    printf("\n####Recive Convert get output multi method nums=[%d]\n",rlen );
+    printf("\n####Recive Convert getPrgCnt nums=[%d]\n",rlen );
    
-    if( 6 == rlen ){
+    if( 7 == rlen ){
        
         //0 auto 1 manual      
-        *result = buf[5];  
+        *result = buf[6];  
         return *result;
     }
 

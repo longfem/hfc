@@ -1,2 +1,2 @@
 
-int getMultiMethod(char *ip);
+int getMultiMethod(char *ip, unsigned char * result);

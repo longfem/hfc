@@ -1,4 +1,4 @@
-#include <stdio.h>
+                                       #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
@@ -7,14 +7,14 @@
 
 #include "communicate.h"
 
-int getMultiProgNum(char *ip)
+int getMultiProgNum(char *ip, int *result)
 {
 
-    char buf[256];
+    char buf[10];
     int i = 0;
     char sendbuf[256];
     int rlen=0;
-  
+    char *p = (char *)result;
  
     //get call channal signal status
     sendbuf[0]=0x77;
@@ -28,8 +28,12 @@ int getMultiProgNum(char *ip)
     communicate(ip, sendbuf, 7, buf, &rlen);
     
     printf("\n####Recive Convert get output multi method nums=[%d]\n",rlen );
-    for(i=0;i<rlen;i++)
-      printf("Recive Convert get output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
+    if(9 == rlen){
+        for(i=0;i<rlen;i++)
+          printf("Recive Convert get output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
 
+        *p++ = buf[7];
+        *p++ = buf[8];
+    }  
 }
 

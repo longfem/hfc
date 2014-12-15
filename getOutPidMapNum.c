@@ -7,13 +7,14 @@
 
 #include "communicate.h"
 
-int setMultiProgNum(char *ip)
+int getOutPidMapNum(char *ip, unsigned short *result)
 {
 
     char buf[256];
     int i = 0;
     char sendbuf[256];
     int rlen=0;
+    unsigned char *p = result;
   
  
     //get call channal signal status
@@ -28,8 +29,18 @@ int setMultiProgNum(char *ip)
     communicate(ip, sendbuf, 7, buf, &rlen);
     
     printf("\n####Recive Convert set output multi method nums=[%d]\n",rlen );
-    for(i=0;i<rlen;i++)
-      printf("Recive Convert set output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
+    if(9 == rlen){
+        for(i=0;i<rlen;i++)
+        printf("Recive Convert set output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
 
+        *p++ = buf[8];
+        *p++ = buf[9];
+
+        printf("get out getOutPidMapNum=[%d]\n", *result );
+
+        return rlen;
+    }
+
+    return -1;
 }
 

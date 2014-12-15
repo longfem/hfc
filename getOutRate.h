@@ -1,1 +1,1 @@
-int getOutRate(char *ip, char* result, int* rlen);
+int getOutRate(char *ip, int* result);
