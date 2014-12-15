@@ -7,7 +7,7 @@ typedef struct Commdes_st
 	int userNew; // 用户自定义内容
 	int index;
 	int tag;
-	int datalen;	
+	int dataLen;	
 	unsigned char *data;
 }Commdes_t;
 
@@ -19,6 +19,7 @@ typedef struct DataStream_st
 	int streamType;
 	int inPid;
 	int outPid;
+	int desNodeLen;
 	int destlen;
 	Commdes_t *desNode; // Commdes_st
 }DataStream_t;
@@ -41,6 +42,7 @@ typedef struct program_info_s
 	////描述长度  1字节
 	////描述内容
 	//}
+	int pmtDesListLen;
 	Commdes_t *pmtDesList; // Commdes_st
 
 	//8.	数据流个数 //1字节
@@ -56,12 +58,13 @@ typedef struct program_info_s
 	////描述内容
 	//}
 	//}
+	int pdataStreamListLen;
 	DataStream_t *pdataStreamList; // DataStream_st
 
 	//9.	节目名字长度//1字节
 	//10.	具体的节目名字内容
 	int  prgNameLen;
-	char *prgName;
+	unsigned char *prgName;
 	//11.	服务提供商名字长度
 	//12.	服务提供商名字
 	int providerNameLen;
@@ -76,6 +79,7 @@ typedef struct program_info_s
 	////描述长度  1字节
 	////描述内容
 	//}
+	int psdtDesListLen;
 	Commdes_t *psdtDesList; // Commdes_st
 
 } program_info_t;

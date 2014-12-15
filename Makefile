@@ -4,7 +4,7 @@ CROSS_COMPILE=
 STRIP	= $(CROSS_COMPILE)strip
 CC	= $(CROSS_COMPILE)gcc
 LD      = $(CROSS_COMPILE)ld
-TARGET=arm-linux
+#TARGET=arm-linux
 
 
 #cross compile
@@ -14,7 +14,8 @@ TARGET=arm-linux
 
 #host compile
 IFLAGS = -I../include 
-CFLAGS +=-g -O2
+#CFLAGS +=-g -O2 -fno-stack-protector
+CFLAGS +=-g -O2  
 LDFLAGS += -L./
 
 BUILD_PATH = build
@@ -48,9 +49,9 @@ build:
 
 	
 	
-	$(CC) $(OBJ) -o tcpclient $(LDFLAGS) $(DBS_LIB) $(BOARDAPI_LD_FLAGS)
+	$(CC) $(OBJ) -g -O0   -o tcpclient $(LDFLAGS) $(DBS_LIB) $(BOARDAPI_LD_FLAGS)
 
-	$(CC) $(LIB_OBJ) -shared -Wall -fPIC -o libtcpclient.so
+	$(CC) $(LIB_OBJ) -g -O2  -shared -Wall -fPIC -o libtcpclient.so
 
 	#$(STRIP) tcpclient 
 

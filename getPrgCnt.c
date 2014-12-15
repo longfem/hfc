@@ -6,13 +6,14 @@
 #include <sys/socket.h>
 
 #include "communicate.h"
+#include "getPrgCnt.h"
 
 int getPrgCnt(char *ip, int inChn,  int * result)
 {
 
     char buf[7];
     int i = 0;
-    char sendbuf[256];
+    char sendbuf[6];
     int rlen=0;
 
 
@@ -33,7 +34,8 @@ int getPrgCnt(char *ip, int inChn,  int * result)
     if( 7 == rlen ){
        
         //0 auto 1 manual      
-        *result = buf[6];  
+        *result = (int)buf[6]; 
+        printf("okkkkkkkkkkkkkkkkkkkkkkkk\n"); 
         return *result;
     }
 

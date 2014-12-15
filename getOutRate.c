@@ -5,13 +5,16 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include "communicate.h"
+#include "getOutRate.h"
+
 int getOutRate(char *ip, int* result)
 {
     char buf[4];
     int i = 0;
     char sendbuf[256];
     int slen=0;
-    char *p = (char *)result;
+    char *p;
 
     //get output rate  return 4 byte len
     sendbuf[0]=0x77;
@@ -24,13 +27,12 @@ int getOutRate(char *ip, int* result)
     
     printf("\n####Recive Convert get getOutputRate receive nums=[%d]\n",slen );
     if(9 == slen){
-         //for(i=0;i<slen;i++)
-         //  printf("Recive data buf[%d]=0x[%02x]\n",i, buf[i]);    
+         for(i=0;i<slen;i++)
+           printf("Recive data buf[%d]=0x[%02x]\n",i, buf[i]);    
 
-        *p++ = buf[5];       
-        *p++ = buf[6];        
-        *p++ = buf[7];        
-        *p++ = buf[8];         
+        p = buf+5;
+        memcpy((char *)result, p, 4);
+           
 
         return slen;
     }

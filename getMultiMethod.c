@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 
 #include "communicate.h"
+#include "getMultiMethod.h"
 
 int getMultiMethod(char *ip, unsigned char * result)
 {

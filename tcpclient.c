@@ -21,53 +21,63 @@ int main(int argc,char *argv[])
 	    return -1;
     }
 
-    int oo = 0x12345678;
-    char *p =(char *)&oo;
+    // int oo = 0x12345678;
+    // char *p =(char *)&oo;
 
-    printf("=====%x==\n", oo);
-    for(i=0;i<4;i++){
-        printf("buf[%d]=[%02x]\n",i, *p++);
-    }
+    // printf("=====%x==\n", oo);
+    // for(i=0;i<4;i++){
+    //     printf("buf[%d]=[%02x]\n",i, *p++);
+    // }
 
     char ip[256];
     memset(ip,0,sizeof(ip));
     memcpy(ip, argv[1], strlen(argv[1]));
 
-    unsigned char csearch;    
-    getAllChannelSignal(ip, &csearch);
-    printf("searched=[%c]\n", csearch);
+    printf("ip=%s\n",ip);
 
-    int rate = 0;//4 bytes
-    memset(sendbuf,0,sizeof(sendbuf));
-    getOutRate(ip, &rate);
-    printf("output rate = [%d]\n", rate);
-    
-    unsigned char cmutexauto;   
-    getMultiMethod(ip, &cmutexauto);
-    printf("cmutexauto=[%c]\n", cmutexauto);
-    
-    memset(sendbuf,0,sizeof(sendbuf));
-    getMultiProgNum(ip);
-    
+    // unsigned char csearch;    
+    // getAllChannelSignal(ip, &csearch);
+    // printf("searched=[%02x]\n", csearch);
 
-    out_program_num_t outprg[8];
-    memset(outprg,0,sizeof(out_program_num_t)*8);
-    getMultiProgNum2(ip, outprg);
+
+    out_program_num_t *pProg;    
+    getPrograms(ip, 2, pProg);
+    //getPrograms(ip, 1, pProg);
+
+    // int rate = 0;//4 bytes    
+    // getOutRate(ip, &rate);
+    // printf("output rate = [%04x]\n", rate);
+    
+    // unsigned char cmutexauto;   
+    // getMultiMethod(ip, &cmutexauto);
+    // printf("cmutexauto=[%x]\n", cmutexauto);
     
     
-    memset(sendbuf,0,sizeof(sendbuf));
-    getPidMapSumCnt(ip);
+    printf("ip=%s\n",ip);
+    // int prgnum=0;
+    // getMultiProgNum(ip, &prgnum);
+    
 
-    //input
-    memset(sendbuf,0,sizeof(sendbuf));
-    curCHNSearched(ip);
+    // out_program_num_t outprg[8];
+    // memset(outprg,0,sizeof(out_program_num_t)*8);
+    // getMultiProgNum2(ip, outprg);
+    
+    
+    // memset(sendbuf,0,sizeof(sendbuf));
+    // getPidMapSumCnt(ip);
 
-    //input
-    memset(sendbuf,0,sizeof(sendbuf));
-    curCHNSearched(ip);
+    // //input
+    // memset(sendbuf,0,sizeof(sendbuf));
+    // curCHNSearched(ip);
 
-    //input
-    memset(sendbuf,0,sizeof(sendbuf));
-    curCHNSearched(ip);
+    // //input
+    // memset(sendbuf,0,sizeof(sendbuf));
+    // curCHNSearched(ip);
+
+    // //input
+    // memset(sendbuf,0,sizeof(sendbuf));
+    // curCHNSearched(ip);
+
+
     return 0;
 }

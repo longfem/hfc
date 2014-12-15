@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include "communicate.h"
+#include "getAllChannelSignal.h"
+
 int getAllChannelSignal(char *ip, unsigned char * result)
 {
 
