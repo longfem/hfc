@@ -5,13 +5,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-
 #include "communicate.h"
+#include "list.h"
 #include "getPrograms.h"
 
   
 
-int getPrograms(char *ip, int inChn, out_program_num_t * outprg)
+int getPrograms(char *ip, int inChn, list_t *prginfolist)
 {
 
     unsigned char buf[256];
@@ -33,8 +33,14 @@ int getPrograms(char *ip, int inChn, out_program_num_t * outprg)
 
     if (prgCnt > 0)
     {
+        //slist
+        
+        list_init(prginfolist);
+
         for (iPrg = 0; iPrg < prgCnt; iPrg++){
             
+            
+
             printf("iPrg=%d\n", iPrg);
             iAddr = 0;
             memset(buf,0,sizeof(buf));
@@ -44,8 +50,8 @@ int getPrograms(char *ip, int inChn, out_program_num_t * outprg)
 			if(rlen < 0){return rlen;}
 
             if(rlen > 0){			
-				
-                ptmpPrgInfo = malloc(sizeof(program_info_t));
+				ptmpPrgInfo = malloc(sizeof(program_info_t));
+
                 ptmpPrgInfo->index = iPmtCntIndex++;                
 				iAddr += 6; pbuf = buf+iAddr;//skip 6 header to data pointer				
                 
@@ -127,7 +133,7 @@ int getPrograms(char *ip, int inChn, out_program_num_t * outprg)
                 iAddr += 1;pbuf +=iAddr;   
 				ptmpPrgInfo->prgNameLen = prgNameLen;				
                 //stan bug bug
-                memcpy(ptmpPrgInfo->prgName, pbuf, prgNameLen);                    
+                //memcpy(ptmpPrgInfo->prgName, pbuf, prgNameLen);                    
                 
                 iAddr += prgNameLen;pbuf +=iAddr;                            
                 int providerNameLen = buf[iAddr];
@@ -162,9 +168,13 @@ int getPrograms(char *ip, int inChn, out_program_num_t * outprg)
 
                     psdtDesInfo++;
                 }
+
+
+                list_append(prginfolist, ptmpPrgInfo);  
             }
 
             printf("iPrg=%d\n", iPrg);
+            //for
 
         }
 

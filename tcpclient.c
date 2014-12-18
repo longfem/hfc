@@ -6,10 +6,14 @@
 #include <sys/socket.h>
 
 
+#include "list.h"
+#include "communicate.h"
+
 #include "getAllChannelSignal.h"
 #include "getOutRate.h"
 #include "getMultiMethod.h"
 #include "getMultiProgNum2.h"
+#include "getPrograms.h"
 
 int main(int argc,char *argv[])
 {
@@ -40,8 +44,8 @@ int main(int argc,char *argv[])
     // printf("searched=[%02x]\n", csearch);
 
 
-    out_program_num_t *pProg;    
-    getPrograms(ip, 2, pProg);
+    list_t  prginfolist ;    
+    getPrograms(ip, 2, &prginfolist);
     //getPrograms(ip, 1, pProg);
 
     // int rate = 0;//4 bytes    

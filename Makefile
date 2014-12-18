@@ -22,10 +22,10 @@ BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
 LIB_PATH = $(BUILD_PATH)/lib
 
-OBJ=  tcpclient.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
+OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
 
 
-LIB_OBJ=  communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
+LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
 
 .PHONY: all clean distclean
 
@@ -34,6 +34,7 @@ all:build install
 build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c tcpclient.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c communicate.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c list.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getAllChannelSignal.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getOutRate.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getMultiMethod.c
