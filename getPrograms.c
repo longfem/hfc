@@ -19,6 +19,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     char sendbuf[256];
     int rlen=0;
     unsigned char *pbuf = buf;
+    unsigned char *ptemp = NULL;
     int ibuflen = 0;
     int iPmtCntIndex = 1;
     unsigned short itmp;
@@ -55,19 +56,33 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 ptmpPrgInfo->index = iPmtCntIndex++;                
 				iAddr += 6; pbuf = buf+iAddr;//skip 6 header to data pointer				
                 
-				ptmpPrgInfo->prgNum =  cdr_int16_to(*pbuf); 
+				//ptmpPrgInfo->prgNum =  cdr_int16_to(*pbuf); 
+                ptemp = (unsigned char *)&ptmpPrgInfo->prgNum;
+                *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+
                 iAddr += 2; pbuf +=iAddr;
                 
 				ptmpPrgInfo->chnId = buf[iAddr];
                 iAddr += 1; pbuf +=iAddr;
-                ptmpPrgInfo->streamId = cdr_int16_to(*pbuf); 
+                //ptmpPrgInfo->streamId = cdr_int16_to(*pbuf);
+                ptemp = (unsigned char *)&ptmpPrgInfo->streamId;
+                *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1]; 
                 iAddr += 2; pbuf +=iAddr;
-                ptmpPrgInfo->networkId = cdr_int16_to(*pbuf); 
+                //ptmpPrgInfo->networkId = cdr_int16_to(*pbuf);
+                ptemp = (unsigned char *)&ptmpPrgInfo->networkId;
+                *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1]; 
+
                 iAddr += 2; pbuf +=iAddr;
-                ptmpPrgInfo->pmtPid = cdr_int16_to(*pbuf);                
+                //ptmpPrgInfo->pmtPid = cdr_int16_to(*pbuf);
+                ptemp = (unsigned char *)&ptmpPrgInfo->pmtPid;
+                *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+
                 iAddr += 2; pbuf +=iAddr;                
 				if (ptmpPrgInfo->pmtPid == 0xffff) continue;
-                ptmpPrgInfo->newPcrPid = ptmpPrgInfo->oldPcrPid = cdr_int16_to(*pbuf); 
+                //ptmpPrgInfo->newPcrPid = ptmpPrgInfo->oldPcrPid = cdr_int16_to(*pbuf); 
+                ptemp = (unsigned char *)&ptmpPrgInfo->oldPcrPid;
+                *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+                ptmpPrgInfo->newPcrPid = ptmpPrgInfo->oldPcrPid;
                 iAddr += 2; pbuf +=iAddr;                        
                 int pmtDesCnt = buf[iAddr];
                 iAddr += 1; pbuf +=iAddr;
@@ -103,7 +118,11 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     pdataStreamInfo->index = desCntIndex++;
                     pdataStreamInfo->streamType = buf[iAddr]; 
 					iAddr += 1;pbuf +=iAddr;					
-                    pdataStreamInfo->outPid = pdataStreamInfo->inPid = cdr_int16_to(*pbuf);
+                    //pdataStreamInfo->outPid = pdataStreamInfo->inPid = cdr_int16_to(*pbuf);
+                    ptemp = (unsigned char *)&pdataStreamInfo->inPid;
+                    *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+                    pdataStreamInfo->outPid = pdataStreamInfo->inPid;
+
                     iAddr += 2;pbuf +=iAddr;
 
                     int dataStreamDesCnt = buf[iAddr];

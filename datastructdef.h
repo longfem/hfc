@@ -85,6 +85,14 @@ typedef struct program_info_s
 } program_info_t;
 
 
+// typedef struct ChannelProgramSt
+// {
+// 	int channelId;
+// 	program_info_t *prgNodes; // struct Dev_prgInfo_st
+// 	Chn_ca_st *caNode;
+// 	User_prgInfo_t *userPrgNodes; // struct User_prgInfo_t
+// 	MuxPidInfo_st *dtPidList; // MuxPidInfo_st , 透传表, 数组以输出通道为序
+// }ChannelProgramSt_t
 
 
 
