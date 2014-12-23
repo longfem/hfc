@@ -64,7 +64,7 @@ install:
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
 	sudo cp -a $(BUILD_PATH) /home/nfs/source
-        sudo chown -R root:root /home/nfs/source/build
+	sudo chown -R root:root /home/nfs/source/build
 
 
 
