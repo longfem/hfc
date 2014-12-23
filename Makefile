@@ -13,19 +13,19 @@ LD      = $(CROSS_COMPILE)ld
 
 
 #host compile
-IFLAGS = -I../include 
+IFLAGS = -I../include -I./json-c
 #CFLAGS +=-g -O2 -fno-stack-protector
-CFLAGS +=-g -O2  
-LDFLAGS += -L./
+CFLAGS +=-g -O2 -Wl,-rpath,/home/nixinlong/work/digit-nms/src/hfc/json-c/.libs 
+LDFLAGS += -L./ -L./json-c/.libs -ljson-c
 
 BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
 LIB_PATH = $(BUILD_PATH)/lib
 
-OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
+OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o getPrgJson.o
 
 
-LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o
+LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o getPrgJson.o
 
 .PHONY: all clean distclean
 
@@ -47,12 +47,13 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgCnt.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgramInfo.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrograms.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgJson.c
 
 	
 	
-	$(CC) $(OBJ) -g -O0   -o tcpclient $(LDFLAGS) $(DBS_LIB) $(BOARDAPI_LD_FLAGS)
+	$(CC) $(OBJ) -g -O0   -o tcpclient  $(DBS_LIB) $(BOARDAPI_LD_FLAGS) $(LDFLAGS)
 
-	$(CC) $(LIB_OBJ) -g -O2  -shared -Wall -fPIC -o libtcpclient.so
+	$(CC) $(LIB_OBJ) -g -O2  -shared -Wall -fPIC -o libtcpclient.so $(LDFLAGS)
 
 	#$(STRIP) tcpclient 
 
@@ -65,7 +66,7 @@ install:
 	cp -a *.h $(LIB_PATH)/include
 	sudo cp -a $(BUILD_PATH) /home/nfs/source
 	sudo chown -R root:root /home/nfs/source/build
-
+	cp -a json-c/.libs/libjson-c.so* $(LIB_PATH)/
 
 
 clean:
