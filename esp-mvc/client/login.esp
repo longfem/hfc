@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>数字网管---登录</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon">    
+    <link rel="stylesheet" href="css/all.css" type="text/css">
+</head>
+<body>
+    <div id="wrapper">	
+		<div id="login" class="animate form">
+			<form  action="mysuperscript.php"> 
+				<h1>用户登录</h1> 
+				<p> 
+					<label for="username" class="uname" data-icon="u" > 用户名 </label>
+					<input id="username" name="username" required="required" type="text" placeholder="请输入用户名"/>
+				</p>
+				<p> 
+					<label for="password" class="youpasswd" data-icon="p"> 密码 </label>
+					<input id="password" name="password" required="required" type="password" placeholder="请输入密码" /> 
+				</p>
+				<p class="keeplogin"> 
+					<input type="checkbox" name="loginkeeping" id="loginkeeping" value="loginkeeping" /> 
+					<label for="loginkeeping">记住密码</label>
+				</p>
+				<p class="login button"> 
+					<input type="submit" value="登录" /> 
+				</p>
+			</form>
+		</div>
+		
+    </div>   
+	<div class="footer">
+		<hr/>
+		<p>© Prevail Software, 2014-2024. All rights reserved.</p>
+	</div>
+    <script type="text/javascript">		
+		
+    </script> 
+</body>
+</html>
