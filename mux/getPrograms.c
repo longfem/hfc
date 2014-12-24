@@ -152,13 +152,15 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 iAddr += 1;pbuf +=iAddr;   
 				ptmpPrgInfo->prgNameLen = prgNameLen;				
                 //stan bug bug
-                //memcpy(ptmpPrgInfo->prgName, pbuf, prgNameLen);                    
+                ptmpPrgInfo->prgName = (unsigned char *)malloc(ptmpPrgInfo->prgNameLen);
+                memcpy(ptmpPrgInfo->prgName, buf+iAddr, prgNameLen);                    
                 
                 iAddr += prgNameLen;pbuf +=iAddr;                            
                 int providerNameLen = buf[iAddr];
                 iAddr += 1;pbuf +=iAddr;     
 				ptmpPrgInfo->providerNameLen = providerNameLen;
-                //memcpy(ptmpPrgInfo->providerName, pbuf, providerNameLen);
+                ptmpPrgInfo->providerName = (unsigned char *)malloc(ptmpPrgInfo->providerNameLen);
+                memcpy(ptmpPrgInfo->providerName, pbuf, providerNameLen);
                 
                 iAddr += providerNameLen;pbuf +=iAddr;
                 ptmpPrgInfo->isCrypto = buf[iAddr] > 0 ? 1 : 0;    
