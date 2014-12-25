@@ -1,28 +1,29 @@
-
+#include <stdio.h>
+#include "freePrograms.h"
 
 int freeProgramsMalloc(program_info_t * data)
 {
-	int pmtDesListLen = program_info_t->pmtDesListLen;
+	int pmtDesListLen = data->pmtDesListLen;
 	if(pmtDesListLen>0){
-		free(program_info_t->pmtDesList);
-		program_info_t->pmtDesList = NULL;
+		free(data->pmtDesList);
+		data->pmtDesList = NULL;
 	}
-	int pdataStreamListLen = program_info_t->pdataStreamListLen;
+	int pdataStreamListLen = data->pdataStreamListLen;
 	if(pdataStreamListLen>0){
-		free(program_info_t->pdataStreamList);
-		program_info_t->pdataStreamList = NULL;
+		free(data->pdataStreamList);
+		data->pdataStreamList = NULL;
 	}
-	if(program_info_t->prgNameLen > 0){
-		free(program_info_t->prgName);
-		program_info_t->prgName = NULL;
+	if(data->prgNameLen > 0){
+		free(data->prgName);
+		data->prgName = NULL;
 	}
-	if(program_info_t->providerNameLen > 0){
-		free(program_info_t->providerName);
-		program_info_t->providerName = NULL;
+	if(data->providerNameLen > 0){
+		free(data->providerName);
+		data->providerName = NULL;
 	}
-	if(program_info_t->psdtDesListLen > 0){
-		free(program_info_t->psdtDesList);
-		program_info_t->psdtDesList = NULL;
+	if(data->psdtDesListLen > 0){
+		free(data->psdtDesList);
+		data->psdtDesList = NULL;
 	}
 }
 

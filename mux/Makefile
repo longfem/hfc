@@ -67,7 +67,7 @@ install:
 	cp -a *.h $(LIB_PATH)/include
 	sudo cp -a $(BUILD_PATH) /home/nfs/source
 	sudo chown -R root:root /home/nfs/source/build
-	cp -a json-c/.libs/libjson-c.so* $(LIB_PATH)/
+	cp -a stanlibs/jsonlibs/libjson-c.so* $(LIB_PATH)/
 
 
 clean:
