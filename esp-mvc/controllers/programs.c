@@ -18,7 +18,7 @@
 static void getprg() { 
     char *ip = "192.168.1.134";//param("ip");  
     int inChn = 2;//param("inChn");  
-	char pProg[4096] = {0}; 
+	char pProg[10240] = {0}; 
     getprgsJson(ip, inChn, pProg);	
 	render(pProg);
     
