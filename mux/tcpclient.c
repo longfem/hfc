@@ -46,7 +46,9 @@ int main(int argc,char *argv[])
 
     list_t  prginfolist ;    
     getPrograms(ip, 2, &prginfolist);
-    //getPrograms(ip, 1, pProg);
+    printf("call getPrograms\n");
+    freePrograms(&prginfolist);
+    printf("call freePrograms\n");
 
     // int rate = 0;//4 bytes    
     // getOutRate(ip, &rate);

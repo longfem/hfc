@@ -28,6 +28,11 @@ int freeProgramsMalloc(program_info_t * data)
 
 int freePrograms(list_t *prginfolist)
 {
+	if(!prginfolist) {
+		printf("prginfolist==NULL not need to free.\n");
+		return -1;
+	}
+
 	program_info_t *ptmpPrgInfo = NULL;
 	int i;
 	int len = list_len(prginfolist);
