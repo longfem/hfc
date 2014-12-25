@@ -14,6 +14,7 @@
 #include "getMultiMethod.h"
 #include "getMultiProgNum2.h"
 #include "getPrograms.h"
+#include "freePrograms.h"
 
 int main(int argc,char *argv[])
 {

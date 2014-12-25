@@ -71,15 +71,14 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		//stream
 		offset = 0;
 		DataStream_t *streaminfo = malloc(sizeof(DataStream_t));
-		for(j=0; j<ptmpPrgInfo->pdataStreamListLen; j++) {
-			//MPEG2 VIDEO
+		for(j=0; j<ptmpPrgInfo->pdataStreamListLen; j++) {			
 			memcpy(streaminfo, ptmpPrgInfo->pdataStreamList+offset, sizeof(DataStream_t) );
 			printf("-----%x-->>%x\n", streaminfo->inPid, streaminfo->streamType);
-			offset += sizeof(DataStream_t);	
-			
-			subprgjson = json_object_new_object();
-			sprintf(idstr, "id1.2.%d.3", (i+1));
+			offset += sizeof(DataStream_t);				
 			if(2 == streaminfo->streamType){
+				//MPEG2 VIDEO
+				subprgjson = json_object_new_object();
+				sprintf(idstr, "id1.2.%d.3", (i+1));
 				json_object_object_add(subprgjson, "icon", json_object_new_string("img/favicon.ico"));
 				sprintf(str,"MPEG2 VIDEO  [PID(0x%x)]",  streaminfo->inPid);
 				json_object_object_add(subprgjson, "title", json_object_new_string((char*)str));
@@ -123,7 +122,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 				
 				json_object_array_add(subprgsarray, subprgjson);
 			}else if(3 == streaminfo->streamType){
-				
+				//MPEG2 AUDIO
 			}				
 			
 			Commdes_t *desNodeinfo = malloc(sizeof(Commdes_t));
