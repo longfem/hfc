@@ -11,14 +11,13 @@
 #include "esp.h" 
 #include "communicate.h"
 #include "getPrograms.h"
-#include "json.h"
 
 
 //extern int getPrograms(char *ip, int inChn, char *outprg);
 static void getprg() { 
-    char *ip = "192.168.1.134";//param("ip");  
+    char ip[16] = "192.168.1.134";//param("ip");  
     int inChn = 2;//param("inChn");  
-	char pProg[10240] = {0}; 
+	char pProg[20480] = {0}; 
     getprgsJson(ip, inChn, pProg);	
 	render(pProg);
     

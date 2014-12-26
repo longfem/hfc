@@ -37,6 +37,10 @@
 	
 ];
 
+var channel_root = [
+	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
+];
+
 var programData = [
 	{title: "节目", folder: true, key: "id1", expanded: true,
 	  children: [
@@ -303,6 +307,13 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
+		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
+		var childrennodes = node.getChildren();
+		if(childrennodes !=null){
+			childrennodes.forEach(function(nodes) {
+				nodes.remove();
+			});
+		};
 		$.ajax({
 			 type: "GET",
 			 async:false,
@@ -311,33 +322,11 @@ function devinfo_output(){
 			 dataType: "json",
 			 success: function(data){
 				data = JSON.stringify(data).replace('\\','');
-				data = '[' + data + ']';
+				//data = '[' + data + ']';
 				alert("-----"+data);
 				var treeData1 = JSON.parse(data);
-				//输入通道树
-				$("#devlist").fancytree({
-					//extensions: ["select"],
-					checkbox: true,
-					selectMode: 2,
-					minExpandLevel:3,
-					source: treeData1,
-					select: function(event, data) {
-						// Display list of selected nodes
-						var selNodes = data.tree.getSelectedNodes();
-						// convert to title/key array
-						var selKeys = $.map(selNodes, function(node){
-							 return "[" + node.key + "]: '" + node.title + "'";
-						  });
-						//$("#echoSelection2").text(selKeys.join(", "));
-					},
-					click: function(event, data) {
-						// We should not toggle, if target was "checkbox", because this
-						// would result in double-toggle (i.e. no toggle)
-						if( $.ui.fancytree.getEventTargetType(event) === "title" ){
-						  data.node.toggleSelected();
-						}
-					}
-				});
+				
+				node.addChildren(treeData1);
 			 },    
 			 error : function(err) {    
 				  // view("异常！");   
@@ -353,6 +342,7 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
+		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.2.1");
 		alert('------------------!!!');
     });
 	
@@ -365,7 +355,30 @@ function devinfo_output(){
 		alert('------------------!!!');
     });
 	
-	
+	//输入通道树
+	$("#devlist").fancytree({
+		//extensions: ["select"],
+		checkbox: true,
+		selectMode: 2,
+		minExpandLevel:2,
+		source: channel_root,
+		select: function(event, data) {
+			// Display list of selected nodes
+			var selNodes = data.tree.getSelectedNodes();
+			// convert to title/key array
+			var selKeys = $.map(selNodes, function(node){
+				 return "[" + node.key + "]: '" + node.title + "'";
+			  });
+			//$("#echoSelection2").text(selKeys.join(", "));
+		},
+		click: function(event, data) {
+			// We should not toggle, if target was "checkbox", because this
+			// would result in double-toggle (i.e. no toggle)
+			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
+			  data.node.toggleSelected();
+			}
+		}
+	});
 	//节目树
 	$("#channel").fancytree({
 		extensions: ["menu"],
