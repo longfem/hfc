@@ -1,79 +1,21 @@
-﻿var treeData = [
-	{"title": "输入通道", folder: true, key: "id3", expanded: true,
-	  children: [
-		{title: "通道1 (ASI-1)",
-		  children: [
-			{title: "Sub-item 3.1.1", key: "id3.1.1" },
-			{title: "Sub-item 3.1.2", key: "id3.1.2" }
-		  ]
-		},
-		{title: "通道2 (ASI-2)",
-		  children: [
-			{title: "Sub-item 3.2.1", key: "id3.2.1" },
-			{title: "Sub-item 3.2.2", key: "id3.2.2" }
-		  ]
-		},
-		{title: "通道3 (ASI-3)", key: "id4", expanded: true,
-		  children: [
-			{title: "Sub-item 4.1 (active on init)",
-			  children: [
-				{title: "Sub-item 4.1.1", key: "id4.1.1" },
-				{title: "Sub-item 4.1.2", key: "id4.1.2" }
-			  ]
-			},
-			{title: "Sub-item 4.2 (selected on init)",
-			  children: [
-				{title: "Sub-item 4.2.1", key: "id4.2.1" },
-				{title: "Sub-item 4.2.2", key: "id4.2.2" }
-			  ]
-			},
-			{title: "Sub-item 4.3 (hideCheckbox)", hideCheckbox: true },
-			{title: "Sub-item 4.4 (unselectable)", unselectable: true }
-		  ]
-		},
-		{title: "通道4 (ASI-4)" }
-	  ]
-	},
-	
+﻿var channel_root = [
+	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
 
 var programData = [
-	{title: "节目", folder: true, key: "id1", expanded: true,
+	{title: "节目", folder: true, key: "id1.0", expanded: true, "icon": "img/book.ico",
 	  children: [
-		{title: "Sub-item 3.1",
-		  children: [
-			{title: "Sub-item 3.1.1", key: "id3.1.1" },
-			{title: "Sub-item 3.1.2", key: "id3.1.2" }
-		  ]
-		},
-		{title: "Sub-item 3.2",
-		  children: [
-			{title: "Sub-item 3.2.1", key: "id3.2.1" },
-			{title: "Sub-item 3.2.2", key: "id3.2.2" }
-		  ]
-		},
-		{title: "Document with some children (expanded on init)", key: "id4", expanded: true,
-		  children: [
-			{title: "Sub-item 4.1 (active on init)", 
-			  children: [
-				{title: "Sub-item 4.1.1", key: "id4.1.1" },
-				{title: "Sub-item 4.1.2", key: "id4.1.2" }
-			  ]
-			},
-			{title: "Sub-item 4.2 (selected on init)",
-			  children: [
-				{title: "Sub-item 4.2.1", key: "id4.2.1" },
-				{title: "Sub-item 4.2.2", key: "id4.2.2" }
-			  ]
-			},
-			{title: "Sub-item 4.3 (hideCheckbox)", hideCheckbox: true },
-			{title: "Sub-item 4.4 (unselectable)", unselectable: true }
-		  ]
-		},
-		{title: "Lazy folder", folder: true, lazy: true }
+		{title: "通道1 (ASI-1)", folder: true, key: "id1.1", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道2 (ASI-2)", folder: true, key: "id1.2", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道3 (ASI-3)", folder: true, key: "id1.3", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道4 (ASI-4)", folder: true, key: "id1.4", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道5 (ASI-5)", folder: true, key: "id1.5", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道6 (ASI-6)", folder: true, key: "id1.6", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道7 (ASI-7)", folder: true, key: "id1.7", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道8 (ASI-8)", folder: true, key: "id1.8", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "用户自定义", folder: true, key: "id1.9", expanded: true, "icon": "img/book.ico"}
 	  ]
-	}
-	
+	}	
 ];
 
 var dataSet = [
@@ -303,6 +245,13 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
+		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
+		var childrennodes = node.getChildren();
+		if(childrennodes !=null){
+			childrennodes.forEach(function(nodes) {
+				nodes.remove();
+			});
+		};
 		$.ajax({
 			 type: "GET",
 			 async:false,
@@ -311,33 +260,9 @@ function devinfo_output(){
 			 dataType: "json",
 			 success: function(data){
 				data = JSON.stringify(data).replace('\\','');
-				data = '[' + data + ']';
 				alert("-----"+data);
-				var treeData1 = JSON.parse(data);
-				//输入通道树
-				$("#devlist").fancytree({
-					//extensions: ["select"],
-					checkbox: true,
-					selectMode: 2,
-					minExpandLevel:3,
-					source: treeData1,
-					select: function(event, data) {
-						// Display list of selected nodes
-						var selNodes = data.tree.getSelectedNodes();
-						// convert to title/key array
-						var selKeys = $.map(selNodes, function(node){
-							 return "[" + node.key + "]: '" + node.title + "'";
-						  });
-						//$("#echoSelection2").text(selKeys.join(", "));
-					},
-					click: function(event, data) {
-						// We should not toggle, if target was "checkbox", because this
-						// would result in double-toggle (i.e. no toggle)
-						if( $.ui.fancytree.getEventTargetType(event) === "title" ){
-						  data.node.toggleSelected();
-						}
-					}
-				});
+				var treeData1 = JSON.parse(data);				
+				node.addChildren(treeData1);
 			 },    
 			 error : function(err) {    
 				  // view("异常！");   
@@ -353,6 +278,7 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
+		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.2.1");
 		alert('------------------!!!');
     });
 	
@@ -365,7 +291,78 @@ function devinfo_output(){
 		alert('------------------!!!');
     });
 	
-	
+	//输入通道树
+	$("#devlist").fancytree({
+		//extensions: ["select"],
+		checkbox: true,
+		selectMode: 3,
+		minExpandLevel:2,
+		source: channel_root,
+		select: function(event, data) {
+			var channeltree =  $("#channel").fancytree("getTree");
+			//删除节目树节点
+			var prgnode = channeltree.getNodeByKey("id1.0");			
+			var childrennodes = prgnode.getChildren();
+			if(childrennodes != null){
+				childrennodes.forEach(function(nodes) {
+					nodes.removeChildren();
+				});
+			};
+			//添加至节目树	
+			var count = 0;//节目计数
+			var selNodes = data.tree.getSelectedNodes();			
+			$.map(selNodes, function(node){				
+				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
+				switch(node.key.length){
+					case 7:	//节目节点
+						if(channeltree.getNodeByKey(node.key) == null){
+							tmpnode.addNode(node.toDict());
+							count++;
+						}						
+						break;
+					case 9:
+						var prgkey = node.key.substring(0,7);
+						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+						}else{
+							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							count++;
+						}						
+						break;
+					case 11:
+						var prgkey = node.key.substring(0,7);
+						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+							}else{
+								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
+							}							
+						}else{
+							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							count++;
+							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
+						}		
+						//count++;
+						break;
+					default:
+						
+						break;
+				}
+				
+			});
+			prgnode.setTitle("节目: "+ count);
+			prgnode.render();
+		},
+		click: function(event, data) {			
+			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
+			  data.node.toggleSelected();
+			}			
+		}
+	});
 	//节目树
 	$("#channel").fancytree({
 		extensions: ["menu"],
@@ -380,7 +377,7 @@ function devinfo_output(){
 			},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
-				if(data.node.key == "id1"){
+				if(data.node.key == "id1.0"){
 					$(".menu_add").css("display", "none");
 					$(".menu_deleteall").css("display", "none");
 					$(".menu_edit").css("display", "none");
@@ -482,7 +479,7 @@ function devinfo_output(){
 		checkbox: true,
 		selectMode: 2,
 		minExpandLevel:3,
-		source: treeData,
+		source: channel_root,
 		menu: {
 			selector: "#table_menu",
 			position: {my: "center"},

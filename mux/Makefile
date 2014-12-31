@@ -13,19 +13,23 @@ LD      = $(CROSS_COMPILE)ld
 
 
 #host compile
-IFLAGS = -I../include -I./json-c
+IFLAGS = -I../include 
 #CFLAGS +=-g -O2 -fno-stack-protector
-CFLAGS +=-g -O2 -Wl,-rpath,/home/nixinlong/work/digit-nms/src/hfc/mux/stanlibs/jsonlibs 
-LDFLAGS += -L./ -L./stanlibs/jsonlibs/ -ljson-c
+#CFLAGS +=-g -O2 -Wl,-rpath,/home/nixinlong/work/digit-nms/src/hfc/mux/stanlibs/jsonlibs 
+#LDFLAGS += -L./ -L./stanlibs/jsonlibs/ -ljson-c -lm
+CFLAGS +=-g -O2 
+LDFLAGS += -L./ -lm
 
 BUILD_PATH = build
 BIN_PATH = $(BUILD_PATH)/bin
 LIB_PATH = $(BUILD_PATH)/lib
 
-OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o getPrgJson.o
+
+OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o cJSON.o getPrgJson.o
 
 
-LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o  getPrgJson.o
+LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o cJSON.o getPrgJson.o 
+
 
 .PHONY: all clean distclean
 
@@ -49,8 +53,9 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c freePrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c sendPrograms.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c cJSON.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgJson.c
-
+	
 	
 	
 	$(CC) $(OBJ) -g -O0   -o tcpclient  $(DBS_LIB) $(BOARDAPI_LD_FLAGS) $(LDFLAGS)
@@ -68,7 +73,6 @@ install:
 	cp -a *.h $(LIB_PATH)/include
 	sudo cp -a $(BUILD_PATH) /home/nfs/source
 	sudo chown -R root:root /home/nfs/source/build
-	cp -a stanlibs/jsonlibs/libjson-c.so* $(LIB_PATH)/
 
 
 clean:

@@ -16,9 +16,11 @@
 #include "getPrograms.h"
 #include "freePrograms.h"
 #include "sendPrograms.h"
-
+#include "cJSON.h"
 
 ClsProgram_t clsProgram;
+
+
 
 int main(int argc,char *argv[])
 {
@@ -41,16 +43,20 @@ int main(int argc,char *argv[])
     char ip[256];
     memset(ip,0,sizeof(ip));
     memcpy(ip, argv[1], strlen(argv[1]));
-
+	program_info_t *ptmpPrgInfo;
     printf("ip=%s\n",ip);
 
     // unsigned char csearch;    
     // getAllChannelSignal(ip, &csearch);
     // printf("searched=[%02x]\n", csearch);
-
-
+	Commdes_t *teststruct = malloc(sizeof(Commdes_t) );
+	memset(teststruct, 0, sizeof(Commdes_t));
+	teststruct->userNew = 0x116;
+	teststruct->index = 0x117;
+	teststruct->dataLen = 0x118;
     list_t  prginfolist ;    
     getPrograms(ip, 2, &prginfolist);
+
     printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
     freePrograms(&prginfolist);
     printf("call freePrograms\n");
@@ -65,6 +71,7 @@ int main(int argc,char *argv[])
     //ret = sendPrograms(1);
     printf("call sendPrograms\n");
     //
+
     // int rate = 0;//4 bytes    
     // getOutRate(ip, &rate);
     // printf("output rate = [%04x]\n", rate);
