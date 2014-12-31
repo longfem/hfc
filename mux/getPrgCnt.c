@@ -11,6 +11,7 @@
 int getPrgCnt(char *ip, int inChn,  int * result)
 {
 
+
     char buf[7];
     int i = 0;
     char sendbuf[6];
