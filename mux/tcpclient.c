@@ -15,11 +15,15 @@
 #include "getMultiProgNum2.h"
 #include "getPrograms.h"
 #include "freePrograms.h"
+#include "sendPrograms.h"
+
+
+ClsProgram_t clsProgram;
 
 int main(int argc,char *argv[])
 {
     char sendbuf[256];
-    int len=0,i;
+    int len=0,i,ret=0;
 
     if(!argv[1]){
 	    perror("please input ip\n");
@@ -47,10 +51,20 @@ int main(int argc,char *argv[])
 
     list_t  prginfolist ;    
     getPrograms(ip, 2, &prginfolist);
-    printf("call getPrograms\n");
+    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
     freePrograms(&prginfolist);
     printf("call freePrograms\n");
 
+    getPrograms(ip, 2, &prginfolist);
+    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
+    freePrograms(&prginfolist);
+    printf("call freePrograms\n");
+
+
+    //write to device
+    //ret = sendPrograms(1);
+    printf("call sendPrograms\n");
+    //
     // int rate = 0;//4 bytes    
     // getOutRate(ip, &rate);
     // printf("output rate = [%04x]\n", rate);

@@ -191,6 +191,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 }
 
 
+                printf("ptmpPrgInfo->prgNum= %x\n", ptmpPrgInfo->prgNum);
                 list_append(prginfolist, ptmpPrgInfo);  
             }
 
