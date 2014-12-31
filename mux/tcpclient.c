@@ -15,13 +15,17 @@
 #include "getMultiProgNum2.h"
 #include "getPrograms.h"
 #include "freePrograms.h"
+#include "sendPrograms.h"
 #include "cJSON.h"
-#include "json.h"
+
+ClsProgram_t clsProgram;
+
+
 
 int main(int argc,char *argv[])
 {
     char sendbuf[256];
-    int len=0,i;
+    int len=0,i,ret=0;
 
     if(!argv[1]){
 	    perror("please input ip\n");
@@ -52,35 +56,22 @@ int main(int argc,char *argv[])
 	teststruct->dataLen = 0x118;
     list_t  prginfolist ;    
     getPrograms(ip, 2, &prginfolist);
-    //printf("call getPrograms\n");
-	for(i=0; i<list_len(&prginfolist); i++) {
-		list_get(&prginfolist, i, &ptmpPrgInfo);
-		printf("------prginfo--->>>%x\n", ptmpPrgInfo->prgNum);
-	}
-	
-	json_object *prgsjson = json_object_new_object();
-	json_object_object_add(prgsjson, "title", json_object_new_string("输入通道"));
-	json_object_object_add(prgsjson, "folder", json_object_new_boolean(1));
-	json_object_object_add(prgsjson, "expanded", json_object_new_boolean(1));
-	json_object_object_add(prgsjson, "key", json_object_new_string("id1.0"));
-	json_object_object_add(prgsjson, "icon", json_object_new_string("img/book.ico"));
-	printf("json_string1=%s\n", json_object_to_json_string(prgsjson));
-	//printf("------prginfo--->>>%s\n", &prgjsonstring);
-	//cJSON_Delete(prgsjson);	
-	json_object_put(prgsjson);
-	//free(prgjsonstring);
-    freePrograms(&prginfolist);
-    printf("call freePrograms\n");	
-	 
-	getPrograms(ip, 2, &prginfolist);
-    printf("==========%x,%x,%x\n", teststruct->userNew, teststruct->index, teststruct->dataLen);
-	for(i=0; i<list_len(&prginfolist); i++) {
-		list_get(&prginfolist, i, &ptmpPrgInfo);
-		printf("------prginfo--->>>%x\n", ptmpPrgInfo->prgNum);
-	}
+
+    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
     freePrograms(&prginfolist);
     printf("call freePrograms\n");
-	
+
+    getPrograms(ip, 2, &prginfolist);
+    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
+    freePrograms(&prginfolist);
+    printf("call freePrograms\n");
+
+
+    //write to device
+    //ret = sendPrograms(1);
+    printf("call sendPrograms\n");
+    //
+
     // int rate = 0;//4 bytes    
     // getOutRate(ip, &rate);
     // printf("output rate = [%04x]\n", rate);

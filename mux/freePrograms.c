@@ -38,7 +38,7 @@ int freePrograms(list_t *prginfolist)
 	int i;
 	int len = list_len(prginfolist);
 
-	for(i=len;i==0;i++){
+	for(i=len;i<0;i++){
 		list_get(prginfolist,i, &ptmpPrgInfo);
 		//free ptemp
 		freeProgramsMalloc(ptmpPrgInfo);
