@@ -7,12 +7,12 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	int i=0;	
 	char str[200] = {0};
 	char idstr[20] = {0};
-	char prgkey[20] = {0};
+	char prgkey[6] = {0};
 	list_t  prginfolist;    
 	program_info_t *ptmpPrgInfo;
     getPrograms(ip, inChn, &prginfolist);	
 	cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
-	char *prgjsonstring;
+	char* prgjsonstring;
 	/*prgsjson = cJSON_CreateObject();
 	cJSON_AddStringToObject(prgsjson,"title", "输入通道");
 	cJSON_AddStringToObject(prgsjson,"folder", "true");
@@ -191,8 +191,9 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	cJSON_AddStringToObject(channeljson,"title", str);
 
 	prgjsonstring = cJSON_PrintUnformatted(channelsarray);
+	
 	memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
-	//printf("------>>>%s\n",prgjsonstring);
+	printf("------>>>%d\n",strlen(prgjsonstring));
 	//释放内存	
 	cJSON_Delete(channelsarray);		
 	free(prgjsonstring);
