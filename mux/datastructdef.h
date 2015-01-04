@@ -1,7 +1,6 @@
 #ifndef _DATASTRUCT_DEFINE_H_
 #define _DATASTRUCT_DEFINE_H_
 
-
 typedef struct Commdes_st
 {
 	int userNew; // 用户自定义内容

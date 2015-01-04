@@ -1,7 +1,7 @@
 {
-    "name": "testnms",
-    "title": "testnms",
-    "description": "init",
+    "name": "muxnms",
+    "title": "muxnms",
+    "description": "muxnms",
     "version": "1.0.0",
     "dependencies": {
         "esp-html-mvc": "~5.2"

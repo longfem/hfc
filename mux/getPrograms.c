@@ -103,10 +103,10 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     pmtDesInfo->dataLen = pmtDesDataLen;                    
                     pmtDesInfo->data = malloc(pmtDesDataLen);                    
                     iAddr += pmtDesDataLen;
-					memcpy(pmtDesInfo->data, buf[iAddr], pmtDesDataLen);                    
+					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen);                    
                     pmtDesInfo++;
                 }
-
+			
                 //stream data
                 int dataStreamCnt = buf[iAddr];
                 iAddr += 1;
@@ -141,7 +141,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 						iAddr += 1;
 						pdataStreamDesInfo->dataLen = dataStreamDesDataLen;
                         pdataStreamDesInfo->data = malloc(dataStreamDesDataLen);                        
-                        memcpy(pdataStreamDesInfo->data, buf[iAddr], dataStreamDesDataLen); 
+                        memcpy(pdataStreamDesInfo->data, buf+iAddr, dataStreamDesDataLen); 
 						iAddr += dataStreamDesDataLen;
 						pdataStreamDesInfo++;
                     }                    
@@ -163,7 +163,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 iAddr += 1;     
 				ptmpPrgInfo->providerNameLen = providerNameLen;
                 ptmpPrgInfo->providerName = (unsigned char *)malloc(ptmpPrgInfo->providerNameLen);
-                memcpy(ptmpPrgInfo->providerName, buf[iAddr], providerNameLen);
+                memcpy(ptmpPrgInfo->providerName, buf+iAddr, providerNameLen);
                 
                 iAddr += providerNameLen;
                 ptmpPrgInfo->isCrypto = buf[iAddr] > 0 ? 1 : 0;    
@@ -185,7 +185,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     iAddr += 1;
 					psdtDesInfo->dataLen = sdtDesDataLen;
                     psdtDesInfo->data = malloc(sdtDesDataLen);                    
-                    memcpy(psdtDesInfo->data, buf[iAddr], sdtDesDataLen);
+                    memcpy(psdtDesInfo->data, buf+iAddr, sdtDesDataLen);
 					iAddr += sdtDesDataLen;                   
                     if (psdtDesInfo->tag == 0x48)
                         ptmpPrgInfo->serviceType = psdtDesInfo->data[0];

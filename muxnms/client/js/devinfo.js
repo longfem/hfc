@@ -256,7 +256,7 @@ function devinfo_output(){
 			 type: "GET",
 			 async:false,
 			 url: "http://192.168.1.249:4000/do/programs/getprg",
-			 //data: {username:$("#username").val(), content:$("#content").val()},
+			 data: {ip:"192.168.1.168", inch:2},
 			 dataType: "json",
 			 success: function(data){
 				data = JSON.stringify(data).replace('\\','');

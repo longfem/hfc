@@ -15,8 +15,10 @@
 
 //extern int getPrograms(char *ip, int inChn, char *outprg);
 static void getprg() { 
+	
     char ip[16] = "192.168.1.134";//param("ip");  
     int inChn = 2;//param("inChn");  
+	//printf("====inch====%d\n", inChn);
 	char pProg[20480] = {0}; 
     getprgsJson(ip, inChn, pProg);	
 	render(pProg);
@@ -31,7 +33,7 @@ static void common(HttpConn *conn) {
 /*
     Dynamic module initialization
  */
-ESP_EXPORT int esp_controller_testnms_programs(HttpRoute *route, MprModule *module) {
+ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *module) {
     espDefineBase(route, common);
     espDefineAction(route, "programs-cmd-getprg", getprg);
     
