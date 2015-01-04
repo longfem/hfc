@@ -69,7 +69,6 @@ int ChnBypass_write(int outChnId)
 
 int sendPrograms(int outChnId)
 {
-	
 
 	//if(CreateTable(outChnId)) {
 		// ------ 设置输出通道信息 -----		

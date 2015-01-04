@@ -1,6 +1,7 @@
 #ifndef _DATASTRUCT_DEFINE_H_
 #define _DATASTRUCT_DEFINE_H_
 
+
 typedef struct Commdes_st
 {
 	int userNew; // 用户自定义内容
@@ -85,32 +86,6 @@ typedef struct program_info_s
 
 
 
-typedef struct  ClsProgram
-{
-	int _intChannelCntMax;
-	int _outChannelCntMax;
-	int _pmtMaxCnt;
- 	program_info_t inPrgList[8] ;
-  	program_info_t outPrgList[2];
-  	int chnBypass2[2]; // 通道直通, 0=禁用，other=输出直通某个输出
-	int chnBypassEnable[2]; // 通道直通功能激活
-	
-	// List<ScramblePrgSt> scramblePrgList;
- // 	List<ScramblePrgSt_v2> scramblePrgListV2;
-	// bool[,] needInputData; // 标志需要用到输入通道的数据，当数据丢失时报警
-	// int prgNum_min = 1;
-	// int prgPid_min = 0x100;
-	// int prgPid_max = 0xfff;
-	// int subPrgPid_min = 0x1000;
-	// int subPrgPid_max = 0x1ff0;
-	// int[] m_autoMuxStartPid; // 自动映射起始PID
-	// ClsMux muxer = null;
-	// ArrayList[] PrgPmtMuxList = null; // MuxPrgInfoGet_st
-	// ArrayList[] PrgAVMuxList = null;  // MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
-	// ArrayList[] nitSection = null; // Nit_section_st
-	// Dglt_showPidMap dglt_showPidMap = null;
-
-}ClsProgram_t;		
 
 
 typedef struct __ts_table_pmt_es_t
