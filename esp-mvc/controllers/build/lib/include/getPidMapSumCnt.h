@@ -1,1 +1,0 @@
-int getPidMapSumCnt(char *ip);
