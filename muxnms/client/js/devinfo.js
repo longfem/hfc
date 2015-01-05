@@ -255,7 +255,7 @@ function devinfo_output(){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://192.168.1.249:4000/do/programs/getprg",
+			 url: "http://192.168.1.134:4000/do/programs/getprg",
 			 data: {ip:"192.168.1.168", inch:2},
 			 dataType: "json",
 			 success: function(data){
