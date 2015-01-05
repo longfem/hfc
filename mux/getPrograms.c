@@ -13,8 +13,6 @@
 
 int getPrograms(char *ip, int inChn, list_t *prginfolist)
 {
-
-
     unsigned char buf[256];
     int i = 0, j=0, k=0, p=0, o=0, iPrg=0;
     char sendbuf[256];
@@ -34,8 +32,6 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 
     if (prgCnt > 0)
     {
-        //slist
-        
         list_init(prginfolist);
 
         for (iPrg = 0; iPrg < prgCnt; iPrg++){
@@ -195,7 +191,6 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 
 
                 list_append(prginfolist, ptmpPrgInfo);  
-            }
         } 
 		return 1;
     }
