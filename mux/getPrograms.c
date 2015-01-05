@@ -30,7 +30,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     int result=0;
     int prgCnt = getPrgCnt(ip, inChn, &result);
 
-    //printf("prgCnt=%d\n", prgCnt);
+    printf("prgCnt=%d\n", prgCnt);
 
     if (prgCnt > 0)
     {
@@ -154,9 +154,9 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 				ptmpPrgInfo->prgNameLen = prgNameLen;				
                 //stan bug bug
                 ptmpPrgInfo->prgName = (unsigned char *)malloc(sizeof(unsigned char)*ptmpPrgInfo->prgNameLen);
-				memset(ptmpPrgInfo->prgName, 0, sizeof(unsigned char) * ptmpPrgInfo->prgNameLen);
-                //memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr), sizeof(unsigned char) * ptmpPrgInfo->prgNameLen); 	
-				strncpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr), prgNameLen);
+				//memset(ptmpPrgInfo->prgName, 0, sizeof(unsigned char) * ptmpPrgInfo->prgNameLen);
+                memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr), sizeof(unsigned char) * ptmpPrgInfo->prgNameLen); 	
+				//strncpy(ptmpPrgInfo->prgName, (buf+iAddr), prgNameLen);
                 printf("prgName=======%d==========%s\n",sizeof(unsigned char)*ptmpPrgInfo->prgNameLen, ptmpPrgInfo->prgName);
                 iAddr += prgNameLen;                           
                 int providerNameLen = buf[iAddr];
@@ -196,14 +196,9 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 
                 list_append(prginfolist, ptmpPrgInfo);  
             }
-
-            //printf("iPrg=%d\n", iPrg);
-            //for
-
-        }
-
-        return 0;
+        } 
+		return 1;
     }
-   
+    return 0;
 }
 

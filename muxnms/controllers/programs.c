@@ -12,22 +12,31 @@
 #include "communicate.h"
 #include "getPrograms.h"
 
+static char* substr(const char*str,unsigned start, unsigned end)
+{
+   unsigned n = end - start;
+   static char stbuf[256];
+   strncpy(stbuf, str + start, n);
+   stbuf[n] = 0;
+   return stbuf;
+}
 
 //extern int getPrograms(char *ip, int inChn, char *outprg);
-static void getprg() { 
-	
-    char ip[16] = "192.168.1.134";//param("ip");  
-    int inChn = 2;//param("inChn");  
-	//printf("====inch====%d\n", inChn);
+static void getprg(HttpConn *conn) { 
+	cchar *param = espGetQueryString(conn);	
+    char ip[16] = "192.168.1.134";//param("ip"); 
+    char *inChn = substr(param, 5, strlen(param));//param("inChn");  
+	int inCh = atoi(inChn);
 	char pProg[20480] = {0}; 
-    getprgsJson(ip, inChn, pProg);	
+    getprgsJson(ip, inCh, pProg);	
 	render(pProg);
     
 } 
 
 
-
 static void common(HttpConn *conn) {
+	
+	
 }
 
 /*
