@@ -16,7 +16,10 @@
 #include "getPrograms.h"
 #include "freePrograms.h"
 #include "sendPrograms.h"
+#include "clsMuxOutCh.h"
 #include "cJSON.h"
+
+
 
 ClsProgram_t clsProgram;
 
@@ -32,44 +35,40 @@ int main(int argc,char *argv[])
 	    return -1;
     }
 
-    // int oo = 0x12345678;
-    // char *p =(char *)&oo;
-
-    // printf("=====%x==\n", oo);
-    // for(i=0;i<4;i++){
-    //     printf("buf[%d]=[%02x]\n",i, *p++);
-    // }
 
     char ip[256];
     memset(ip,0,sizeof(ip));
-    memcpy(ip, argv[1], strlen(argv[1]));
-	program_info_t *ptmpPrgInfo;
+    memcpy(ip, argv[1], strlen(argv[1]));	
     printf("ip=%s\n",ip);
 
     // unsigned char csearch;    
     // getAllChannelSignal(ip, &csearch);
     // printf("searched=[%02x]\n", csearch);
-	Commdes_t *teststruct = malloc(sizeof(Commdes_t) );
-	memset(teststruct, 0, sizeof(Commdes_t));
-	teststruct->userNew = 0x116;
-	teststruct->index = 0x117;
-	teststruct->dataLen = 0x118;
-    list_t  prginfolist ;    
-    getPrograms(ip, 2, &prginfolist);
 
-    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
-    freePrograms(&prginfolist);
-    printf("call freePrograms\n");
+/////////////////////case programs///////////
+    // list_t  prginfolist ;    
+        
+    // getPrograms(ip, 2, &prginfolist);
+    // if(ret < 0){
+    //     printf("getPrograms error\n");
+    //     return -1;
+    // }
+    // printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
+    // freePrograms(&prginfolist);
+    // printf("call freePrograms\n");
+////////////////////case end programs//////////
 
-    getPrograms(ip, 2, &prginfolist);
-    printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
-    freePrograms(&prginfolist);
-    printf("call freePrograms\n");
+    unsigned short  outTsId;
+    ErrorTypeEm res;
+    //res =  GetOutChnTSID(ip, 1, &outTsId);
+    res =  GetOutChnNetID(ip, 1, &outTsId);
 
+
+    printf("outTsid = %d \n", outTsId);
 
     //write to device
     //ret = sendPrograms(1);
-    printf("call sendPrograms\n");
+    //printf("call sendPrograms\n");
     //
 
     // int rate = 0;//4 bytes    

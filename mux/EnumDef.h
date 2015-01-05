@@ -1,11 +1,11 @@
 
 #ifndef ENUM_DEFINE_H
-#define ENUM_DEFINE_H 1
+#define ENUM_DEFINE_H 
 
 
 	typedef enum MsgTypeEm
 	{ 
-		normal, warnning, error, success
+		normal, warnning, msgerror, success
 	}MsgTypeEm;
 
 	typedef enum AlarmLevelEm
@@ -30,8 +30,8 @@
 
 	typedef enum ErrorTypeEm
 	{
-		ok, error2, length, cmd
-	}ErrorTypeEm_t;
+		ok, error, length, cmd
+	}ErrorTypeEm;
 
 
 

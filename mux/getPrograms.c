@@ -30,12 +30,12 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     int result=0;
     int prgCnt = getPrgCnt(ip, inChn, &result);
 
-    //printf("prgCnt=%d\n", prgCnt);
+    printf("prgCnt=%d\n", prgCnt);
 
     if (prgCnt > 0)
     {
         //slist
-        
+        printf("prgCnt======111111111111111============================\n");
         list_init(prginfolist);
 
         for (iPrg = 0; iPrg < prgCnt; iPrg++){
@@ -201,9 +201,10 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
             //for
 
         }
-
-        return 0;
+        
     }
    
+    printf("prgCnt======222222222222222222============================\n");
+     return 0;
 }
 

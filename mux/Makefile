@@ -25,10 +25,10 @@ BIN_PATH = $(BUILD_PATH)/bin
 LIB_PATH = $(BUILD_PATH)/lib
 
 
-OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o cJSON.o getPrgJson.o
+OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o
 
 
-LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o cJSON.o getPrgJson.o 
+LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o 
 
 
 .PHONY: all clean distclean
@@ -53,6 +53,7 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c freePrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c sendPrograms.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxOutCh.c	
 	$(CC) $(CFLAGS) $(IFLAGS) -c cJSON.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgJson.c
 	
