@@ -191,6 +191,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 
 
                 list_append(prginfolist, ptmpPrgInfo);  
+			}
         } 
 		return 1;
     }
