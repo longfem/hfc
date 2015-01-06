@@ -46,7 +46,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
             if(rlen >=0 && rlen <6) { iPmtCntIndex++; continue;}
 			if(rlen < 0){return rlen;}
 			
-            if(rlen > 0){			
+            if(rlen > 0){	
 				ptmpPrgInfo = malloc(sizeof(program_info_t));
 
                 ptmpPrgInfo->index = iPmtCntIndex++;                
@@ -149,11 +149,10 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 iAddr += 1;  
 				ptmpPrgInfo->prgNameLen = prgNameLen;				
                 //stan bug bug
-                ptmpPrgInfo->prgName = (unsigned char *)malloc(sizeof(unsigned char)*ptmpPrgInfo->prgNameLen);
-				//memset(ptmpPrgInfo->prgName, 0, sizeof(unsigned char) * ptmpPrgInfo->prgNameLen);
-                memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr), sizeof(unsigned char) * ptmpPrgInfo->prgNameLen); 	
-				//strncpy(ptmpPrgInfo->prgName, (buf+iAddr), prgNameLen);
-                printf("prgName=======%d==========%s\n",sizeof(unsigned char)*ptmpPrgInfo->prgNameLen, ptmpPrgInfo->prgName);
+                ptmpPrgInfo->prgName = (unsigned char *)malloc(prgNameLen);
+				memset(ptmpPrgInfo->prgName, 0,  prgNameLen);
+                memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr),  prgNameLen); 	
+				
                 iAddr += prgNameLen;                           
                 int providerNameLen = buf[iAddr];
                 iAddr += 1;     

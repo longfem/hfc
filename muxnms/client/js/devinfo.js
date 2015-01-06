@@ -246,6 +246,7 @@ function devinfo_output(){
     }).click(function( event ) {
         event.preventDefault();
 		$("#devlist").fancytree("getTree").reload();
+		$("#channel").fancytree("getTree").reload();
 		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
 		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
 		for(var i=1;i<9; i++){
@@ -300,13 +301,9 @@ function devinfo_output(){
 		select: function(event, data) {
 			var channeltree =  $("#channel").fancytree("getTree");
 			//删除节目树节点
+			channeltree.reload();
 			var prgnode = channeltree.getNodeByKey("id1.0");			
-			var childrennodes = prgnode.getChildren();
-			if(childrennodes != null){
-				childrennodes.forEach(function(nodes) {
-					nodes.removeChildren();
-				});
-			};
+
 			//添加至节目树	
 			var count = 0;//节目计数
 			var selNodes = data.tree.getSelectedNodes();			

@@ -28,14 +28,16 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		for(i=0; i<list_len(&prginfolist); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
 			list_get(&prginfolist, i, &ptmpPrgInfo);		
-			//添加节目节点TITLE		
-			sprintf(idstr, "id1.%d.%d", inChn, (i+1));//1.2.1	
-			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, ptmpPrgInfo->prgName );
-
+			//添加节目节点TITLE					
+			memset(idstr, 0, sizeof(idstr));
+			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
 			cJSON_AddTrueToObject(prgjson,"folder");
 			cJSON_AddFalseToObject(prgjson,"expanded");
 			cJSON_AddStringToObject(prgjson,"prgkey", prgkey);
+			sprintf(idstr, "id1.%d.%d", inChn, (i+1));//1.2.1	
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
 			
