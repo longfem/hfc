@@ -5,11 +5,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-int communicate(char *ip, char * sendbuf, int slen, char* result, int* rlen)
+int communicate(char *ip, unsigned char * sendbuf, int slen, unsigned char* result, int* rlen)
 {
 
     int sockfd,numbytes;
-    char buf[256];
+    unsigned char buf[256];
     struct sockaddr_in their_addr;
     int i = 0;
     
@@ -65,6 +65,7 @@ int communicate(char *ip, char * sendbuf, int slen, char* result, int* rlen)
     }
     else if(numbytes > 0){
         if(numbytes >= slen){
+            
             *rlen = numbytes ;        
             memcpy(result, buf, numbytes);    
         }

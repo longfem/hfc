@@ -18,6 +18,7 @@
 #include "sendPrograms.h"
 #include "clsMuxOutCh.h"
 #include "cJSON.h"
+#include "devinfo.h"
 
 
 
@@ -56,15 +57,117 @@ int main(int argc,char *argv[])
     // printf("call getPrograms  prgNum = [%0x]\n",  ((program_info_t *)(prginfolist.head->data))->prgNum);
     // freePrograms(&prginfolist);
     // printf("call freePrograms\n");
+
 ////////////////////case end programs//////////
 
-    unsigned short  outTsId;
-    ErrorTypeEm res;
+
+
+
+
+
+///////////////////////////case devinfo////////////////////////
+
+unsigned int  outType=0;
+ret = getDeviceType(ip,  &outType);
+if(ret < 0){
+        printf("getDeviceType error\n");
+        return -1;
+}
+   
+printf("get device type= %x\n", outType);
+
+unsigned int  outHardVer=0;
+ret = getHardVersion(ip,  &outHardVer);
+if(ret < 0){
+        printf("getHardVersion error\n");
+        return -1;
+}
+
+printf("get device Hard version=%x\n", outHardVer);
+
+
+unsigned int  outSoftVer=0;
+ret = getSoftVersion(ip,  &outSoftVer);
+if(ret < 0){
+        printf("getSoftVersion error\n");
+        return -1;
+}else
+   printf("get device Soft version=%x\n", outSoftVer);
+
+unsigned int outFPGAVer = 0;
+ret = getFpgaVersion(ip,  &outFPGAVer);
+if(ret < 0){
+        printf("getFpgaVersion error\n");
+        return -1;
+}else
+    printf("get device Fpga version=%x\n", outFPGAVer);
+
+unsigned int outIP=0;
+ret = getIp(ip,  &outIP);
+if(ret < 0){
+        printf("getIp error\n");
+        return -1;
+}else
+   printf("get device Out Ip =%4x\n", outIP);
+
+unsigned char outMac[6];
+ret = getMac(ip, outMac, 6);
+if(ret < 0){
+        printf("getMac error\n");
+        return -1;
+}
+for(i=0;i<6;i++)
+    printf("outMac[%d]=[%02x]",i,outMac[i]);
+
+unsigned int outPort = 0;
+ret = getPort(ip,  &outPort);
+if(ret < 0){
+        printf("getPort error\n");
+        return -1;
+}
+printf("get getPort  =%x\n", outPort);
+
+rebootDevice(ip);
+
+/*
+unsigned int devip = ((unsigned char)192 <<32) & ((unsigned char)168 <<16) & ((unsigned char)1 <<8) & ((unsigned char)18);
+ret = setIp(ip,  devip);
+if(ret < 0){
+        printf("setIp error\n");
+        return -1;
+}
+
+ret = setMac(ip,  outMac);
+if(ret < 0){
+        printf("setMac error\n");
+        return -1;
+}
+
+
+
+ret = setPort(ip,  outPort);
+if(ret < 0){
+        printf("setPort error\n");
+        return -1;
+}
+
+*/
+
+//restoreFactory(ip);
+
+
+
+
+
+
+////////////////////////////////////////////case devinfo end /////////////////////
+    //unsigned short  outTsId;
+    //ErrorTypeEm res;
     //res =  GetOutChnTSID(ip, 1, &outTsId);
-    res =  GetOutChnNetID(ip, 1, &outTsId);
+    //res =  GetOutChnNetID(ip, 1, &outTsId);
 
 
-    printf("outTsid = %d \n", outTsId);
+    //printf("outTsid = %d \n", outTsId);
 
     //write to device
     //ret = sendPrograms(1);

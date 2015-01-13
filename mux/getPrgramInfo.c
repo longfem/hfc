@@ -35,8 +35,10 @@ int getPrgramInfo(char *ip, int inChn, int prgNo, unsigned char * result, int * 
    
     if( rlen > 6 ){
        
-        //0 auto 1 manual              
-        memcpy(result, buf, rlen); 
+        //0 auto 1 manual
+        printf("\n###11111#R\n");
+        memcpy(result, buf, rlen);
+        printf("\n###112221#R\n");
         *reslen =  rlen;
         return *reslen;
     }

@@ -43,12 +43,20 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
             memset(buf,0,sizeof(buf));
             rlen = getPrgramInfo(ip, inChn, iPrg+1, buf, &ibuflen);
             //invalid program
-            if(rlen >=0 && rlen <6) { iPmtCntIndex++; continue;}
+            printf("\n###11333#R\n");
+            if(rlen >=0 && rlen <6) {
+                printf("\n###1ipmt1#R\n");
+             iPmtCntIndex++; continue;
+             }
 			if(rlen < 0){return rlen;}
-			
-            if(rlen > 0){	
+
+			printf("\n###1befoer rlen=%d1#R\n", rlen);
+            if(rlen > 0){
+
+             printf("\n###1144444#R\n");
 				ptmpPrgInfo = malloc(sizeof(program_info_t));
 
+                printf("\n###11555555555#R\n");
                 ptmpPrgInfo->index = iPmtCntIndex++;                
 				iAddr += 4; //skip 6 header to data pointer				
 
@@ -84,6 +92,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 int pmtDesCnt = buf[iAddr];
                 iAddr += 1; 
 
+                 printf("\n###6666666#R\n");
                 //pmt
 				ptmpPrgInfo->pmtDesListLen = pmtDesCnt;
                 ptmpPrgInfo->pmtDesList = malloc(pmtDesCnt * sizeof(Commdes_t) );
@@ -102,7 +111,8 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen);                    
                     pmtDesInfo++;
                 }
-			
+
+			 printf("\n###7777777777776666#R\n");
                 //stream data
                 int dataStreamCnt = buf[iAddr];
                 iAddr += 1;
@@ -143,7 +153,8 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     }                    
                     pdataStreamInfo++;
                 }         
-				
+
+				 printf("\n###88888888#R\n");
                 // --- 节目和提供商名字 ---
                 int prgNameLen = buf[iAddr];
                 iAddr += 1;  
@@ -188,12 +199,16 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     psdtDesInfo++;
                 }
 
+                 printf("\n###999999999666#R\n");
+                list_append(prginfolist, ptmpPrgInfo);
 
-                list_append(prginfolist, ptmpPrgInfo);  
+                 printf("\n###666610101010110#R\n");
 			}
         } 
 		return 1;
     }
+
+     printf("\n###6oooookkkkkkkkkkkkkkk#R\n");
     return 0;
 }
 
