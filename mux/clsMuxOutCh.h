@@ -6,10 +6,10 @@
 #define _CLS_MUX_OUT_CHANNEL_H_
 
 
-ErrorTypeEm SetOutChnTSID(char *ip, int outChn, unsigned short tsId);
-ErrorTypeEm GetOutChnTSID(char *ip, int outChn,  unsigned short  *outTsId);
-ErrorTypeEm GetOutChnNetID(char *ip, int outChn, unsigned short  *outNetId);
-
+ErrorTypeEm GetOutChnTSID(char *ip, int outChn,  unsigned int  *outTsId);
+ErrorTypeEm GetOutChnNetID(char *ip, int outChn, unsigned int  *outNetId);
+ErrorTypeEm GetOutChnOrgNetID(char *ip, int outChn, unsigned int *outOrgNetId);
+ErrorTypeEm GetOutChnTableVer(char *ip, int outChn, unsigned int *outTableVer);
 #endif
 
 

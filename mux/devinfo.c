@@ -279,6 +279,160 @@ int setIp(char *ip,  unsigned int  devip)
     
 }
 
+//获取setSubMask
+int getSubMask(char *ip,  unsigned int  *getSubMask)
+{
+    unsigned char buf[10];
+    int i = 0;
+    unsigned char sendbuf[10];
+    int slen=0;
+  
+    //get call channal signal status
+    int  res;
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x02;
+    sendbuf[3]=0x02;
+    sendbuf[4]=0x01;
+    
+    
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 5, buf, &slen);
+    
+    //printf("\n####Recive getSubMask receive nums=[%d]\n", slen );
+    if( 9 == slen ){
+          for(i=0;i<slen;i++)
+            printf("Recive getSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
+              
+        *getSubMask = buf[5]<<24 | buf[6]<<16 | buf[7]<<8 | buf[8];  
+         res = 0;
+
+    }else 
+        res = -1;
+
+    return res;
+    
+}
+
+//设置setSubMask地址
+int setSubMask(char *ip,  unsigned int  inSubMask)
+{
+    unsigned char buf[10];
+    int i = 0;
+    unsigned char sendbuf[10];
+    int slen=0;
+  
+    //get call channal signal status
+    int  res;
+
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x02;
+    sendbuf[3]=0x02;
+    sendbuf[4]=0x02;
+    sendbuf[5]=(unsigned char) (inSubMask & 0xff000000) >> 24;
+    sendbuf[6]=(unsigned char) (inSubMask & 0xff0000) >> 16;
+    sendbuf[7]=(unsigned char) (inSubMask & 0xff00) >> 8;
+    sendbuf[8]=(unsigned char) (inSubMask & 0xff) ;
+    
+    
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 9, buf, &slen);
+    
+    printf("\n####Recive setSubMask receive nums=[%d]\n", slen );
+    if( 9 == slen ){
+          for(i=0;i<slen;i++)
+            printf("Recive setSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
+               
+         res = 0;
+
+    }else 
+        res = -1;
+
+    return res;
+    
+}
+
+
+//获取IP
+int getGateway(char *ip,  unsigned int  *outGateway)
+{
+    unsigned char buf[10];
+    int i = 0;
+    unsigned char sendbuf[10];
+    int slen=0;
+  
+    //get call channal signal status
+    int  res;
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x02;
+    sendbuf[3]=0x03;
+    sendbuf[4]=0x01;
+    
+    
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 5, buf, &slen);
+    
+    //printf("\n####Recive getGateway receive nums=[%d]\n", slen );
+    if( 9 == slen ){
+          for(i=0;i<slen;i++)
+            printf("Recive getGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
+              
+        *outGateway = buf[5]<<24 | buf[6]<<16 | buf[7]<<8 | buf[8];  
+         res = 0;
+
+    }else 
+        res = -1;
+
+    return res;
+    
+}
+
+//设置Gateway地址
+int setGateway(char *ip,  unsigned int  inGateway)
+{
+    unsigned char buf[10];
+    int i = 0;
+    unsigned char sendbuf[10];
+    int slen=0;
+  
+    //get call channal signal status
+    int  res;
+
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x02;
+    sendbuf[3]=0x03;
+    sendbuf[4]=0x02;
+    sendbuf[5]=(unsigned char) (inGateway & 0xff000000) >> 24;
+    sendbuf[6]=(unsigned char) (inGateway & 0xff0000) >> 16;
+    sendbuf[7]=(unsigned char) (inGateway & 0xff00) >> 8;
+    sendbuf[8]=(unsigned char) (inGateway & 0xff) ;
+    
+    
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 9, buf, &slen);
+    
+    printf("\n####Recive setGateway receive nums=[%d]\n", slen );
+    if( 9 == slen ){
+          for(i=0;i<slen;i++)
+            printf("Recive setGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
+               
+         res = 0;
+
+    }else 
+        res = -1;
+
+    return res;
+    
+}
+
+
 
 //获取Mac
 int getMac(char *ip,  unsigned char  *outMac, unsigned int outlen)

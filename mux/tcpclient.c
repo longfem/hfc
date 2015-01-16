@@ -110,6 +110,22 @@ if(ret < 0){
 }else
    printf("get device Out Ip =%4x\n", outIP);
 
+unsigned int outSubMask=0;
+ret = getSubMask(ip,  &outSubMask);
+if(ret < 0){
+        printf("getSubMask error\n");
+        return -1;
+}else
+   printf("get device Out outSubMask =%4x\n", outSubMask);
+
+unsigned int outGateway=0;
+ret = getGateway(ip,  &outGateway);
+if(ret < 0){
+        printf("getGateway error\n");
+        return -1;
+}else
+   printf("get device Out outGateway =%4x\n", outGateway);  
+    
 unsigned char outMac[6];
 ret = getMac(ip, outMac, 6);
 if(ret < 0){
@@ -143,6 +159,11 @@ if(ret < 0){
         return -1;
 }
 
+
+int getSubMask(char *ip,  unsigned int  *getSubMask);
+int setSubMask(char *ip,  unsigned int  inSubMask);
+int getGateway(char *ip,  unsigned int  *outGateway);
+int setGateway(char *ip,  unsigned int  inGateway);
 
 
 ret = setPort(ip,  outPort);
