@@ -142,7 +142,7 @@ ErrorTypeEm GetOutChnTableVer(char *ip, int outChn, unsigned int *outTableVer)
     communicate(ip, sendbuf, 6, buf, &slen);
     
     //printf("\n####Recive GetOutChnNetID receive nums=[%d]\n", slen );
-    if( 8 == slen ){
+    if( 7 == slen ){
           // for(i=0;i<slen;i++)
           //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);    
               
@@ -156,4 +156,43 @@ ErrorTypeEm GetOutChnTableVer(char *ip, int outChn, unsigned int *outTableVer)
     return res;
     
     
+}
+
+
+// 获取表使能标志位
+ErrorTypeEm GetTableEnableFlag(char *ip, int outChn, unsigned int *outStatus)
+{
+    unsigned char buf[10];
+    int i = 0;
+    unsigned char sendbuf[256];
+    int slen=0;
+  
+    //get call channal signal status
+    enum ErrorTypeEm res;
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x21;
+    sendbuf[3]=(unsigned char)outChn;
+    sendbuf[4]=0x0a;
+    sendbuf[5]=0x01;
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 6, buf, &slen);
+    
+    //printf("\n####Recive GetOutChnNetID receive nums=[%d]\n", slen );
+    if( 8 == slen ){
+          // for(i=0;i<slen;i++)
+          //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);    
+              
+        *outStatus = ( buf[6]<<8| buf[7]) & 0xffff;  
+         
+         res = ok;
+
+    }
+    else 
+        res = error;
+
+    return res;
+        
 }
