@@ -34,8 +34,8 @@ int getDeviceType(char *ip,  unsigned int  *outType)
     
     //printf("\n####Recive getDeviceType receive nums=[%d]\n", slen );
     if( 8 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getDeviceType buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getDeviceType buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outType = (buf[7]<<24| buf[6]<<16|buf[5]<<8| buf[4]) ;  
          res = 0;
@@ -70,8 +70,8 @@ int getHardVersion(char *ip,  unsigned int  *outHardVer)
     
     //printf("\n####Recive getHardVersion receive nums=[%d]\n", slen );
     if( 7 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getHardVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getHardVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outHardVer = (buf[6]<<16| buf[5]<<8|buf[4]) & 0xffffff;  
          res = 0;
@@ -105,8 +105,8 @@ int getSoftVersion(char *ip,  unsigned int  *outSoftVer)
     
     //printf("\n####Recive getSoftVersion receive nums=[%d]\n", slen );
     if( 7 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getSoftVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getSoftVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outSoftVer = (buf[6]<<16| buf[5]<<8|buf[4]) & 0xffffff ;  
          res = 0;
@@ -140,8 +140,8 @@ int getFpgaVersion(char *ip,  unsigned int  *outFPGAVer)
     
     //printf("\n####Recive getFpgaVersion receive nums=[%d]\n", slen );
     if( 7 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getFpgaVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getFpgaVersion buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outFPGAVer = (buf[6]<<16| buf[5]<<8|buf[4]) & 0xffffff ;  
          res = 0;
@@ -226,8 +226,8 @@ int getIp(char *ip,  unsigned int  *outIP)
     
     //printf("\n####Recive getIp receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getIp buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getIp buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outIP = buf[5]<<24 | buf[6]<<16 | buf[7]<<8 | buf[8];  
          res = 0;
@@ -267,8 +267,8 @@ int setIp(char *ip,  unsigned int  devip)
     
     printf("\n####Recive setIp receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive setIp buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive setIp buf[%d]=0x[%02x]\n",i, buf[i]);    
                
          res = 0;
 
@@ -302,8 +302,8 @@ int getSubMask(char *ip,  unsigned int  *getSubMask)
     
     //printf("\n####Recive getSubMask receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *getSubMask = buf[5]<<24 | buf[6]<<16 | buf[7]<<8 | buf[8];  
          res = 0;
@@ -341,10 +341,10 @@ int setSubMask(char *ip,  unsigned int  inSubMask)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);
     
-    printf("\n####Recive setSubMask receive nums=[%d]\n", slen );
+    // printf("\n####Recive setSubMask receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive setSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive setSubMask buf[%d]=0x[%02x]\n",i, buf[i]);    
                
          res = 0;
 
@@ -379,8 +379,8 @@ int getGateway(char *ip,  unsigned int  *outGateway)
     
     //printf("\n####Recive getGateway receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outGateway = buf[5]<<24 | buf[6]<<16 | buf[7]<<8 | buf[8];  
          res = 0;
@@ -418,10 +418,10 @@ int setGateway(char *ip,  unsigned int  inGateway)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);
     
-    printf("\n####Recive setGateway receive nums=[%d]\n", slen );
+    // printf("\n####Recive setGateway receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive setGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive setGateway buf[%d]=0x[%02x]\n",i, buf[i]);    
                
          res = 0;
 
@@ -461,8 +461,8 @@ int getMac(char *ip,  unsigned char  *outMac, unsigned int outlen)
     
     //printf("\n####Recive getMac receive nums=[%d]\n", slen );
     if( 11 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getMac buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getMac buf[%d]=0x[%02x]\n",i, buf[i]);    
                       
          *outMac = buf[5];
          *(outMac+1) = buf[6];
@@ -516,8 +516,8 @@ int setMac(char *ip,  unsigned char  *outMac)
     
     printf("\n####Recive setMac receive nums=[%d]\n", slen );
     if( 11 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive setMac buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive setMac buf[%d]=0x[%02x]\n",i, buf[i]);    
                       
          res = 0;
 
@@ -551,8 +551,8 @@ int getPort(char *ip,  unsigned int  *outPort)
     
     //printf("\n####Recive getPort receive nums=[%d]\n", slen );
     if( 7 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive getPort buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive getPort buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         *outPort = (buf[6]<<8| buf[5]) & 0xffff;  
          res = 0;
@@ -589,10 +589,10 @@ int setPort(char *ip,  unsigned int  port)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 7, buf, &slen);
     
-    printf("\n####Recive setPort receive nums=[%d]\n", slen );
+    // printf("\n####Recive setPort receive nums=[%d]\n", slen );
     if( 9 == slen ){
-          for(i=0;i<slen;i++)
-            printf("Recive setPort buf[%d]=0x[%02x]\n",i, buf[i]);    
+          // for(i=0;i<slen;i++)
+          //   printf("Recive setPort buf[%d]=0x[%02x]\n",i, buf[i]);    
                
          res = 0;
 
