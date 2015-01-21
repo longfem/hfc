@@ -18,7 +18,10 @@ int getOutPrograms(char *ip, int outChn, list_t *prginfolist)
 
 	enum ErrorTypeEm res;
 	unsigned int  tmpShort = 0;
-	if(GetOutChnTSID(i + 1, ref tmpShort) == res.ok)
+	if(GetOutChnTSID(i + 1, ref tmpShort) == res.ok){
+
+	}
+	
 	// 	db.valueTree.outChnArray[i].streamId = tmpShort;
 	// if (GetOutChnNetID(i + 1, ref tmpShort) == ErrorTypeEm.ok)
 	// 	db.valueTree.outChnArray[i].networkId = tmpShort;

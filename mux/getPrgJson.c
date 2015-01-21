@@ -9,7 +9,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	char idstr[20] = {0};
 	char prgkey[6] = {0};
 	list_t  prginfolist;    
-	program_info_t *ptmpPrgInfo;
+	Dev_prgInfo_st *ptmpPrgInfo;
     res = getPrograms(ip, inChn, &prginfolist);	
 	if(0 != res){
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
