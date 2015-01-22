@@ -21,7 +21,6 @@ static char* substr(const char*str,unsigned start, unsigned end)
    return stbuf;
 }
 
-//extern int getPrograms(char *ip, int inChn, char *outprg);
 static void getprg(HttpConn *conn) { 
 	cchar *param = espGetQueryString(conn);	
     char ip[16] = "192.168.1.134";//param("ip"); 

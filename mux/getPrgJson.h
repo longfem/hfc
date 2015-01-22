@@ -4,5 +4,5 @@
 #include "datastructdef.h"
 #include "list.h"
 
-int getPrgJson(char *ip, int inChn, char *outprg);
+void getPrgJson(char *ip, int inChn, char *outprg);
 #endif 

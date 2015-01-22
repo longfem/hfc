@@ -510,6 +510,15 @@ ul,ol{
 	margin-left: 30px;
   }
   
+  .network_set {
+	margin-left: 30px;
+	margin-bottom:10px;
+  }
+  
+  .newip {
+	margin-right: 30px;
+  }
+  
   /** fonts used for the icons **/ 
 @font-face {
     font-family: 'FontomasCustomRegular';

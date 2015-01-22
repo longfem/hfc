@@ -240,7 +240,7 @@ int getIp(char *ip,  unsigned int  *outIP)
 }
 
 //设置ip地址
-int setIp(char *ip,  unsigned int  devip)
+int setIp(char *ip,  unsigned int devip)
 {
     unsigned char buf[10];
     int i = 0;
@@ -256,11 +256,11 @@ int setIp(char *ip,  unsigned int  devip)
     sendbuf[2]=0x02;
     sendbuf[3]=0x01;
     sendbuf[4]=0x02;
-    sendbuf[5]=(unsigned char) (devip & 0xff000000) >> 24;
-    sendbuf[6]=(unsigned char) (devip & 0xff0000) >> 16;
-    sendbuf[7]=(unsigned char) (devip & 0xff00) >> 8;
-    sendbuf[8]=(unsigned char) (devip & 0xff) ;
-    
+    sendbuf[5]=(devip & 0xff000000) >> 24;
+    sendbuf[6]=(devip & 0xff0000) >> 16;
+    sendbuf[7]=(devip & 0xff00) >> 8;
+    sendbuf[8]=(devip & 0xff) ;
+    printf("\n####Recive setIp receive ip=[%d.%d.%d.%d]\n", sendbuf[5], sendbuf[6],sendbuf[7],sendbuf[8] );
     
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);
@@ -332,10 +332,10 @@ int setSubMask(char *ip,  unsigned int  inSubMask)
     sendbuf[2]=0x02;
     sendbuf[3]=0x02;
     sendbuf[4]=0x02;
-    sendbuf[5]=(unsigned char) (inSubMask & 0xff000000) >> 24;
-    sendbuf[6]=(unsigned char) (inSubMask & 0xff0000) >> 16;
-    sendbuf[7]=(unsigned char) (inSubMask & 0xff00) >> 8;
-    sendbuf[8]=(unsigned char) (inSubMask & 0xff) ;
+    sendbuf[5]=(inSubMask & 0xff000000) >> 24;
+    sendbuf[6]=(inSubMask & 0xff0000) >> 16;
+    sendbuf[7]=(inSubMask & 0xff00) >> 8;
+    sendbuf[8]=(inSubMask & 0xff) ;
     
     
     memset(buf,0,sizeof(buf));
@@ -409,10 +409,10 @@ int setGateway(char *ip,  unsigned int  inGateway)
     sendbuf[2]=0x02;
     sendbuf[3]=0x03;
     sendbuf[4]=0x02;
-    sendbuf[5]=(unsigned char) (inGateway & 0xff000000) >> 24;
-    sendbuf[6]=(unsigned char) (inGateway & 0xff0000) >> 16;
-    sendbuf[7]=(unsigned char) (inGateway & 0xff00) >> 8;
-    sendbuf[8]=(unsigned char) (inGateway & 0xff) ;
+    sendbuf[5]=(inGateway & 0xff000000) >> 24;
+    sendbuf[6]=(inGateway & 0xff0000) >> 16;
+    sendbuf[7]=(inGateway & 0xff00) >> 8;
+    sendbuf[8]=(inGateway & 0xff) ;
     
     
     memset(buf,0,sizeof(buf));
