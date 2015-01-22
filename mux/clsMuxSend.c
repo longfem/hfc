@@ -2,7 +2,7 @@
 #include "communicate.h"
 #include "clsMuxSend.h"
 
-extern ClsProgram_t clsProgram;
+extern ClsProgram_st clsProgram;
 int o_selectedPrgCntMax = 29;
 
 unsigned char SendTable(int outChnId)

@@ -22,7 +22,7 @@
 
 
 
-ClsProgram_t clsProgram;
+ClsProgram_st clsProgram;
 
 
 

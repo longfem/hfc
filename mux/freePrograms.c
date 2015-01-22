@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "freePrograms.h"
 
-int freeProgramsMalloc(program_info_t * data)
+int freeProgramsMalloc(Dev_prgInfo_st * data)
 {
 	int pmtDesListLen = data->pmtDesListLen;
 	if(pmtDesListLen>0){
@@ -34,7 +34,7 @@ int freePrograms(list_t *prginfolist)
 		return -1;
 	}
 
-	program_info_t *ptmpPrgInfo = NULL;
+	Dev_prgInfo_st *ptmpPrgInfo = NULL;
 	int i;
 	int len = list_len(prginfolist);
 

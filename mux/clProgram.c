@@ -39,7 +39,7 @@ unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSen
 											
 				}
 
-				ErrorTypeEm rslt = muxer.SendOutPrgMuxMap(i + 1, sendList);
+				ErrorTypeEm rslt = muxer.SendOutPrgMuxMap(i + 1, &sendList);
 				if (rslt != ErrorTypeEm.ok)
 					return false;
 			}

@@ -28,7 +28,7 @@ typedef struct DataStream_st
 
 
 //Dev_prgInfo_st
-typedef struct Dev_prgInfo_st
+typedef struct Dev_prgInfo_t
 {
     int userNew; // 用户自定义内容
     int index;
@@ -110,25 +110,9 @@ typedef struct out_program_num_s
 	unsigned short newPid;	   //2 byte
 } out_program_num_t;
 
-typedef struct Database_st
-{
-	unsigned char isAutoMakeMux;
-	unsigned char isAutoOutTreeListExpandAll;
-	unsigned char isAutoInTreeListExpandAll;
-	unsigned char isPrgInfoHexPid;
-	unsigned char isConnectPid;
-	unsigned char isLogEnable;
-	DatabaseOutputChannel_st *poutChnArray;
 
-	//string net_ipAddrStr;
-	//int net_port;
-	//ConnectType_en net_type;
-	int startPid;
-	//bool isServerMode;
 
-}Database_st;
-
-typedef struct DatabaseOutputChannel_st
+typedef struct DatabaseOutputChannel_t
 {
 	unsigned int outputRate;
 	unsigned int oringal_networkid;
@@ -146,15 +130,31 @@ typedef struct DatabaseOutputChannel_st
 	unsigned char isNeedSend_nit;
 }DatabaseOutputChannel_st;
 
+typedef struct Database_t
+{
+	unsigned char isAutoMakeMux;
+	unsigned char isAutoOutTreeListExpandAll;
+	unsigned char isAutoInTreeListExpandAll;
+	unsigned char isPrgInfoHexPid;
+	unsigned char isConnectPid;
+	unsigned char isLogEnable;
+	DatabaseOutputChannel_st *poutChnArray;
 
+	//string net_ipAddrStr;
+	//int net_port;
+	//ConnectType_en net_type;
+	int startPid;
+	//bool isServerMode;
 
-#define cdr_int16_to(from) \
-	( (((from) & (0xffu << 8)) >> 8)  \
-	| (((from) & 0xffu) << 8) )
+}Database_st;
+
+// #define cdr_int16_to(from) \
+// 	( (((from) & (0xffu << 8)) >> 8)  \
+// 	| (((from) & 0xffu) << 8) )
 		
-#endif		
+// #endif		
 
-typedef struct MuxPrgInfoGet_st
+typedef struct MuxPrgInfoGet_t
 {
 	int inChannel;
 	int prgIndex; // 该消息指示的节目列表中消息的索引
@@ -162,7 +162,7 @@ typedef struct MuxPrgInfoGet_st
 	int prgPid;
 }MuxPrgInfoGet_st;
 
-typedef struct ChannelProgramSt
+typedef struct ChannelProgramt
 {
 	int channelId;
 	list_t prgNodes; // struct Dev_prgInfo_st
@@ -175,7 +175,7 @@ typedef struct  ClsProgram_t
 {
 	int _intChannelCntMax;
 	int _outChannelCntMax;
-	int _pmtMaxCnt = 29;
+	int _pmtMaxCnt; // = 29;
 	list_t  inPrgList;  //ChannelProgramSt  8 input
 	list_t outPrgList;  // 2 output
 	// int[] chnBypass2; // 通道直通, 0=禁用，other=输出直通某个输出
@@ -183,16 +183,17 @@ typedef struct  ClsProgram_t
 	// List<ScramblePrgSt> scramblePrgList;
 	// List<ScramblePrgSt_v2> scramblePrgListV2;
 	// bool[,] needInputData; // 标志需要用到输入通道的数据，当数据丢失时报警
-	 int prgNum_min = 1;
-	 int prgPid_min = 0x100;
-	 int prgPid_max = 0xfff;
-	 int subPrgPid_min = 0x1000;
-	 int subPrgPid_max = 0x1ff0;
+	 int prgNum_min; // = 1;
+	 int prgPid_min; // = 0x100;
+	 int prgPid_max; // = 0xfff;
+	 int subPrgPid_min; // = 0x1000;
+	 int subPrgPid_max; // = 0x1ff0;
 	// int[] m_autoMuxStartPid; // 自动映射起始PID
 	// ClsMux muxer = null;
 	// ArrayList[] PrgPmtMuxList = null; // MuxPrgInfoGet_st
 	// public ArrayList[] PrgAVMuxList = null;  // MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
 	// ArrayList[] nitSection = null; // Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
-}ClsProgram_t;	
+}ClsProgram_st;	
 
+#endif	
