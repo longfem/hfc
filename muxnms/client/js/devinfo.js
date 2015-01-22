@@ -100,6 +100,12 @@ function devinfo_output(){
 			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
 			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
 		+'</ul>'
+		+'<ul id="inputprg_menu" class="contextMenu ui-helper-hidden">'
+			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+		+'</ul>'
 		+'<div id="dialog-form" title="编辑节目">'
 			+'<table class="tbl_program">'
 				+'<tr>'
@@ -278,8 +284,32 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
-		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.2.1");
+		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
+		var inCh = 1; //通道号		
+		/*nodes.forEach(function(node) {
+			if( node.hasChildren() ) {
+				var subnodes = node.children;
+				
+			}
+			inCh++;
+		});
 		alert('------------------!!!');
+		*/
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/maketable",
+			 data: {ip:"192.168.1.134", inch:2},
+			 dataType: "json",
+			 success: function(data){
+				
+			 },    
+			 error : function(err) {    
+				  // view("异常！");   
+				var xxx = err;
+				  alert("异常！====="+JSON.stringify(err));    
+			 }   
+		});
     });
 	
 	$( "#output-write" ).button({
@@ -293,11 +323,54 @@ function devinfo_output(){
 	
 	//输入通道树
 	$("#devlist").fancytree({
-		//extensions: ["select"],
+		extensions: ["menu"],
 		checkbox: true,
 		selectMode: 3,
 		minExpandLevel:2,
 		source: channel_root,
+		menu: {
+			selector: "#inputprg_menu",
+			position: {my: "center"},
+			create: function(event, data){
+			    $.ui.fancytree.debug("Menu create ", data.$menu);
+			},
+			beforeOpen: function(event, data){
+			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
+				if(data.node.key == "id1.0"){
+					$(".menu_delete").css("display", "none");
+				}else if(data.node.key.length == 5){
+					$(".menu_delete").css("display", "block");
+				}
+			    
+			},
+			select: function(event, data){				
+				switch(data.menuId){
+					case '#expandall' :{
+						var nodes = data.node.children;
+						data.node.setExpanded(true);
+						$.each(nodes, function(index,item){
+							item.setExpanded(true);
+							//item.render();
+						});
+						break;
+					} case '#collasp': {
+						data.node.setExpanded(false);
+						break;
+					} case '#delete': {
+						while( data.node.hasChildren() ) {
+							data.node.getFirstChild().remove();
+						}
+						break;
+					}default: {
+						alert("Menu select " + data.menuId + ", " + data.node);
+						break;
+					}			  
+				}
+			},
+			close: function(event, data){
+			  $.ui.fancytree.debug("Menu close ", data.$menu, data.node);
+			}
+		},
 		select: function(event, data) {
 			var channeltree =  $("#channel").fancytree("getTree");
 			//删除节目树节点

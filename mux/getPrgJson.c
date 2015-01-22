@@ -3,14 +3,15 @@
 #include "getPrograms.h"
 #include "cJSON.h"
 
-void getprgsJson(char *ip, int inChn, char *outprg){
+void getprgsJson(char *ip, int inChn, char *outprg, ChannelProgram_t *pst){
 	int i=0, res = 0;	
 	char str[200] = {0};
 	char idstr[20] = {0};
 	char prgkey[6] = {0};
 	list_t  prginfolist;    
-	program_info_t *ptmpPrgInfo;
+	Dev_prgInfo_t *ptmpPrgInfo;
     res = getPrograms(ip, inChn, &prginfolist);	
+	memcpy(&(pst->prgNodes), &prginfolist, sizeof(prginfolist));	
 	if(0 != res){
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
