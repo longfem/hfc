@@ -4,7 +4,7 @@
 #include "sendPrograms.h"
 
 
-extern ClsProgram_t clsProgram;
+extern ClsProgram_st clsProgram;
 
 int ChnBypass_write(int outChnId)
 {

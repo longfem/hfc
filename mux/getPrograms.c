@@ -22,7 +22,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     int iPmtCntIndex = 1;
     unsigned short itmp;
 	int iAddr = 0;
-    Dev_prgInfo_t *ptmpPrgInfo = NULL;
+    Dev_prgInfo_st *ptmpPrgInfo = NULL;
 
     //getProCnt
     int result=0;
@@ -53,8 +53,9 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 		//	printf("\n###1befoer rlen=%d1#R\n", rlen);
             if(rlen > 0){
 
-            // printf("\n###1144444#R\n");
-				ptmpPrgInfo = malloc(sizeof(Dev_prgInfo_t));
+
+      
+				ptmpPrgInfo = malloc(sizeof(Dev_prgInfo_st));
 
              //   printf("\n###11555555555#R\n");
                 ptmpPrgInfo->index = iPmtCntIndex++;                
