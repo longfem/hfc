@@ -17,7 +17,7 @@ IFLAGS = -I../include
 #CFLAGS +=-g -O2 -fno-stack-protector
 #CFLAGS +=-g -O2 -Wl,-rpath,/home/nixinlong/work/digit-nms/src/hfc/mux/stanlibs/jsonlibs 
 #LDFLAGS += -L./ -L./stanlibs/jsonlibs/ -ljson-c -lm
-CFLAGS +=-g -O2 
+CFLAGS +=-g -O2 -fPIC
 LDFLAGS += -L./ -lm
 
 BUILD_PATH = build
@@ -29,13 +29,13 @@ OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
-clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o getBaseJson.o
+clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o
 
 LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
-clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o getBaseJson.o
+clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o
 
 .PHONY: all clean distclean
 
@@ -65,7 +65,8 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c devinfo.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxprgInfoGet.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxSend.c	
-	$(CC) $(CFLAGS) $(IFLAGS) -c clsProgram.c		
+	$(CC) $(CFLAGS) $(IFLAGS) -c clsProgram.c	
+	$(CC) $(CFLAGS) $(IFLAGS) -c clsParams.c			
 	$(CC) $(CFLAGS) $(IFLAGS) -c getBaseJson.c
 
 	
