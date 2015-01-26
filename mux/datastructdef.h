@@ -196,5 +196,12 @@ typedef struct  ClsProgram_t
 	// Dglt_showPidMap dglt_showPidMap = null;
 }ClsProgram_st;	
 
+
+typedef struct ClsParams
+{	
+	int channelNumMax;
+	Database_st *pvalueTree;
+}ClsParams_st; 
+
 #endif	
 
