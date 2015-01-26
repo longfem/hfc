@@ -285,29 +285,39 @@ function devinfo_output(){
     }).click(function( event ) {
         event.preventDefault();
 		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
-		var inCh = 1; //通道号		
-		/*nodes.forEach(function(node) {
+		var inCh = 1, flag = 0; //通道号	
+		var jsondata = new Array();
+		var prgindex = new Array();
+		var jsonstr;
+		nodes.forEach(function(node) {
+			flag = 0;
+			prgindex = new Array();
+			var chstr = "inCh" + inCh;
 			if( node.hasChildren() ) {
-				var subnodes = node.children;
-				
+				var prgnodes = node.children;				
+				prgnodes.forEach(function(prgnode) {					
+					prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
+					flag++;
+				});					
 			}
+			jsonstr = chstr+':{' + prgindex.toString() +'}';
+			jsondata[inCh-1] = jsonstr;
 			inCh++;
-		});
-		alert('------------------!!!');
-		*/
+		});	
+		//alert("=========arraystring======>>>"+ jsondata.toString());
 		$.ajax({
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/programs/maketable",
-			 data: {ip:"192.168.1.134", inch:2},
-			 dataType: "json",
+			 data: '{' + jsondata.toString() + '}',
+			 dataType: "text",
 			 success: function(data){
 				
 			 },    
 			 error : function(err) {    
 				  // view("异常！");   
 				var xxx = err;
-				  alert("异常！====="+JSON.stringify(err));    
+				//  alert("异常！====="+JSON.stringify(err));    
 			 }   
 		});
     });

@@ -17,7 +17,7 @@ IFLAGS = -I../include
 #CFLAGS +=-g -O2 -fno-stack-protector
 #CFLAGS +=-g -O2 -Wl,-rpath,/home/nixinlong/work/digit-nms/src/hfc/mux/stanlibs/jsonlibs 
 #LDFLAGS += -L./ -L./stanlibs/jsonlibs/ -ljson-c -lm
-CFLAGS +=-g -O2 
+CFLAGS +=-g -O2 -fPIC
 LDFLAGS += -L./ -lm
 
 BUILD_PATH = build

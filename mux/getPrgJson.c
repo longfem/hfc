@@ -4,7 +4,8 @@
 #include "getPrograms.h"
 #include "cJSON.h"
 
-void getprgsJson(char *ip, int inChn, char *outprg, ChannelProgramSt *pst){
+ClsProgram_st clsProgram;
+void getprgsJson(char *ip, int inChn, char *outprg){
 	int i=0, res = 0;	
 	char str[200] = {0};
 	char idstr[20] = {0};
@@ -12,8 +13,8 @@ void getprgsJson(char *ip, int inChn, char *outprg, ChannelProgramSt *pst){
 	list_t  prginfolist;    
 
 	Dev_prgInfo_st *ptmpPrgInfo;
-    res = getPrograms(ip, inChn, &prginfolist);	
-	memcpy(&(pst->prgNodes), &prginfolist, sizeof(prginfolist));	
+	Dev_prgInfo_st *PrgInfo;
+    res = getPrograms(ip, inChn, &prginfolist);		
 	if(0 != res){
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
@@ -30,7 +31,17 @@ void getprgsJson(char *ip, int inChn, char *outprg, ChannelProgramSt *pst){
 		
 		for(i=0; i<list_len(&prginfolist); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
-			list_get(&prginfolist, i, &ptmpPrgInfo);		
+			list_get(&prginfolist, i, &ptmpPrgInfo);	
+			if(list_len(&(clsProgram.inPrgList)+(inChn-1)) < list_len(&prginfolist)){
+				PrgInfo = malloc(sizeof(Dev_prgInfo_st));
+				memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));
+				list_append(&(clsProgram.inPrgList)+(inChn-1), PrgInfo);
+			}else{					
+				list_get(&(clsProgram.inPrgList)+(inChn-1), i, &PrgInfo);
+				memset(PrgInfo, 0, sizeof(Dev_prgInfo_st));
+				memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));	
+			}			
+			
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
@@ -40,6 +51,7 @@ void getprgsJson(char *ip, int inChn, char *outprg, ChannelProgramSt *pst){
 			cJSON_AddTrueToObject(prgjson,"folder");
 			cJSON_AddFalseToObject(prgjson,"expanded");
 			cJSON_AddStringToObject(prgjson,"prgkey", prgkey);
+			cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
 			sprintf(idstr, "id1.%d.%d", inChn, (i+1));//1.2.1	
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");

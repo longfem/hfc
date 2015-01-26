@@ -12,7 +12,7 @@
 #include "communicate.h"
 #include "getPrograms.h"
 
-ClsProgram_t clsProgram;
+extern ClsProgram_st clsProgram;
 
 static char* substr(const char*str,unsigned start, unsigned end)
 {
@@ -28,29 +28,31 @@ static void getprg(HttpConn *conn) {
     char ip[16] = "192.168.1.134";//param("ip"); 
     char *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
-	char pProg[20480] = {0}; 
-	ChannelProgram_t pst;
-	ChannelProgram_t tmpst;
-	pst.channelId = inCh;
-	list_t test;
-    getprgsJson(ip, inCh, pProg, &pst);
-	//list_init(&(clsProgram.inPrgList));
-	//list_append(&(clsProgram.inPrgList), &pst);
-	//list_get(&(clsProgram.inPrgList), inChn - 1, &tmpst);
-	list_init(&test);
-	list_append(&test, &pst);
-	list_get(&test, 0, &tmpst);
-	//program_info_t *ptmpPrgInfo;
-	//list_get(&(clsProgram.inPrgList), 1, &ptmpPrgInfo);	
-	printf("=====%d=>>>>%d\n", pst.channelId, tmpst.channelId);
+	char pProg[20480] = {0}; 	
+    getprgsJson(ip, inCh, pProg);
 	render(pProg);
     
 } 
-
+/*制表准备工作*/
 static void maketable(HttpConn *conn) { 
-	MprJson *jsonparam = httpGetParams(conn);
-	printf("======>>>>%s\n", mprGetJson(jsonparam, "ip"));
-	render("-----------");
+	int i = 0, j = 0, prgindex = 0;
+	char str[5] = {0};
+	char idstr[4] = {0};
+	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
+	//提取要制表的节目信息
+	for(i=0; i<clsProgram._intChannelCntMax; i++){
+		sprintf(str, "inCh%d", i);
+		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){		
+			for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
+				sprintf(idstr, "id%d", i);
+				prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
+				printf("===ch===>>>>%d======index=====>>>%d\n", i, prgindex);	
+			}
+		}
+	}	
+	
+	printf("===%s===>>>>%s\n", espGetQueryString(conn), mprGetJson(mprGetJsonObj(jsonparam, "inCh2" ), "id1"));	
+	render("");
     
 } 
 
@@ -60,11 +62,38 @@ static void common(HttpConn *conn) {
 	
 }
 
+static void espinit() {	
+	int i=0;
+	ChannelProgramSt *pst = NULL;
+	//全局变量初始化
+	clsProgram._outChannelCntMax = 2;
+	clsProgram._intChannelCntMax = 8;
+	clsProgram.prgNum_min = 1;
+	clsProgram.prgPid_min = 0x100;
+	clsProgram.prgPid_max = 0xfff;
+	clsProgram.subPrgPid_min = 0x1000;
+	clsProgram.subPrgPid_max = 0x1ff0;
+	//给全局变量申请内存
+	for(i=0; i<clsProgram._intChannelCntMax; i++){
+		pst = malloc(sizeof(ChannelProgramSt));
+		memset(pst, 0, sizeof(ChannelProgramSt));
+		pst->channelId = i + 1;		
+		list_append(&(clsProgram.inPrgList), pst);
+	}	
+	for(i=0; i<clsProgram._outChannelCntMax; i++){
+		pst = malloc(sizeof(ChannelProgramSt));
+		memset(pst, 0, sizeof(ChannelProgramSt));
+		list_append(&(clsProgram.outPrgList), pst);
+	}	
+	printf("======>>>>esp init!!!!!!!\n");
+}
+
 /*
     Dynamic module initialization
  */
 ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *module) {
     espDefineBase(route, common);
+	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
     
