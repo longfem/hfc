@@ -55,13 +55,17 @@ static void maketable(HttpConn *conn) {
 				outprglen = list_len(&(outpst->prgNodes));
 				//释放输出通道占用的节目内存
 				if(0 != outprglen){
+					printf("-----%d-->>\n", pos);
 					for(j=0; j< outprglen; j++){
 						list_get(&(outpst->prgNodes), j, &outprg);
-						if(outprg != NULL)
+						if(outprg != NULL){
 							free(outprg);
+							outprg = NULL;
+						}
 					}
 				}
 			}
+			list_init(&(outpst->prgNodes));
 			//获取输入通道信息
 			list_get(&(clsProgram.inPrgList), i, &pst);
 			//加入输出通道列表
