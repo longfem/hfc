@@ -6,14 +6,14 @@
 
 ClsProgram_st clsProgram;
 void getprgsJson(char *ip, int inChn, char *outprg){
-	int i=0, res = 0;	
+	int i = 0, j = 0, res = 0;	
 	char str[200] = {0};
 	char idstr[20] = {0};
 	char prgkey[6] = {0};
-	list_t  prginfolist;    
-
+	list_t  prginfolist; 	
 	Dev_prgInfo_st *ptmpPrgInfo;
 	Dev_prgInfo_st *PrgInfo;
+	ChannelProgramSt *pst = NULL;
     res = getPrograms(ip, inChn, &prginfolist);		
 	if(0 != res){
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
@@ -28,20 +28,22 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		cJSON_AddStringToObject(channeljson,"icon", "img/channel_in.ico");
 		
 		cJSON_AddItemToObject(channeljson, "children", prgsarray = cJSON_CreateArray());
-		
+		//释放输入通道节目占用的内存
+		list_get(&(clsProgram.inPrgList), inChn-1, &pst);
+		if( list_len(&pst->prgNodes) > 0){
+			for(j=0; j< list_len(&pst->prgNodes); j++){
+				list_get(&pst->prgNodes, j, &PrgInfo);
+				if(PrgInfo != NULL)
+					free(PrgInfo);
+			}	
+		}
+			
 		for(i=0; i<list_len(&prginfolist); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
 			list_get(&prginfolist, i, &ptmpPrgInfo);	
-			if(list_len(&(clsProgram.inPrgList)+(inChn-1)) < list_len(&prginfolist)){
-				PrgInfo = malloc(sizeof(Dev_prgInfo_st));
-				memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));
-				list_append(&(clsProgram.inPrgList)+(inChn-1), PrgInfo);
-			}else{					
-				list_get(&(clsProgram.inPrgList)+(inChn-1), i, &PrgInfo);
-				memset(PrgInfo, 0, sizeof(Dev_prgInfo_st));
-				memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));	
-			}			
-			
+			PrgInfo = malloc(sizeof(Dev_prgInfo_st));
+			memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));
+			list_append(&pst->prgNodes, PrgInfo);			
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);

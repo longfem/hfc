@@ -35,23 +35,60 @@ static void getprg(HttpConn *conn) {
 } 
 /*制表准备工作*/
 static void maketable(HttpConn *conn) { 
-	int i = 0, j = 0, prgindex = 0;
-	char str[5] = {0};
+	int i = 0, j = 0, pos = 0, outprglen = 0, prgindex = 0;
+	char str[6] = {0};
 	char idstr[4] = {0};
+	ChannelProgramSt *pst = NULL;
+	ChannelProgramSt *outpst = NULL;
+	Dev_prgInfo_st *inprg = NULL;
+	Dev_prgInfo_st *outprg = NULL;
+	
+	ChannelProgramSt *testoutpst = NULL;
+	Dev_prgInfo_st *testoutprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	//提取要制表的节目信息
 	for(i=0; i<clsProgram._intChannelCntMax; i++){
-		sprintf(str, "inCh%d", i);
-		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){		
-			for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
-				sprintf(idstr, "id%d", i);
-				prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
-				printf("===ch===>>>>%d======index=====>>>%d\n", i, prgindex);	
+		sprintf(str, "inCh%d", i+1);				
+		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){	
+			list_get(&(clsProgram.outPrgList), pos, &outpst);
+			if(outpst != NULL){
+				outprglen = list_len(&(outpst->prgNodes));
+				//释放输出通道占用的节目内存
+				if(0 != outprglen){
+					for(j=0; j< outprglen; j++){
+						list_get(&(outpst->prgNodes), j, &outprg);
+						if(outprg != NULL)
+							free(outprg);
+					}
+				}
 			}
+			//获取输入通道信息
+			list_get(&(clsProgram.inPrgList), i, &pst);
+			//加入输出通道列表
+			outpst->channelId = i+1;
+			//memcpy(outpst, pst, sizeof(ChannelProgramSt));
+			//加入输出节目信息
+			for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
+				sprintf(idstr, "id%d", j);
+				prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
+				//printf("===ch===>>>>%d======index=====>>>%d\n", i+1, prgindex);
+				list_get(&(pst->prgNodes), prgindex-1, &inprg);	
+				outprg = malloc(sizeof(Dev_prgInfo_st));
+				memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));
+				list_append(&(outpst->prgNodes), outprg);				
+			}
+			pos++;
+			if(pos >=  clsProgram._outChannelCntMax){
+				//制表超过最大允许通道数，后面的忽略
+				break;
+			}		
 		}
 	}	
 	
-	printf("===%s===>>>>%s\n", espGetQueryString(conn), mprGetJson(mprGetJsonObj(jsonparam, "inCh2" ), "id1"));	
+	list_get(&(clsProgram.outPrgList), 0, &testoutpst);
+	list_get(&(testoutpst->prgNodes), 0, &testoutprg);
+	printf("===%d===>>>>%d\n", testoutprg->prgNum, testoutprg->chnId);	
+	
 	render("");
     
 } 
@@ -68,6 +105,7 @@ static void espinit() {
 	//全局变量初始化
 	clsProgram._outChannelCntMax = 2;
 	clsProgram._intChannelCntMax = 8;
+	clsProgram._pmtMaxCnt = 29;
 	clsProgram.prgNum_min = 1;
 	clsProgram.prgPid_min = 0x100;
 	clsProgram.prgPid_max = 0xfff;
@@ -83,6 +121,7 @@ static void espinit() {
 	for(i=0; i<clsProgram._outChannelCntMax; i++){
 		pst = malloc(sizeof(ChannelProgramSt));
 		memset(pst, 0, sizeof(ChannelProgramSt));
+		pst->channelId = i + 1;
 		list_append(&(clsProgram.outPrgList), pst);
 	}	
 	printf("======>>>>esp init!!!!!!!\n");
