@@ -27,18 +27,18 @@ int getPrgramInfo(char *ip, int inChn, int prgNo, unsigned char * result, int * 
     sendbuf[5]=(unsigned char)prgNo;
 
     for(i=0;i<6;i++)
-    printf("%x ", sendbuf[i]);
+   //printf("%x ", sendbuf[i]);
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 6, buf, &rlen);
     
-    printf("\n####Recive Convert getPrgramInfo nums=[%d]\n",rlen );
+    //printf("\n####Recive Convert getPrgramInfo nums=[%d]\n",rlen );
    
     if( rlen > 6 ){
        
         //0 auto 1 manual
-        printf("\n###11111#R\n");
+        //printf("\n###11111#R\n");
         memcpy(result, buf, rlen);
-        printf("\n###112221#R\n");
+       // printf("\n###112221#R\n");
         *reslen =  rlen;
         return *reslen;
     }

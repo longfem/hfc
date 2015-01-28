@@ -30,13 +30,13 @@ int getPrgCnt(char *ip, int inChn,  int * result)
 
     communicate(ip, sendbuf, 6, buf, &rlen);
     
-    printf("\n####Recive Convert getPrgCnt nums=[%d]\n",rlen );
+    //printf("\n####Recive Convert getPrgCnt nums=[%d]\n",rlen );
    
     if( 7 == rlen ){
        
         //0 auto 1 manual      
         *result = (int)buf[6]; 
-        printf("okkkkkkkkkkkkkkkkkkkkkkkk\n"); 
+       // printf("okkkkkkkkkkkkkkkkkkkkkkkk\n"); 
         return *result;
     }
 
