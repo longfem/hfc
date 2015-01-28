@@ -35,7 +35,7 @@ static void getprg(HttpConn *conn) {
 } 
 /*制表准备工作*/
 static void maketable(HttpConn *conn) { 
-	int i = 0, j = 0, pos = 0, outprglen = 0, prgindex = 0;
+	int i = 0, j = 0, k = 0,cm = 0, pos = 0, outprglen = 0, prgindex = 0;
 	char str[6] = {0};
 	char idstr[4] = {0};
 	ChannelProgramSt *pst = NULL;
@@ -52,10 +52,12 @@ static void maketable(HttpConn *conn) {
 		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){	
 			list_get(&(clsProgram.outPrgList), pos, &outpst);
 			if(outpst != NULL){
-				outprglen = list_len(&(outpst->prgNodes));
+				if(list_len(&(outpst->prgNodes)) !=0){					
+					freePrograms(&outpst->prgNodes);
+				}				
+				/* outprglen = list_len(&(outpst->prgNodes));
 				//释放输出通道占用的节目内存
 				if(0 != outprglen){
-					printf("-----%d-->>\n", pos);
 					for(j=0; j< outprglen; j++){
 						list_get(&(outpst->prgNodes), j, &outprg);
 						if(outprg != NULL){
@@ -63,7 +65,7 @@ static void maketable(HttpConn *conn) {
 							outprg = NULL;
 						}
 					}
-				}
+				} */
 			}
 			list_init(&(outpst->prgNodes));
 			//获取输入通道信息
@@ -78,8 +80,50 @@ static void maketable(HttpConn *conn) {
 				//printf("===ch===>>>>%d======index=====>>>%d\n", i+1, prgindex);
 				list_get(&(pst->prgNodes), prgindex-1, &inprg);	
 				outprg = malloc(sizeof(Dev_prgInfo_st));
-				memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));
-				list_append(&(outpst->prgNodes), outprg);				
+				memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));				
+				//pmt
+				outprg->pmtDesList = malloc(outprg->pmtDesListLen * sizeof(Commdes_t) );
+                Commdes_t *pmtDesInfo = outprg->pmtDesList;
+				Commdes_t *inpmtDesInfo = inprg->pmtDesList;
+				for (k = 0; k < outprg->pmtDesListLen; k++)
+                {  
+					memcpy(pmtDesInfo, inpmtDesInfo, sizeof(Commdes_t) );
+					pmtDesInfo++;
+					inpmtDesInfo++;
+                }
+				//stream data
+				outprg->pdataStreamList = malloc(outprg->pdataStreamListLen * sizeof(DataStream_t));
+                DataStream_t *pdataStreamInfo = outprg->pdataStreamList;
+				DataStream_t *inpdataStreamInfo = inprg->pdataStreamList;
+				for (k = 0; k < outprg->pdataStreamListLen; k++)
+                {  
+					memcpy(pdataStreamInfo, inpdataStreamInfo, sizeof(DataStream_t) );
+                    pdataStreamInfo->desNode = malloc(pdataStreamInfo->desNodeLen * sizeof(Commdes_t));                    
+                    Commdes_t *pdataStreamDesInfo = pdataStreamInfo->desNode;
+					Commdes_t *inpdataStreamDesInfo = inpdataStreamInfo->desNode;
+					for (cm = 0; cm < pdataStreamInfo->desNodeLen; cm++)
+					{ 
+						memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
+						pdataStreamDesInfo++;
+						inpdataStreamDesInfo++;
+					}
+					pdataStreamInfo++;
+					inpdataStreamInfo++;
+                }
+				//SDT 描述符
+                outprg->psdtDesList = malloc(outprg->psdtDesListLen * sizeof(Commdes_t));
+                Commdes_t *psdtDesInfo = outprg->psdtDesList;
+				Commdes_t *inpsdtDesInfo = inprg->psdtDesList;
+				for (k = 0; k < outprg->psdtDesListLen; k++)
+                { 					
+					memcpy(psdtDesInfo, inpsdtDesInfo, sizeof(Commdes_t) );
+					psdtDesInfo->data = malloc(inpsdtDesInfo->dataLen);
+					memcpy(psdtDesInfo->data, inpsdtDesInfo->data, inpsdtDesInfo->dataLen);
+					psdtDesInfo++;
+					inpsdtDesInfo++;
+                }
+				
+				list_append(&(outpst->prgNodes), outprg);
 			}
 			pos++;
 			if(pos >=  clsProgram._outChannelCntMax){

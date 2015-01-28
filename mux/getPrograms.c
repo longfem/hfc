@@ -107,9 +107,10 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     int pmtDesDataLen = buf[iAddr];
 					iAddr += 1; 
                     pmtDesInfo->dataLen = pmtDesDataLen;                    
-                    pmtDesInfo->data = malloc(pmtDesDataLen);                    
-                    iAddr += pmtDesDataLen;
-					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen);                    
+                    pmtDesInfo->data = malloc(pmtDesDataLen); 
+                    
+					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen); 
+					iAddr += pmtDesDataLen;					
                     pmtDesInfo++;
                 }
 
