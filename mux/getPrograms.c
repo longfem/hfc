@@ -22,13 +22,14 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     int iPmtCntIndex = 1;
     unsigned short itmp;
 	int iAddr = 0;
+    int jtmp=0;
     Dev_prgInfo_st *ptmpPrgInfo = NULL;
 
     //getProCnt
     int result=0;
     int prgCnt = getPrgCnt(ip, inChn, &result);
 
-   // printf("prgCnt=%d\n", prgCnt);
+    printf("prgCnt=%d\n", prgCnt);
 
     if (prgCnt > 0)
     {
@@ -99,17 +100,19 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 ptmpPrgInfo->pmtDesList = malloc(pmtDesCnt * sizeof(Commdes_t) );
                 int desCntIndex = 1;
                 Commdes_t *pmtDesInfo = ptmpPrgInfo->pmtDesList;
+
+                
                 for (i = 0; i < pmtDesCnt; i++)
                 {                    
                     pmtDesInfo->index = desCntIndex++;
                     pmtDesInfo->tag = buf[iAddr];
                     iAddr += 1; 
-                    int pmtDesDataLen = buf[iAddr];
-					iAddr += 1; 
+                    int pmtDesDataLen = buf[iAddr];					
                     pmtDesInfo->dataLen = pmtDesDataLen;                    
-                    pmtDesInfo->data = malloc(pmtDesDataLen);                    
-                    iAddr += pmtDesDataLen;
-					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen);                    
+                    iAddr += 1;                    
+                    pmtDesInfo->data = malloc(pmtDesDataLen);                                                           
+					memcpy(pmtDesInfo->data, buf+iAddr, pmtDesDataLen); 
+                    iAddr += pmtDesDataLen;                   
                     pmtDesInfo++;
                 }
 
@@ -120,6 +123,9 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 				ptmpPrgInfo->pdataStreamListLen = dataStreamCnt;
                 ptmpPrgInfo->pdataStreamList = malloc(dataStreamCnt * sizeof(DataStream_t));
                 DataStream_t *pdataStreamInfo = ptmpPrgInfo->pdataStreamList;
+
+                printf("iAddr=%d dataStreamCnt=%d\n", iAddr, pmtDesCnt);
+
                 for (i = 0; i < dataStreamCnt; i++)
                 {                    
                     pdataStreamInfo->inChn = ptmpPrgInfo->chnId;                    
@@ -139,6 +145,9 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     pdataStreamInfo->desNode = malloc(dataStreamDesCnt * sizeof(Commdes_t));                    
                     Commdes_t *pdataStreamDesInfo = pdataStreamInfo->desNode;
 					int subDesCntIndex = 1;
+
+                    int k=0;
+                    printf("dataStreamDesCnt=%d, iAddr=%d\n", dataStreamDesCnt , iAddr);
                     for (j = 0; j < dataStreamDesCnt; j++)
                     {                        
                         pdataStreamDesInfo->index = subDesCntIndex++;
@@ -149,6 +158,15 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 						pdataStreamDesInfo->dataLen = dataStreamDesDataLen;
                         pdataStreamDesInfo->data = malloc(dataStreamDesDataLen);                        
                         memcpy(pdataStreamDesInfo->data, buf+iAddr, dataStreamDesDataLen); 
+
+                        // for(k=0;k < 40; k++)
+                        //     printf("pmt[%d]= [%d]\n", k, buf[k]);
+
+                        printf("dat=[%d], iAddr=%d  dataStreamDesDataLen = %d\n", buf[iAddr] , iAddr, dataStreamDesDataLen);
+
+                        for(k=0; k< dataStreamDesDataLen; k++)
+                            printf("datastreamdata[%d]=%d",k, pdataStreamDesInfo->data[k]);
+
 						iAddr += dataStreamDesDataLen;
 						pdataStreamDesInfo++;
                     }                    

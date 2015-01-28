@@ -34,5 +34,9 @@
 	}ErrorTypeEm;
 
 
+	typedef enum PsiTableType 
+	{
+		pat = 1, pmt = 2, sdt = 3, cat = 4, nit = 5
+	}PsiTableType;
 
 #endif 

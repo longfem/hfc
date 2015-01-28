@@ -1,91 +1,124 @@
 
 #include <stdio.h>
+#include "EnumDef.h"
 #include "datastructdef.h"
 #include "communicate.h"
 #include "clsMuxSend.h"
 
 extern ClsProgram_st clsProgram;
+extern ClsParams_st *pdb;
+ClsMux_st *pclsMux;
 int o_selectedPrgCntMax = 29;
 
-// unsigned char SendTable(int outChnId)
-// {
-// 	unsigned char rslt = true;
-// 	int iChn = outChnId - 1;
+unsigned char SendTable(int outChnId)
+{
+	unsigned char rslt = 1;
+	int iChn = outChnId - 1;
+	enum PsiTableType psiType;
 
-// 	if (table_pat[iChn] != null && db.valueTree.outChnArray[iChn].isNeedSend_pat)
-// 	{
-// 		byte[] sendTable = (byte[])table_pat[iChn];
-// 		if (SendTable_psi(outChnId, PsiTableType.pat, sendTable, sendTable.Length) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	else
-// 	{
-// 		if (SendTable_psi(outChnId, PsiTableType.pat, null, 0) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	if (db.valueTree.outChnArray[iChn].isNeedSend_pmt && 
-// 		table_pmtList[iChn] != null 
-// 		&& table_pmtList[iChn].Count > 0
-// 		&& table_pmtList[iChn][0] != null)
-// 	{
-// 		if (SendTable_pmt(outChnId, table_pmtList[iChn]) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	else
-// 	{
-// 		if (SendTable_pmt(outChnId, null) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	if (table_sdt[iChn] != null && db.valueTree.outChnArray[iChn].isNeedSend_sdt)
-// 	{
-// 		byte[] sendTable = (byte[])table_sdt[iChn];
-// 		if (SendTable_psi(outChnId, PsiTableType.sdt, sendTable, sendTable.Length) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	else
-// 	{
-// 		if (SendTable_psi(outChnId, PsiTableType.sdt, null, 0) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	if (table_cat[iChn] != null && db.valueTree.outChnArray[iChn].isNeedSend_cat)
-// 	{
-// 		byte[] sendTable = (byte[])table_cat[iChn];
-// 		if (SendTable_psi(outChnId, PsiTableType.cat, sendTable, sendTable.Length) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	else
-// 	{
-// 		if (SendTable_psi(outChnId, PsiTableType.cat, null, 0) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	if (table_nit[iChn] != null && db.valueTree.outChnArray[iChn].isNeedSend_nit)
-// 	{
-// 		byte[] sendTable = (byte[])table_nit[iChn];
-// 		if (SendTable_psi(outChnId, PsiTableType.nit, sendTable, sendTable.Length) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	else
-// 	{
-// 		if (SendTable_psi(outChnId, PsiTableType.nit, null, 0) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 	}
-// 	//	if (rslt)
-// 	{
-// 		if (SendTable_psi_finish(outChnId) != ErrorTypeEm.ok)
-// 			rslt = false;
-// 		else
-// 			rslt = SendPidMap(outChnId);
-// 	}
+	BufferUn_st  *pbuff = NULL;
+	if(NULL == pclsMux || NULL == pdb){
+		printf("pclsMux== null error.\n");
+		return 0;
+	}
+
+	list_get(&pclsMux->table_pat, iChn, &pbuff); 
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
+	{
+		psiType = pat;
+		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+	}
+	else
+	{
+		psiType = pat;
+		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
+			rslt = 0;
+	}
+
+
+	list_t *table_pmt=NULL;
+	int table_pmtListLen = list_len(&pclsMux->table_pmtList);
+	list_get(&pclsMux->table_pmtList, iChn, &table_pmt);
 
 	
-// 	return rslt;
-// }
+	int table_pmtLen = 0;
+	if(NULL!= table_pmt){
+		table_pmtLen = list_len(table_pmt);
+	}
+
+	if (pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt && 
+		table_pmt != NULL 
+		&& table_pmtListLen > 0
+		&& table_pmtLen != NULL)
+	{
+		if (SendTable_pmt(outChnId, table_pmt) != ok)
+			rslt = 0;
+	}
+	else
+	{
+		if (SendTable_pmt(outChnId, NULL) != ok)
+			rslt = 0;
+	}
+
+	pbuff = NULL;	
+	list_get(&pclsMux->table_sdt, iChn, &pbuff); 
+	psiType = sdt;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
+	{					
+		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+	}
+	else
+	{		
+		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
+			rslt = 0;
+	}
+	pbuff = NULL;	
+	list_get(&pclsMux->table_cat, iChn, &pbuff); 
+	psiType = cat;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
+	{		
+		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+	}
+	else
+	{
+		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
+			rslt = 0;
+	}
+
+	pbuff = NULL;	
+	list_get(&pclsMux->table_nit, iChn, &pbuff); 
+	psiType = nit;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit)
+	{
+		
+		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+	}
+	else
+	{
+		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
+			rslt = 0;
+	}
+	//	if (rslt)
+	// {
+	// 	if (SendTable_psi_finish(outChnId) != ok)
+	// 		rslt = 0;
+	// 	else
+	// 		rslt = SendPidMap(outChnId);
+	// }
+
+	
+	return rslt;
+}
 
 // unsigned char SendPidMap(int outChnId)
 // {
 // 	bool rslt = true;
 
-// 	if (SendTable_PidMap(outChnId, clsProgram.PrgAVMuxList) != ErrorTypeEm.ok)
+// 	if (SendTable_PidMap(outChnId, clsProgram.PrgAVMuxList) != ok)
 // 		rslt = false;
 // 	if (DirectlyTransmit_sendMap(outChnId, clsProgram.outPrgList[outChnId - 1].dtPidList) != ErrorTypeEm.ok)
 // 		rslt = false;
@@ -135,16 +168,16 @@ void SendMux(int outChnId)
 		isNeedDesInfoSend = 0;
 		return;
 	}
-    // unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(outChnId, !db.valueTree.outChnArray[outChnId - 1].isManualMapMode);
-    // if (!sendRslt)
-    // {	    
-	   //  isNeedDesInfoSend = 0;
-	   //  return;
-    // }
-	// SendTable(outChnId);
+    unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
+    if (!sendRslt)
+    {	    
+	    isNeedDesInfoSend = 0;
+	    return;
+    }
+	SendTable(outChnId);
 	// if (isNeedDesInfoSend)
 	// {
-	// 	//MakeOutputBytesAndSend(outChnId);
+	// 	MakeOutputBytesAndSend(outChnId);
 	// }
 
 	// RecordInputChnUseStatus(outChnId);
