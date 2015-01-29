@@ -11,7 +11,8 @@
 #include "esp.h" 
 #include "communicate.h"
 #include "getPrograms.h"
-
+#include "clsParams.h"
+#include "getOutPrograms.h"
 extern ClsProgram_st clsProgram;
 
 static char* substr(const char*str,unsigned start, unsigned end)
@@ -33,6 +34,17 @@ static void getprg(HttpConn *conn) {
 	render(pProg);
     
 } 
+
+static void getoutprg(HttpConn *conn) { 
+    char ip[16] = "192.168.1.134";
+	int outChn = 0;
+	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
+		getOutPrograms(ip, outChn);
+	} 
+	render("%d", clsProgram._intChannelCntMax);
+    
+} 
+
 /*制表准备工作*/
 static void maketable(HttpConn *conn) { 
 	int i = 0, j = 0, k = 0,cm = 0, pos = 0, outprglen = 0, prgindex = 0;
@@ -172,6 +184,8 @@ static void espinit() {
 		pst->channelId = i + 1;
 		list_append(&(clsProgram.outPrgList), pst);
 	}	
+	
+	Init(clsProgram._outChannelCntMax);
 	printf("======>>>>esp init!!!!!!!\n");
 }
 
@@ -182,6 +196,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineBase(route, common);
 	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
+	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
     
 #if SAMPLE_VALIDATIONS

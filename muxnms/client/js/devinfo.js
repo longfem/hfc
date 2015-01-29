@@ -255,27 +255,45 @@ function devinfo_output(){
 		$("#channel").fancytree("getTree").reload();
 		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
 		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
-		for(var i=1;i<9; i++){
-			$.ajax({
-				 type: "GET",
-				 async:false,
-				 url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
-				// data: {ip:"192.168.1.134", inch:2},
-				 dataType: "json",
-				 success: function(data){
-					data = JSON.stringify(data).replace('\\','');
-					//alert("-----"+data);
-					var treeData1 = JSON.parse(data);				
-					node.addChildren(treeData1);
-				 },    
-				 error : function(err) {    
-					  // view("异常！");   
-					var xxx = err;
-					  alert("异常！====="+JSON.stringify(err));    
-				 }   
-			});
-		}
-		
+		var _intChannelCntMax = 0;//设备输入通道数
+		//获取输出通道信息
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/getoutprg",
+			// data: {ip:"192.168.1.134", inch:2},
+			 dataType: "text",
+			 success: function(data){
+				_intChannelCntMax = Number(data);
+			 },    
+			 error : function(err) {    
+				  // view("异常！");   
+				var xxx = err;
+				  alert("异常！====="+JSON.stringify(err));    
+			 }   
+		});
+		if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
+			for(var i=1;i<_intChannelCntMax+1; i++){
+				$.ajax({
+					 type: "GET",
+					 async:false,
+					 url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
+					// data: {ip:"192.168.1.134", inch:2},
+					 dataType: "json",
+					 success: function(data){
+						data = JSON.stringify(data).replace('\\','');
+						//alert("-----"+data);
+						var treeData1 = JSON.parse(data);				
+						node.addChildren(treeData1);
+					 },    
+					 error : function(err) {    
+						  // view("异常！");   
+						var xxx = err;
+						  alert("异常！====="+JSON.stringify(err));    
+					 }   
+				});
+			}
+		}	
     });
 	
 	$( "#output-table" ).button({
