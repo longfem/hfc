@@ -5,6 +5,7 @@
 #include "communicate.h"
 #include "clsMuxprgInfoGet.h"
 
+extern ClsParams_st *pdb;
 
 ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid)
 {
@@ -33,7 +34,7 @@ ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid)
           // for(i=0;i<slen;i++)
           //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);    
               
-        *outPid = ( buf[6]<<8| buf[7]) & 0xffff; 
+        *outPid = ( buf[7]<<8| buf[6]) & 0xffff;       
         
         if (*outPid < 0 || *outPid > 0x1fff)
 			*outPid = 0x100;
@@ -47,6 +48,49 @@ ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid)
 	return res;
 	
 }
+
+
+int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
+{
+
+    unsigned char buf[20];
+    int i = 0;
+    unsigned char sendbuf[20];
+    int slen=0;
+  
+    //get call channal signal status
+    enum ErrorTypeEm res;
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x21;
+    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[4]=0x01;
+    sendbuf[5]=0x01;
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 6, buf, &slen);
+    
+    //printf("\n####Recive GetChannelOutputMaxRate receive nums=[%d]\n", slen );
+    if( 9 == slen ){
+          // for(i=0;i<slen;i++)
+          //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
+              
+        *outRate = ( buf[8]<<24| buf[7]<<8 | buf[6]) & 0xffffff;       
+
+         res = ok;
+
+    }
+    else{
+        *outRate = 0;
+        res = error;
+    } 
+        
+
+    return res;    
+}
+
+
 
 ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
 {
@@ -779,4 +823,33 @@ unsigned char SendOutputPrgInfo(int outChn, unsigned char *muxInfoBytes, int len
     //         return false;
     // }
     return 1;
+}
+
+
+// 获取并记录码率、表示能到数据库
+void LoadBitrateAndTableEnable(char *ip, int iChn)
+{
+    if(NULL == pdb){
+        printf("pdb not init id prggetinfo!\n");
+        return ;
+    }
+
+    unsigned int outrate = 0;
+    GetChannelOutputMaxRate(ip, iChn + 1, &outrate);
+    
+    unsigned int rate = pdb->pvalueTree->poutChnArray[iChn].outputRate = outrate;
+
+
+    unsigned int tableEnableFlag = 0;
+    if (GetTableEnableFlag(ip, iChn + 1, &tableEnableFlag) != ok)
+    {
+        printf("error\n" );
+        tableEnableFlag = 0;
+    }
+
+    pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat = (tableEnableFlag & 0x1) > 0;
+    pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt = (tableEnableFlag & 0x2) > 0;
+    pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt = (tableEnableFlag & 0x4) > 0;
+    pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat = (tableEnableFlag & 0x8) > 0;
+    pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit = (tableEnableFlag & 0x10) > 0;
 }

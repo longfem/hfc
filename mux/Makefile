@@ -29,13 +29,15 @@ OBJ=  tcpclient.o list.o communicate.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
-clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o
+clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
+getOutPrograms.o
 
 LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
-clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o
+clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
+getOutPrograms.o
 
 .PHONY: all clean distclean
 
@@ -57,6 +59,7 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgCnt.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrgramInfo.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c getPrograms.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getOutPrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c freePrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c sendPrograms.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxOutCh.c	
@@ -68,6 +71,7 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsProgram.c	
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsParams.c			
 	$(CC) $(CFLAGS) $(IFLAGS) -c getBaseJson.c
+	
 
 	
 	

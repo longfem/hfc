@@ -12,9 +12,11 @@
 #include "getOutPrograms.h"
 
 extern ClsParams_st *pdb;
+extern ClsProgram_st clsProgram;
 // ------ 获取输出通道信息 -----
-int getOutPrograms(char *ip, int outChn, list_t *prginfolist)
+int getOutPrograms(char *ip, int outChn)
 {
+
 
 	if(pdb == NULL){
 		printf("pdb had not inited!\n");
@@ -23,22 +25,30 @@ int getOutPrograms(char *ip, int outChn, list_t *prginfolist)
 
 	enum ErrorTypeEm res;
 	unsigned int  tmpShort = 0;
-	if(GetOutChnTSID(i + 1, ref tmpShort) == ok){
-
+	if(GetOutChnTSID(ip, outChn + 1, &tmpShort) == ok){
+		pdb->pvalueTree->poutChnArray[outChn].streamId = tmpShort;
+		printf("GetOutChnTSID = %d |0x %x\n", tmpShort);
 	}
-	
-		pdb->pvalueTree->outChnArray[i].streamId = tmpShort;
-	if (GetOutChnNetID(i + 1, ref tmpShort) == ok)
-		pdb->pvalueTree->outChnArray[i].networkId = tmpShort;
-	if (GetOutChnOrgNetID(i + 1, ref tmpShort) == ok)
-		pdb->pvalueTree->outChnArray[i].oringal_networkid = tmpShort;
-	byte tmpByte = 0;
-	if (GetOutChnTableVer(i + 1, ref tmpByte) == ok)
-		pdb->pvalueTree->outChnArray[i].version = tmpByte;
-	if (GetPidOffset(i + 1, ref tmpShort) == ok)
-		clsProgram.m_autoMuxStartPid[i] = tmpShort;
+	if (GetOutChnNetID(ip, outChn + 1, &tmpShort) == ok){
+		pdb->pvalueTree->poutChnArray[outChn].networkId = tmpShort;
+		printf("GetOutChnNetID = %d |0x %x\n", tmpShort);
+	}
+	if (GetOutChnOrgNetID(ip, outChn + 1, &tmpShort) == ok){
+		pdb->pvalueTree->poutChnArray[outChn].oringal_networkid = tmpShort;
+		printf("GetOutChnOrgNetID = %d |0x %x\n", tmpShort);
+	}
+	unsigned char tmpByte = 0;
+	if (GetOutChnTableVer(ip, outChn + 1, &tmpByte) == ok){
+		pdb->pvalueTree->poutChnArray[outChn].version = tmpByte;
+		printf("GetOutChnTableVer = %d |0x %x\n", tmpByte);
+	}
+	if (GetPidOffset(ip, outChn + 1, &tmpShort) == ok){
+		clsProgram.m_autoMuxStartPid[outChn] = tmpShort;
+		printf("GetPidOffset = %d |0x %x\n", tmpShort);
+	}
 	// ---- 获取表激活命令 ----
-	LoadBitrateAndTableEnable(outChn);
+	LoadBitrateAndTableEnable(ip, outChn);
+
 
 	return 0;
 }

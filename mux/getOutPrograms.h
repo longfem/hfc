@@ -6,6 +6,6 @@
 #ifndef _GET_OUTPUT_PROGRAMS_H_
 #define _GET_OUTPUT_PROGRAMS_H_
 
-int getOutPrograms(char *ip, int outChn, list_t *prginfolist);
+int getOutPrograms(char *ip, int outChn);
 	
 #endif 
