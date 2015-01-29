@@ -23,4 +23,17 @@
         data: [
         ],
     },
+    'User': {
+        hints: {
+            ncols: 3
+        },
+        schema: {
+            'id': { type: 'int', autoinc: true, index: true, key: true },
+            'username': { type: 'string' },
+            'password': { type: 'string' },
+        },
+        data: [
+            [ 1,'root','root',],
+        ],
+    },
 }
