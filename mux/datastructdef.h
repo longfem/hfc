@@ -269,7 +269,7 @@ typedef struct  ClsProgram_t
 	 int prgPid_max; // = 0xfff;
 	 int subPrgPid_min; // = 0x1000;
 	 int subPrgPid_max; // = 0x1ff0;
-	// int[] m_autoMuxStartPid; // 自动映射起始PID
+	 int m_autoMuxStartPid[]; // 自动映射起始PID
 	// ClsMux muxer = null;
 	// ArrayList[] PrgPmtMuxList = null; // MuxPrgInfoGet_st
 	// public ArrayList[] PrgAVMuxList = null;  // MuxPidInfo_st , 节目映射PID, 数组以输出通道为序

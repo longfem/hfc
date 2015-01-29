@@ -20,10 +20,11 @@
 #include "cJSON.h"
 #include "devinfo.h"
 
+#include "clsParams.h"
+#include "getOutPrograms.h"
 
 
 ClsProgram_st clsProgram;
-
 
 
 int main(int argc,char *argv[])
@@ -47,24 +48,28 @@ int main(int argc,char *argv[])
     // printf("searched=[%02x]\n", csearch);
 
 /////////////////////case programs///////////
-    list_t  prginfolist ;    
+    // list_t  prginfolist ;    
         
-    getPrograms(ip, 2, &prginfolist);
-    if(ret < 0){
-        printf("getPrograms error\n");
-        return -1;
-    }
-    printf("call getPrograms  prgNum = [%0x]\n",  ((Dev_prgInfo_st *)(prginfolist.head->data))->prgNum);
-    freePrograms(&prginfolist);
-    printf("call freePrograms\n");
+    // getPrograms(ip, 2, &prginfolist);
+    // if(ret < 0){
+    //     printf("getPrograms error\n");
+    //     return -1;
+    // }
+    // printf("call getPrograms  prgNum = [%0x]\n",  ((Dev_prgInfo_st *)(prginfolist.head->data))->prgNum);
+    // freePrograms(&prginfolist);
+    // printf("call freePrograms\n");
 
 ////////////////////case end programs//////////
 
+/////////////////// getoutprograms case/////////////
+
+
+    Init(2);
+    ret = getOutPrograms(ip, 0);
 
 
 
-
-
+////////////////get out programs end//////////////
 ///////////////////////////case devinfo////////////////////////
 
 // unsigned int  outType=0;
