@@ -92,18 +92,18 @@ install:
 	mv libtcpclient.so $(LIB_PATH)/
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
-	sudo cp -a $(BUILD_PATH) /home/nfs/source
-	sudo chown -R root:root /home/nfs/source/build
+	#sudo cp -a $(BUILD_PATH) /home/nfs/source
+	#sudo chown -R root:root /home/nfs/source/build
 
 
 clean:
 	rm -f *.o tcpclient
 	rm -rf $(BUILD_PATH)
 	
-	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
+	#sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 
 distclean:
 	rm -f *.o tcpclient
 	rm -rf $(BUILD_PATH)
-	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
+	#sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 
