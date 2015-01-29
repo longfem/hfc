@@ -4,6 +4,9 @@
 #ifndef _DATASTRUCT_DEFINE_H_
 #define _DATASTRUCT_DEFINE_H_
 
+#define FALSE   0
+#define TRUE    1
+
 typedef struct Commdes_st
 {
 	int userNew; // 用户自定义内容
@@ -183,7 +186,7 @@ typedef struct ChannelProgramt
 
 }patPrg_t;
 
- struct pat_senction_st
+typedef struct pat_senction_t
 {
 
 
@@ -200,9 +203,9 @@ typedef struct ChannelProgramt
 	 int last_section_number; // 8b
 	 patPrg_t* p_first_program;
 	 int crc32; // 32b
-};
+}pat_senction_st;
 
- struct pmt_senction_st
+typedef struct pmt_senction_t
  {
 	  int table_id; // 8b
 	  int section_syntax_indicator; // 1b
@@ -228,7 +231,8 @@ typedef struct ChannelProgramt
 	 int pdataStreamListLen;
 	  DataStream_t *pdataStreamList; // DataStream_st
 	  int crc32; // 32b
- };
+
+}pmt_senction_st;
 
 
 typedef struct table_pmtList
