@@ -138,6 +138,7 @@ typedef struct Database_t
 	unsigned char isPrgInfoHexPid;
 	unsigned char isConnectPid;
 	unsigned char isLogEnable;
+	int poutChnArrayLen;
 	DatabaseOutputChannel_st *poutChnArray;
 
 	//string net_ipAddrStr;
@@ -170,6 +171,86 @@ typedef struct ChannelProgramt
 	list_t userPrgNodes; // struct User_prgInfo_t
 	list_t dtPidList; // MuxPidInfo_st , 透传表, 数组以输出通道为序
 }ChannelProgramSt;
+
+
+
+ typedef struct patPrg_st
+{
+	 int program_number; // 16b
+	 int reserved; // 3b
+	 int pid; // 13b	  if(program_number == 0) pid == networkId;
+	 struct patPrg_st * p_next;
+
+}patPrg_t;
+
+ struct pat_senction_st
+{
+
+
+	 int table_id; // 8b
+	 int section_syntax_indicator; // 1b
+	 int flag_0; // 1b
+	 int reserved0; // 2b
+	 int section_length; // 12b
+	 int transport_stream_id; // 16b
+	 int reserved1; // 2b
+	 int version_number; // 5b
+	 int current_next_indicator; // 1b
+	 int section_number; // 8b
+	 int last_section_number; // 8b
+	 patPrg_t* p_first_program;
+	 int crc32; // 32b
+};
+
+ struct pmt_senction_st
+ {
+	  int table_id; // 8b
+	  int section_syntax_indicator; // 1b
+
+	  int flag_0; // 1b
+	  int reserved0; // 2b
+	  int section_length; // 12b
+	  int program_number; // 16b
+
+	 int reserved1; // 2b
+	 int version_number; // 5b
+	 int current_next_indicator; // 1b
+	 int section_number; // 8b
+	 int last_section_number; // 8b
+
+	 int reserved2; // 3b
+	 int pcrPid; // 13b
+	 int reserved3; // 4b
+	 int program_info_length; // 12b
+	 int pmtDesListLen;
+	 Commdes_t *pmtDesList; // Commdes_st
+
+	 int pdataStreamListLen;
+	  DataStream_t *pdataStreamList; // DataStream_st
+	  int crc32; // 32b
+ };
+
+
+typedef struct table_pmtList
+{
+	list_t table_pmt; 
+}table_pmtList_st;
+
+typedef struct BufferUn
+{
+	int bufLen;
+	unsigned char *pbuf;
+}BufferUn_st;
+
+typedef struct ClsMux
+{	
+	list_t table_pat;
+	list_t table_pmtList; // byte[]
+	list_t table_sdt;
+	list_t table_cat;
+	list_t table_nit;
+}ClsMux_st;
+
 
 typedef struct  ClsProgram_t
 {
