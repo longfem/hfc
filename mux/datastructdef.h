@@ -244,11 +244,11 @@ typedef struct BufferUn
 
 typedef struct ClsMux
 {	
-	list_t table_pat;
-	list_t table_pmtList; // byte[]
-	list_t table_sdt;
-	list_t table_cat;
-	list_t table_nit;
+	list_t table_pat; //BufferUn_st*
+	list_t table_pmtList; // list_t*
+	list_t table_sdt; //BufferUn_st*
+	list_t table_cat; //BufferUn_st*
+	list_t table_nit;//BufferUn_st*
 }ClsMux_st;
 
 
