@@ -9,11 +9,11 @@
     "import": true,
     "app": {
         "http": {
-            "database": "default",
+            "database": "mdb://muxnms.mdb",
             "serverPrefix": "/do",
-            "auth": {
-                "store": "app"
-            },
+			indexes: [
+				'login.esp'
+			],
             "routes": "esp-html-mvc",
             "xsrf": true
         },

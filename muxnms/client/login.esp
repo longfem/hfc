@@ -9,15 +9,15 @@
 <body>
     <div id="wrapper">	
 		<div id="login" class="animate form">
-			<form  action="mysuperscript.php"> 
+			<form method="post" action="do/login/check"> 
 				<h1>用户登录</h1> 
 				<p> 
 					<label for="username" class="uname" data-icon="u" > 用户名 </label>
-					<input id="username" name="username" required="required" type="text" placeholder="请输入用户名"/>
+					<input id="username" name="username" required="required" type="text" autocomplete="off" value='<%= param("username") %>' placeholder="请输入用户名"/>
 				</p>
 				<p> 
 					<label for="password" class="youpasswd" data-icon="p"> 密码 </label>
-					<input id="password" name="password" required="required" type="password" placeholder="请输入密码" /> 
+					<input id="password" name="password" required="required" type="password" autocomplete="off" value='<%= param("password") %>' placeholder="请输入密码" /> 
 				</p>
 				<p class="keeplogin"> 
 					<input type="checkbox" name="loginkeeping" id="loginkeeping" value="loginkeeping" /> 
@@ -26,6 +26,7 @@
 				<p class="login button"> 
 					<input type="submit" value="登录" /> 
 				</p>
+				<% inputSecurityToken(); %>
 			</form>
 		</div>
 		
@@ -34,7 +35,31 @@
 		<hr/>
 		<p>© Prevail Software, 2014-2024. All rights reserved.</p>
 	</div>
+	<script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript">		
+		var isremember = localStorage.getItem("remember");
+		if(isremember == undefined || isremember == "" || isremember == "false"){
+			localStorage.setItem("remember", false);
+			$('#password').val("");
+		}else{
+			$('#password').val(localStorage.getItem("password"));
+			$('#loginkeeping')[0].checked = true;
+		}
+		$('#username').val(localStorage.getItem("username"));
+		
+		$('#loginkeeping').click(function(){
+			isremember = $('#loginkeeping')[0].checked;
+			localStorage.setItem("username", $('#username')[0].value);
+			if(isremember){
+				localStorage.setItem("remember",true);
+				localStorage.setItem("password", $('#password')[0].value);
+			}else{
+				localStorage.setItem("remember",false);
+				localStorage.setItem("password", "");
+			}
+		});
+		
+		
 		
     </script> 
 </body>

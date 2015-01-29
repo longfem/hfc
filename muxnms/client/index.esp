@@ -97,8 +97,10 @@
 				recdata = data;
 			 },    
 			 error : function(err) {    
-				var xxx = err;
-				  alert("异常！====="+JSON.stringify(err));    
+				if(err.responseText == "login.esp"){
+					window.location = "/login.esp";
+				}
+				 //alert("异常！====="+JSON.stringify(err));    
 			 }   
 		});
 		$('.main-content').empty();
@@ -220,6 +222,19 @@
 
 		function btn_close() {
 			var userAgent = navigator.userAgent;
+			//注销				
+			$.ajax({
+				 type: "GET",
+				 async:false,
+				 url: "http://"+localip+":4000/do/login/logout",
+				 dataType: "text",
+				 success: function(data){
+					
+				 },    
+				 error : function(err) {    
+   
+				 }   
+			});
 			if (userAgent.indexOf("Firefox") != -1 || userAgent.indexOf("Presto") != -1) {
 				window.location.replace("about:blank");
 			} else {
