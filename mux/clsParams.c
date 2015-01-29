@@ -15,6 +15,7 @@ void Init(int outChannelNumMax)
 		printf("ClsParams_st had init already. don't init again.\n");
 		return;
 	}
+	pdb = malloc(sizeof(ClsParams_st));
 	pdb->channelNumMax = 0;
 	pdb->pvalueTree = malloc(sizeof(Database_st));
 

@@ -29,7 +29,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
     int result=0;
     int prgCnt = getPrgCnt(ip, inChn, &result);
 
-    printf("prgCnt=%d\n", prgCnt);
+    //printf("prgCnt=%d\n", prgCnt);
 
     if (prgCnt > 0)
     {
@@ -37,64 +37,46 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 
         for (iPrg = 0; iPrg < prgCnt; iPrg++){
             
-            
-
-           // printf("iPrg=%d\n", iPrg);
+                    
             iAddr = 0;
             memset(buf,0,sizeof(buf));
             rlen = getPrgramInfo(ip, inChn, iPrg+1, buf, &ibuflen);
             //invalid program
-        //    printf("\n###11333#R\n");
+        
             if(rlen >=0 && rlen <6) {
         //        printf("\n###1ipmt1#R\n");
              iPmtCntIndex++; continue;
              }
 			if(rlen < 0){return rlen;}
 
-		//	printf("\n###1befoer rlen=%d1#R\n", rlen);
             if(rlen > 0){
-
-
-      
+   
 				ptmpPrgInfo = malloc(sizeof(Dev_prgInfo_st));
 
-             //   printf("\n###11555555555#R\n");
                 ptmpPrgInfo->index = iPmtCntIndex++;                
 				iAddr += 4; //skip 6 header to data pointer				
-
-                //ptemp = (unsigned char *)&ptmpPrgInfo->prgNum;
-                //*ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+                
 				iAddr += 2; //n
 				ptmpPrgInfo->prgNum = buf[iAddr + 1]<<8 | buf[iAddr];//n
                 iAddr += 2;
-                
-				//ptmpPrgInfo->chnId = buf[iAddr];
+                				
 				ptmpPrgInfo->chnId = buf[iAddr]; //n
                 iAddr += 1; 
 				ptmpPrgInfo->streamId = buf[iAddr + 1]<<8 | buf[iAddr];//n
-                //ptemp = (unsigned char *)&ptmpPrgInfo->streamId;
-                //*ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1]; 
                 iAddr += 2; 
 				ptmpPrgInfo->networkId = buf[iAddr + 1]<<8 | buf[iAddr];//n
-               // ptemp = (unsigned char *)&ptmpPrgInfo->networkId;
-               // *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1]; 
-
+               
                 iAddr += 2; 
 				ptmpPrgInfo->pmtPid = buf[iAddr + 1]<<8 | buf[iAddr];//n
-               // ptemp = (unsigned char *)&ptmpPrgInfo->pmtPid;
-               // *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
-
+               
                 iAddr += 2;               
 				if (ptmpPrgInfo->pmtPid == 0xffff) continue;
 				ptmpPrgInfo->oldPcrPid = buf[iAddr + 1]<<8 | buf[iAddr];//n
-                //ptemp = (unsigned char *)&ptmpPrgInfo->oldPcrPid;
-               // *ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
                 ptmpPrgInfo->newPcrPid = ptmpPrgInfo->oldPcrPid;
                 iAddr += 2;                        
                 int pmtDesCnt = buf[iAddr];
                 iAddr += 1; 
 
-             //    printf("\n###6666666#R\n");
                 //pmt
 				ptmpPrgInfo->pmtDesListLen = pmtDesCnt;
                 ptmpPrgInfo->pmtDesList = malloc(pmtDesCnt * sizeof(Commdes_t) );
@@ -115,8 +97,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     iAddr += pmtDesDataLen;                   
                     pmtDesInfo++;
                 }
-
-			// printf("\n###7777777777776666#R\n");
+			
                 //stream data
                 int dataStreamCnt = buf[iAddr];
                 iAddr += 1;
@@ -124,7 +105,8 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 ptmpPrgInfo->pdataStreamList = malloc(dataStreamCnt * sizeof(DataStream_t));
                 DataStream_t *pdataStreamInfo = ptmpPrgInfo->pdataStreamList;
 
-                printf("iAddr=%d dataStreamCnt=%d\n", iAddr, pmtDesCnt);
+                
+
 
                 for (i = 0; i < dataStreamCnt; i++)
                 {                    
@@ -133,8 +115,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     pdataStreamInfo->streamType = buf[iAddr]; 
 					iAddr += 1;				
 					pdataStreamInfo->inPid = buf[iAddr + 1]<<8 | buf[iAddr];//n
-                    //ptemp = (unsigned char *)&pdataStreamInfo->inPid;
-                    //*ptemp++ = buf[iAddr]; *ptemp = buf[iAddr+1];
+                    
                     pdataStreamInfo->outPid = pdataStreamInfo->inPid;
 
                     iAddr += 2;
@@ -147,7 +128,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 					int subDesCntIndex = 1;
 
                     int k=0;
-                    printf("dataStreamDesCnt=%d, iAddr=%d\n", dataStreamDesCnt , iAddr);
+                    
                     for (j = 0; j < dataStreamDesCnt; j++)
                     {                        
                         pdataStreamDesInfo->index = subDesCntIndex++;
@@ -159,21 +140,13 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                         pdataStreamDesInfo->data = malloc(dataStreamDesDataLen);                        
                         memcpy(pdataStreamDesInfo->data, buf+iAddr, dataStreamDesDataLen); 
 
-                        // for(k=0;k < 40; k++)
-                        //     printf("pmt[%d]= [%d]\n", k, buf[k]);
-
-                        printf("dat=[%d], iAddr=%d  dataStreamDesDataLen = %d\n", buf[iAddr] , iAddr, dataStreamDesDataLen);
-
-                        for(k=0; k< dataStreamDesDataLen; k++)
-                            printf("datastreamdata[%d]=%d",k, pdataStreamDesInfo->data[k]);
-
+                        
 						iAddr += dataStreamDesDataLen;
 						pdataStreamDesInfo++;
                     }                    
                     pdataStreamInfo++;
                 }         
-
-			//	 printf("\n###88888888#R\n");
+			
                 // --- 节目和提供商名字 ---
                 int prgNameLen = buf[iAddr];
                 iAddr += 1;  
@@ -218,16 +191,14 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                     psdtDesInfo++;
                 }
 
-            //     printf("\n###999999999666#R\n");
+            
                 list_append(prginfolist, ptmpPrgInfo);
-
-             //    printf("\n###666610101010110#R\n");
+            
 			}
         } 
 		return 1;
     }
-
-     //printf("\n###6oooookkkkkkkkkkkkkkk#R\n");
+     
     return 0;
 }
 

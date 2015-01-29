@@ -63,28 +63,28 @@ unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSen
 }
 
 
-int MakeOutPutBytes(int outChn, unsigned char *outBytes, unsigned int outlen)
-{
-	// MemoryStream memStream = NULL;
-	// outBytes = NULL;
-	// try
-	// {
-	// 	memStream = new MemoryStream();
-	// 	IFormatter formatter = new BinaryFormatter();
-	// 	formatter.Serialize(memStream, outPrgList[outChn - 1]);
-	// 	outBytes = memStream.GetBuffer();
-	// 	memStream.Close();
+// int MakeOutPutBytes(int outChn, unsigned char *outBytes, unsigned int outlen)
+// {
+// 	MemoryStream memStream = NULL;
+// 	outBytes = NULL;
+// 	try
+// 	{
+// 		memStream = new MemoryStream();
+// 		IFormatter formatter = new BinaryFormatter();
+// 		formatter.Serialize(memStream, outPrgList[outChn - 1]);
+// 		outBytes = memStream.GetBuffer();
+// 		memStream.Close();
 
-	// }
-	// catch 
-	// {
-	// 	if(memStream != NULL)
-	// 		memStream.Close();
-	// 	MessageBox.Show(lang.Get("保存通道信息出错") + "!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-	// }
-	// return outBytes.Length;
-	return 0;
-}
+// 	}
+// 	catch 
+// 	{
+// 		if(memStream != NULL)
+// 			memStream.Close();
+// 		MessageBox.Show(lang.Get("保存通道信息出错") + "!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+// 	}
+// 	return outBytes.Length;
+// 	return 0;
+// }
 
 // bool MakeOutputBytesAndSend(int outChn)
 // {

@@ -692,91 +692,91 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 // 		}
 
 
-// bool SendOutputPrgInfo(int outChn, byte[] muxInfoBytes, int length)
-// {
-//     byte[] cmdBytes = new byte[20];
-//     int eachSendLeng = 500;
-//     Array.Resize(ref muxInfoBytes, muxInfoBytes.Length + 4);
-//     length += 4; // crc bytes
-//     int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
-//     int sendedInfoAddr = 0;
-//     ClsCrc32 clsCrc = new ClsCrc32();
-//     clsCrc.Key = "Hangzhou WanLong Chengdu Studio";
-//     uint crcRslt = clsCrc.CrcBytes(muxInfoBytes, 0, length - 4);
-//     ClsDataOper.BigFormat_intToBytes((int)crcRslt, muxInfoBytes, length - 4, 4);
+unsigned char SendOutputPrgInfo(int outChn, unsigned char *muxInfoBytes, int length)
+{
+    // unsigned char  *cmdBytes = new byte[20];
+    // int eachSendLeng = 500;
+    // Array.Resize(ref muxInfoBytes, muxInfoBytes.Length + 4);
+    // length += 4; // crc bytes
+    // int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
+    // int sendedInfoAddr = 0;
+    // ClsCrc32 clsCrc = new ClsCrc32();
+    // clsCrc.Key = "Hangzhou WanLong Chengdu Studio";
+    // uint crcRslt = clsCrc.CrcBytes(muxInfoBytes, 0, length - 4);
+    // ClsDataOper.BigFormat_intToBytes((int)crcRslt, muxInfoBytes, length - 4, 4);
 
-//     int iAddr = 0;
-//     cmdBytes[iAddr++] = _startBytes[0];
-//     cmdBytes[iAddr++] = _startBytes[1];
-//     cmdBytes[iAddr++] = 0x23;
-//     cmdBytes[iAddr++] = (byte)outChn;
-//     cmdBytes[iAddr++] = 6;
-//     cmdBytes[iAddr++] = 2;
-//     cmdBytes[iAddr++] = 1;
-//     int CmdStringAddr = iAddr;
-//     cmdBytes[iAddr++] = (byte)sendCnt;
+    // int iAddr = 0;
+    // cmdBytes[iAddr++] = _startBytes[0];
+    // cmdBytes[iAddr++] = _startBytes[1];
+    // cmdBytes[iAddr++] = 0x23;
+    // cmdBytes[iAddr++] = (byte)outChn;
+    // cmdBytes[iAddr++] = 6;
+    // cmdBytes[iAddr++] = 2;
+    // cmdBytes[iAddr++] = 1;
+    // int CmdStringAddr = iAddr;
+    // cmdBytes[iAddr++] = (byte)sendCnt;
 
-//     ClsDataOper.LittleFormat_intToBytes(length, cmdBytes, iAddr, 2);
-//     iAddr += 2;
+    // ClsDataOper.LittleFormat_intToBytes(length, cmdBytes, iAddr, 2);
+    // iAddr += 2;
 
-//     Array.Copy(cmdBytes, _buf, iAddr);
+    // Array.Copy(cmdBytes, _buf, iAddr);
 
-//     int readLen = netConn.WriteAndRead(_buf, iAddr);
-//     if (readLen <= CmdStringAddr)
-//         return false;
-//     for (int j = 0; j < CmdStringAddr; j++)
-//     {
-//         if (cmdBytes[j] != _buf[j])
-//             return false;
-//     }
-//     if (_buf[CmdStringAddr] != 0)
-//         return false;
+    // int readLen = netConn.WriteAndRead(_buf, iAddr);
+    // if (readLen <= CmdStringAddr)
+    //     return false;
+    // for (int j = 0; j < CmdStringAddr; j++)
+    // {
+    //     if (cmdBytes[j] != _buf[j])
+    //         return false;
+    // }
+    // if (_buf[CmdStringAddr] != 0)
+    //     return false;
 
 
 
-//     for (byte i = 0; i < sendCnt; i++)
-//     {
-//         iAddr = 0;
-//         cmdBytes[iAddr++] = _startBytes[0];
-//         cmdBytes[iAddr++] = _startBytes[1];
-//         cmdBytes[iAddr++] = 0x23;
-//         cmdBytes[iAddr++] = (byte)outChn;
-//         cmdBytes[iAddr++] = 6;
-//         cmdBytes[iAddr++] = 2;
-//         cmdBytes[iAddr++] = 2;
-//         CmdStringAddr = iAddr;
-//         cmdBytes[iAddr++] = (byte)sendCnt;
-//         cmdBytes[iAddr++] = (byte)(i + 1);
+    // for (byte i = 0; i < sendCnt; i++)
+    // {
+    //     iAddr = 0;
+    //     cmdBytes[iAddr++] = _startBytes[0];
+    //     cmdBytes[iAddr++] = _startBytes[1];
+    //     cmdBytes[iAddr++] = 0x23;
+    //     cmdBytes[iAddr++] = (byte)outChn;
+    //     cmdBytes[iAddr++] = 6;
+    //     cmdBytes[iAddr++] = 2;
+    //     cmdBytes[iAddr++] = 2;
+    //     CmdStringAddr = iAddr;
+    //     cmdBytes[iAddr++] = (byte)sendCnt;
+    //     cmdBytes[iAddr++] = (byte)(i + 1);
 
-//         int needSendNum = length - sendedInfoAddr;
-//         int thisTimeSendNum = (needSendNum > eachSendLeng) ? eachSendLeng : needSendNum;
-//         ClsDataOper.LittleFormat_intToBytes(thisTimeSendNum, cmdBytes, iAddr, 2);
-//         iAddr += 2;
-//         Array.Copy(cmdBytes, _buf, iAddr);
-//         //if (i + 1 == sendCnt)
-//         //{
-//         //    Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum - 4);
-//         //    iAddr += thisTimeSendNum - 4;
-//         //    ClsDataOper.LittleFormat_intToBytes((int)crcRslt, _buf, iAddr, 4);
-//         //    iAddr += 4;
-//         //}
-//         //else
-//         {
-//             Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum);
-//             sendedInfoAddr += thisTimeSendNum;
-//             iAddr += thisTimeSendNum;
-//         }
+    //     int needSendNum = length - sendedInfoAddr;
+    //     int thisTimeSendNum = (needSendNum > eachSendLeng) ? eachSendLeng : needSendNum;
+    //     ClsDataOper.LittleFormat_intToBytes(thisTimeSendNum, cmdBytes, iAddr, 2);
+    //     iAddr += 2;
+    //     Array.Copy(cmdBytes, _buf, iAddr);
+    //     //if (i + 1 == sendCnt)
+    //     //{
+    //     //    Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum - 4);
+    //     //    iAddr += thisTimeSendNum - 4;
+    //     //    ClsDataOper.LittleFormat_intToBytes((int)crcRslt, _buf, iAddr, 4);
+    //     //    iAddr += 4;
+    //     //}
+    //     //else
+    //     {
+    //         Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum);
+    //         sendedInfoAddr += thisTimeSendNum;
+    //         iAddr += thisTimeSendNum;
+    //     }
 
-//         readLen = netConn.WriteAndRead(_buf, iAddr);
-//         if (readLen <= CmdStringAddr)
-//             return false;
-//         for (int j = 0; j < CmdStringAddr; j++)
-//         {
-//             if (cmdBytes[j] != _buf[j])
-//                 return false;
-//         }
-//         if (_buf[CmdStringAddr] != 0)
-//             return false;
-//     }
-//     return true;
-// }
+    //     readLen = netConn.WriteAndRead(_buf, iAddr);
+    //     if (readLen <= CmdStringAddr)
+    //         return false;
+    //     for (int j = 0; j < CmdStringAddr; j++)
+    //     {
+    //         if (cmdBytes[j] != _buf[j])
+    //             return false;
+    //     }
+    //     if (_buf[CmdStringAddr] != 0)
+    //         return false;
+    // }
+    return 1;
+}
