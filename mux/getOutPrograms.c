@@ -23,8 +23,6 @@ int getOutPrograms(char *ip, int outChn)
 		return -1;
 	}
 
-
-
 	enum ErrorTypeEm res;
 	unsigned int  tmpShort = 0;
 	if(GetOutChnTSID(ip, outChn + 1, &tmpShort) == ok){
@@ -51,7 +49,6 @@ int getOutPrograms(char *ip, int outChn)
 	// ---- 获取表激活命令 ----
 	LoadBitrateAndTableEnable(ip, outChn);
 
-	free(pdb);
 
 	return 0;
 }
