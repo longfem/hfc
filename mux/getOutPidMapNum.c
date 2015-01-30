@@ -7,7 +7,7 @@
 
 #include "communicate.h"
 
-int getOutPidMapNum(char *ip, unsigned short *result)
+int getOutPidMapNum(char *ip, int outChannel, unsigned short *pidCnt)
 {
 
     char buf[256];
@@ -21,22 +21,21 @@ int getOutPidMapNum(char *ip, unsigned short *result)
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x23;
-    sendbuf[3]=0x01;
+    sendbuf[3]=(unsigned char)(outChannel & 0xFF);
     sendbuf[4]=0x02;
     sendbuf[5]=0x01;
     sendbuf[6]=0x01;
 
     communicate(ip, sendbuf, 7, buf, &rlen);
     
-    printf("\n####Recive Convert set output multi method nums=[%d]\n",rlen );
+    //printf("\n####Recive Convert set output multi method nums=[%d]\n",rlen );
     if(9 == rlen){
-        for(i=0;i<rlen;i++)
-        printf("Recive Convert set output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
+        // for(i=0;i<rlen;i++)
+        //     printf("Recive Convert set output multi method buf[%d]=0x[%02x]\n",i, buf[i]);
 
-        *p++ = buf[8];
-        *p++ = buf[9];
+        *pidCnt = (buf[8]<<8 | buf[7]) & 0xFFFF;        
 
-        printf("get out getOutPidMapNum=[%d]\n", *result );
+        printf("get out getOutPidMapNum pidCnt =[%d]\n", *pidCnt );
 
         return rlen;
     }

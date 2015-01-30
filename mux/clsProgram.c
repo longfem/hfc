@@ -86,7 +86,7 @@ unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSen
 // 	return 0;
 // }
 
-// bool MakeOutputBytesAndSend(int outChn)
+// unsigned char MakeOutputBytesAndSend(int outChn)
 // {
 // 	unsigned char *tmpBytes;
 
@@ -98,3 +98,61 @@ unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSen
 // 	}
 // 	return false;
 // }
+
+
+unsigned char PrgMuxInfoGet()
+{
+	//MuxPrgInfoGet_st
+	PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
+	PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
+
+    //PrgPmtMuxListLen
+	for (int i = 0; i < _outChannelCntMax; i++)
+	{
+		if (GetOutProgramMuxMap(i + 1, out PrgPmtMuxList[i]) != ok)
+			return false;
+		if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != ok)
+			return false;
+	}
+
+	if (dglt_showPidMap != null)
+	{
+		for (int i = 0; i < PrgPmtMuxList.Length; i++)
+		{
+			if (PrgPmtMuxList[i] != null)
+			{
+				foreach (MuxPrgInfoGet_st pmtItem in PrgPmtMuxList[i])
+				{
+					if (inPrgList[pmtItem.inChannel].prgNodes == null)
+						continue;
+					if (inPrgList[pmtItem.inChannel].prgNodes.Count < pmtItem.prgIndex)
+						continue;
+					Dev_prgInfo_st tmpPrgInfo = ((Dev_prgInfo_st)(inPrgList[pmtItem.inChannel].prgNodes[pmtItem.prgIndex - 1]));
+					int oldPid = tmpPrgInfo.pmtPid;
+
+					dglt_showPidMap(pmtItem.inChannel, i + 1, "0x" + oldPid.ToString("x"),
+							"0x" + pmtItem.prgPid.ToString("x"), tmpPrgInfo.prgNum.ToString(),
+							pmtItem.prgNum.ToString(), "PMT [" + tmpPrgInfo.prgName + "]");
+				}
+			}
+		}
+
+		for (int i = 0; i < PrgAVMuxList.Length; i++)
+		{
+			if (PrgAVMuxList[i] != null)
+			{
+				foreach (MuxPidInfo_st avItem in PrgAVMuxList[i])
+				{
+					if (inPrgList[avItem.inChannel].prgNodes == null)
+						continue;
+					int oldPid = avItem.oldPid;
+
+					dglt_showPidMap(avItem.inChannel, i + 1, "0x" + avItem.oldPid.ToString("x"),
+									"0x" + avItem.newPid.ToString("x"), "", "", "");
+				}
+			}
+		}
+	}
+
+	return true;
+}
