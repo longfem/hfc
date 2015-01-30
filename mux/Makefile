@@ -30,14 +30,14 @@ getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
 clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
-getOutPrograms.o
+getOutPrograms.o clsMakeTable.o clsPsiTable.o 
 
 LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
 clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
-getOutPrograms.o
+getOutPrograms.o clsPsiTable.o
 
 .PHONY: all clean distclean
 
@@ -69,6 +69,8 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxprgInfoGet.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsMuxSend.c	
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsProgram.c	
+	$(CC) $(CFLAGS) $(IFLAGS) -c clsMakeTable.c		
+	$(CC) $(CFLAGS) $(IFLAGS) -c clsPsiTable.c		
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsParams.c			
 	$(CC) $(CFLAGS) $(IFLAGS) -c getBaseJson.c
 	
@@ -90,18 +92,18 @@ install:
 	mv libtcpclient.so $(LIB_PATH)/
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
-	sudo cp -a $(BUILD_PATH) /home/nfs/source
-	sudo chown -R root:root /home/nfs/source/build
+	#sudo cp -a $(BUILD_PATH) /home/nfs/source
+	#sudo chown -R root:root /home/nfs/source/build
 
 
 clean:
 	rm -f *.o tcpclient
 	rm -rf $(BUILD_PATH)
 	
-	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
+	#sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 
 distclean:
 	rm -f *.o tcpclient
 	rm -rf $(BUILD_PATH)
-	sudo rm -rf /home/nfs/source/$(BUILD_PATH)
+	#sudo rm -rf /home/nfs/source/$(BUILD_PATH)
 
