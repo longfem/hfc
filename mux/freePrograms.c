@@ -4,6 +4,7 @@
 
 int freeProgramsMalloc(Dev_prgInfo_st * data)
 {
+	int i = 0;
 	int pmtDesListLen = data->pmtDesListLen;
 	if(pmtDesListLen>0){
 		free(data->pmtDesList);
@@ -11,6 +12,17 @@ int freeProgramsMalloc(Dev_prgInfo_st * data)
 	}
 	int pdataStreamListLen = data->pdataStreamListLen;
 	if(pdataStreamListLen>0){
+		for(i=0; i< pdataStreamListLen; i++){
+			if(data->pdataStreamList[i].desNode){
+				if(data->pdataStreamList[i].desNode->data){
+					free(data->pdataStreamList[i].desNode->data);
+					data->pdataStreamList[i].desNode->data = NULL;
+				}
+
+				free(data->pdataStreamList[i].desNode);
+				data->pdataStreamList[i].desNode = NULL;
+			}
+		}
 		free(data->pdataStreamList);
 		data->pdataStreamList = NULL;
 	}
