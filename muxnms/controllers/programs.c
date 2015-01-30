@@ -58,11 +58,12 @@ static void maketable(HttpConn *conn) {
 	ChannelProgramSt *testoutpst = NULL;
 	Dev_prgInfo_st *testoutprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
+	pos = atoi(mprGetJson(jsonparam, "channel"));
 	//提取要制表的节目信息
 	for(i=0; i<clsProgram._intChannelCntMax; i++){
 		sprintf(str, "inCh%d", i+1);				
 		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){	
-			list_get(&(clsProgram.outPrgList), pos, &outpst);
+			list_get(&(clsProgram.outPrgList), pos-1, &outpst);
 			if(outpst != NULL){
 				if(list_len(&(outpst->prgNodes)) !=0){					
 					freePrograms(&outpst->prgNodes);
@@ -136,11 +137,6 @@ static void maketable(HttpConn *conn) {
                 }
 				
 				list_append(&(outpst->prgNodes), outprg);
-			}
-			pos++;
-			if(pos >=  clsProgram._outChannelCntMax){
-				//制表超过最大允许通道数，后面的忽略
-				break;
 			}		
 		}
 	}	
