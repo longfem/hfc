@@ -10,11 +10,11 @@
 int getOutPidMapNum(char *ip, int outChannel, unsigned short *pidCnt)
 {
 
-    char buf[256];
+    unsigned char buf[20];
     int i = 0;
-    char sendbuf[256];
+    unsigned char sendbuf[20];
     int rlen=0;
-    unsigned char *p = result;
+    
   
  
     //get call channal signal status

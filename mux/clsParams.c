@@ -7,7 +7,7 @@
 #include "clsParams.h"
 
 ClsParams_st *pdb = NULL;
-
+extern ClsProgram_st clsProgram;
 void Init(int outChannelNumMax)
 {
 	int i = 0;
@@ -46,4 +46,6 @@ void Init(int outChannelNumMax)
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_pmt = 1;
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_sdt = 1;
 	}
+
+	m_autoMuxStartPid
 }

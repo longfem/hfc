@@ -7,6 +7,51 @@
 #include "clsProgram.h"
 
 extern ClsProgram_st clsProgram;
+
+
+initClsProgram(ClsMux muxer, int inChannelNum, int outChannelNum)//, Shawn.WL.WanLongPannel.language.ILanguage lang)
+{	
+	_intChannelCntMax = inChannelNum;
+	_outChannelCntMax = outChannelNum;
+
+	clsProgram.inPrgList = malloc(sizeof(ChannelProgramSt) *_intChannelCntMax);
+	for (int i = 0; i < inPrgList.Length; i++)
+	{
+		inPrgList[i] = new ChannelProgramSt();
+		inPrgList[i].channelId = i + 1;
+	}
+
+	outPrgList = new ChannelProgramSt[_outChannelCntMax];
+	for (int i = 0; i < outPrgList.Length; i++)
+	{
+		outPrgList[i] = new ChannelProgramSt();
+		outPrgList[i].channelId = i + 1;
+
+		outPrgList[i].prgNodes = new ArrayList();
+		outPrgList[i].userPrgNodes = new ArrayList();
+		outPrgList[i].dtPidList = new ArrayList();
+		outPrgList[i].caNode = new Chn_ca_st();
+		outPrgList[i].caNode.caIdenList = new ArrayList();
+	}
+	m_autoMuxStartPid = new int[_outChannelCntMax];
+	for (int i = 0; i < m_autoMuxStartPid.Length; i++)
+	{
+		m_autoMuxStartPid[i] = 0x100;
+	}
+
+	nitSection = new ArrayList[_outChannelCntMax];
+	for (int i = 0; i < nitSection.Length; i++)
+	{
+		nitSection[i] = new ArrayList();
+	}
+
+	needInputData = new bool[_outChannelCntMax, _intChannelCntMax];
+
+	scramblePrgList = new List<ScramblePrgSt>();
+	scramblePrgListV2 = new List<ScramblePrgSt_v2>();
+}
+
+
 unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSendDevMux)
 {
 	list_t sendList;
@@ -111,7 +156,7 @@ unsigned char PrgMuxInfoGet()
 	{
 		if (GetOutProgramMuxMap(i + 1, out PrgPmtMuxList[i]) != ok)
 			return false;
-		if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != ok)
+		if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != tok)
 			return false;
 	}
 
