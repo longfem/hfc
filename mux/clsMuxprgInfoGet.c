@@ -752,7 +752,12 @@ ErrorTypeEm SendTable_psi_finish(int outChannel)
 
 ErrorTypeEm SendTable_PidMap(int outChannel, list_t *pidMapListArray)
 {
-	
+	 unsigned char buf[1024];
+    int i = 0, j=0;
+    unsigned char sendbuf[1024];
+    int slen=0;
+
+    int dataAddr, iAddr;
     list_t *pidMapList = NULL;
     pidMapListLen = 0;
     int pidMapListArrayLen = 0
@@ -798,201 +803,217 @@ ErrorTypeEm SendTable_PidMap(int outChannel, list_t *pidMapListArray)
 
 
     MuxPidInfo_st * pidMapTmp = NULL;
-	if (pidMapListArray ==NULL || pidMapList == NULL || pidMapListLen == 0)
-	{
-		
-	}
+	
 	
 	unsigned char *pidMapBytes = malloc(pidMapListLen * 5);
+    int pidMapBytesLen = 0;
 	iAddr = 0;
     for(i=0; i< pidMapListLen; i++){
         list_get(pidMapList, i, &pidMapTmp);        
        
         pidMapBytes[iAddr++] = (unsigned char)pidMapTmp->inChannel & 0xFF;
-        //pidMapBytes[iAddr++] = (unsigned char)pidMapTmp->oldPid & 0x    
-                
+        pidMapBytes[iAddr++] = (unsigned char)(pidMapTmp->oldPid & 0xFF);    
+        pidMapBytes[iAddr++] = (unsigned char)((pidMapTmp->oldPid & 0xFF00)>>8);    
+        pidMapBytes[iAddr++] = (unsigned char)(pidMapTmp->newPid & 0xFF);    
+        pidMapBytes[iAddr++] = (unsigned char)((pidMapTmp->newPid & 0xFF00)>>8);    
+        pidMapBytesLen+=5;        
     }
 
-	foreach (MuxPidInfo_st pidMapTmp in pidMapList)
-	{
-		pidMapBytes[iAddr++] = (byte)(pidMapTmp.inChannel);
-		iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapTmp.oldPid, pidMapBytes, iAddr, 2);
-		iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapTmp.newPid, pidMapBytes, iAddr, 2);
-	}
+	
 
-	int sendCnt = pidMapList.Count / pidMap_eachTransmit_numberMax + ((pidMapList.Count % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
+	int sendCnt = pidMapListLen / pidMap_eachTransmit_numberMax + ((pidMapListLen % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
 
+
+//////////////////////////////////////
 	// 发送个数
-	iAddr = 0;
-	cmdBytes[iAddr++] = _startBytes[0];
-	cmdBytes[iAddr++] = _startBytes[1];
-	cmdBytes[iAddr++] = 0x23;
-	cmdBytes[iAddr++] = (byte)outChannel;
-	cmdBytes[iAddr++] = 2;
-	cmdBytes[iAddr++] = 2;
-	cmdBytes[iAddr++] = 1;
-	int cmdStringAddr = iAddr;
-	iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapList.Count, cmdBytes, iAddr, 2);
-	Array.Copy(cmdBytes, _buf, iAddr);
-	readLen = netConn.WriteAndRead(_buf, iAddr);
-	checkRslt = CheckReturnBytes(cmdBytes, cmdStringAddr, _buf, readLen);
-	if (checkRslt != ErrorTypeEm.ok)
-		return checkRslt;
-	if (_buf[cmdStringAddr] != 0)
-		return ErrorTypeEm.error;
+    memset(sendbuf, 0, sizeof(sendbuf));
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x23;
+    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[4]=0x02;
+    sendbuf[5]=0x02;
+    sendbuf[6]=0x01;
+
+    sendbuf[7]=(unsigned char) (pidMapListLen & 0xFF);
+    sendbuf[8]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 9, buf, &slen);
+    if( slen < 9 ){
+        return error;
+    }
+	
 
 	// 发送表
 	int iSendedBytes = 0;
 	for (int i = 0; i < sendCnt; i++)
 	{
-		iAddr = 0;
-		cmdBytes[iAddr++] = _startBytes[0];
-		cmdBytes[iAddr++] = _startBytes[1];
-		cmdBytes[iAddr++] = 0x23;
-		cmdBytes[iAddr++] = (byte)outChannel;
-		cmdBytes[iAddr++] = 2;
-		cmdBytes[iAddr++] = 2;
-		cmdBytes[iAddr++] = 2;
-		cmdBytes[iAddr++] = (byte)sendCnt;
-		cmdBytes[iAddr++] = (byte)(i + 1);
-		int cmdFinishAddr = iAddr;
+        memset(sendbuf, 0, sizeof(sendbuf));
+        sendbuf[0]=0x77;
+        sendbuf[1]=0x6C;
+        sendbuf[2]=0x23;
+        sendbuf[3]=(unsigned char)outChannel;
+        sendbuf[4]=0x02;
+        sendbuf[5]=0x02;
+        sendbuf[6]=0x02;
+        sendbuf[7]=(unsigned char)sendCnt & 0xFF;
+        sendbuf[8]=(unsigned char)(i + 1);
+        sendbuf[9]=(unsigned char) (pidMapListLen & 0xFF);
+        sendbuf[10]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
+		
+		int cmdFinishAddr = 9;
 
-		iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapList.Count, cmdBytes, iAddr, 2);
-		Array.Copy(cmdBytes, _buf, iAddr);
-		if (pidMapBytes.Length < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
+		iAddr = 11;
+		if (pidMapBytesLen < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
 		{
-			Array.Copy(pidMapBytes, (i * pidMap_eachTransmit_numberMax * 5), _buf, iAddr, pidMapBytes.Length - iSendedBytes);
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);			
 			iAddr += (pidMapBytes.Length - iSendedBytes);
-			iSendedBytes = pidMapBytes.Length;
+			iSendedBytes = pidMapBytesLen;
 		}
 		else
 		{
-			Array.Copy(pidMapBytes, (i * pidMap_eachTransmit_numberMax * 5), _buf, iAddr, pidMap_eachTransmit_numberMax);
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMap_eachTransmit_numberMax);			
 			iSendedBytes += pidMap_eachTransmit_numberMax * 5;
 			iAddr += pidMap_eachTransmit_numberMax * 5;
 		}
 
-		readLen = netConn.WriteAndRead(_buf, iAddr);
-		checkRslt = CheckReturnBytes(cmdBytes, cmdFinishAddr, _buf, readLen);
-		if (checkRslt != ErrorTypeEm.ok)
-			return checkRslt;
-		if (_buf[cmdFinishAddr] != 0)
-			return ErrorTypeEm.error;
+        memset(buf,0,sizeof(buf));
+        communicate(ip, sendbuf, iAddr, buf, &slen);
+
+        if(slen == iAddr+1){
+            if(buf[iAddr] == 0)
+                res = ok;
+            else{
+                printf("send pidmap error\n");
+                return error;
+            }
+        }		
 	}
-	return ErrorTypeEm.ok;
+	return ok;
 }
 
-// 		internal ErrorTypeEm DirectlyTransmit_sendMap(int outChannel, ArrayList pidMapList)
-// 		{
-// 			int readLen;
-// 			byte[] cmdBytes = new byte[20];
-// 			int iAddr = 0;
-// 			if (pidMapList == null || pidMapList.Count == 0)
-// 			{
-// 				cmdBytes[iAddr++] = _startBytes[0];
-// 				cmdBytes[iAddr++] = _startBytes[1];
-// 				cmdBytes[iAddr++] = 0x23;
-// 				cmdBytes[iAddr++] = (byte)outChannel;
-// 				cmdBytes[iAddr++] = 3;
-// 				cmdBytes[iAddr++] = 2;
-// 				cmdBytes[iAddr++] = 1;
-// 				int cmdStringAddr = iAddr;
-// 				cmdBytes[iAddr++] = cmdBytes[iAddr++] = 0;
-// 				Array.Copy(cmdBytes, _buf, iAddr);
-// 				readLen = netConn.WriteAndRead(_buf, iAddr);
-// 				ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, cmdStringAddr, _buf, readLen);
-// 				if (checkRslt != ErrorTypeEm.ok)
-// 					return checkRslt;
-// 				if (_buf[cmdStringAddr] != 0)
-// 					return ErrorTypeEm.error;
-// 				return ErrorTypeEm.ok;
-// 			}
+ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapList)
+{
 
-// 			byte[] pidMapBytes = new byte[pidMapList.Count * 5];
+    unsigned char buf[1024];
+    int i = 0, j=0;
+    unsigned char sendbuf[20];
+    int slen=0;
 
-// 			foreach (MuxPidInfo_st pidMapTmp in pidMapList)
-// 			{
-// 				pidMapBytes[iAddr++] = (byte)(pidMapTmp.inChannel);
-// 				iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapTmp.oldPid, pidMapBytes, iAddr, 2);
-// 				iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapTmp.newPid, pidMapBytes, iAddr, 2);
-// 			}
-
-// 			int sendCnt = pidMapList.Count / pidMap_eachTransmit_numberMax + ((pidMapList.Count % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
-
-// 			// 发送个数
-// 			iAddr = 0;
-// 			cmdBytes[iAddr++] = _startBytes[0];
-// 			cmdBytes[iAddr++] = _startBytes[1];
-// 			cmdBytes[iAddr++] = 0x23;
-// 			cmdBytes[iAddr++] = (byte)outChannel;
-// 			cmdBytes[iAddr++] = 3;
-// 			cmdBytes[iAddr++] = 2;
-// 			cmdBytes[iAddr++] = 1;
-// 			iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapList.Count, cmdBytes, iAddr, 2);
-// 			//netConn.Write(cmdBytes, iAddr, DeviceRead_callBack);
-// 			//readEndSem.WaitOne();
-// 			Array.Copy(cmdBytes, _buf, iAddr);
-// 			readLen = netConn.WriteAndRead(_buf, iAddr);
-// 			iAddr -= 2;
-// 			if (readLen <= iAddr)
-// 				return ErrorTypeEm.length;
-// 			for (int j = 0; j < iAddr; j++)
-// 			{
-// 				if (cmdBytes[j] != _buf[j])
-// 					return ErrorTypeEm.cmd;
-// 			}
-// 			if (_buf[iAddr] != 0)
-// 				return ErrorTypeEm.error;
-
-// 			// 发送表
-// 			int iSendedBytes = 0;
-// 			for (int i = 0; i < sendCnt; i++)
-// 			{
-// 				iAddr = 0;
-// 				cmdBytes[iAddr++] = _startBytes[0];
-// 				cmdBytes[iAddr++] = _startBytes[1];
-// 				cmdBytes[iAddr++] = 0x23;
-// 				cmdBytes[iAddr++] = (byte)outChannel;
-// 				cmdBytes[iAddr++] = 3;
-// 				cmdBytes[iAddr++] = 2;
-// 				cmdBytes[iAddr++] = 2;
-// 				int cmdFinishAddr = iAddr;
-// 				cmdBytes[iAddr++] = (byte)sendCnt;
-// 				cmdBytes[iAddr++] = (byte)(i + 1);
+    int dataAddr, iAddr;
 
 
-// 				iAddr += ClsDataOper.LittleFormat_intToBytes(pidMapList.Count, cmdBytes, iAddr, 2);
-// 				Array.Copy(cmdBytes, _buf, iAddr);
-// 				if (pidMapBytes.Length < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
-// 				{
-// 					Array.Copy(pidMapBytes, (i * pidMap_eachTransmit_numberMax * 5), _buf, iAddr, pidMapBytes.Length - iSendedBytes);
-// 					iAddr += (pidMapBytes.Length - iSendedBytes);
-// 					iSendedBytes = pidMapBytes.Length;
-// 				}
-// 				else
-// 				{
-// 					Array.Copy(pidMapBytes, (i * pidMap_eachTransmit_numberMax * 5), _buf, iAddr, pidMap_eachTransmit_numberMax);
-// 					iSendedBytes += pidMap_eachTransmit_numberMax * 5;
-// 					iAddr += pidMap_eachTransmit_numberMax * 5;
-// 				}
+    int pidMapListLen = list_len(pidMapList);
 
-// 				//netConn.Write(_buf, iAddr, DeviceRead_callBack);
-// 				//readEndSem.WaitOne();
-// 				readLen = netConn.WriteAndRead(_buf, iAddr);
-// 				if (readLen <= cmdFinishAddr)
-// 					return ErrorTypeEm.length;
-// 				for (int j = 0; j < cmdFinishAddr; j++)
-// 				{
-// 					if (cmdBytes[j] != _buf[j])
-// 						return ErrorTypeEm.cmd;
-// 				}
-// 				if (_buf[cmdFinishAddr] != 0)
-// 					return ErrorTypeEm.error;
-// 			}
-// 			ErrorTypeEm rtnRslt = ErrorTypeEm.ok;
-// 			//	DirectlyTransmit_mapSendFinish(outChannel);
-// 			return rtnRslt;
-// 		}
+	int readLen;
+	byte[] cmdBytes = new byte[20];
+	int iAddr = 0;
+	if (pidMapList == NULL || pidMapListLen == 0)
+	{
+        memset(sendbuf, 0, sizeof(sendbuf));
+        sendbuf[0]=0x77;
+        sendbuf[1]=0x6C;
+        sendbuf[2]=0x23;
+        sendbuf[3]=(unsigned char)outChannel;
+        sendbuf[4]=0x03;
+        sendbuf[5]=0x02;
+        sendbuf[6]=0x01;
+
+        sendbuf[7]=0x00;
+        sendbuf[8]=0x00;
+
+        memset(buf,0,sizeof(buf));
+        communicate(ip, sendbuf, 9, buf, &slen);
+        if( slen < 9 ){
+            return error;
+        }
+
+        return ok;
+	}
+
+	unsigned char *pidMapBytes = malloc(pidMapListLen * 5);
+
+    int pidMapBytesLen = 0;
+    iAddr = 0;
+    for(i=0; i< pidMapListLen; i++){
+        list_get(pidMapList, i, &pidMapTmp);        
+       
+        pidMapBytes[iAddr++] = (unsigned char)pidMapTmp->inChannel & 0xFF;
+        pidMapBytes[iAddr++] = (unsigned char)(pidMapTmp->oldPid & 0xFF);    
+        pidMapBytes[iAddr++] = (unsigned char)((pidMapTmp->oldPid & 0xFF00)>>8);    
+        pidMapBytes[iAddr++] = (unsigned char)(pidMapTmp->newPid & 0xFF);    
+        pidMapBytes[iAddr++] = (unsigned char)((pidMapTmp->newPid & 0xFF00)>>8);    
+        pidMapBytesLen+=5;        
+    }
+
+    int sendCnt = pidMapListLen / pidMap_eachTransmit_numberMax + ((pidMapListLen % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
+
+
+    // 发送个数
+    memset(sendbuf, 0, sizeof(sendbuf));
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x23;
+    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[4]=0x03;
+    sendbuf[5]=0x02;
+    sendbuf[6]=0x01;
+
+    sendbuf[7]=(unsigned char) (pidMapListLen & 0xFF);
+    sendbuf[8]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 9, buf, &slen);
+    if( slen < 9 ){
+        return error;
+    }
+
+    int iSendedBytes = 0;
+    for (int i = 0; i < sendCnt; i++)
+    {
+        memset(sendbuf, 0, sizeof(sendbuf));
+        sendbuf[0]=0x77;
+        sendbuf[1]=0x6C;
+        sendbuf[2]=0x23;
+        sendbuf[3]=(unsigned char)outChannel;
+        sendbuf[4]=0x03;
+        sendbuf[5]=0x02;
+        sendbuf[6]=0x02;
+        sendbuf[7]=(unsigned char)sendCnt & 0xFF;
+        sendbuf[8]=(unsigned char)(i + 1);
+        sendbuf[9]=(unsigned char) (pidMapListLen & 0xFF);
+        sendbuf[10]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
+        
+        iAddr = 11;
+        if (pidMapBytesLen < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
+        {
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);          
+            iAddr += (pidMapBytes.Length - iSendedBytes);
+            iSendedBytes = pidMapBytesLen;
+        }
+        else
+        {
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMap_eachTransmit_numberMax);          
+            iSendedBytes += pidMap_eachTransmit_numberMax * 5;
+            iAddr += pidMap_eachTransmit_numberMax * 5;
+        }
+
+        memset(buf,0,sizeof(buf));
+        communicate(ip, sendbuf, iAddr, buf, &slen);
+
+        if(slen == iAddr+1){
+            if(buf[iAddr] == 0)
+                res = ok;
+            else{
+                printf("send pidmap error\n");
+                return error;
+            }
+        }       
+    }
+    return ok;
+
+}
 
 
 unsigned char SendOutputPrgInfo(int outChn, unsigned char *muxInfoBytes, int length)
