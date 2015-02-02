@@ -7,6 +7,8 @@
 #define FALSE   0
 #define TRUE    1
 
+#pragma pack(1)
+
 typedef struct Commdes_st
 {
 	int userNew; // 用户自定义内容
@@ -92,7 +94,7 @@ typedef struct Dev_prgInfo_t
 
 } Dev_prgInfo_st;
 
-
+#pragma pack()
 
 
 typedef struct __ts_table_pmt_es_t

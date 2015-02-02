@@ -107,42 +107,199 @@ unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSen
 
 }
 
+void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
+{
+	unsigned char *pBuf = NULL, pTemp= NULL;
+	int i=0, j=0, bufLen=0;
+	if(proginfo == NULL){
+		printf("proginfo NULL \n");
+		return -1;
+	}
 
-// int MakeOutPutBytes(int outChn, unsigned char *outBytes, unsigned int outlen)
-// {
-// 	MemoryStream memStream = NULL;
-// 	outBytes = NULL;
-// 	try
-// 	{
-// 		memStream = new MemoryStream();
-// 		IFormatter formatter = new BinaryFormatter();
-// 		formatter.Serialize(memStream, outPrgList[outChn - 1]);
-// 		outBytes = memStream.GetBuffer();
-// 		memStream.Close();
+	//compute need malloc buf len
+	bufLen += sizeof(Dev_prgInfo_st); // struct sizeof(Dev_prgInfo_st) 	
+	bufLen += proginfo->pmtDesListLen;   //pmtDesListLen
+	
 
-// 	}
-// 	catch 
-// 	{
-// 		if(memStream != NULL)
-// 			memStream.Close();
-// 		MessageBox.Show(lang.Get("保存通道信息出错") + "!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-// 	}
-// 	return outBytes.Length;
-// 	return 0;
-// }
+	for(i=0; i< proginfo->pmtDesListLen; i++){
+		bufLen += sizeof(Commdes_t);
+		bufLen += proginfo->pmtDesList->dataLen;
+	}
 
-// unsigned char MakeOutputBytesAndSend(int outChn)
-// {
-// 	unsigned char *tmpBytes;
+	bufLen += 4;   //pdataStreamListLen;	 
 
-// 	int sendLen = MakeOutPutBytes(outChn, out tmpBytes);
-// 	if (sendLen > 0)
-// 	{
-// 		if (muxer.SendOutputPrgInfo(outChn, tmpBytes, sendLen))
-// 			return true;
-// 	}
-// 	return false;
-// }
+	for(i=0  < proginfo->pdataStreamListLen; i++){
+		bufLen += sizeof(DataStream_t);
+
+		for(j=0; j< proginfo->pdataStreamList->destlen; j++){
+			bufLen += sizeof(Commdes_t);
+			bufLen += proginfo->pdataStreamList->desNode->dataLen;
+		}
+	}
+
+	bufLen+= proginfo->prgNameLen; //
+	bufLen+= proginfo->providerNameLen; //
+	bufLen +=4 // Crc 32;
+	bufLen
+	//malloc now
+	pBuf = malloc(bufLen);
+
+	//copy now	
+	//copy pmt
+	pTemp = pBuf;
+	memcpy(pBuf, proginfo, sizeof(Dev_prgInfo_st));
+	pTemp += sizeof(Dev_prgInfo_st);	
+	memcpy(pTemp, (unsigned char *)&proginfo->pmtDesListLen, 4 );
+	pTemp +=4;
+
+	
+
+	for(i=0; i< proginfo->pmtDesListLen; i++){
+		memcpy(pTemp, proginfo->pmtDesList + i, sizeof(Commdes_t));
+		pTemp += sizeof(Commdes_t);
+
+		memcpy(pTemp, proginfo->pmtDesList->data, proginfo->pmtDesList->dataLen);				
+		pTemp+=	proginfo->pmtDesList->dataLen;
+	}
+
+	//copy datastream
+	memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
+	pTemp +=4;
+	for(i=0  < proginfo->pdataStreamListLen; i++){
+		memcpy(pTemp, &proginfo->pdataStreamList[i], sizeof(DataStream_t));
+		pTemp += sizeof(DataStream_t);
+		for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
+			memcpy(pTemp, &proginfo->pdataStreamList[i].desNode[j], sizeof(Commdes_t));
+			pTemp += sizeof(Commdes_t);
+			memcpy(pTemp, proginfo->pdataStreamList[i].desNode[j].data, proginfo->pdataStreamList[i].desNode[j].dataLen);
+			pTemp += proginfo->pdataStreamList[i].desNode[j]->dataLen;
+		}
+	}	
+
+	//prgName
+	if(proginfo->prgNameLen > 0){
+		memcpy(pTemp, proginfo->prgName, proginfo->prgNameLen);
+		pTemp += 4;	
+	}
+	
+	//providerName    
+	if(proginfo->providerNameLen > 0){
+		memcpy(pTemp, proginfo->providerName, proginfo->providerNameLen);
+		pTemp += 4;		
+	}
+	
+	//psdt
+
+
+	if(pBuf != NULL){
+		pOutbuf = pBuf;
+		*outLen = bufLen;
+	} 
+	else{
+		pOutbuf = NULL;
+		*outLen = 0;
+	}       
+}
+
+int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
+{
+	Dev_prgInfo_st *pBuf = NULL;
+	unsigned char *pTemp = NULL ;
+	int i=0, bufLen=0;
+	if(pInbuf == NULL || inLen < sizeof(Dev_prgInfo_st) + 4){
+		printf("proginfo NULL or len too small\n");
+		return NULL;
+	}
+
+	pBuf = malloc(sizeof(Dev_prgInfo_st));
+	pTemp = pInbuf;
+	memcpy(pBuf, pTemp, sizeof(Dev_prgInfo_st));	
+	pTemp += sizeof(Dev_prgInfo_st);
+
+	int pmtDesListLen = 0;
+	memcpy(&pmtDesListLen, pInbuf, 4 );
+	pTemp +=4;
+
+	pBuf->pmtDesList = malloc(sizeof(Commdes_t) * pmtDesListLen);
+	
+	for(i=0; i< proginfo->pmtDesListLen; i++){
+		memcpy(&proginfo->pmtDesList[i], pTemp, sizeof(Commdes_t));		
+		pTemp += sizeof(Commdes_t);
+		memcpy(proginfo->pmtDesList[i].data, pTemp, proginfo->pmtDesList[i].dataLen);				
+		pTemp+=	proginfo->pmtDesList[i].dataLen;		
+	}
+
+	//deserialize datastream
+	int pdataStreamListLen=0;
+	memcpy(&pdataStreamListLen, pTemp, 4 );
+	pTemp +=4;
+
+	if(pdataStreamListLen > 0){
+		for(i=0  < proginfo->pdataStreamListLen; i++){
+			memcpy(&proginfo->pdataStreamList[i], pTemp, sizeof(DataStream_t));
+			pTemp += sizeof(DataStream_t);
+			for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
+				memcpy(&proginfo->pdataStreamList[i].desNode[j], pTemp, sizeof(Commdes_t));
+				pTemp += sizeof(Commdes_t);
+				memcpy(proginfo->pdataStreamList[i].desNode[j].data, pTemp, proginfo->pdataStreamList[i].desNode[j].dataLen);
+				pTemp += proginfo->pdataStreamList[i].desNode[j]->dataLen;
+			}
+		}	
+	}else{
+		proginfo->pdataStreamListLen = 0;
+		proginfo->pdataStreamList = NULL;
+	}
+		
+	if(proginfo->prgNameLen > 0){	
+		memcpy(proginfo->prgName, pTemp, proginfo->prgNameLen);
+		pTemp += 4;
+	}
+
+	//providerName 
+	if(proginfo->providerNameLen > 0){   
+		memcpy(proginfo->providerName, pTemp, proginfo->providerNameLen);
+		pTemp += 4;	
+	}	
+
+
+	return pBuf;	
+	}
+}
+
+int MakeOutPutBytes(int outChn, unsigned char *outBytes)
+{
+	
+	outBytes = NULL;
+	
+	memStream = new MemoryStream();
+	IFormatter formatter = new BinaryFormatter();
+
+	list_get(&clsProgram.outPrgList, outChn - 1, pOutBytes);
+	outBytes = memStream.GetBuffer();
+	memStream.Close();
+
+	catch 
+	{
+		if(memStream != null)
+			memStream.Close();
+		MessageBox.Show(lang.Get("保存通道信息出错") + "!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+	}
+	return outBytes.Length;
+}
+
+
+unsigned char MakeOutputBytesAndSend(int outChn)
+{
+	unsigned char *tmpBytes;
+
+	int sendLen = MakeOutPutBytes(outChn, out tmpBytes);
+	if (sendLen > 0)
+	{
+		if (muxer.SendOutputPrgInfo(outChn, tmpBytes, sendLen))
+			return true;
+	}
+	return false;
+}
 
 
 unsigned char PrgMuxInfoGet()

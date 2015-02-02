@@ -1018,90 +1018,79 @@ ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapLis
 
 unsigned char SendOutputPrgInfo(int outChn, unsigned char *muxInfoBytes, int length)
 {
-    // unsigned char  *cmdBytes = new byte[20];
-    // int eachSendLeng = 500;
-    // Array.Resize(ref muxInfoBytes, muxInfoBytes.Length + 4);
-    // length += 4; // crc bytes
-    // int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
-    // int sendedInfoAddr = 0;
-    // ClsCrc32 clsCrc = new ClsCrc32();
-    // clsCrc.Key = "Hangzhou WanLong Chengdu Studio";
-    // uint crcRslt = clsCrc.CrcBytes(muxInfoBytes, 0, length - 4);
-    // ClsDataOper.BigFormat_intToBytes((int)crcRslt, muxInfoBytes, length - 4, 4);
+    unsigned char  *cmdBytes = new byte[20];
+    int eachSendLeng = 500;
+    Array.Resize(ref muxInfoBytes, muxInfoBytes.Length + 4);
+    length += 4; // crc bytes
+    int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
+    int sendedInfoAddr = 0;
+    ClsCrc32 clsCrc = new ClsCrc32();
+    clsCrc.Key = "Hangzhou WanLong Chengdu Studio";
+    uint crcRslt = CrcBytes(muxInfoBytes, 0, length - 4);
+    ClsDataOper.BigFormat_intToBytes((int)crcRslt, muxInfoBytes, length - 4, 4);
 
-    // int iAddr = 0;
-    // cmdBytes[iAddr++] = _startBytes[0];
-    // cmdBytes[iAddr++] = _startBytes[1];
-    // cmdBytes[iAddr++] = 0x23;
-    // cmdBytes[iAddr++] = (byte)outChn;
-    // cmdBytes[iAddr++] = 6;
-    // cmdBytes[iAddr++] = 2;
-    // cmdBytes[iAddr++] = 1;
-    // int CmdStringAddr = iAddr;
-    // cmdBytes[iAddr++] = (byte)sendCnt;
+    int iAddr = 0;
+    memset(sendbuf, 0, sizeof(sendbuf));
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x23;
+    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[4]=0x06;
+    sendbuf[5]=0x02;
+    sendbuf[6]=0x01;
+    sendbuf[7]=(unsigned char)iAddr & 0xFF;
+    sendbuf[8]=(unsigned char)(sendCnt & 0xFF);
+    sendbuf[9]=(unsigned char) (length & 0xFF);
+    sendbuf[10]=(unsigned char) (length & 0xFF00)>>8;
 
-    // ClsDataOper.LittleFormat_intToBytes(length, cmdBytes, iAddr, 2);
-    // iAddr += 2;
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, iAddr, buf, &slen);
 
-    // Array.Copy(cmdBytes, _buf, iAddr);
+    if(slen <= iAddr){
+        printf("send SendOutputPrgInfo error \n");
+        return -1;
+    }
+    
 
-    // int readLen = netConn.WriteAndRead(_buf, iAddr);
-    // if (readLen <= CmdStringAddr)
-    //     return false;
-    // for (int j = 0; j < CmdStringAddr; j++)
-    // {
-    //     if (cmdBytes[j] != _buf[j])
-    //         return false;
-    // }
-    // if (_buf[CmdStringAddr] != 0)
-    //     return false;
+////////////////////////////////
 
 
+    for ( i = 0; i < sendCnt; i++)
+    {
+        iAddr = 0;
+        memset(sendbuf, 0, sizeof(sendbuf));
+        sendbuf[iAddr++]=0x77;
+        sendbuf[iAddr++]=0x6C;
+        sendbuf[iAddr++]=0x23;
+        sendbuf[iAddr++]=(unsigned char)outChannel;
+        sendbuf[iAddr++]=0x06;
+        sendbuf[iAddr++]=0x02;
+        sendbuf[iAddr++]=0x02;        
+        sendbuf[iAddr++]=(unsigned char)(sendCnt & 0xFF);
+        sendbuf[iAddr++]=(unsigned char) (i+1)& 0xFF;
+        
+        //////////////////////////////
+       
 
-    // for (byte i = 0; i < sendCnt; i++)
-    // {
-    //     iAddr = 0;
-    //     cmdBytes[iAddr++] = _startBytes[0];
-    //     cmdBytes[iAddr++] = _startBytes[1];
-    //     cmdBytes[iAddr++] = 0x23;
-    //     cmdBytes[iAddr++] = (byte)outChn;
-    //     cmdBytes[iAddr++] = 6;
-    //     cmdBytes[iAddr++] = 2;
-    //     cmdBytes[iAddr++] = 2;
-    //     CmdStringAddr = iAddr;
-    //     cmdBytes[iAddr++] = (byte)sendCnt;
-    //     cmdBytes[iAddr++] = (byte)(i + 1);
+        int needSendNum = length - sendedInfoAddr;
+        int thisTimeSendNum = (needSendNum > eachSendLeng) ? eachSendLeng : needSendNum;
+        sendbuf[iAddr++]=(unsigned char)(thisTimeSendNum & 0xFF);
+        sendbuf[iAddr++]=(unsigned char)(thisTimeSendNum & 0xFF00)>>8;
+        
+        memcpy(sendbuf+iAddr, muxInfoBytes + sendedInfoAddr, thisTimeSendNum);
+        sendedInfoAddr += thisTimeSendNum;
+        iAddr += thisTimeSendNum;
+        
+        memset(buf,0,sizeof(buf));
+        communicate(ip, sendbuf, iAddr, buf, &slen);
 
-    //     int needSendNum = length - sendedInfoAddr;
-    //     int thisTimeSendNum = (needSendNum > eachSendLeng) ? eachSendLeng : needSendNum;
-    //     ClsDataOper.LittleFormat_intToBytes(thisTimeSendNum, cmdBytes, iAddr, 2);
-    //     iAddr += 2;
-    //     Array.Copy(cmdBytes, _buf, iAddr);
-    //     //if (i + 1 == sendCnt)
-    //     //{
-    //     //    Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum - 4);
-    //     //    iAddr += thisTimeSendNum - 4;
-    //     //    ClsDataOper.LittleFormat_intToBytes((int)crcRslt, _buf, iAddr, 4);
-    //     //    iAddr += 4;
-    //     //}
-    //     //else
-    //     {
-    //         Array.Copy(muxInfoBytes, sendedInfoAddr, _buf, iAddr, thisTimeSendNum);
-    //         sendedInfoAddr += thisTimeSendNum;
-    //         iAddr += thisTimeSendNum;
-    //     }
-
-    //     readLen = netConn.WriteAndRead(_buf, iAddr);
-    //     if (readLen <= CmdStringAddr)
-    //         return false;
-    //     for (int j = 0; j < CmdStringAddr; j++)
-    //     {
-    //         if (cmdBytes[j] != _buf[j])
-    //             return false;
-    //     }
-    //     if (_buf[CmdStringAddr] != 0)
-    //         return false;
-    // }
+        if(slen <= iAddr){
+            printf("send SendOutputPrgInfo error \n");
+            if(buf[iAddr]!=0)            
+                return 0;
+        }
+        
+    }
     return 1;
 }
 

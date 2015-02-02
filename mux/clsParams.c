@@ -47,5 +47,5 @@ void Init(int outChannelNumMax)
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_sdt = 1;
 	}
 
-	m_autoMuxStartPid
+	clsProgram.m_autoMuxStartPid = 
 }
