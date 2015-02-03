@@ -7,6 +7,9 @@
 #include "EnumDef.h"
 #include "sendPrograms.h"
 
+#include "clsMux.h"
+
+
 
 extern ClsProgram_st clsProgram;
 
@@ -70,34 +73,13 @@ int ChnBypass_write(int outChnId)
 
 
 
-
-int sendPrograms(int outChnId)
+int sendPrograms(char *ip, int outChnId)
 {
 
-	//if(CreateTable(outChnId)) {
-		// ------ 设置输出通道信息 -----		
-		// int outChnIndexTmp = outChnId - 1;        
-
-		// ChnBypass_write(outChnId); // 发送直传标志
-		// SendMux(outChnId); // 发送表复用信息
-		
-		// SetOutChnTSID(outChnId, (ushort)db.valueTree.outChnArray[outChnIndexTmp].streamId);
-		// SetOutChnNetID(outChnId, (ushort)db.valueTree.outChnArray[outChnIndexTmp].networkId);
-		// SetOutChnOrgNetID(outChnId, (ushort)db.valueTree.outChnArray[outChnIndexTmp].oringal_networkid);
-		// SetOutChnTableVer(outChnId, (byte)db.valueTree.outChnArray[outChnIndexTmp].version);
-
-		// if (dgltCasSend != null) // CAS发送
-		// {
-		// 	dgltCasSend();
-		// }
-
-		// //if (m_isLoadFileDb) // 都发送一边通道表激活、码率信息
-		// {// 如果是用户读取的数据，需要发送通道信息
-		// 	m_isLoadFileDb = false;
-		// 	myCmd = ThreadCmdTypeEm.sendOption;
-		// 	threadParams--; // ThreadCmdTypeEm.sendOption 接收的下标是0开始
-		// 	continue;
-		// }
-		return 0;	
-	//}
+	if(CreateTable(outChnId))
+	{
+		sendOutPutMuxInfo(ip, outChnId);
+		sendOutPutOption(ip, outChnId);		
+	}
+	return 0;	
 }

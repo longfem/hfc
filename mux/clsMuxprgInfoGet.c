@@ -11,6 +11,47 @@
 extern ClsParams_st *pdb;
 extern ClsProgram_st clsProgram;
 
+ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
+{
+    unsigned char buf[20];
+    int i = 0;
+    unsigned char sendbuf[20];
+    int slen=0;
+  
+    //get call channal signal status
+    enum ErrorTypeEm res;
+
+    sendbuf[0]=0x77;
+    sendbuf[1]=0x6C;
+    sendbuf[2]=0x21;
+    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[4]=0x01;
+    sendbuf[5]=0x02;
+    sendbuf[6]=(unsigned char) outputRate & 0xff;
+    sendbuf[7]=(unsigned char) (outputRate & 0xff00)>>8;
+    sendbuf[8]=(unsigned char) (outputRate & 0xff0000>>16);
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, 9, buf, &slen);
+    
+    //printf("\n####Recive GetOutChnNetID receive nums=[%d]\n", slen );
+    if( 10 == slen ){
+          // for(i=0;i<slen;i++)
+          //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);    
+        
+        if (buf[9] == 0)
+            res = ok;
+        else 
+            res = error;
+    }
+    else 
+        res = error;
+
+    return res;
+
+}
+
+
 ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid)
 {
 	unsigned char buf[10];

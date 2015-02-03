@@ -69,6 +69,8 @@ int freePrograms(list_t *prginfolist)
 		
 	}
 
+	prginfolist = NULL;
+
 	
 	return 0;
 }
