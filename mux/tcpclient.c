@@ -61,13 +61,19 @@ int main(int argc,char *argv[])
 
 ////////////////////case end programs//////////
 
+/////////////////////
+    //int inCh = atoi(inChn);
+    char pProg[20480] = {0};    
+    getprgsJson(ip, 2, pProg);
+
 /////////////////// getoutprograms case/////////////
 
 
     Init(2);
     ret = getOutPrograms(ip, 0);
 
-
+//////////////////  sendPrograms
+    sendPrograms(ip, 1);
 
 ////////////////get out programs end//////////////
 ///////////////////////////case devinfo////////////////////////

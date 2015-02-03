@@ -1,5 +1,11 @@
-﻿var channel_root = [
+﻿var _selectcount = 0;//节目计数
+
+var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
+];
+
+var table_root = [
+	{"title": "表", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
 
 var programData = [
@@ -32,58 +38,113 @@ var dataSet1 = [
 	['3','24']	
 ];
 	
-function devinfo_output(){
+function devinfo_output(devType){
 	$('.main-content').empty();
-	$('.main-content').append(
-		'<div id="devoutput">'
-			+'<ul>'
-				+'<li><a href="#tabs-1">输出通道1</a></li>'
-				+'<li><a href="#tabs-2">表结构1</a></li>'
-			+'</ul>'
-			+'<div id="tabs-1">'
-				+'<div class="clearfix">'
-					+'<div id="devlist" class="channel_input"></div>'
-					+'<div id="channel" class="program"></div>'
+	if(devType == "8合1复用器"){
+		$('.main-content').append(
+			'<div id="devoutput">'
+				+'<ul>'
+					+'<li><a href="#tabs-1">输出通道1</a></li>'
+					+'<li><a href="#tabs-2">表结构1</a></li>'
+					+'<li><a href="#tabs-3">输出通道2</a></li>'
+					+'<li><a href="#tabs-4">表结构2</a></li>'
+				+'</ul>'
+				+'<div id="tabs-1">'
+					+'<div class="clearfix">'
+						+'<div id="devlist" class="channel_input"></div>'
+						+'<div id="channel" class="program"></div>'
+					+'</div>'
+					+'<div class="tbn_div">'
+						+'<button id="output-read" class="STRING_READ">读取</button>'
+						+'<button id="output-table" class="STRING_WRITE">制表</button>'
+						+'<button id="output-write" class="STRING_WRITE">应用</button>'					
+					+'</div>'
 				+'</div>'
-				+'<div class="tbn_div">'
-					+'<button id="output-read" class="STRING_READ">读取</button>'
-					+'<button id="output-table" class="STRING_WRITE">制表</button>'
-					+'<button id="output-write" class="STRING_WRITE">应用</button>'					
+				+'<div id="tabs-2">'
+					+'<div class="clearfix">'
+						+'<div id="out_tree" class="tbl_struct"></div>'
+						+'<div id="out_table">'
+							+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_outtable"></table>'
+						+'</div>'
+						
+					+'</div>'				
+				+'</div>'
+				+'<div id="tabs-3">'
+					+'<div class="clearfix">'
+						+'<div id="devlist2" class="channel_input"></div>'
+						+'<div id="channel2" class="program"></div>'
+					+'</div>'
+					+'<div class="tbn_div">'
+						+'<button id="output-read2" class="STRING_READ">读取</button>'
+						+'<button id="output-table2" class="STRING_WRITE">制表</button>'
+						+'<button id="output-write2" class="STRING_WRITE">应用</button>'					
+					+'</div>'
+				+'</div>'
+				+'<div id="tabs-4">'
+					+'<div class="clearfix">'
+						+'<div id="out_tree2" class="tbl_struct"></div>'
+						+'<div id="out_table">'
+							+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_outtable2"></table>'
+						+'</div>'
+						
+					+'</div>'				
 				+'</div>'
 			+'</div>'
-			+'<div id="tabs-2">'
-				+'<div class="clearfix">'
-					+'<div id="out_tree" class="tbl_struct"></div>'
-					+'<div id="out_table">'
-						+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_outtable"></table>'
-					+'</div>'
-					
-				+'</div>'
-				+'<div id="dialog-NIT" title="NIT段编辑">'			
-					+'<div class="nit_edit">'
-						+'<label>网络ID &nbsp</label>'
-						+'<input type="text" class="nit_id" value=""></input>&nbsp&nbsp(十六进制)<br/>'
-						+'<label>网络名称</label>'
-						+'<input type="text" class="nit_name" value="段1"></input>'
-						+'<br/>'
-						+'<textarea rows="8" style="width:350px;margin-left:30px">'
-						+'</textarea>'
-					+'</div>'
-				+'</div>'
-				+'<!-- Definition of context menu -->'
-				+'<ul id="table_menu" class="contextMenu ui-helper-hidden">'
-					+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-					+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-					+'<li>---</li>'
-					+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
-					+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
-					+'<li>---</li>'
-					+'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
-					+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
-					
+		);
+	}else{
+		$('.main-content').append(
+			'<div id="devoutput">'
+				+'<ul>'
+					+'<li><a href="#tabs-1">输出通道1</a></li>'
+					+'<li><a href="#tabs-2">表结构1</a></li>'
 				+'</ul>'
+				+'<div id="tabs-1">'
+					+'<div class="clearfix">'
+						+'<div id="devlist" class="channel_input"></div>'
+						+'<div id="channel" class="program"></div>'
+					+'</div>'
+					+'<div class="tbn_div">'
+						+'<button id="output-read" class="STRING_READ">读取</button>'
+						+'<button id="output-table" class="STRING_WRITE">制表</button>'
+						+'<button id="output-write" class="STRING_WRITE">应用</button>'					
+					+'</div>'
+				+'</div>'
+				+'<div id="tabs-2">'
+					+'<div class="clearfix">'
+						+'<div id="out_tree" class="tbl_struct"></div>'
+						+'<div id="out_table">'
+							+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_outtable"></table>'
+						+'</div>'
+						
+					+'</div>'				
+				+'</div>'				
+			+'</div>'
+		);
+	}
+	$('.main-content').append(
+		'<div id="dialog-NIT" title="NIT段编辑">'			
+			+'<div class="nit_edit">'
+				+'<label>网络ID &nbsp</label>'
+				+'<input type="text" class="nit_id" value=""></input>&nbsp&nbsp(十六进制)<br/>'
+				+'<label>网络名称</label>'
+				+'<input type="text" class="nit_name" value="段1"></input>'
+				+'<br/>'
+				+'<textarea rows="8" style="width:350px;margin-left:30px">'
+				+'</textarea>'
 			+'</div>'
 		+'</div>'
+		+'<!-- Definition of context menu -->'
+		+'<ul id="table_menu" class="contextMenu ui-helper-hidden">'
+			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
+			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
+			+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
+			
+		+'</ul>'
 		+'<!-- Definition of context menu -->'
 		+'<ul id="program_menu" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
@@ -244,6 +305,23 @@ function devinfo_output(){
 		]
 	});
 	
+	//表结构右侧table2
+	$('#tbl_outtable2').dataTable( {
+		"data": dataSet,
+		"order": [[ 0, "asc" ]],
+		"paging":   false,
+		"info":     false,
+		"searching":   false,
+		"scrollCollapse": true,
+		"columns": [
+			{ "title": "NO"},
+			{ "title": "CH"},
+			{ "title": "IN-PID", "width":"30%"},
+			{ "title": "OUT-PID"},
+			{ "title": "TYPE" }
+		]
+	});
+	
 	var tabs = $("#devoutput").tabs();
 	$( "#output-read" ).button({
       icons: {
@@ -302,6 +380,7 @@ function devinfo_output(){
       }
     }).click(function( event ) {
         event.preventDefault();
+		$("#out_tree").fancytree("getTree").reload();
 		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
 		var inCh = 1, flag = 0; //通道号	
 		var jsondata = new Array();
@@ -327,7 +406,109 @@ function devinfo_output(){
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/programs/maketable",
-			 data: '{' + jsondata.toString() + '}',
+			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+			 dataType: "json",
+			 success: function(data){
+				var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+				tablenode.addChildren(data);
+			 },    
+			 error : function(err) { 
+				alert(err);
+			 }   
+		});
+    });
+	
+	$( "#output-write" ).button({
+      icons: {
+        primary: "ui-icon-pencil"
+      }
+    }).click(function( event ) {
+        event.preventDefault();
+		alert('------------------!!!');
+    });
+	
+	$( "#output-read2" ).button({
+      icons: {
+        primary: "ui-icon-comment"
+      }
+    }).click(function( event ) {
+        event.preventDefault();
+		$("#devlist2").fancytree("getTree").reload();
+		$("#channel2").fancytree("getTree").reload();
+		var node = $("#devlist2").fancytree("getTree").getNodeByKey("id1.0");
+		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+		var _intChannelCntMax = 0;//设备输入通道数
+		//获取输出通道信息
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/getoutprg",
+			// data: {ip:"192.168.1.134", inch:2},
+			 dataType: "text",
+			 success: function(data){
+				_intChannelCntMax = Number(data);
+			 },    
+			 error : function(err) {    
+				  // view("异常！");   
+				var xxx = err;
+				  alert("异常！====="+JSON.stringify(err));    
+			 }   
+		});
+		if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
+			for(var i=1;i<_intChannelCntMax+1; i++){
+				$.ajax({
+					 type: "GET",
+					 async:false,
+					 url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
+					// data: {ip:"192.168.1.134", inch:2},
+					 dataType: "json",
+					 success: function(data){
+						data = JSON.stringify(data).replace('\\','');
+						var treeData1 = JSON.parse(data);				
+						node.addChildren(treeData1);
+					 },    
+					 error : function(err) {    
+						  // view("异常！");   
+						var xxx = err;
+						  alert("异常！====="+JSON.stringify(err));    
+					 }   
+				});
+			}
+		}	
+    });
+	
+	$( "#output-table2" ).button({
+      icons: {
+        primary: "ui-icon-gear"
+      }
+    }).click(function( event ) {
+        event.preventDefault();
+		var nodes = $("#channel2").fancytree("getTree").getNodeByKey("id1.0").children;
+		var inCh = 1, flag = 0; //通道号	
+		var jsondata = new Array();
+		var prgindex = new Array();
+		var jsonstr;
+		nodes.forEach(function(node) {
+			flag = 0;
+			prgindex = new Array();
+			var chstr = "inCh" + inCh;
+			if( node.hasChildren() ) {
+				var prgnodes = node.children;				
+				prgnodes.forEach(function(prgnode) {					
+					prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
+					flag++;
+				});					
+			}
+			jsonstr = chstr+':{' + prgindex.toString() +'}';
+			jsondata[inCh-1] = jsonstr;
+			inCh++;
+		});	
+		//alert("=========arraystring======>>>"+ jsondata.toString());
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/maketable",
+			 data: '{' + jsondata.toString() + ',channel:'+2+'}',
 			 dataType: "text",
 			 success: function(data){
 				
@@ -340,7 +521,7 @@ function devinfo_output(){
 		});
     });
 	
-	$( "#output-write" ).button({
+	$( "#output-write2" ).button({
       icons: {
         primary: "ui-icon-pencil"
       }
@@ -359,17 +540,13 @@ function devinfo_output(){
 		menu: {
 			selector: "#inputprg_menu",
 			position: {my: "center"},
-			create: function(event, data){
-			    $.ui.fancytree.debug("Menu create ", data.$menu);
-			},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
 				if(data.node.key == "id1.0"){
 					$(".menu_delete").css("display", "none");
 				}else if(data.node.key.length == 5){
 					$(".menu_delete").css("display", "block");
-				}
-			    
+				}			    
 			},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -394,13 +571,253 @@ function devinfo_output(){
 						break;
 					}			  
 				}
-			},
-			close: function(event, data){
-			  $.ui.fancytree.debug("Menu close ", data.$menu, data.node);
 			}
 		},
 		select: function(event, data) {
 			var channeltree =  $("#channel").fancytree("getTree");
+			//删除节目树节点
+			channeltree.reload();
+			var prgnode = channeltree.getNodeByKey("id1.0");			
+
+			//添加至节目树	
+			_selectcount = 0;
+			var selNodes = data.tree.getSelectedNodes();			
+			$.map(selNodes, function(node){				
+				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
+				switch(node.key.length){
+					case 7:	//节目节点
+						if(channeltree.getNodeByKey(node.key) == null){
+							tmpnode.addNode(node.toDict());
+							_selectcount++;
+						}						
+						break;
+					case 9:
+						var prgkey = node.key.substring(0,7);
+						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+						}else{
+							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							_selectcount++;
+						}						
+						break;
+					case 11:
+						var prgkey = node.key.substring(0,7);
+						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+							}else{
+								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
+							}							
+						}else{
+							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							_selectcount++;
+							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
+						}		
+						//count++;
+						break;
+					default:
+						
+						break;
+				}
+				
+			});
+			prgnode.setTitle("节目: "+ _selectcount);
+			prgnode.render();
+		},
+		click: function(event, data) {			
+			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
+			  data.node.toggleSelected();
+			}			
+		}
+	});
+	//节目树
+	$("#channel").fancytree({
+		extensions: ["menu"],
+		selectMode: 1,
+		minExpandLevel:2,
+		source: programData,
+		menu: {
+			selector: "#program_menu",
+			position: {my: "center"},
+			beforeOpen: function(event, data){
+			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
+				if(data.node.key == "id1.0"){
+					$(".menu_add").css("display", "none");
+					$(".menu_deleteall").css("display", "none");
+					$(".menu_edit").css("display", "none");
+					$(".menu_delete").css("display", "none");
+					$(".menu_prgdeleteall").css("display", "block");
+					$(".menu_prgitems").css("display", "block");
+					$(".menu_re_prg").css("display", "block");
+					$(".menu_re_pid").css("display", "block");
+					$(".menu_pidtrans").css("display", "block");
+				}else{
+					$(".menu_prgdeleteall").css("display", "none");
+					$(".menu_prgitems").css("display", "none");
+					$(".menu_re_prg").css("display", "none");
+					$(".menu_re_pid").css("display", "none");
+					$(".menu_pidtrans").css("display", "none");
+					$(".menu_add").css("display", "block");
+					$(".menu_deleteall").css("display", "block");
+					$(".menu_edit").css("display", "block");
+					$(".menu_delete").css("display", "block");
+				}
+			    
+			},
+			select: function(event, data){				
+				switch(data.menuId){
+					case '#expandall' :{
+						var nodes = data.node.children;
+						data.node.setExpanded(true);
+						$.each(nodes, function(index,item){
+							item.setExpanded(true);
+							//item.render();
+						});
+						break;
+					} case '#collasp': {
+						data.node.setExpanded(false);
+						break;
+					} case '#delete': {
+						
+						break;
+					} case '#edit': {
+						dialog.dialog( "open" );
+						break;
+					} case '#deleteall': {
+						
+						break;
+					} case '#add': {
+						dialog_desc.dialog( "open" );
+						break;
+					} case '#prgdeleteall': {
+						
+						break;
+					} case '#itmes': {
+						dig_itmes.dialog( "open" );
+						break;
+					} case '#re_prg': {
+						
+						break;
+					} case '#re_pid': {
+						
+						break;
+					} case '#pidtrans': {
+						dialog_pid.dialog( "open" );
+						break;
+					} default: {
+						alert("Menu select " + data.menuId + ", " + data.node);
+						break;
+					}			  
+				}
+			}
+		},
+		click: function(event, data) {
+			// We should not toggle, if target was "checkbox", because this
+			// would result in double-toggle (i.e. no toggle)
+			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
+			  data.node.toggleSelected();
+			}
+		}
+	});	
+	
+	//表结构树
+	$("#out_tree").fancytree({
+		extensions: ["menu"],
+		selectMode: 1,
+		minExpandLevel:3,
+		source: table_root,
+		menu: {
+			selector: "#table_menu",
+			position: {my: "center"},
+			select: function(event, data){				
+				switch(data.menuId){
+					case '#expandall' :{
+						var nodes = data.node.children;
+						data.node.setExpanded(true);
+						$.each(nodes, function(index,item){
+							item.setExpanded(true);
+							//item.render();
+						});
+						break;
+					} case '#collasp': {
+						data.node.setExpanded(false);
+						break;
+					} case '#add': {
+						dialog_NIT.dialog( "open" );
+						break;
+					} case '#delete': {
+						//dialog.dialog( "open" );
+						break;
+					} case '#import': {
+						
+						break;
+					} case '#export': {
+						
+						break;
+					} default: {
+						alert("Menu select " + data.menuId + ", " + data.node);
+						break;
+					}			  
+				}
+			}
+		},
+		click: function(event, data) {
+			// We should not toggle, if target was "checkbox", because this
+			// would result in double-toggle (i.e. no toggle)
+			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
+			  data.node.toggleSelected();
+			}
+		}
+	});
+	
+	//输入通道树
+	$("#devlist2").fancytree({
+		extensions: ["menu"],
+		checkbox: true,
+		selectMode: 3,
+		minExpandLevel:2,
+		source: channel_root,
+		menu: {
+			selector: "#inputprg_menu",
+			position: {my: "center"},
+			beforeOpen: function(event, data){
+				if(data.node.key == "id1.0"){
+					$(".menu_delete").css("display", "none");
+				}else if(data.node.key.length == 5){
+					$(".menu_delete").css("display", "block");
+				}			    
+			},
+			select: function(event, data){				
+				switch(data.menuId){
+					case '#expandall' :{
+						var nodes = data.node.children;
+						data.node.setExpanded(true);
+						$.each(nodes, function(index,item){
+							item.setExpanded(true);
+							//item.render();
+						});
+						break;
+					} case '#collasp': {
+						data.node.setExpanded(false);
+						break;
+					} case '#delete': {
+						while( data.node.hasChildren() ) {
+							data.node.getFirstChild().remove();
+						}
+						break;
+					}default: {
+						alert("Menu select " + data.menuId + ", " + data.node);
+						break;
+					}			  
+				}
+			}
+		},
+		select: function(event, data) {
+			var channeltree =  $("#channel2").fancytree("getTree");
 			//删除节目树节点
 			channeltree.reload();
 			var prgnode = channeltree.getNodeByKey("id1.0");			
@@ -461,7 +878,7 @@ function devinfo_output(){
 		}
 	});
 	//节目树
-	$("#channel").fancytree({
+	$("#channel2").fancytree({
 		extensions: ["menu"],
 		selectMode: 1,
 		minExpandLevel:2,
@@ -469,9 +886,6 @@ function devinfo_output(){
 		menu: {
 			selector: "#program_menu",
 			position: {my: "center"},
-			create: function(event, data){
-			    $.ui.fancytree.debug("Menu create ", data.$menu);
-			},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
 				if(data.node.key == "id1.0"){
@@ -496,12 +910,6 @@ function devinfo_output(){
 					$(".menu_delete").css("display", "block");
 				}
 			    
-			},
-			open: function(event, data){
-			  $.ui.fancytree.debug("Menu open ", data.$menu, data.node);
-			},
-			focus: function(event, data){
-			  $.ui.fancytree.debug("Menu focus ", data.menuId, data.node);
 			},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -548,18 +956,7 @@ function devinfo_output(){
 						break;
 					}			  
 				}
-			},
-			close: function(event, data){
-			  $.ui.fancytree.debug("Menu close ", data.$menu, data.node);
 			}
-		},
-		select: function(event, data) {
-			// Display list of selected nodes
-			var selNodes = data.tree.getSelectedNodes();
-			// convert to title/key array
-			var selKeys = $.map(selNodes, function(node){
-				 return "[" + node.key + "]: '" + node.title + "'";
-			  });
 		},
 		click: function(event, data) {
 			// We should not toggle, if target was "checkbox", because this
@@ -571,27 +968,15 @@ function devinfo_output(){
 	});	
 	
 	//表结构树
-	$("#out_tree").fancytree({
+	$("#out_tree2").fancytree({
 		extensions: ["menu"],
 		checkbox: true,
 		selectMode: 2,
 		minExpandLevel:3,
-		source: channel_root,
+		source: table_root,
 		menu: {
 			selector: "#table_menu",
 			position: {my: "center"},
-			create: function(event, data){
-			    $.ui.fancytree.debug("Menu create ", data.$menu);
-			},
-			beforeOpen: function(event, data){
-			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);				
-			},
-			open: function(event, data){
-			  $.ui.fancytree.debug("Menu open ", data.$menu, data.node);
-			},
-			focus: function(event, data){
-			  $.ui.fancytree.debug("Menu focus ", data.menuId, data.node);
-			},
 			select: function(event, data){				
 				switch(data.menuId){
 					case '#expandall' :{
@@ -622,19 +1007,7 @@ function devinfo_output(){
 						break;
 					}			  
 				}
-			},
-			close: function(event, data){
-			  $.ui.fancytree.debug("Menu close ", data.$menu, data.node);
 			}
-		},
-		select: function(event, data) {
-			// Display list of selected nodes
-			var selNodes = data.tree.getSelectedNodes();
-			// convert to title/key array
-			var selKeys = $.map(selNodes, function(node){
-				 return "[" + node.key + "]: '" + node.title + "'";
-			  });
-			//$("#echoSelection2").text(selKeys.join(", "));
 		},
 		click: function(event, data) {
 			// We should not toggle, if target was "checkbox", because this
