@@ -1,5 +1,11 @@
-﻿var channel_root = [
+﻿var _selectcount = 0;//节目计数
+
+var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
+];
+
+var table_root = [
+	{"title": "表", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
 
 var programData = [
@@ -374,6 +380,7 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
+		$("#out_tree").fancytree("getTree").reload();
 		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
 		var inCh = 1, flag = 0; //通道号	
 		var jsondata = new Array();
@@ -399,15 +406,14 @@ function devinfo_output(devType){
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/programs/maketable",
-			 data: '{' + jsondata.toString() + ',channel:'+1+'}',
-			 dataType: "text",
+			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+			 dataType: "json",
 			 success: function(data){
-				
+				var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+				tablenode.addChildren(data);
 			 },    
-			 error : function(err) {    
-				  // view("异常！");   
-				var xxx = err;
-				//  alert("异常！====="+JSON.stringify(err));    
+			 error : function(err) { 
+				alert(err);
 			 }   
 		});
     });
@@ -574,7 +580,7 @@ function devinfo_output(devType){
 			var prgnode = channeltree.getNodeByKey("id1.0");			
 
 			//添加至节目树	
-			var count = 0;//节目计数
+			_selectcount = 0;
 			var selNodes = data.tree.getSelectedNodes();			
 			$.map(selNodes, function(node){				
 				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
@@ -582,7 +588,7 @@ function devinfo_output(devType){
 					case 7:	//节目节点
 						if(channeltree.getNodeByKey(node.key) == null){
 							tmpnode.addNode(node.toDict());
-							count++;
+							_selectcount++;
 						}						
 						break;
 					case 9:
@@ -592,7 +598,7 @@ function devinfo_output(devType){
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
 							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
+							_selectcount++;
 						}						
 						break;
 					case 11:
@@ -607,7 +613,7 @@ function devinfo_output(devType){
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
 							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
+							_selectcount++;
 							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
 							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 						}		
@@ -619,7 +625,7 @@ function devinfo_output(devType){
 				}
 				
 			});
-			prgnode.setTitle("节目: "+ count);
+			prgnode.setTitle("节目: "+ _selectcount);
 			prgnode.render();
 		},
 		click: function(event, data) {			
@@ -722,9 +728,9 @@ function devinfo_output(devType){
 	$("#out_tree").fancytree({
 		extensions: ["menu"],
 		checkbox: true,
-		selectMode: 2,
+		selectMode: 1,
 		minExpandLevel:3,
-		source: channel_root,
+		source: table_root,
 		menu: {
 			selector: "#table_menu",
 			position: {my: "center"},
@@ -968,7 +974,7 @@ function devinfo_output(devType){
 		checkbox: true,
 		selectMode: 2,
 		minExpandLevel:3,
-		source: channel_root,
+		source: table_root,
 		menu: {
 			selector: "#table_menu",
 			position: {my: "center"},

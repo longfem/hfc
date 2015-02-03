@@ -30,14 +30,14 @@ getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
 clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
-getOutPrograms.o clsMakeTable.o clsPsiTable.o 
+getOutPrograms.o clsMakeTable.o clsPsiTable.o getTableJson.o
 
 LIB_OBJ=  communicate.o list.o getAllChannelSignal.o getOutRate.o \
 getMultiMethod.o getMultiProgNum.o getMultiProgNum2.o  getPidMapSumCnt.o  \
 curCHNSearched.o getOutPidMapNum.o getPrgCnt.o getPrgramInfo.o getPrograms.o \
 freePrograms.o sendPrograms.o clsMuxOutCh.o cJSON.o getPrgJson.o devinfo.o \
 clsMuxprgInfoGet.o clsMuxSend.o clsProgram.o clsParams.o getBaseJson.o \
-getOutPrograms.o clsPsiTable.o
+getOutPrograms.o clsMakeTable.o clsPsiTable.o getTableJson.o
 
 .PHONY: all clean distclean
 
@@ -73,6 +73,7 @@ build:
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsPsiTable.c		
 	$(CC) $(CFLAGS) $(IFLAGS) -c clsParams.c			
 	$(CC) $(CFLAGS) $(IFLAGS) -c getBaseJson.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c getTableJson.c
 	
 
 	

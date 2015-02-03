@@ -13,7 +13,10 @@
 #include "getPrograms.h"
 #include "clsParams.h"
 #include "getOutPrograms.h"
+#include "getTableJson.h"
+
 extern ClsProgram_st clsProgram;
+extern ClsParams_st *pdb;
 
 static char* substr(const char*str,unsigned start, unsigned end)
 {
@@ -50,6 +53,7 @@ static void maketable(HttpConn *conn) {
 	int i = 0, j = 0, k = 0,cm = 0, pos = 0, outprglen = 0, prgindex = 0;
 	char str[6] = {0};
 	char idstr[4] = {0};
+	char outstring[20480] = {0};
 	ChannelProgramSt *pst = NULL;
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *inprg = NULL;
@@ -59,28 +63,18 @@ static void maketable(HttpConn *conn) {
 	Dev_prgInfo_st *testoutprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
+	
+	list_get(&(clsProgram.outPrgList), pos-1, &outpst);
+	if(outpst != NULL){
+		if(list_len(&(outpst->prgNodes)) !=0){					
+			freePrograms(&outpst->prgNodes);
+		}
+	}
+	list_init(&(outpst->prgNodes));
 	//提取要制表的节目信息
 	for(i=0; i<clsProgram._intChannelCntMax; i++){
 		sprintf(str, "inCh%d", i+1);				
-		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){	
-			list_get(&(clsProgram.outPrgList), pos-1, &outpst);
-			if(outpst != NULL){
-				if(list_len(&(outpst->prgNodes)) !=0){					
-					freePrograms(&outpst->prgNodes);
-				}				
-				/* outprglen = list_len(&(outpst->prgNodes));
-				//释放输出通道占用的节目内存
-				if(0 != outprglen){
-					for(j=0; j< outprglen; j++){
-						list_get(&(outpst->prgNodes), j, &outprg);
-						if(outprg != NULL){
-							free(outprg);
-							outprg = NULL;
-						}
-					}
-				} */
-			}
-			list_init(&(outpst->prgNodes));
+		if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){				
 			//获取输入通道信息
 			list_get(&(clsProgram.inPrgList), i, &pst);
 			//加入输出通道列表
@@ -143,12 +137,26 @@ static void maketable(HttpConn *conn) {
 	
 	list_get(&(clsProgram.outPrgList), 0, &testoutpst);
 	list_get(&(testoutpst->prgNodes), 0, &testoutprg);
-	printf("===%d===>>>>%d\n", testoutprg->prgNum, testoutprg->chnId);	
+	//printf("===%d===>>>>%d\n", testoutprg->prgNum, testoutprg->chnId);
+
+	//制表
+	MakeTable(pos, 	pdb->pvalueTree->poutChnArray, outpst->prgNodes);
 	
-	render("");
+	
+	//获取制表后结果
+	getTableJson(pos, outstring);
+	render(outstring);
     
 } 
 
+static void getTable(HttpConn *conn) { 
+    char outstring[1024] = {0};
+	MprJson *jsonparam = httpGetParams(conn); 
+    char *prgcount = mprGetJson(jsonparam, "prgnum"); 
+	int count = atoi(prgcount);
+	
+	render(outstring);    
+} 
 
 static void common(HttpConn *conn) {
 	
@@ -194,6 +202,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineAction(route, "programs-cmd-getprg", getprg);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
+	espDefineAction(route, "programs-cmd-getTable", getTable);
     
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

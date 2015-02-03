@@ -3,26 +3,36 @@
 #include "datastructdef.h"
 #include "list.h"
 
-static  pat_senction_st *table_pat[4];
+extern ClsMux_st *pclsMux;
 
 extern ClsProgram_st clsProgram;
-
-int MakeTable(int outChnId, DatabaseOutputChannel_st outChnArray[],	list_t  prginfolist)
+static int isTableInit=0;
+int MakeTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prginfolist)
 {
+	//Error_psiTable errFlag;
 	int outChnIndex = outChnId - 1;
-	int streamId = 1;
-	int netWorkId = 16;
-	int oringinalNetworkId = 2184;
+	int rstPat;
+	int i;
+
+
+	ClsMuxInit(2,2);
+	ClsMuxInit(2,2);
+
+
+	//int streamId = 1;
+	//int netWorkId = 16;
 	int version = 2;
-	unsigned char tmpBytes[1024];
+	unsigned char patTable[188];
+	unsigned char pmtTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
-/*
+
 	int streamId = outChnArray[outChnIndex].streamId;
 	int netWorkId = outChnArray[outChnIndex].networkId;
 	int oringinalNetworkId = outChnArray[outChnIndex].oringal_networkid;
-	int version = outChnArray[outChnIndex].version;
-*/
+	//int version = outChnArray[outChnIndex].version;
+
 	// PAT
+
 	/*
 	if (outChnArray[outChnIndex].isAutoRaiseVersion) // 自动增加版本号
 	{
@@ -32,37 +42,97 @@ int MakeTable(int outChnId, DatabaseOutputChannel_st outChnArray[],	list_t  prgi
 	outChnArray[outChnIndex].version = version;
 	//db.SettingSave();
 	}
-
 	*/
-
-	//table_pat[outChnIndex] = CreatePatNoju(buildOoutPrgList(),tmpBytes, streamId, netWorkId, version);
-
+	BufferUn_st  *pbuff;
 
 
-	table_pat[outChnIndex] = CreatePatStan(prginfolist,tmpBytes, streamId, netWorkId, version);
-	////printf("call getprograms	prgnum = [%0x]\n",	((program_info_t *)(prginfolist.head->data))->prgNum);
-	pat_senction_st* PATS=table_pat[outChnIndex];
-	//printPAT(PATS);
-
-  //   pat_senction_st *p_pat = (pat_senction_st*)malloc(sizeof(pat_senction_st));
-	 // int xx=ParsePat(tmpBytes, 5, p_pat);
-
-	  // printPAT(p_pat);
+	rstPat=CreatePatStan(prginfolist,patTable, streamId, netWorkId, version);	
 
 
-	//pmt
-	list_get(&prginfolist, 0, &ptmpPrgInfo);
-	pmt_senction_st* PMTS=CreatePmtStan(ptmpPrgInfo,tmpBytes,version);
+	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
+	memcpy(pbuff->pbuf, patTable, sizeof(patTable));
+	pbuff->bufLen=sizeof(patTable);
+	//ist_set(&pclsMux->table_pat,outChnIndex,pbuff);
 
-	//pmt_senction_st *p_pmt = (pmt_senction_st*)malloc(sizeof(pmt_senction_st));
-//int 	xx=ParsePmt(tmpBytes, 5, p_pmt);
-	printPMT(PMTS);
+	if (!rstPat)
+	{
+		CleanOutputTable(outChnId);
+		//ShowCreatTableErrorInfo(errFlag, "[PAT]");
+		return 0;
+	}
+	else
+	{	
+		printf("make pat SUCCESSFULL---%d\n",rstPat);
+	}
+
+
+#if 1
+	pat_senction_st *p_pat = (pat_senction_st*)malloc(sizeof(pat_senction_st));	
+	rstPat=ParsePat(pbuff->pbuf, 5, p_pat);
+	if(rstPat)
+	{
+		printPAT(p_pat);
+	}
+
+#endif
+
+
+	list_t *tablePmt;
+	list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
+	while(list_len(tablePmt))
+	{
+		list_pop_tail(tablePmt);	
+	}
+
+	//for (i = 0; i < list_len(&prginfolist); i++)
+	for (i = 0; i < 1; i++)
+	{
+		list_get(&prginfolist, i, &ptmpPrgInfo);	
+		rstPat=CreatePmtStan(ptmpPrgInfo,pmtTable,version);
+
+		if(rstPat)
+		{
+			printf("make pmt SUCCESSFULL---%d\n",rstPat);
+			BufferUn_st *pmtbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+
+			pmtbuff->pbuf=malloc(sizeof(pmtTable));
+			memcpy(pmtbuff->pbuf, pmtTable, sizeof(pmtTable));
+			pmtbuff->bufLen=sizeof(pmtTable);
+			list_append(tablePmt,pmtbuff);	
+
+		}
+		else
+		{
+			return 0;
+
+		}
+
+
+#if 0
+
+		BufferUn_st  *outPMTBuffer;
+		list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
+		list_get(tablePmt,i,&outPMTBuffer);
+		pmt_senction_st *PMTS = (pmt_senction_st*)malloc(sizeof(pmt_senction_st));
+		int rst=ParsePmt(outPMTBuffer->pbuf, 5, PMTS);
+		printPMT(PMTS);
+#endif
+
+	}	
+
+
+
+
+
+
 
 
 }
 
 void printPAT(pat_senction_st* PATS)
 {
+	int i;
+
 	printf("crc32----%d\n",PATS->crc32);
 	printf("current_next_indicator----%d\n",PATS->current_next_indicator);
 	printf("flag_0----%d\n",PATS->flag_0);
@@ -77,21 +147,23 @@ void printPAT(pat_senction_st* PATS)
 	printf("transport_stream_id----%d\n",PATS->transport_stream_id);
 	printf("version_number----%d\n",PATS->version_number);
 
-	  patPrg_t* p_program = PATS->p_first_program;
-	  while(p_program != NULL)
-	  {
-		  printf("patPrg_st pid----%d\n",p_program->pid);
-		  printf("patPrg_st program_number ----%d\n",p_program->program_number);
-		  printf("patPrg_st reserved----%d\n",p_program->reserved);
-		  p_program=p_program->p_next;
-	  }
+	patPrg_t* p_program = PATS->patPrg_tList;
+	for (i = 0; i < PATS->patPrg_tListLen; i++)
+	{
+		printf("patPrg_st pid----%d\n",p_program->pid);
+		printf("patPrg_st program_number ----%d\n",p_program->program_number);
+		printf("patPrg_st reserved----%d\n",p_program->reserved);
+		p_program++;
+	}
 
 
 }
 
 
 void printPMT(pmt_senction_st* PMTS)
-{int i;
+{
+
+	int i;
 	int j;
 
 	printf("crc32----%d\n",PMTS->crc32);
@@ -114,55 +186,71 @@ void printPMT(pmt_senction_st* PMTS)
 	printf("version_number----%d\n",PMTS->version_number);
 
 
+	int k;
 
-	 Commdes_t* p_program = PMTS->pmtDesList;
+	Commdes_t* p_program = PMTS->pmtDesList;
 
 	for (i = 0; i < PMTS->pmtDesListLen; i++)
-			{
-			
-			printf("Commdes_st index----%d\n",p_program->index);
-			printf("Commdes_st tag ----%d\n",p_program->tag);
-			printf("Commdes_st userNew----%d\n",p_program->userNew);
-	p_program++;
-			
+	{
 
-			
+		printf("Commdes_st index----%d\n",p_program->index);
+		printf("Commdes_st tag ----%d\n",p_program->tag);
+		printf("Commdes_st userNew----%d\n",p_program->userNew);
+		printf("Commdes_st dataLen %d \n",p_program->dataLen);
+
+
+
+		unsigned char *ptmp=p_program->data;
+
+		for (k = 0; k < p_program->dataLen; k++)
+		{	  
+
+			printf(" %d  ",*ptmp++);		  
 
 		}
 
 
 
-	 
 
-	DataStream_t* p_last_DataStream_t = PMTS->pdataStreamList;
-
-
-	for (i = 0; i < PMTS->pdataStreamListLen; i++)
-			{
-			
-
-		printf("DataStream_st inChn----%d\n",p_last_DataStream_t->inChn);
-		printf("DataStream_st index ----%d\n",p_last_DataStream_t->index);
-		printf("DataStream_st inPid----%d\n",p_last_DataStream_t->inPid);
-		printf("DataStream_st outPid----%d\n",p_last_DataStream_t->outPid);
-	    printf("DataStream_st streamType----%d\n",p_last_DataStream_t->streamType);
-
-		p_program = p_last_DataStream_t->desNode;
-	   	for (j = 0; j< p_last_DataStream_t->desNodeLen; j++)
-			{
-		 printf("Commdes_st index----%d\n",p_program->index);
-		 printf("Commdes_st tag ----%d\n",p_program->tag);
-		 printf("Commdes_st userNew----%d\n",p_program->userNew);
-		   p_program++;
-	   }
-
-	p_last_DataStream_t++;
-
+		p_program++;
 
 	}
 
 
+	DataStream_t* p_last_DataStream_t = PMTS->pdataStreamList;
 
+	for (i = 0; i < PMTS->pdataStreamListLen; i++)
+	{
+		printf("DataStream_st inChn----%d\n",p_last_DataStream_t->inChn);
+		printf("DataStream_st index ----%d\n",p_last_DataStream_t->index);
+		printf("DataStream_st inPid----%d\n",p_last_DataStream_t->inPid);
+		printf("DataStream_st outPid----%d\n",p_last_DataStream_t->outPid);
+		printf("DataStream_st streamType----%d\n",p_last_DataStream_t->streamType);
+
+
+		p_program = p_last_DataStream_t->desNode;
+		for (j = 0; j< p_last_DataStream_t->desNodeLen; j++)
+		{
+			printf("Commdes_st index----%d\n",p_program->index);
+			printf("Commdes_st tag ----%d\n",p_program->tag);
+			printf("Commdes_st userNew----%d\n",p_program->userNew);
+			printf("Commdes_st dataLen is :%d  vList: ",p_program->dataLen);
+
+
+			unsigned char *ptmp=p_program->data;
+
+			for (k = 0; k < p_program->dataLen; k++)
+			{
+
+				printf(" %d  ",*ptmp++);			
+
+			}
+
+			p_program++;
+		}
+
+		p_last_DataStream_t++;
+	}
 }
 
 int AutoMakeNewPid(int outChannel)
@@ -177,7 +265,61 @@ int MakePidMapTable(int outChannel)
 
 int CleanOutputTable(int outChannel)
 {
+	/*
+	BufferUn_st  *pbuff;
+	int outChnIndex=outChannel-1;
+	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
+
+	if(pbuff!=NULL)
+	{
+	list_append(&pclsMux->table_pat,NULL);
+	}
+	*/
 
 }
+
+
+
+void ClsMuxInit(int _outMaxNum,int treeView_inLength)
+{
+	int i;
+	if(isTableInit)
+	{
+
+		printf("pclsMuxb is already not null****\n");
+	}
+	else
+	{	
+		printf("go to init pclsMuxb****\n");
+
+		if (_outMaxNum > 0)
+		{
+			pclsMux=(ClsMux_st*)malloc(sizeof(ClsMux_st));
+			list_init(&pclsMux->table_pat);
+			list_init(&pclsMux->table_pmtList);
+		}
+		for (i = 0; i < treeView_inLength; i++)
+		{
+			if (_outMaxNum > 0)
+			{
+				BufferUn_st *pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+				pbuff->pbuf=malloc(188);
+				pbuff->bufLen=999;
+				list_append(&pclsMux->table_pat,pbuff);
+
+
+				list_t *table_pmt=(list_t*)malloc(sizeof(list_t));
+				list_init(table_pmt);
+				list_append(&pclsMux->table_pmtList,table_pmt);
+
+			}
+		}	
+		isTableInit=1;
+
+	}
+
+}
+
+
 
 

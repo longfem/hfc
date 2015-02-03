@@ -182,7 +182,6 @@ typedef struct ChannelProgramt
 	 int program_number; // 16b
 	 int reserved; // 3b
 	 int pid; // 13b	  if(program_number == 0) pid == networkId;
-	 struct patPrg_st * p_next;
 
 }patPrg_t;
 
@@ -201,7 +200,8 @@ typedef struct pat_senction_t
 	 int current_next_indicator; // 1b
 	 int section_number; // 8b
 	 int last_section_number; // 8b
-	 patPrg_t* p_first_program;
+	 int patPrg_tListLen;
+	 patPrg_t *patPrg_tList; 
 	 int crc32; // 32b
 }pat_senction_st;
 
