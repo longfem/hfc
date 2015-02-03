@@ -163,7 +163,8 @@ static void writetable(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn); 
     char *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
-	if(!sendPrograms(inCh)){
+	printf("now before call sendPrograms inChn=%d\n", inCh);
+	if(!sendPrograms("192.168.1.134", inCh)){
 		render("OK"); 
 	}else{
 		render("ERROR"); 
