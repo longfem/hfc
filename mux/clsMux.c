@@ -11,12 +11,13 @@
 #include "clsMuxOutCh.h"
 
 extern ClsProgram_st clsProgram;
-extern ClsParams_st *pdb = NULL;
+extern ClsParams_st *pdb;
 unsigned int CreateTable(int outChnId)
 {
 	unsigned int rtn = 0;
 	int prgNodesLen=0;
 	int outChnIndex = outChnId - 1;
+	ChannelProgramSt *outpst = NULL;
 	if (clsProgram.chnBypassEnable != 0 && clsProgram.chnBypassEnable[outChnId - 1] &&
 		clsProgram.chnBypass2 != 0 && clsProgram.chnBypass2[outChnId - 1] != 0)
 	{
@@ -24,9 +25,12 @@ unsigned int CreateTable(int outChnId)
 		// 	clsProgram.outPrgList[outChnIndex].caNode.caIdenList.Clear();
 		// if (clsProgram.outPrgList[outChnIndex].dtPidList != null)
 		// 	clsProgram.outPrgList[outChnIndex].dtPidList.Clear();
-		prgNodesLen = list_len(&clsProgram.outPrgList[outChnIndex].prgNodes);
+
+
+		list_get(&(clsProgram.outPrgList), outChnIndex, &outpst);
+		prgNodesLen = list_len(&(outpst->prgNodes));
 		if (prgNodesLen > 0){
-			freePrograms(&clsProgram.outPrgList[outChnIndex].prgNodes);			
+			freePrograms(&outpst->prgNodes);			
 		}
 		// if (clsProgram.outPrgList[outChnIndex].userPrgNodes != null)
 		// 	clsProgram.outPrgList[outChnIndex].userPrgNodes.Clear();
