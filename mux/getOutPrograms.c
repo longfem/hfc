@@ -23,6 +23,7 @@ int getOutPrograms(char *ip, int outChn)
 		return -1;
 	}
 
+
 	enum ErrorTypeEm res;
 	unsigned int  tmpShort = 0;
 	if(GetOutChnTSID(ip, outChn + 1, &tmpShort) == ok){
@@ -37,17 +38,21 @@ int getOutPrograms(char *ip, int outChn)
 		pdb->pvalueTree->poutChnArray[outChn].oringal_networkid = tmpShort;
 		printf("GetOutChnOrgNetID = %d |0x %x\n", tmpShort);
 	}
+	
 	unsigned char tmpByte = 0;
 	if (GetOutChnTableVer(ip, outChn + 1, &tmpByte) == ok){
 		pdb->pvalueTree->poutChnArray[outChn].version = tmpByte;
 		printf("GetOutChnTableVer = %d |0x %x\n", tmpByte);
 	}
+	
 	if (GetPidOffset(ip, outChn + 1, &tmpShort) == ok){
 		clsProgram.m_autoMuxStartPid[outChn] = tmpShort;
 		printf("GetPidOffset = %d |0x %x\n", tmpShort);
 	}
+	
 	// ---- 获取表激活命令 ----
 	LoadBitrateAndTableEnable(ip, outChn);
+	
 
 
 	return 0;

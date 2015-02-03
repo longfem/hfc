@@ -78,8 +78,11 @@ int sendPrograms(char *ip, int outChnId)
 
 	if(CreateTable(outChnId))
 	{
+		printf("1\n");
 		sendOutPutMuxInfo(ip, outChnId);
+		printf("2\n");
 		sendOutPutOption(ip, outChnId);		
+		printf("finish\n");
 	}
 	return 0;	
 }

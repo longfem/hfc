@@ -41,10 +41,7 @@ void initTestGetPrgJson(){
     clsProgram.subPrgPid_max = 0x1ff0;
     //给全局变量申请内存
     list_init(&clsProgram.inPrgList);
-    i =3;
-    i=0;
-    //for(i=0; i<clsProgram._intChannelCntMax; i++){
-    for(i=0; i< 8; i++){
+    for(i=0; i<clsProgram._intChannelCntMax; i++){    
         pst = (ChannelProgramSt *)malloc(sizeof(ChannelProgramSt));
         memset(pst, 0, sizeof(ChannelProgramSt));
         pst->channelId = i + 1;     
@@ -59,6 +56,12 @@ void initTestGetPrgJson(){
         list_append(&(clsProgram.outPrgList), pst);
     }   
     
+    clsProgram.m_autoMuxStartPid = malloc(clsProgram._outChannelCntMax);
+    for (i = 0; i < clsProgram._outChannelCntMax; i++)
+    {
+        clsProgram.m_autoMuxStartPid[i] = 0x100;
+    }
+
     Init(clsProgram._outChannelCntMax);
 }
 
@@ -101,17 +104,13 @@ int main(int argc,char *argv[])
     ret = getOutPrograms(ip, 0);
 
     //int inCh = atoi(inChn);
-    //char pProg[20480] = {0};    
-    //getprgsJson(ip, 2, pProg);
+    char pProg[20480] = {0};    
+    getprgsJson(ip, 2, pProg);
 
-/////////////////// getoutprograms case/////////////
-
-
-    //Init(2);
     
 
 //////////////////  sendPrograms
-    //sendPrograms(ip, 1);
+    sendPrograms(ip, 1);
 
 ////////////////get out programs end//////////////
 ///////////////////////////case devinfo////////////////////////
