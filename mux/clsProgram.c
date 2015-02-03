@@ -9,46 +9,46 @@
 extern ClsProgram_st clsProgram;
 
 
-initClsProgram(ClsMux muxer, int inChannelNum, int outChannelNum)//, Shawn.WL.WanLongPannel.language.ILanguage lang)
+void initClsProgram(int inChannelNum, int outChannelNum)//, Shawn.WL.WanLongPannel.language.ILanguage lang)
 {	
-	_intChannelCntMax = inChannelNum;
-	_outChannelCntMax = outChannelNum;
+	// _intChannelCntMax = inChannelNum;
+	// _outChannelCntMax = outChannelNum;
 
-	clsProgram.inPrgList = malloc(sizeof(ChannelProgramSt) *_intChannelCntMax);
-	for (int i = 0; i < inPrgList.Length; i++)
-	{
-		inPrgList[i] = new ChannelProgramSt();
-		inPrgList[i].channelId = i + 1;
-	}
+	// clsProgram.inPrgList = malloc(sizeof(ChannelProgramSt) *_intChannelCntMax);
+	// for (int i = 0; i < inPrgList.Length; i++)
+	// {
+	// 	inPrgList[i] = new ChannelProgramSt();
+	// 	inPrgList[i].channelId = i + 1;
+	// }
 
-	outPrgList = new ChannelProgramSt[_outChannelCntMax];
-	for (int i = 0; i < outPrgList.Length; i++)
-	{
-		outPrgList[i] = new ChannelProgramSt();
-		outPrgList[i].channelId = i + 1;
+	// outPrgList = new ChannelProgramSt[_outChannelCntMax];
+	// for (int i = 0; i < outPrgList.Length; i++)
+	// {
+	// 	outPrgList[i] = new ChannelProgramSt();
+	// 	outPrgList[i].channelId = i + 1;
 
-		outPrgList[i].prgNodes = new ArrayList();
-		outPrgList[i].userPrgNodes = new ArrayList();
-		outPrgList[i].dtPidList = new ArrayList();
-		outPrgList[i].caNode = new Chn_ca_st();
-		outPrgList[i].caNode.caIdenList = new ArrayList();
-	}
-	m_autoMuxStartPid = new int[_outChannelCntMax];
-	for (int i = 0; i < m_autoMuxStartPid.Length; i++)
-	{
-		m_autoMuxStartPid[i] = 0x100;
-	}
+	// 	outPrgList[i].prgNodes = new ArrayList();
+	// 	outPrgList[i].userPrgNodes = new ArrayList();
+	// 	outPrgList[i].dtPidList = new ArrayList();
+	// 	outPrgList[i].caNode = new Chn_ca_st();
+	// 	outPrgList[i].caNode.caIdenList = new ArrayList();
+	// }
+	// m_autoMuxStartPid = new int[_outChannelCntMax];
+	// for (int i = 0; i < m_autoMuxStartPid.Length; i++)
+	// {
+	// 	m_autoMuxStartPid[i] = 0x100;
+	// }
 
-	nitSection = new ArrayList[_outChannelCntMax];
-	for (int i = 0; i < nitSection.Length; i++)
-	{
-		nitSection[i] = new ArrayList();
-	}
+	// nitSection = new ArrayList[_outChannelCntMax];
+	// for (int i = 0; i < nitSection.Length; i++)
+	// {
+	// 	nitSection[i] = new ArrayList();
+	// }
 
-	needInputData = new bool[_outChannelCntMax, _intChannelCntMax];
+	// needInputData = new bool[_outChannelCntMax, _intChannelCntMax];
 
-	scramblePrgList = new List<ScramblePrgSt>();
-	scramblePrgListV2 = new List<ScramblePrgSt_v2>();
+	// scramblePrgList = new List<ScramblePrgSt>();
+	// scramblePrgListV2 = new List<ScramblePrgSt_v2>();
 }
 
 
@@ -128,7 +128,7 @@ void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
 
 	bufLen += 4;   //pdataStreamListLen;	 
 
-	for(i=0  < proginfo->pdataStreamListLen; i++){
+	for(i=0;  i < proginfo->pdataStreamListLen; i++){
 		bufLen += sizeof(DataStream_t);
 
 		for(j=0; j< proginfo->pdataStreamList->destlen; j++){
@@ -139,8 +139,8 @@ void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
 
 	bufLen+= proginfo->prgNameLen; //
 	bufLen+= proginfo->providerNameLen; //
-	bufLen +=4 // Crc 32;
-	bufLen
+	bufLen +=4; // Crc 32;
+	
 	//malloc now
 	pBuf = malloc(bufLen);
 
@@ -165,14 +165,14 @@ void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
 	//copy datastream
 	memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
 	pTemp +=4;
-	for(i=0  < proginfo->pdataStreamListLen; i++){
+	for(i=0 ; i < proginfo->pdataStreamListLen; i++){
 		memcpy(pTemp, &proginfo->pdataStreamList[i], sizeof(DataStream_t));
 		pTemp += sizeof(DataStream_t);
 		for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
 			memcpy(pTemp, &proginfo->pdataStreamList[i].desNode[j], sizeof(Commdes_t));
 			pTemp += sizeof(Commdes_t);
 			memcpy(pTemp, proginfo->pdataStreamList[i].desNode[j].data, proginfo->pdataStreamList[i].desNode[j].dataLen);
-			pTemp += proginfo->pdataStreamList[i].desNode[j]->dataLen;
+			pTemp += proginfo->pdataStreamList[i].desNode[j].dataLen;
 		}
 	}	
 
@@ -205,7 +205,7 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 {
 	Dev_prgInfo_st *pBuf = NULL;
 	unsigned char *pTemp = NULL ;
-	int i=0, bufLen=0;
+	int i=0, j=0, bufLen=0;
 	if(pInbuf == NULL || inLen < sizeof(Dev_prgInfo_st) + 4){
 		printf("proginfo NULL or len too small\n");
 		return NULL;
@@ -235,14 +235,14 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 	pTemp +=4;
 
 	if(pdataStreamListLen > 0){
-		for(i=0  < proginfo->pdataStreamListLen; i++){
+		for(i=0 ; i < proginfo->pdataStreamListLen; i++){
 			memcpy(&proginfo->pdataStreamList[i], pTemp, sizeof(DataStream_t));
 			pTemp += sizeof(DataStream_t);
 			for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
 				memcpy(&proginfo->pdataStreamList[i].desNode[j], pTemp, sizeof(Commdes_t));
 				pTemp += sizeof(Commdes_t);
 				memcpy(proginfo->pdataStreamList[i].desNode[j].data, pTemp, proginfo->pdataStreamList[i].desNode[j].dataLen);
-				pTemp += proginfo->pdataStreamList[i].desNode[j]->dataLen;
+				pTemp += proginfo->pdataStreamList[i].desNode[j].dataLen;
 			}
 		}	
 	}else{
@@ -263,7 +263,7 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 
 
 	return pBuf;	
-	}
+
 }
 
 int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
@@ -275,7 +275,7 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 	list_get(&clsProgram.outPrgList, outChn - 1, &proginfo);
 
 
-	cSerialize(proginfo, pOutBytes, outLen);
+	cSerialize(proginfo, outBytes, outLen);
 	return outLen;
 }
 
@@ -288,7 +288,7 @@ unsigned char MakeOutputBytesAndSend(int outChn)
 	int sendLen = MakeOutPutBytes(outChn,  tmpBytes, &tmpBytesLen);
 	if (sendLen > 0)
 	{
-		if (muxer.SendOutputPrgInfo(outChn, tmpBytes, sendLen))
+		if (SendOutputPrgInfo(outChn, tmpBytes, sendLen))
 			return 1;
 	}
 	return 0;
@@ -349,5 +349,5 @@ unsigned char PrgMuxInfoGet()
 	// 	}
 	// }
 
-	return true;
+	return 1;
 }
