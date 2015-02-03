@@ -266,95 +266,88 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 	}
 }
 
-int MakeOutPutBytes(int outChn, unsigned char *outBytes)
+int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 {
 	
+	Dev_prgInfo_st * proginfo = NULL;
 	outBytes = NULL;
 	
-	memStream = new MemoryStream();
-	IFormatter formatter = new BinaryFormatter();
+	list_get(&clsProgram.outPrgList, outChn - 1, &proginfo);
 
-	list_get(&clsProgram.outPrgList, outChn - 1, pOutBytes);
-	outBytes = memStream.GetBuffer();
-	memStream.Close();
 
-	catch 
-	{
-		if(memStream != null)
-			memStream.Close();
-		MessageBox.Show(lang.Get("保存通道信息出错") + "!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-	}
-	return outBytes.Length;
+	cSerialize(proginfo, pOutBytes, outLen);
+	return outLen;
 }
 
 
 unsigned char MakeOutputBytesAndSend(int outChn)
 {
 	unsigned char *tmpBytes;
+	unsigned int tmpBytesLen=0;
 
-	int sendLen = MakeOutPutBytes(outChn, out tmpBytes);
+	int sendLen = MakeOutPutBytes(outChn,  tmpBytes, &tmpBytesLen);
 	if (sendLen > 0)
 	{
 		if (muxer.SendOutputPrgInfo(outChn, tmpBytes, sendLen))
-			return true;
+			return 1;
 	}
-	return false;
+	return 0;
 }
 
 
 unsigned char PrgMuxInfoGet()
 {
 	//MuxPrgInfoGet_st
-	PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
-	PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
+	// PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
+	// PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
 
-    //PrgPmtMuxListLen
-	for (int i = 0; i < _outChannelCntMax; i++)
-	{
-		if (GetOutProgramMuxMap(i + 1, out PrgPmtMuxList[i]) != ok)
-			return false;
-		if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != tok)
-			return false;
-	}
+ //    //PrgPmtMuxListLen
+	// for (int i = 0; i < _outChannelCntMax; i++)
+	// {
+	// 	if (GetOutProgramMuxMap(i + 1, out PrgPmtMuxList[i]) != ok)
+	// 		return false;
+	// 	if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != tok)
+	// 		return false;
+	// }
 
-	if (dglt_showPidMap != null)
-	{
-		for (int i = 0; i < PrgPmtMuxList.Length; i++)
-		{
-			if (PrgPmtMuxList[i] != null)
-			{
-				foreach (MuxPrgInfoGet_st pmtItem in PrgPmtMuxList[i])
-				{
-					if (inPrgList[pmtItem.inChannel].prgNodes == null)
-						continue;
-					if (inPrgList[pmtItem.inChannel].prgNodes.Count < pmtItem.prgIndex)
-						continue;
-					Dev_prgInfo_st tmpPrgInfo = ((Dev_prgInfo_st)(inPrgList[pmtItem.inChannel].prgNodes[pmtItem.prgIndex - 1]));
-					int oldPid = tmpPrgInfo.pmtPid;
+	// if (dglt_showPidMap != null)
+	// {
+	// 	for (int i = 0; i < PrgPmtMuxList.Length; i++)
+	// 	{
+	// 		if (PrgPmtMuxList[i] != null)
+	// 		{
+	// 			foreach (MuxPrgInfoGet_st pmtItem in PrgPmtMuxList[i])
+	// 			{
+	// 				if (inPrgList[pmtItem.inChannel].prgNodes == null)
+	// 					continue;
+	// 				if (inPrgList[pmtItem.inChannel].prgNodes.Count < pmtItem.prgIndex)
+	// 					continue;
+	// 				Dev_prgInfo_st tmpPrgInfo = ((Dev_prgInfo_st)(inPrgList[pmtItem.inChannel].prgNodes[pmtItem.prgIndex - 1]));
+	// 				int oldPid = tmpPrgInfo.pmtPid;
 
-					dglt_showPidMap(pmtItem.inChannel, i + 1, "0x" + oldPid.ToString("x"),
-							"0x" + pmtItem.prgPid.ToString("x"), tmpPrgInfo.prgNum.ToString(),
-							pmtItem.prgNum.ToString(), "PMT [" + tmpPrgInfo.prgName + "]");
-				}
-			}
-		}
+	// 				dglt_showPidMap(pmtItem.inChannel, i + 1, "0x" + oldPid.ToString("x"),
+	// 						"0x" + pmtItem.prgPid.ToString("x"), tmpPrgInfo.prgNum.ToString(),
+	// 						pmtItem.prgNum.ToString(), "PMT [" + tmpPrgInfo.prgName + "]");
+	// 			}
+	// 		}
+	// 	}
 
-		for (int i = 0; i < PrgAVMuxList.Length; i++)
-		{
-			if (PrgAVMuxList[i] != null)
-			{
-				foreach (MuxPidInfo_st avItem in PrgAVMuxList[i])
-				{
-					if (inPrgList[avItem.inChannel].prgNodes == null)
-						continue;
-					int oldPid = avItem.oldPid;
+	// 	for (int i = 0; i < PrgAVMuxList.Length; i++)
+	// 	{
+	// 		if (PrgAVMuxList[i] != null)
+	// 		{
+	// 			foreach (MuxPidInfo_st avItem in PrgAVMuxList[i])
+	// 			{
+	// 				if (inPrgList[avItem.inChannel].prgNodes == null)
+	// 					continue;
+	// 				int oldPid = avItem.oldPid;
 
-					dglt_showPidMap(avItem.inChannel, i + 1, "0x" + avItem.oldPid.ToString("x"),
-									"0x" + avItem.newPid.ToString("x"), "", "", "");
-				}
-			}
-		}
-	}
+	// 				dglt_showPidMap(avItem.inChannel, i + 1, "0x" + avItem.oldPid.ToString("x"),
+	// 								"0x" + avItem.newPid.ToString("x"), "", "", "");
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	return true;
 }
