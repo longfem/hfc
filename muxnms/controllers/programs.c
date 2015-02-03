@@ -202,6 +202,12 @@ static void espinit() {
 		list_append(&(clsProgram.outPrgList), pst);
 	}	
 	
+	clsProgram.m_autoMuxStartPid = malloc(clsProgram._outChannelCntMax);
+	for (i = 0; i < clsProgram._outChannelCntMax; i++)
+	{
+		clsProgram.m_autoMuxStartPid[i] = 0x100;
+	}
+
 	Init(clsProgram._outChannelCntMax);
 	printf("======>>>>esp init!!!!!!!\n");
 }

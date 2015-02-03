@@ -4,24 +4,30 @@
 
 int freeProgramsMalloc(Dev_prgInfo_st * data)
 {
-	int i = 0;
+	int i = 0, j=0;
 	int pmtDesListLen = data->pmtDesListLen;
-	if(pmtDesListLen>0){
+	for(i=0; i < pmtDesListLen; i++){		
+			free(data->pmtDesList[i].data);
+			data->pmtDesList[i].data = NULL;		
+	}
+	if(data->pmtDesList){
 		free(data->pmtDesList);
 		data->pmtDesList = NULL;
 	}
 	int pdataStreamListLen = data->pdataStreamListLen;
 	if(pdataStreamListLen>0){
 		for(i=0; i< pdataStreamListLen; i++){
-			if(data->pdataStreamList[i].desNode){
-				if(data->pdataStreamList[i].desNode->data){
-					free(data->pdataStreamList[i].desNode->data);
-					data->pdataStreamList[i].desNode->data = NULL;
-				}
-
-				free(data->pdataStreamList[i].desNode);
-				data->pdataStreamList[i].desNode = NULL;
+			for(j=0; j < data->pdataStreamList[i].destlen; j++)
+			{				
+				if(data->pdataStreamList[i].desNode[j].data){
+					free(data->pdataStreamList[i].desNode[j].data);
+					data->pdataStreamList[i].desNode[j].data = NULL;
+				}												
 			}
+
+			free(data->pdataStreamList[i].desNode);
+			data->pdataStreamList[i].desNode = NULL;
+		
 		}
 		free(data->pdataStreamList);
 		data->pdataStreamList = NULL;
@@ -62,6 +68,8 @@ int freePrograms(list_t *prginfolist)
 		}		
 		
 	}
+
+	prginfolist = NULL;
 
 	
 	return 0;

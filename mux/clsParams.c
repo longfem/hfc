@@ -7,7 +7,7 @@
 #include "clsParams.h"
 
 ClsParams_st *pdb = NULL;
-
+extern ClsProgram_st clsProgram;
 void Init(int outChannelNumMax)
 {
 	int i = 0;
@@ -46,4 +46,8 @@ void Init(int outChannelNumMax)
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_pmt = 1;
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_sdt = 1;
 	}
+
+	clsProgram.pidMap_eachTransmit_numberMax = 200; // 每次PID映射表传输最大个数
+
+	
 }

@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include "datastructdef.h"
 #include "communicate.h"
 #include "getPrgCnt.h"
 

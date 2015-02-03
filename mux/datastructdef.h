@@ -7,6 +7,8 @@
 #define FALSE   0
 #define TRUE    1
 
+#pragma pack(1)
+
 typedef struct Commdes_st
 {
 	int userNew; // 用户自定义内容
@@ -166,6 +168,15 @@ typedef struct MuxPrgInfoGet_t
 	int prgPid;
 }MuxPrgInfoGet_st;
 
+
+typedef struct MuxPidInfo_t
+{
+	int inChannel;
+	int oldPid;
+	int newPid;
+}MuxPidInfo_st;
+
+
 typedef struct ChannelProgramt
 {
 	int channelId;
@@ -263,8 +274,8 @@ typedef struct  ClsProgram_t
 	int _pmtMaxCnt; // = 29;
 	list_t  inPrgList;  //ChannelProgramSt  8 input
 	list_t outPrgList;  // 2 output
-	// int[] chnBypass2; // 通道直通, 0=禁用，other=输出直通某个输出
-	// bool[] chnBypassEnable; // 通道直通功能激活
+	int *chnBypass2; // 通道直通, 0=禁用，other=输出直通某个输出
+	unsigned char *chnBypassEnable; // 通道直通功能激活
 	// List<ScramblePrgSt> scramblePrgList;
 	// List<ScramblePrgSt_v2> scramblePrgListV2;
 	// bool[,] needInputData; // 标志需要用到输入通道的数据，当数据丢失时报警
@@ -273,12 +284,13 @@ typedef struct  ClsProgram_t
 	 int prgPid_max; // = 0xfff;
 	 int subPrgPid_min; // = 0x1000;
 	 int subPrgPid_max; // = 0x1ff0;
-	 int m_autoMuxStartPid[]; // 自动映射起始PID
+	 int *m_autoMuxStartPid; // 自动映射起始PID _outChannelCntMax=2 为数量
 	// ClsMux muxer = null;
-	// ArrayList[] PrgPmtMuxList = null; // MuxPrgInfoGet_st
-	// public ArrayList[] PrgAVMuxList = null;  // MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
-	// ArrayList[] nitSection = null; // Nit_section_st
+	 list_t *PrgPmtMuxList; // MuxPrgInfoGet_st  list Array
+	 list_t *PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
+	 list_t *nitSection; // list Array Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
+	 int pidMap_eachTransmit_numberMax;
 }ClsProgram_st;	
 
 
@@ -287,6 +299,8 @@ typedef struct ClsParams
 	int channelNumMax;
 	Database_st *pvalueTree;
 }ClsParams_st; 
+
+#pragma pack()
 
 #endif	
 
