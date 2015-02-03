@@ -94,7 +94,7 @@ typedef struct Dev_prgInfo_t
 
 } Dev_prgInfo_st;
 
-#pragma pack()
+
 
 
 typedef struct __ts_table_pmt_es_t
@@ -300,6 +300,7 @@ typedef struct ClsParams
 	Database_st *pvalueTree;
 }ClsParams_st; 
 
+#pragma pack()
 
 #endif	
 

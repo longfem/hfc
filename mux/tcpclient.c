@@ -27,6 +27,41 @@
 ClsProgram_st clsProgram;
 
 
+void initTestGetPrgJson(){
+    int i=0;
+    ChannelProgramSt *pst = NULL;
+    //全局变量初始化
+    clsProgram._outChannelCntMax = 2;
+    clsProgram._intChannelCntMax = 8;
+    clsProgram._pmtMaxCnt = 29;
+    clsProgram.prgNum_min = 1;
+    clsProgram.prgPid_min = 0x100;
+    clsProgram.prgPid_max = 0xfff;
+    clsProgram.subPrgPid_min = 0x1000;
+    clsProgram.subPrgPid_max = 0x1ff0;
+    //给全局变量申请内存
+    list_init(&clsProgram.inPrgList);
+    i =3;
+    i=0;
+    //for(i=0; i<clsProgram._intChannelCntMax; i++){
+    for(i=0; i< 8; i++){
+        pst = (ChannelProgramSt *)malloc(sizeof(ChannelProgramSt));
+        memset(pst, 0, sizeof(ChannelProgramSt));
+        pst->channelId = i + 1;     
+        list_append(&(clsProgram.inPrgList), pst);
+    }   
+
+    list_init(&clsProgram.outPrgList);
+    for(i=0; i<clsProgram._outChannelCntMax; i++){
+        pst = malloc(sizeof(ChannelProgramSt));
+        memset(pst, 0, sizeof(ChannelProgramSt));
+        pst->channelId = i + 1;
+        list_append(&(clsProgram.outPrgList), pst);
+    }   
+    
+    Init(clsProgram._outChannelCntMax);
+}
+
 int main(int argc,char *argv[])
 {
     char sendbuf[256];
@@ -62,18 +97,21 @@ int main(int argc,char *argv[])
 ////////////////////case end programs//////////
 
 /////////////////////
+    initTestGetPrgJson();
+    ret = getOutPrograms(ip, 0);
+
     //int inCh = atoi(inChn);
-    char pProg[20480] = {0};    
-    getprgsJson(ip, 2, pProg);
+    //char pProg[20480] = {0};    
+    //getprgsJson(ip, 2, pProg);
 
 /////////////////// getoutprograms case/////////////
 
 
-    Init(2);
-    ret = getOutPrograms(ip, 0);
+    //Init(2);
+    
 
 //////////////////  sendPrograms
-    sendPrograms(ip, 1);
+    //sendPrograms(ip, 1);
 
 ////////////////get out programs end//////////////
 ///////////////////////////case devinfo////////////////////////
