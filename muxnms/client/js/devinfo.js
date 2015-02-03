@@ -424,6 +424,18 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/writetable?channel=1",
+			 dataType: "text",
+			 success: function(data){
+				
+			 },    
+			 error : function(err) { 
+				alert(err);
+			 }   
+		});
 		alert('------------------!!!');
     });
 	

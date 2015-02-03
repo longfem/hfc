@@ -14,6 +14,7 @@
 #include "clsParams.h"
 #include "getOutPrograms.h"
 #include "getTableJson.h"
+#include "sendPrograms.h"
 
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
@@ -158,6 +159,18 @@ static void getTable(HttpConn *conn) {
 	render(outstring);    
 } 
 
+static void writetable(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn); 
+    char *inChn = mprGetJson(jsonparam, "inch"); 
+	int inCh = atoi(inChn);
+	if(!sendPrograms(inCh)){
+		render("OK"); 
+	}else{
+		render("ERROR"); 
+	}
+	   
+} 
+
 static void common(HttpConn *conn) {
 	
 	
@@ -202,6 +215,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineAction(route, "programs-cmd-getprg", getprg);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
+	espDefineAction(route, "programs-cmd-writetable", writetable);
 	espDefineAction(route, "programs-cmd-getTable", getTable);
     
 #if SAMPLE_VALIDATIONS
