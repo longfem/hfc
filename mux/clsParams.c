@@ -47,5 +47,7 @@ void Init(int outChannelNumMax)
 		pdb->pvalueTree->poutChnArray[i].isNeedSend_sdt = 1;
 	}
 
+	clsProgram.pidMap_eachTransmit_numberMax = 200; // 每次PID映射表传输最大个数
+
 	
 }

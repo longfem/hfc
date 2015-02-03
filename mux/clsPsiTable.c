@@ -29,7 +29,7 @@ Dev_prgInfo_st* buildOoutPrgList()
 }
 
 
-static unsigned  long  CrcBytes(unsigned char inBytes[],int offset, int length)
+ unsigned  long  CrcBytes(unsigned char inBytes[],int offset, int length)
 {
 	if (TRUE)
 	{

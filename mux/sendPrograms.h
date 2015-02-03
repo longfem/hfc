@@ -1,6 +1,4 @@
 
-#include "datastructdef.h"
-#include "list.h"
 
 
 #ifndef _SEND_PROGRAMS_H_

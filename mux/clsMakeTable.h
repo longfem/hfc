@@ -1,8 +1,6 @@
 
-
-#include "EnumDef.h"
-
-
+#include "datastructdef.h"
+#include "list.h"
 #ifndef _CLS_MAKE_TABLE_H_
 #define _CLS_MAKE_TABLE_H_
 

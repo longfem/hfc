@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "list.h"
+
+
 #include "datastructdef.h"
 #include "communicate.h"
+#include "clsPsiTable.h"
+
 #include "clsMuxprgInfoGet.h"
 
 extern ClsParams_st *pdb;
@@ -217,7 +220,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     /////////////////////////////////////////////////
     muxPidInfoList = malloc(sizeof(list_t));
 
-    int getCnt = pidCnt / pidMap_eachTransmit_numberMax + ((pidCnt % pidMap_eachTransmit_numberMax > 0) ? 1 : 0);
+    int getCnt = pidCnt / clsProgram.pidMap_eachTransmit_numberMax + ((pidCnt % clsProgram.pidMap_eachTransmit_numberMax > 0) ? 1 : 0);
     int nowCnt = 0;
     int cmdStringAddr = 0;
     for (i = 0; i < getCnt; i++)
@@ -833,7 +836,7 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 
 	
 
-	int sendCnt = pidMapListLen / pidMap_eachTransmit_numberMax + ((pidMapListLen % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
+	int sendCnt = pidMapListLen / clsProgram.pidMap_eachTransmit_numberMax + ((pidMapListLen % clsProgram.pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
 
 
 //////////////////////////////////////
@@ -877,17 +880,17 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 		int cmdFinishAddr = 9;
 
 		iAddr = 11;
-		if (pidMapBytesLen < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
+		if (pidMapBytesLen < iSendedBytes + clsProgram.pidMap_eachTransmit_numberMax * 5)
 		{
-            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);			
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * clsProgram.pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);			
 			iAddr += (pidMapBytesLen - iSendedBytes);
 			iSendedBytes = pidMapBytesLen;
 		}
 		else
 		{
-            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMap_eachTransmit_numberMax);			
-			iSendedBytes += pidMap_eachTransmit_numberMax * 5;
-			iAddr += pidMap_eachTransmit_numberMax * 5;
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * clsProgram.pidMap_eachTransmit_numberMax * 5), clsProgram.pidMap_eachTransmit_numberMax);			
+			iSendedBytes += clsProgram.pidMap_eachTransmit_numberMax * 5;
+			iAddr += clsProgram.pidMap_eachTransmit_numberMax * 5;
 		}
 
         memset(buf,0,sizeof(buf));
@@ -959,7 +962,7 @@ ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapLis
         pidMapBytesLen+=5;        
     }
 
-    int sendCnt = pidMapListLen / pidMap_eachTransmit_numberMax + ((pidMapListLen % pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
+    int sendCnt = pidMapListLen / clsProgram.pidMap_eachTransmit_numberMax + ((pidMapListLen % clsProgram.pidMap_eachTransmit_numberMax) == 0 ? 0 : 1);
 
 
     // 发送个数
@@ -998,17 +1001,17 @@ ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapLis
         sendbuf[10]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
         
         iAddr = 11;
-        if (pidMapBytesLen < iSendedBytes + pidMap_eachTransmit_numberMax * 5)
+        if (pidMapBytesLen < iSendedBytes + clsProgram.pidMap_eachTransmit_numberMax * 5)
         {
-            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);          
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * clsProgram.pidMap_eachTransmit_numberMax * 5), pidMapBytesLen - iSendedBytes);          
             iAddr += (pidMapBytesLen - iSendedBytes);
             iSendedBytes = pidMapBytesLen;
         }
         else
         {
-            memcpy(sendbuf + iAddr, pidMapBytes + (i * pidMap_eachTransmit_numberMax * 5), pidMap_eachTransmit_numberMax);          
-            iSendedBytes += pidMap_eachTransmit_numberMax * 5;
-            iAddr += pidMap_eachTransmit_numberMax * 5;
+            memcpy(sendbuf + iAddr, pidMapBytes + (i * clsProgram.pidMap_eachTransmit_numberMax * 5), clsProgram.pidMap_eachTransmit_numberMax);          
+            iSendedBytes += clsProgram.pidMap_eachTransmit_numberMax * 5;
+            iAddr += clsProgram.pidMap_eachTransmit_numberMax * 5;
         }
 
         memset(buf,0,sizeof(buf));

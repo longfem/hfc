@@ -1,7 +1,9 @@
-#ifndef _GET_PROGRAMS_H_
-#define _GET_PROGRAMS_H_
 
-#include "datastructdef.h"
+
+#ifndef _GET_BASEJSON_H_
+#define _GET_BASEJSON_H_
+
+
 
 void getbaseJson(char *ip, char *outprg);
 #endif 

@@ -1,5 +1,9 @@
 
 #include <stdio.h>
+
+
+#include "datastructdef.h"
+#include "list.h"
 #include "EnumDef.h"
 #include "sendPrograms.h"
 

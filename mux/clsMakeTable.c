@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include "EnumDef.h"
 #include "datastructdef.h"
 #include "list.h"
 

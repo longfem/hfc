@@ -290,6 +290,7 @@ typedef struct  ClsProgram_t
 	 list_t *PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
 	 list_t *nitSection; // list Array Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
+	 int pidMap_eachTransmit_numberMax;
 }ClsProgram_st;	
 
 
@@ -299,6 +300,6 @@ typedef struct ClsParams
 	Database_st *pvalueTree;
 }ClsParams_st; 
 
-int pidMap_eachTransmit_numberMax = 200; // 每次PID映射表传输最大个数
+
 #endif	
 
