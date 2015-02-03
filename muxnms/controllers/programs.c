@@ -59,8 +59,8 @@ static void maketable(HttpConn *conn) {
 	Dev_prgInfo_st *inprg = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	
-	ChannelProgramSt *testoutpst = NULL;
-	Dev_prgInfo_st *testoutprg = NULL;
+	//ChannelProgramSt *testoutpst = NULL;
+	//Dev_prgInfo_st *testoutprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	
@@ -135,12 +135,12 @@ static void maketable(HttpConn *conn) {
 		}
 	}	
 	
-	list_get(&(clsProgram.outPrgList), 0, &testoutpst);
-	list_get(&(testoutpst->prgNodes), 0, &testoutprg);
+	//list_get(&(clsProgram.outPrgList), 0, &testoutpst);
+	//list_get(&(testoutpst->prgNodes), 0, &testoutprg);
 	//printf("===%d===>>>>%d\n", testoutprg->prgNum, testoutprg->chnId);
 
 	//制表
-	MakeTable(pos, 	pdb->pvalueTree->poutChnArray, outpst->prgNodes);
+	MakeTable(pos);
 	
 	
 	//获取制表后结果

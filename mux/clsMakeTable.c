@@ -4,10 +4,19 @@
 #include "list.h"
 
 extern ClsMux_st *pclsMux;
+extern ClsParams_st *pdb;
 
 extern ClsProgram_st clsProgram;
 static int isTableInit=0;
-int MakeTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prginfolist)
+int MakeTable(int outChnId)
+{
+	ChannelProgramSt *outpst = NULL;
+	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
+	buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes);
+
+}
+
+int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prginfolist)
 {
 	//Error_psiTable errFlag;
 	int outChnIndex = outChnId - 1;
@@ -66,7 +75,7 @@ int MakeTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prgi
 	}
 
 
-#if 1
+#if 0
 	pat_senction_st *p_pat = (pat_senction_st*)malloc(sizeof(pat_senction_st));	
 	rstPat=ParsePat(pbuff->pbuf, 5, p_pat);
 	if(rstPat)
@@ -94,7 +103,7 @@ int MakeTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prgi
 		{
 			printf("make pmt SUCCESSFULL---%d\n",rstPat);
 			BufferUn_st *pmtbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
-
+			
 			pmtbuff->pbuf=malloc(sizeof(pmtTable));
 			memcpy(pmtbuff->pbuf, pmtTable, sizeof(pmtTable));
 			pmtbuff->bufLen=sizeof(pmtTable);
@@ -120,7 +129,7 @@ int MakeTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prgi
 
 	}	
 
-
+return 1;
 
 
 

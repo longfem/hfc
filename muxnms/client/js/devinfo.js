@@ -727,7 +727,6 @@ function devinfo_output(devType){
 	//表结构树
 	$("#out_tree").fancytree({
 		extensions: ["menu"],
-		checkbox: true,
 		selectMode: 1,
 		minExpandLevel:3,
 		source: table_root,

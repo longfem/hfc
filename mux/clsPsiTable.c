@@ -852,8 +852,118 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
 
 	return p_pmt;
 }
+#if 0
+        int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int originalNetworkId, int verisonNumber)
+        {
 
 
+			int i;
+    		int iAddr = 0;
+            //sdtTable = new byte[6 * 188];
+            //byte[] tmpBytes = new byte[8 * 188];
+			unsigned char tmpBytes[1024];
+			Dev_prgInfo_st *ptmpPrgInfo;
+
+
+
+            // head
+            tmpBytes[iAddr++] = 0x47;
+            tmpBytes[iAddr++] = 0x40;
+            tmpBytes[iAddr++] = 0x11;
+            tmpBytes[iAddr++] = 0x10;
+            tmpBytes[iAddr++] = 0;
+
+            // -- sdt -- 
+            tmpBytes[iAddr++] = 0x42;
+            int sectionLenAddr = iAddr;
+            iAddr += 2; // 跳过长度字节
+            iAddr += BigFormat_intToBytes(streamId, tmpBytes, iAddr, 2);
+            tmpBytes[iAddr++] = (unsigned char)((3 << 6) // reserved
+                | ((verisonNumber & 0x1f) << 1)  // version number
+                | (1 << 0)); // current_next_indicator
+            tmpBytes[iAddr++] = 0; // section number
+            tmpBytes[iAddr++] = 0; // last_section_number
+            iAddr += BigFormat_intToBytes(originalNetworkId, tmpBytes, iAddr, 2);
+            tmpBytes[iAddr++] = 0xff; // reaserved_future_use
+
+ 
+       
+		for (i = 0; i <list_len(&prginfolist); i++)
+		{
+			list_get(&prginfolist, i, &ptmpPrgInfo);
+                    iAddr += BigFormat_intToBytes(ptmpPrgInfo.prgNum, tmpBytes, iAddr, 2);
+                    tmpBytes[iAddr++] = (unsigned char)((0x3f << 2) // reserved_future_use
+                        | (0 << 1) // EIT_schedule_flag
+                        | (0 << 0)); // EIT_present_following_flag
+                    int des_length_addr = iAddr;
+                    iAddr += 2; // 跳过长度字节
+
+                    // 添加自定义名称
+                    tmpBytes[iAddr++] = 0x48;
+                    string prgNameTmp = ptmpPrgInfo.prgName;
+                    if (prgNameTmp == null)
+                        prgNameTmp = string.Empty;
+                    byte[] nameStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(prgNameTmp);
+                    string providerNameTmp = prgInfoTmp.providerName;
+                    if (providerNameTmp == null)
+                        providerNameTmp = string.Empty;
+                    byte[] privoderStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(providerNameTmp);
+                    tmpBytes[iAddr++] = (byte)(1 + 1 + 1 + nameStrBytesTmp.Length + privoderStrBytesTmp.Length);
+                    tmpBytes[iAddr++] = (byte)prgInfoTmp.serviceType;
+                    tmpBytes[iAddr++] = (byte)privoderStrBytesTmp.Length;
+                    Array.Copy(privoderStrBytesTmp, 0, tmpBytes, iAddr, privoderStrBytesTmp.Length);
+                    iAddr += privoderStrBytesTmp.Length;
+                    tmpBytes[iAddr++] = (byte)nameStrBytesTmp.Length;
+                    Array.Copy(nameStrBytesTmp, 0, tmpBytes, iAddr, nameStrBytesTmp.Length);
+                    iAddr += nameStrBytesTmp.Length;
+#if 1
+                    if (prgInfoTmp.sdtDesList != null)
+                    {
+
+                        foreach (Commdes_st desInfoTmp in prgInfoTmp.sdtDesList)
+                        {
+                            if (desInfoTmp.tag == 0x48) // service_tag
+                                continue;
+                            tmpBytes[iAddr++] = (byte)(desInfoTmp.tag);
+                            tmpBytes[iAddr++] = (byte)(desInfoTmp.data.Length);
+                            Array.Copy(desInfoTmp.data, 0, tmpBytes, iAddr, desInfoTmp.data.Length);
+                            iAddr += desInfoTmp.data.Length;
+                        }
+                    }
+#endif
+
+
+                    ClsDataOper.BigFormat_intToBytes(((4 << 13)  // runing_status
+                        | ((prgInfoTmp.isCrypto ? 1 : 0) << 12) // free_CA_mode
+                        | ((iAddr - des_length_addr - 2) & 0xfff)), tmpBytes, des_length_addr, 2); // des_loop_length
+                }
+       
+
+            int numLenTmp = ((0xf << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff));
+            ClsDataOper.BigFormat_intToBytes(numLenTmp, tmpBytes, sectionLenAddr, 2);
+
+
+            // -- crc --
+            uint crcWord = myCrc.CrcBytes(tmpBytes, 5, iAddr - 5);
+            iAddr += ClsDataOper.BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
+
+            if (iAddr < 1021) // 1108
+            {
+                sdtTable = new byte[iAddr];
+                Array.Copy(tmpBytes, sdtTable, iAddr);
+                return Error_psiTable.ok;
+            }
+            else
+            {
+                sdtTable = null;
+                return Error_psiTable.tableLenOverflow;
+            }
+        }
+
+
+
+
+#endif
 int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 {
 	int iAddr = offset;
@@ -873,7 +983,8 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 		return 0;
 
 
-	p_pmt->program_number = (buf[iAddr++] << 8) | buf[iAddr++];
+	p_pmt->program_number = (buf[iAddr] << 8) | buf[++iAddr];
+	iAddr++;
 	tmpByteValue = buf[iAddr++];
 	p_pmt->reserved1 = (tmpByteValue >> 6) & 0x3;
 	p_pmt->version_number = (tmpByteValue >> 1) & 0x1f;
@@ -939,7 +1050,8 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 		cLen[tmpLen]=0;
 		tmppStart++;
 		tmppStart++;	tmppStart++;
-		int tmpes_info_lengh = ((buf[tmppStart++] << 8) & 0x0f00) | buf[tmppStart++];
+		int tmpes_info_lengh = ((buf[tmppStart] << 8) & 0x0f00) | buf[++tmppStart];
+		tmppStart++;
 
 		if (tmpes_info_lengh + tmppStart <= pEnd)
 		{
@@ -972,8 +1084,10 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 
 
 		p_DataStream_st->streamType = buf[pStart++];
-		p_DataStream_st->outPid = ((buf[pStart++] << 8) & 0x1f00) | buf[pStart++];
-		int es_info_lengh = ((buf[pStart++] << 8) & 0x0f00) | buf[pStart++];
+		p_DataStream_st->outPid = ((buf[pStart] << 8) & 0x1f00) | buf[++pStart];
+		pStart++;
+		int es_info_lengh = ((buf[pStart] << 8) & 0x0f00) | buf[++pStart];
+		pStart++;
 		if (es_info_lengh + pStart <= pEnd)
 		{
 
@@ -1017,7 +1131,9 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 		pStart += es_info_lengh;
 	}
 	iAddr = pEnd;
-	p_pmt->crc32 = (buf[iAddr++] << 24) | (buf[iAddr++] << 16) | (buf[iAddr++] << 8) | buf[iAddr++];
+	p_pmt->crc32 = (buf[iAddr] << 24) | (buf[++iAddr] << 16) | (buf[++iAddr] << 8) | buf[++iAddr];
+	iAddr++;
+
 	return 1;
 
 }
