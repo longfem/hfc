@@ -92,6 +92,7 @@ void getTableJson(int channel, char *outprg){
 	cJSON_AddStringToObject(tablejson,"key", "id1.2");
 	cJSON_AddStringToObject(tablejson,"title", "PMT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
+	
 	pmt_senction_st *p_pmt;
 	BufferUn_st *outPMTBuffer;
 	list_t *tablePmt;
@@ -151,7 +152,6 @@ void getTableJson(int channel, char *outprg){
 					case 6:
 						pdataStreamList = p_pmt->pdataStreamList;
 						for(k=0;k<p_pmt->pdataStreamListLen;k++){
-							printf("-----pdataStreamListLen===%d:::streamType-->>:::%d\n", p_pmt->pdataStreamListLen, pdataStreamList->streamType);
 							if(2 == pdataStreamList->streamType){
 								memset(str, 0, sizeof(str));						
 								sprintf(str,"流 %d pid(0x%x) MPEG2 Video", 2, pdataStreamList->outPid);
