@@ -197,7 +197,6 @@ void getTableJson(int channel, char *outprg){
 					case 7:
 						pdataStreamList = p_pmt->pdataStreamList;
 						for(k=0;k<p_pmt->pdataStreamListLen;k++){
-							printf("-----pdataStreamListLen===%d:::streamType-->>:::%d\n", p_pmt->pdataStreamListLen, pdataStreamList->streamType);
 							if(4 == pdataStreamList->streamType){
 								memset(str, 0, sizeof(str));						
 								sprintf(str,"流 %d pid(0x%x) MPEG2 Audio", 4, pdataStreamList->outPid);

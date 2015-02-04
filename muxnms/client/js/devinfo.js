@@ -207,7 +207,7 @@ function devinfo_output(devType){
 					+'<td><label>输出总码率  (Kpbs)</label></td><td><input type="text" class="item_out" value=""></input></td>'
 				+'</tr>'
 				+'<tr>'
-					+'<td><input type="checkbox">    自动增长版本号</input></td><td><label class="item_transid">2</label></td>'
+					+'<td><input class="autoinc_ver" type="checkbox">    自动增长版本号</input></td><td><label class="item_version">2</label></td>'
 				+'</tr>'
 			+'</table>'
 			+'<input type="checkbox" class="pat_auto">    当生成PAT时按业务ID排序</input>'
@@ -219,6 +219,7 @@ function devinfo_output(devType){
 					+'<input type="checkbox" class="sl_cat">    CAT</input>'
 					+'<input type="checkbox" class="sl_nit">    NIT</input>'
 			+'</fieldset>'
+			+'<label id="tag_channel" style="dispaly:none"></label>'
 		+'</div>'
 		+'<div id="dialog-pid" title="PID表">'
 			+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_pid"></table>'
@@ -386,6 +387,10 @@ function devinfo_output(devType){
 		var jsondata = new Array();
 		var prgindex = new Array();
 		var jsonstr;
+		if(nodes === Null){
+			alert("请选择节目!");
+			return;
+		}
 		nodes.forEach(function(node) {
 			flag = 0;
 			prgindex = new Array();
@@ -427,16 +432,16 @@ function devinfo_output(devType){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/writetable?channel=1",
-			 dataType: "text",
+			 url: "http://"+localip+":4000/do/programs/writetable?channel=" + 1,
+			 dataType: "json",
 			 success: function(data){
 				
 			 },    
 			 error : function(err) { 
-				alert(err);
+				//alert(err);
 			 }   
 		});
-		alert('------------------!!!');
+		//alert('------------------!!!');
     });
 	
 	$( "#output-read2" ).button({
@@ -709,7 +714,67 @@ function devinfo_output(devType){
 						
 						break;
 					} case '#itmes': {
-						dig_itmes.dialog( "open" );
+						//获取输出通道设置信息
+						$.ajax({
+							 type: "GET",
+							 async:false,
+							 url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel=1",
+							 dataType: "json",
+							 success: function(data){
+								alert(data);
+								//JSON.parse(data);
+								$('.item_transid').val(data.streamId);
+								$('.item_netid').val(data.networkId);
+								
+								$('.item_orignetid').val(data.oringal_networkid);
+								$('.item_out').val(data.outputRate);
+								if(data.isAutoRaiseVersion){
+									$('.autoinc_ver')[0].checked = true;
+								}else{
+									$('.autoinc_ver')[0].checked = false;
+								}
+								$('.item_version')[0].textContent = data.version;
+								if(data.isAutoRankPAT){
+									$('.pat_auto')[0].checked = true;
+								}else{
+									$('.pat_auto')[0].checked = false;
+								}
+								if(data.isNeedSend_cat){
+									$('.sl_cat')[0].checked = true;
+								}else{
+									$('.sl_cat')[0].checked = false;
+								}
+								if(data.isNeedSend_nit){
+									$('.sl_nit')[0].checked = true;
+								}else{
+									$('.sl_nit')[0].checked = false;
+								}
+								if(data.isNeedSend_pat){
+									$('.sl_pat')[0].checked = true;
+								}else{
+									$('.sl_pat')[0].checked = false;
+								}
+								if(data.isNeedSend_pmt){
+									$('.sl_pmt')[0].checked = true;
+								}else{
+									$('.sl_pmt')[0].checked = false;
+								}
+								if(data.isNeedSend_sdt){
+									$('.sl_sdt')[0].checked = true;
+								}else{
+									$('.sl_sdt')[0].checked = false;
+								}
+								$('#tag_channel')[0].textContent = 1;
+								
+								dig_itmes.dialog( "open" );
+							 },    
+							 error : function(err) {    
+								  // view("异常！");   
+								var xxx = err;
+								alert("异常！====="+JSON.stringify(err));    
+							 }   
+						});
+						
 						break;
 					} case '#re_prg': {
 						
@@ -1110,13 +1175,33 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {				
 			"确定": function() {
-			  dig_itmes.dialog( "close" );
+				var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ $('.item_netid').val() + ',"streamId":' + $('.item_transid').val() + ',"oringal_networkid":' + $('.item_orignetid').val() + ',"outputRate":' + $('.item_out').val()+ ',"isAutoRaiseVersion":' +
+				$('.autoinc_ver')[0].checked == true?1:0 + ',"version":' + $('.item_version')[0].textContent + ',"isAutoRankPAT":' + $('pat_auto')[0].checked == true?1:0 + ',"isNeedSend_cat":' + $('.sl_cat')[0].checked == true?1:0 + ',"isNeedSend_nit":' + $('.sl_nit')[0].checked == true?1:0 + 
+				',"isNeedSend_pat":' + $('.sl_pat')[0].checked == true?1:0 + ',"isNeedSend_pmt":' + $('.sl_pmt')[0].checked == true?1:0 + ',"isNeedSend_sdt":' + $('.sl_sdt')[0].checked == true?1:0 + '}';
+				//下发配置
+				$.ajax({
+					 type: "GET",
+					 async:false,
+					 url: "http://"+localip+":4000/do/programs/setchanneloutinfo",
+					 data: jsonstr,
+					 dataType: "json",
+					 success: function(data){
+						
+					 },    
+					 error : function(err) {    
+						  // view("异常！");   
+						var xxx = err;
+						alert("异常！====="+JSON.stringify(err));    
+					 }   
+				});
+				dig_itmes.dialog( "close" );
 			},
 			"取消": function() {
-			  dig_itmes.dialog( "close" );
+				dig_itmes.dialog( "close" );
 			},
 			"应用":function() {
-			  dig_itmes.dialog( "close" );
+				
+				dig_itmes.dialog( "close" );
 			}
 		}
 	});
