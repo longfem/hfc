@@ -81,6 +81,7 @@ int sendOutPutOption(char *ip, int outChnId)
 	int outChnIndexTmp = outChnId - 1;	
 	ErrorTypeEm errRslt = SetOutRate(outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);	
 
+	printf("fuck 6\n");
 	unsigned int tableEnableFlag = 0;
 	if (pdb->pvalueTree->poutChnArray[outChnIndexTmp].isNeedSend_pat)
 		tableEnableFlag |= 0x1;
@@ -92,5 +93,9 @@ int sendOutPutOption(char *ip, int outChnId)
 		tableEnableFlag |= 0x8;
 	if (pdb->pvalueTree->poutChnArray[outChnIndexTmp].isNeedSend_nit)
 		tableEnableFlag |= 0x10;
+
+	printf("fuck 7\n");
 	SetTableEnableFlag(ip, outChnIndexTmp, tableEnableFlag);
+
+	printf("fuck 8\n");
 }

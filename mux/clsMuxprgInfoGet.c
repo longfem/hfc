@@ -685,6 +685,7 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 
     int dataAddr, iAddr;
   
+    printf("psi 1\n");
     //get call channal signal status
     enum ErrorTypeEm res;
     
@@ -703,13 +704,16 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 8, buf, &slen);
         
+        printf("psi 2\n");
         printf("\n####Recive SendTable_psi pat receive nums=[%d]\n", slen );
         if( slen ==9 ){
               // for(i=0;i<slen;i++)
               //   printf("Recive SendTable_psi buf[%d]=0x[%02x]\n",i, buf[i]);
               
-              if(buf[8]==0) 
+              if(buf[8]==0) {
+                printf("psi ok\n");
                 res = ok;
+              }                
               else{
                 res = error;                
               }              
@@ -722,8 +726,12 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
     /////////////////////////////////////////////////////////send first
 	list_t *paketList = NULL;
 	
+
+    printf("psi 5\n");
+
 	paketList = MaketPaketSection(ptableBytes, length);
     
+    printf("psi 6\n");
     int paketListLen = list_len(paketList); 
 	if (paketListLen == 0)
 		return 0;
