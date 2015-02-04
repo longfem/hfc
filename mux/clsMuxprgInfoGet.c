@@ -484,11 +484,15 @@ list_t * MaketPaketSection(unsigned char *table, int length)
 {
     list_t *outList = malloc(sizeof(list_t));
 
+    list_init(outList);
+
+    printf("packet 1\n");
     BufferUn_st *pPacket = malloc(sizeof(BufferUn_st));
     pPacket->pbuf = malloc(188);
     unsigned char *tmpBytes = pPacket->pbuf;
     int iAdded = 0, i=0;
 
+    printf("packet 2\n");
     if (length <= 188)
     {
         memcpy(tmpBytes, table , length);
@@ -496,18 +500,22 @@ list_t * MaketPaketSection(unsigned char *table, int length)
         for (i = length; i < 188; i++)
             tmpBytes[i] = 0xff;
 
+        printf("packet 3\n");
+
         pPacket->bufLen = length;
         list_append(outList, pPacket);        
         return outList;
     }
     else
     {
+        printf("packet 4\n");
         memcpy(tmpBytes, table , 188);
         pPacket->bufLen = 188;
         list_append(outList, pPacket);        
         length -= 188;
         iAdded += 188;
 
+        printf("packet 5\n");
         while (length > 0)
         {
             pPacket = NULL;
@@ -515,6 +523,7 @@ list_t * MaketPaketSection(unsigned char *table, int length)
             pPacket->pbuf = malloc(188);
             tmpBytes = pPacket->pbuf;
             
+            printf("packet 6\n");
             memcpy(tmpBytes, table , 4);            
             tmpBytes[1] = (unsigned char)(tmpBytes[1] & 0xbf); // 清除起始包标志
             tmpBytes[3] = (unsigned char)((tmpBytes[3] & 0xf0) | ((tmpBytes[3]++) & 0x0f)); // 连续计数器加1
@@ -522,7 +531,9 @@ list_t * MaketPaketSection(unsigned char *table, int length)
             if (length <= 184)
             {
                 pPacket->bufLen = length;
-                memcpy(tmpBytes+4, table+iAdded, length);                
+                memcpy(tmpBytes+4, table+iAdded, length);
+
+                printf("packet 7\n");
                 for (i = length; i < 184; i++)
                 {
                     tmpBytes[i + 4] = 0xff;
@@ -533,14 +544,21 @@ list_t * MaketPaketSection(unsigned char *table, int length)
             }
             else
             {
+
+                printf("packet 8\n");
                 pPacket->bufLen = 184;
                 memcpy(tmpBytes+4, table+iAdded, length);
                 iAdded += 184;
                 length -= 184;
             }
+
+            printf("packet 9\n");
             list_append(outList, tmpBytes);        
         }
     }
+
+    printf("packet 10\n" );
+
     return outList;
 }
 

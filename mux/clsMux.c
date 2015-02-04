@@ -78,10 +78,11 @@ int sendOutPutMuxInfo(char *ip, int outChnId){
 
 int sendOutPutOption(char *ip, int outChnId)
 {
-	int outChnIndexTmp = outChnId - 1;	
+	int outChnIndexTmp = outChnId - 1;
+	printf("option 1\n");	
 	ErrorTypeEm errRslt = SetOutRate(outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);	
 
-	printf("fuck 6\n");
+	printf("option 2\n");
 	unsigned int tableEnableFlag = 0;
 	if (pdb->pvalueTree->poutChnArray[outChnIndexTmp].isNeedSend_pat)
 		tableEnableFlag |= 0x1;
@@ -94,8 +95,8 @@ int sendOutPutOption(char *ip, int outChnId)
 	if (pdb->pvalueTree->poutChnArray[outChnIndexTmp].isNeedSend_nit)
 		tableEnableFlag |= 0x10;
 
-	printf("fuck 7\n");
+	printf("option 3\n");
 	SetTableEnableFlag(ip, outChnIndexTmp, tableEnableFlag);
 
-	printf("fuck 8\n");
+	printf("option 4\n");
 }
