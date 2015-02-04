@@ -28,11 +28,13 @@ unsigned int CreateTable(int outChnId)
 		// 	clsProgram.outPrgList[outChnIndex].dtPidList.Clear();
 
 
-		list_get(&(clsProgram.outPrgList), outChnIndex, &outpst);
-		prgNodesLen = list_len(&(outpst->prgNodes));
-		if (prgNodesLen > 0){
-			freePrograms(&outpst->prgNodes);			
-		}
+		// list_get(&(clsProgram.outPrgList), outChnIndex, &outpst);
+		// prgNodesLen = list_len(&(outpst->prgNodes));
+		// if (prgNodesLen > 0){
+		// 	freePrograms(&outpst->prgNodes);			
+		// }
+
+		
 		// if (clsProgram.outPrgList[outChnIndex].userPrgNodes != null)
 		// 	clsProgram.outPrgList[outChnIndex].userPrgNodes.Clear();
 

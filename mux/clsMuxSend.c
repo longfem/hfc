@@ -63,6 +63,7 @@ int SendTable(char *ip, int outChnId)
 			rslt = 0;
 	}
 	
+	printf("fuck 3\n");
 	// pbuff = NULL;	
 	// list_get(&pclsMux->table_sdt, iChn, &pbuff); 
 	// psiType = sdt;
@@ -111,7 +112,7 @@ int SendTable(char *ip, int outChnId)
 	else
 		rslt = SendPidMap(ip, outChnId);
 		
-	
+	printf("fuck 4\n");
 	return rslt;
 }
 

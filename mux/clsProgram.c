@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
+#include "EnumDef.h"
 #include "datastructdef.h"
 #include "communicate.h"
 #include "clsProgram.h"
@@ -297,18 +298,22 @@ unsigned char MakeOutputBytesAndSend(int outChn)
 
 unsigned char PrgMuxInfoGet()
 {
-	//MuxPrgInfoGet_st
-	// PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
-	// PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
 
- //    //PrgPmtMuxListLen
-	// for (int i = 0; i < _outChannelCntMax; i++)
-	// {
-	// 	if (GetOutProgramMuxMap(i + 1, out PrgPmtMuxList[i]) != ok)
-	// 		return false;
-	// 	if (GetOutPidMuxMap(i + 1, out PrgAVMuxList[i]) != tok)
-	// 		return false;
-	// }
+	int i=0;
+	//MuxPrgInfoGet_st list array
+	//list_t *PrgPmtMuxList = NULL;
+	//MuxPidInfo_st list array
+	//PrgAVMuxList
+
+	ErrorTypeEm res;
+  
+	for (i = 0; i < clsProgram._outChannelCntMax; i++)
+	{		 
+		if (GetOutProgramMuxMap(i + 1, &clsProgram.PrgPmtMuxList[i]) != ok)
+			return 0;
+		if (GetOutPidMuxMap(i + 1, &clsProgram.PrgAVMuxList[i]) != ok)
+			return 0;
+	}
 
 	// if (dglt_showPidMap != null)
 	// {
