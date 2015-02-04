@@ -75,14 +75,14 @@ int ChnBypass_write(int outChnId)
 
 int sendPrograms(char *ip, int outChnId)
 {
-
+	
 	if(CreateTable(outChnId))
-	{
-		printf("1\n");
+	{		
 		sendOutPutMuxInfo(ip, outChnId);
-		printf("2\n");
-		sendOutPutOption(ip, outChnId);		
-		printf("finish\n");
+		printf("2\n");				
+		sendOutPutOption(ip, outChnId);
+
+		printf("sendPrograms finish\n");
 	}
 	return 0;	
 }

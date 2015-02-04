@@ -164,11 +164,12 @@ static void writetable(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn); 
     char *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
-	/*if(!sendPrograms(inCh)){
+	
+	if(!sendPrograms("192.168.1.134", inCh)){
 		render("OK"); 
 	}else{
 		render("ERROR"); 
-	}*/
+	}
 	   
 } 
 
@@ -264,6 +265,13 @@ static void espinit() {
 	}
 
 	Init(clsProgram._outChannelCntMax);
+
+	//add by stan for getmux info init global var
+	//MuxPrgInfoGet_st list array
+	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
+	//MuxPidInfo_st list array
+	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
+	
 	printf("======>>>>esp init!!!!!!!\n");
 }
 

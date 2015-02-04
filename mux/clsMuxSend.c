@@ -4,15 +4,16 @@
 #include "datastructdef.h"
 #include "communicate.h"
 #include "clsMuxSend.h"
+#include "clsMuxprgInfoGet.h"
 
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 ClsMux_st *pclsMux;
 int o_selectedPrgCntMax = 29;
 
-unsigned char SendTable(int outChnId)
+int SendTable(char *ip, int outChnId)
 {
-	unsigned char rslt = 1;
+	int rslt = 1;
 	int iChn = outChnId - 1;
 	enum PsiTableType psiType;
 
@@ -23,19 +24,20 @@ unsigned char SendTable(int outChnId)
 	}
 
 	list_get(&pclsMux->table_pat, iChn, &pbuff); 
+
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
 	{
-		psiType = pat;
-		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
+		if (SendTable_psi(ip, outChnId, pat, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 	}
 	else
 	{
 		psiType = pat;
-		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
+		if (SendTable_psi(ip, outChnId, pat, NULL, 0) != ok)
 			rslt = 0;
 	}
 
+	
 
 	list_t *table_pmt=NULL;
 	int table_pmtListLen = list_len(&pclsMux->table_pmtList);
@@ -52,81 +54,81 @@ unsigned char SendTable(int outChnId)
 		&& table_pmtListLen > 0
 		&& table_pmtLen != NULL)
 	{
-		if (SendTable_pmt(outChnId, table_pmt) != ok)
+		if (SendTable_pmt(ip, outChnId, table_pmt) != ok)
 			rslt = 0;
 	}
 	else
 	{
-		if (SendTable_pmt(outChnId, NULL) != ok)
+		if (SendTable_pmt(ip, outChnId, NULL) != ok)
 			rslt = 0;
 	}
-
-	pbuff = NULL;	
-	list_get(&pclsMux->table_sdt, iChn, &pbuff); 
-	psiType = sdt;
-	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
-	{					
-		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
-			rslt = 0;
-	}
-	else
-	{		
-		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
-			rslt = 0;
-	}
-	pbuff = NULL;	
-	list_get(&pclsMux->table_cat, iChn, &pbuff); 
-	psiType = cat;
-	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
-	{		
-		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
-			rslt = 0;
-	}
-	else
-	{
-		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
-			rslt = 0;
-	}
-
-	pbuff = NULL;	
-	list_get(&pclsMux->table_nit, iChn, &pbuff); 
-	psiType = nit;
-	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit)
-	{
-		
-		if (SendTable_psi(outChnId, psiType, pbuff->pbuf, pbuff->bufLen) != ok)
-			rslt = 0;
-	}
-	else
-	{
-		if (SendTable_psi(outChnId, psiType, NULL, 0) != ok)
-			rslt = 0;
-	}
-	//	if (rslt)
-	// {
-	// 	if (SendTable_psi_finish(outChnId) != ok)
+	
+	printf("fuck 3\n");
+	// pbuff = NULL;	
+	// list_get(&pclsMux->table_sdt, iChn, &pbuff); 
+	// psiType = sdt;
+	// if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
+	// {					
+	// 	if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
 	// 		rslt = 0;
-	// 	else
-	// 		rslt = SendPidMap(outChnId);
+	// }
+	// else
+	// {		
+	// 	if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
+	// 		rslt = 0;
+	// }
+	// pbuff = NULL;	
+	// list_get(&pclsMux->table_cat, iChn, &pbuff); 
+	// psiType = cat;
+	// if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
+	// {		
+	// 	if (SendTable_psi(ip, outChnId, cat, pbuff->pbuf, pbuff->bufLen) != ok)
+	// 		rslt = 0;
+	// }
+	// else
+	// {
+	// 	if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
+	// 		rslt = 0;
 	// }
 
+
+	// pbuff = NULL;	
+	// list_get(&pclsMux->table_nit, iChn, &pbuff); 
+	// psiType = nit;
+	// if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit)
+	// {
+		
+	// 	if (SendTable_psi(ip, outChnId, nit, pbuff->pbuf, pbuff->bufLen) != ok)
+	// 		rslt = 0;
+	// }
+	// else
+	// {
+	// 	if (SendTable_psi(ip, outChnId, nit, NULL, 0) != ok)
+	// 		rslt = 0;
+	// }
 	
+	if (SendTable_psi_finish(ip, outChnId) != ok)
+		rslt = 0;
+	else
+		rslt = SendPidMap(ip, outChnId);
+		
+	printf("fuck 4\n");
 	return rslt;
 }
 
-// unsigned char SendPidMap(int outChnId)
-// {
-// 	bool rslt = true;
+int SendPidMap(char *ip, int outChnId)
+{
+	int rslt = 1;
 
-// 	if (SendTable_PidMap(outChnId, clsProgram.PrgAVMuxList) != ok)
-// 		rslt = false;
-// 	if (DirectlyTransmit_sendMap(outChnId, clsProgram.outPrgList[outChnId - 1].dtPidList) != ErrorTypeEm.ok)
-// 		rslt = false;
-// 	if (SendEnableMuxTable(outChnId) != ErrorTypeEm.ok)
-// 		rslt = false;
+	if (SendTable_PidMap(ip, outChnId, clsProgram.PrgAVMuxList) != ok)
+		rslt = 0;
+	// if (DirectlyTransmit_sendMap(ip, outChnId, clsProgram.outPrgList[outChnId - 1].dtPidList) != ok)
+	// 	rslt = 0;
+	if (SendEnableMuxTable(ip, outChnId) != ok)
+		rslt = 0;
 
-// 	return rslt;
-// }
+	return rslt;
+}
 
 int CountSelectedPrgCnt(int outChnId)
 {
@@ -158,9 +160,12 @@ int CountSelectedPrgCnt(int outChnId)
 }
 
 
-void SendMux(int outChnId)
+void SendMux(char *ip, int outChnId)
 {
 	unsigned char isNeedDesInfoSend = 1;
+
+	printf("sendMux 1 outChnId=%d\n", outChnId);
+
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	//MuxPrgNumMax
 	if (selCnt > o_selectedPrgCntMax) 
@@ -168,13 +173,14 @@ void SendMux(int outChnId)
 		isNeedDesInfoSend = 0;
 		return;
 	}
-    unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
+    unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(ip, outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
     if (!sendRslt)
     {	    
 	    isNeedDesInfoSend = 0;
 	    return;
     }
-	SendTable(outChnId);
+    printf("sendMux will send table outChnId=%d\n", outChnId);
+	SendTable(ip, outChnId);
 	// if (isNeedDesInfoSend)
 	// {
 	// 	MakeOutputBytesAndSend(outChnId);
