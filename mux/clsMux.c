@@ -56,6 +56,8 @@ int sendOutPutMuxInfo(char *ip, int outChnId){
 		int outChnIndexTmp = outChnId - 1;        
 
 		ChnBypass_write(ip, outChnId); // 发送直传标志
+		printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
+
 		SendMux(ip, outChnId); // 发送表复用信息
 		
 		SetOutChnTSID(ip, outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].streamId);
