@@ -21,6 +21,9 @@ ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
     //get call channal signal status
     enum ErrorTypeEm res;
 
+    printf(" outChannel=%d, SetOutRate =%d\n", outChannel, outputRate);
+
+    memset(sendbuf,0, sizeof(sendbuf));
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x21;
@@ -34,10 +37,10 @@ ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);
     
-    //printf("\n####Recive GetOutChnNetID receive nums=[%d]\n", slen );
+    printf("\n####Recive SetOutRate receive nums=[%d]\n", slen );
     if( 10 == slen ){
-          // for(i=0;i<slen;i++)
-          //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);    
+           for(i=0;i<slen;i++)
+             printf("Recive SetOutRate buf[%d]=0x[%02x]\n",i, buf[i]);    
         
         if (buf[9] == 0)
             res = ok;
@@ -485,14 +488,12 @@ list_t * MaketPaketSection(unsigned char *table, int length)
     list_t *outList = malloc(sizeof(list_t));
 
     list_init(outList);
-
-    printf("packet 1\n");
+    
     BufferUn_st *pPacket = malloc(sizeof(BufferUn_st));
     pPacket->pbuf = malloc(188);
     unsigned char *tmpBytes = pPacket->pbuf;
     int iAdded = 0, i=0;
 
-    printf("packet 2\n");
     if (length <= 188)
     {
         memcpy(tmpBytes, table , length);
@@ -500,30 +501,26 @@ list_t * MaketPaketSection(unsigned char *table, int length)
         for (i = length; i < 188; i++)
             tmpBytes[i] = 0xff;
 
-        printf("packet 3\n");
 
         pPacket->bufLen = length;
         list_append(outList, pPacket);        
         return outList;
     }
     else
-    {
-        printf("packet 4\n");
+    {       
         memcpy(tmpBytes, table , 188);
         pPacket->bufLen = 188;
         list_append(outList, pPacket);        
         length -= 188;
         iAdded += 188;
-
-        printf("packet 5\n");
+     
         while (length > 0)
         {
             pPacket = NULL;
             pPacket = malloc(sizeof(BufferUn_st));
             pPacket->pbuf = malloc(188);
             tmpBytes = pPacket->pbuf;
-            
-            printf("packet 6\n");
+                        
             memcpy(tmpBytes, table , 4);            
             tmpBytes[1] = (unsigned char)(tmpBytes[1] & 0xbf); // 清除起始包标志
             tmpBytes[3] = (unsigned char)((tmpBytes[3] & 0xf0) | ((tmpBytes[3]++) & 0x0f)); // 连续计数器加1
@@ -532,8 +529,7 @@ list_t * MaketPaketSection(unsigned char *table, int length)
             {
                 pPacket->bufLen = length;
                 memcpy(tmpBytes+4, table+iAdded, length);
-
-                printf("packet 7\n");
+            
                 for (i = length; i < 184; i++)
                 {
                     tmpBytes[i + 4] = 0xff;
@@ -543,21 +539,17 @@ list_t * MaketPaketSection(unsigned char *table, int length)
 
             }
             else
-            {
-
-                printf("packet 8\n");
+            {       
                 pPacket->bufLen = 184;
                 memcpy(tmpBytes+4, table+iAdded, length);
                 iAdded += 184;
                 length -= 184;
             }
-
-            printf("packet 9\n");
+            
             list_append(outList, tmpBytes);        
         }
     }
-
-    printf("packet 10\n" );
+    
 
     return outList;
 }
@@ -702,8 +694,7 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
     int slen=0;
 
     int dataAddr, iAddr;
-  
-    printf("psi 1\n");
+      
     //get call channal signal status
     enum ErrorTypeEm res;
     
@@ -721,15 +712,13 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
       
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 8, buf, &slen);
-        
-        printf("psi 2\n");
-        printf("\n####Recive SendTable_psi pat receive nums=[%d]\n", slen );
+                
+        //printf("\n####Recive SendTable_psi pat receive nums=[%d]\n", slen );
         if( slen ==9 ){
               // for(i=0;i<slen;i++)
               //   printf("Recive SendTable_psi buf[%d]=0x[%02x]\n",i, buf[i]);
               
-              if(buf[8]==0) {
-                printf("psi ok\n");
+              if(buf[8]==0) {               
                 res = ok;
               }                
               else{
@@ -743,13 +732,10 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
     }
     /////////////////////////////////////////////////////////send first
 	list_t *paketList = NULL;
-	
-
-    printf("psi 5\n");
+	    
 
 	paketList = MaketPaketSection(ptableBytes, length);
-    
-    printf("psi 6\n");
+        
     int paketListLen = list_len(paketList); 
 	if (paketListLen == 0)
 		return 0;
@@ -822,7 +808,7 @@ ErrorTypeEm SendTable_psi_finish(char *ip, int outChannel)
     communicate(ip, sendbuf, 5, buf, &slen);
 
     if( slen ==6 ){
-        printf("resul= %d\n", buf[5]);
+        printf("SendTable_psi_finish resul= %d\n", buf[5]);
         res = ok;                        
     }
     else{            

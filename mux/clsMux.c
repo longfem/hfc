@@ -19,8 +19,6 @@ unsigned int CreateTable(int outChnId)
 	int outChnIndex = outChnId - 1;
 	ChannelProgramSt *outpst = NULL;
 
-	printf("hello1\n");
-
 	if (clsProgram.chnBypassEnable != 0 && clsProgram.chnBypassEnable[outChnId - 1] &&
 		clsProgram.chnBypass2 != 0 && clsProgram.chnBypass2[outChnId - 1] != 0)
 	{
@@ -29,7 +27,7 @@ unsigned int CreateTable(int outChnId)
 		// if (clsProgram.outPrgList[outChnIndex].dtPidList != null)
 		// 	clsProgram.outPrgList[outChnIndex].dtPidList.Clear();
 
-		printf("hello2\n");
+
 		list_get(&(clsProgram.outPrgList), outChnIndex, &outpst);
 		prgNodesLen = list_len(&(outpst->prgNodes));
 		if (prgNodesLen > 0){
@@ -42,9 +40,7 @@ unsigned int CreateTable(int outChnId)
 	}
 	pdb->pvalueTree->poutChnArray[outChnIndex].isManualMapMode = 1;	
 
-	printf("hello3\n");
 	rtn = MakeTable(outChnId);
-	printf("hello4\n");
 	//OutPsiTable_show(outChnIndex);			
 
 	return rtn;
@@ -80,7 +76,7 @@ int sendOutPutOption(char *ip, int outChnId)
 {
 	int outChnIndexTmp = outChnId - 1;
 	printf("option 1\n");	
-	ErrorTypeEm errRslt = SetOutRate(outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);	
+	ErrorTypeEm errRslt = SetOutRate(ip, outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);	
 
 	printf("option 2\n");
 	unsigned int tableEnableFlag = 0;
