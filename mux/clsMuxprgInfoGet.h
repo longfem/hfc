@@ -12,4 +12,5 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate);
 ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList);
 ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList);
 ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsigned char *ptableBytes, int length);
+ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList);
 #endif

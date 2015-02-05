@@ -6,6 +6,7 @@
 #include "datastructdef.h"
 #include "communicate.h"
 #include "clsProgram.h"
+#include "clsMuxprgInfoGet.h"
 
 extern ClsProgram_st clsProgram;
 
@@ -296,7 +297,7 @@ unsigned char MakeOutputBytesAndSend(int outChn)
 }
 
 
-unsigned char PrgMuxInfoGet()
+unsigned char PrgMuxInfoGet(char *ip)
 {
 
 	int i=0;
@@ -309,9 +310,9 @@ unsigned char PrgMuxInfoGet()
   
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{		 
-		if (GetOutProgramMuxMap(i + 1, &clsProgram.PrgPmtMuxList[i]) != ok)
+		if (GetOutProgramMuxMap(ip, i + 1, &clsProgram.PrgPmtMuxList[i]) != ok)
 			return 0;
-		if (GetOutPidMuxMap(i + 1, &clsProgram.PrgAVMuxList[i]) != ok)
+		if (GetOutPidMuxMap(ip, i + 1, &clsProgram.PrgAVMuxList[i]) != ok)
 			return 0;
 	}
 
