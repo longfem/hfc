@@ -20,14 +20,17 @@
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
-/* static char* substr(const char*str,unsigned start, unsigned end)
+ static void rendersts(const char *str,int status)
 {
-   unsigned n = end - start;
-   static char stbuf[256];
-   strncpy(stbuf, str + start, n);
-   stbuf[n] = 0;
-   return stbuf;
-} */
+	cJSON *result = cJSON_CreateObject();
+	char* jsonstring;
+	cJSON_AddNumberToObject(result,"sts", status);
+	jsonstring = cJSON_PrintUnformatted(result);
+	memcpy(str, jsonstring, strlen(jsonstring));
+	//释放内存	
+	cJSON_Delete(result);		
+	free(jsonstring);
+} 
 
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
@@ -164,67 +167,69 @@ static void writetable(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn); 
     char *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
-	
+	char rsts[20] = {0};
 	if(!sendPrograms("192.168.1.134", inCh)){
-		render("OK"); 
+		rendersts(rsts, 1);
 	}else{
-		render("ERROR"); 
+		rendersts(rsts, 0);
 	}
-	   
+	render(rsts);
 } 
 
 static void getchanneloutinfo(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn); 
     char *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);	
+	char rsts[20] = {0};
 	if(!pdb){
 		printf("getchanneloutinfo-----pdb is null!\n");
-		render("ERROR"); 
+		rendersts(rsts, 0);
 	}
 	cJSON *pdbjson;
 	char* jsonstring;
 	pdbjson = cJSON_CreateObject();
-	cJSON_AddStringToObject(pdbjson,"networkId", pdb->pvalueTree->poutChnArray[inCh-1].networkId);
-	cJSON_AddStringToObject(pdbjson,"streamId", pdb->pvalueTree->poutChnArray[inCh-1].streamId);
-	cJSON_AddStringToObject(pdbjson,"oringal_networkid", pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid);
-	cJSON_AddStringToObject(pdbjson,"outputRate", pdb->pvalueTree->poutChnArray[inCh-1].outputRate);
-	cJSON_AddStringToObject(pdbjson,"isAutoRaiseVersion", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion);
-	cJSON_AddStringToObject(pdbjson,"version", pdb->pvalueTree->poutChnArray[inCh-1].version);
-	cJSON_AddStringToObject(pdbjson,"isManualMapMode", pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode);
-	cJSON_AddStringToObject(pdbjson,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT);
+	cJSON_AddNumberToObject(pdbjson,"networkId", pdb->pvalueTree->poutChnArray[inCh-1].networkId);
+	cJSON_AddNumberToObject(pdbjson,"streamId", pdb->pvalueTree->poutChnArray[inCh-1].streamId);
+	cJSON_AddNumberToObject(pdbjson,"oringal_networkid", pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid);
+	cJSON_AddNumberToObject(pdbjson,"outputRate", pdb->pvalueTree->poutChnArray[inCh-1].outputRate);
+	cJSON_AddNumberToObject(pdbjson,"isAutoRaiseVersion", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion);
+	cJSON_AddNumberToObject(pdbjson,"version", pdb->pvalueTree->poutChnArray[inCh-1].version);
+	cJSON_AddNumberToObject(pdbjson,"isManualMapMode", pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode);
+	cJSON_AddNumberToObject(pdbjson,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT);
 	
-	cJSON_AddStringToObject(pdbjson,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
-	cJSON_AddStringToObject(pdbjson,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit);
-	cJSON_AddStringToObject(pdbjson,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat);
-	cJSON_AddStringToObject(pdbjson,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt);
-	cJSON_AddStringToObject(pdbjson,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt);
+	cJSON_AddNumberToObject(pdbjson,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
+	cJSON_AddNumberToObject(pdbjson,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit);
+	cJSON_AddNumberToObject(pdbjson,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat);
+	cJSON_AddNumberToObject(pdbjson,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt);
+	cJSON_AddNumberToObject(pdbjson,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt);
 	jsonstring = cJSON_PrintUnformatted(pdbjson);
 	render(jsonstring);
-	printf("=====================-----after render!\n");
 	cJSON_Delete(pdbjson);
 	free(jsonstring);
 } 
 
 static void setchanneloutinfo(HttpConn *conn) { 
+	char rsts[20] = {0};
 	MprJson *jsonparam = httpGetParams(conn); 
-	printf("==========setchanneloutinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
-    char *inChn = mprGetJson(jsonparam, "channel"); 
+	//printf("==========setchanneloutinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+    char *inChn = mprGetJson(jsonparam, "channel"); 	
 	int inCh = atoi(inChn);
 	pdb->pvalueTree->poutChnArray[inCh-1].networkId = atoi(mprGetJson(jsonparam, "networkId"));
 	pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid = atoi(mprGetJson(jsonparam, "oringal_networkid"));
 	pdb->pvalueTree->poutChnArray[inCh-1].streamId = atoi(mprGetJson(jsonparam, "streamId"));
 	pdb->pvalueTree->poutChnArray[inCh-1].outputRate = atoi(mprGetJson(jsonparam, "outputRate"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion = atoi(mprGetJson(jsonparam, "isAutoRaiseVersion"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion = (unsigned char)atoi(mprGetJson(jsonparam, "isAutoRaiseVersion"));
 	pdb->pvalueTree->poutChnArray[inCh-1].version = atoi(mprGetJson(jsonparam, "version"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode = atoi(mprGetJson(jsonparam, "isManualMapMode"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT = atoi(mprGetJson(jsonparam, "isAutoRankPAT"));
-	
-	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat = atoi(mprGetJson(jsonparam, "isNeedSend_cat"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit = atoi(mprGetJson(jsonparam, "isNeedSend_nit"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat = atoi(mprGetJson(jsonparam, "isNeedSend_pat"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt = atoi(mprGetJson(jsonparam, "isNeedSend_pmt"));
-	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt = atoi(mprGetJson(jsonparam, "isNeedSend_sdt"));
-	render("OK"); 
+	//memcpy(&pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode, mprGetJson(jsonparam, "isManualMapMode"), sizeof(char));
+	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT = (unsigned char)atoi(mprGetJson(jsonparam, "isAutoRankPAT"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_cat"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_nit"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_pat"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_pmt"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_sdt"));
+	//printf(":::%d:::%d:::%d\n", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion, pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT,pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
+	rendersts(rsts, 1);
+	render(rsts); 
 } 
 
 static void common(HttpConn *conn) {
@@ -268,9 +273,9 @@ static void espinit() {
 
 	//add by stan for getmux info init global var
 	//MuxPrgInfoGet_st list array
-	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) *_outChannelCntMax);
+	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) *clsProgram._outChannelCntMax);
 	//MuxPidInfo_st list array
-	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * _outChannelCntMax);
+	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
 	
 	printf("======>>>>esp init!!!!!!!\n");
 }
