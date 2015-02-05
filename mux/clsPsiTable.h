@@ -7,7 +7,7 @@
 
 unsigned char Muxer_ChannelScan(void);
 Dev_prgInfo_st* buildOoutPrgList();
-unsigned  long  CrcBytes(unsigned char inBytes[],int offset, int length);
+unsigned  long  CrcBytes(unsigned char *inBytes,int offset, int length);
 static int BigFormat_intToBytes(int intValue, unsigned char outBytes[], int offset, int bytesLen);
 static int BigFormat_uintToBytes(unsigned long intValue, unsigned char outBytes[], int offset, int bytesLen);
 pat_senction_st*  CreatePatStan(list_t  prginfolist,unsigned char tmpBytes[],int streamId, int networkId, int verisonNumber);
