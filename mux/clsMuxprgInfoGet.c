@@ -1086,7 +1086,7 @@ ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapLis
 
 unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoBytes, int length)
 {
-    /*unsigned char buf[1024];
+    unsigned char buf[1024];
     int i = 0, j=0;
     unsigned char sendbuf[200];
     int slen=0;
@@ -1106,25 +1106,24 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
     int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
     int sendedInfoAddr = 0;
     
-    unsigned int crcRslt = CrcBytes(muxInfoBytes, 0, length - 4);
-    muxInfoBytes[length-4] = (unsigned char) crcRslt & 0xFF000000;
-    muxInfoBytes[length-4] = (unsigned char) crcRslt & 0xFF0000;
-    muxInfoBytes[length-4] = (unsigned char) crcRslt & 0xFF00;
+    unsigned  long crcRslt = CrcBytes(muxInfoBytes, 0, length - 4);
+    muxInfoBytes[length-4] = (unsigned char) (crcRslt >>24) & 0xFF;
+    muxInfoBytes[length-4] = (unsigned char) (crcRslt >>16) & 0xFF;
+    muxInfoBytes[length-4] = (unsigned char) (crcRslt >> 8) & 0xFF;
     muxInfoBytes[length-4] = (unsigned char) crcRslt & 0xFF;
     
     
     memset(sendbuf, 0, sizeof(sendbuf));
-    sendbuf[0]=0x77;
-    sendbuf[1]=0x6C;
-    sendbuf[2]=0x23;
-    sendbuf[3]=(unsigned char)outChn;
-    sendbuf[4]=0x06;
-    sendbuf[5]=0x02;
-    sendbuf[6]=0x01;
-    sendbuf[7]=(unsigned char)iAddr & 0xFF;
-    sendbuf[8]=(unsigned char)(sendCnt & 0xFF);
-    sendbuf[9]=(unsigned char) (length & 0xFF);
-    sendbuf[10]=(unsigned char) (length & 0xFF00)>>8;
+    sendbuf[iAddr++]=0x77;
+    sendbuf[iAddr++]=0x6C;
+    sendbuf[iAddr++]=0x23;
+    sendbuf[iAddr++]=(unsigned char)outChn;
+    sendbuf[iAddr++]=0x06;
+    sendbuf[iAddr++]=0x02;
+    sendbuf[iAddr++]=0x01;
+    sendbuf[iAddr++]=(unsigned char)sendCnt & 0xFF;    
+    sendbuf[iAddr++]=(unsigned char) length & 0xFF;
+    sendbuf[iAddr++]=(unsigned char) (length >> 8) & 0xFF;
 
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, iAddr, buf, &slen);
@@ -1132,6 +1131,11 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
     if(slen <= iAddr){
         printf("send SendOutputPrgInfo error \n");
         return -1;
+    }else{
+        if(buf[7] != 0){
+          printf("send SendOutputPrgInfo result is error \n");
+        return -1;  
+        }
     }
     
 
@@ -1171,9 +1175,14 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
             printf("send SendOutputPrgInfo error \n");
             if(buf[iAddr]!=0)            
                 return 0;
+        }else{
+           if(buf[7] != 0){
+              printf("send SendOutputPrgInfo loop sentcnt result is error \n");
+            return -1;  
+            }
         }
         
-    }*/
+    }
     return 1;
 }
 

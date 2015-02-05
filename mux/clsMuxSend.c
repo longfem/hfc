@@ -181,10 +181,10 @@ void SendMux(char *ip, int outChnId)
     }
     printf("sendMux will send table outChnId=%d\n", outChnId);
 	SendTable(ip, outChnId);
-	// if (isNeedDesInfoSend)
-	// {
-	// 	MakeOutputBytesAndSend(outChnId);
-	// }
+	//if (isNeedDesInfoSend)
+	{
+		MakeOutputBytesAndSend(ip, outChnId);
+	}
 
 	// RecordInputChnUseStatus(outChnId);
 

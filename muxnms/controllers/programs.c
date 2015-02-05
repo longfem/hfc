@@ -273,7 +273,7 @@ static void espinit() {
 
 	//add by stan for getmux info init global var
 	//MuxPrgInfoGet_st list array
-	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) *clsProgram._outChannelCntMax);
+	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
 	//MuxPidInfo_st list array
 	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
 	

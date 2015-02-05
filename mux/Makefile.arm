@@ -87,6 +87,8 @@ install:
 	mkdir -p $(BIN_PATH)
 	cp tcpclient $(BIN_PATH)/
 	mkdir -p $(LIB_PATH)
+	arm-linux-strip libtcpclient.so
+	cp libtcpclient.so ../build-arm/mux-arm/lib/
 	mv libtcpclient.so $(LIB_PATH)/
 	mkdir -p $(LIB_PATH)/include
 	cp -a *.h $(LIB_PATH)/include
