@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 
 #include "esp.h" 
+#include "cJSON.h"
 #include "communicate.h"
 #include "getPrograms.h"
 #include "clsParams.h"
@@ -19,14 +20,14 @@
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
-static char* substr(const char*str,unsigned start, unsigned end)
+/* static char* substr(const char*str,unsigned start, unsigned end)
 {
    unsigned n = end - start;
    static char stbuf[256];
    strncpy(stbuf, str + start, n);
    stbuf[n] = 0;
    return stbuf;
-}
+} */
 
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
@@ -51,7 +52,7 @@ static void getoutprg(HttpConn *conn) {
 
 /*制表准备工作*/
 static void maketable(HttpConn *conn) { 
-	int i = 0, j = 0, k = 0,cm = 0, pos = 0, outprglen = 0, prgindex = 0;
+	int i = 0, j = 0, k = 0,cm = 0, pos = 0, prgindex = 0;
 	char str[6] = {0};
 	char idstr[4] = {0};
 	char outstring[20480] = {0};
@@ -163,13 +164,67 @@ static void writetable(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn); 
     char *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
-	printf("now before call sendPrograms inChn=%d\n", inCh);
+	
 	if(!sendPrograms("192.168.1.134", inCh)){
 		render("OK"); 
 	}else{
 		render("ERROR"); 
 	}
 	   
+} 
+
+static void getchanneloutinfo(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn); 
+    char *inChn = mprGetJson(jsonparam, "channel"); 
+	int inCh = atoi(inChn);	
+	if(!pdb){
+		printf("getchanneloutinfo-----pdb is null!\n");
+		render("ERROR"); 
+	}
+	cJSON *pdbjson;
+	char* jsonstring;
+	pdbjson = cJSON_CreateObject();
+	cJSON_AddStringToObject(pdbjson,"networkId", pdb->pvalueTree->poutChnArray[inCh-1].networkId);
+	cJSON_AddStringToObject(pdbjson,"streamId", pdb->pvalueTree->poutChnArray[inCh-1].streamId);
+	cJSON_AddStringToObject(pdbjson,"oringal_networkid", pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid);
+	cJSON_AddStringToObject(pdbjson,"outputRate", pdb->pvalueTree->poutChnArray[inCh-1].outputRate);
+	cJSON_AddStringToObject(pdbjson,"isAutoRaiseVersion", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion);
+	cJSON_AddStringToObject(pdbjson,"version", pdb->pvalueTree->poutChnArray[inCh-1].version);
+	cJSON_AddStringToObject(pdbjson,"isManualMapMode", pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode);
+	cJSON_AddStringToObject(pdbjson,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT);
+	
+	cJSON_AddStringToObject(pdbjson,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
+	cJSON_AddStringToObject(pdbjson,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit);
+	cJSON_AddStringToObject(pdbjson,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat);
+	cJSON_AddStringToObject(pdbjson,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt);
+	cJSON_AddStringToObject(pdbjson,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt);
+	jsonstring = cJSON_PrintUnformatted(pdbjson);
+	render(jsonstring);
+	printf("=====================-----after render!\n");
+	cJSON_Delete(pdbjson);
+	free(jsonstring);
+} 
+
+static void setchanneloutinfo(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn); 
+	printf("==========setchanneloutinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+    char *inChn = mprGetJson(jsonparam, "channel"); 
+	int inCh = atoi(inChn);
+	pdb->pvalueTree->poutChnArray[inCh-1].networkId = atoi(mprGetJson(jsonparam, "networkId"));
+	pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid = atoi(mprGetJson(jsonparam, "oringal_networkid"));
+	pdb->pvalueTree->poutChnArray[inCh-1].streamId = atoi(mprGetJson(jsonparam, "streamId"));
+	pdb->pvalueTree->poutChnArray[inCh-1].outputRate = atoi(mprGetJson(jsonparam, "outputRate"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion = atoi(mprGetJson(jsonparam, "isAutoRaiseVersion"));
+	pdb->pvalueTree->poutChnArray[inCh-1].version = atoi(mprGetJson(jsonparam, "version"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode = atoi(mprGetJson(jsonparam, "isManualMapMode"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT = atoi(mprGetJson(jsonparam, "isAutoRankPAT"));
+	
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat = atoi(mprGetJson(jsonparam, "isNeedSend_cat"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit = atoi(mprGetJson(jsonparam, "isNeedSend_nit"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat = atoi(mprGetJson(jsonparam, "isNeedSend_pat"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt = atoi(mprGetJson(jsonparam, "isNeedSend_pmt"));
+	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt = atoi(mprGetJson(jsonparam, "isNeedSend_sdt"));
+	render("OK"); 
 } 
 
 static void common(HttpConn *conn) {
@@ -231,7 +286,9 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-maketable", maketable);
 	espDefineAction(route, "programs-cmd-writetable", writetable);
 	espDefineAction(route, "programs-cmd-getTable", getTable);
-    
+    espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
+	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
+	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
     ediAddValidation(edi, "present", "programs", "title", 0);

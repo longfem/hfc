@@ -1086,7 +1086,7 @@ ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapLis
 
 unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoBytes, int length)
 {
-    unsigned char buf[1024];
+    /*unsigned char buf[1024];
     int i = 0, j=0;
     unsigned char sendbuf[200];
     int slen=0;
@@ -1173,7 +1173,7 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
                 return 0;
         }
         
-    }
+    }*/
     return 1;
 }
 
