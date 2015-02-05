@@ -1,5 +1,15 @@
 How to run appweb in arm
+gcc version 4.0.0 (DENX ELDK 4.1 4.0.0)
 
+
+ch root
+cp appweb-5.2.0.tar.bz2 /home/nfs/source
+cd /home/nfs/source
+chown root:root appweb-5.2.0.tar.bz2
+tar -jxvf appweb-5.2.0.tar.bz2
+
+compile esp needa
+/usr/local/lib/esp/5.2.0/bin/esp.conf
 #option one to put file
 1. cp -a mux-arm /usr/local/
 2. tar -jcvf mux-arm.tar.bz2 -C /usr/local/
