@@ -54,7 +54,7 @@ void initClsProgram(int inChannelNum, int outChannelNum)//, Shawn.WL.WanLongPann
 }
 
 
-unsigned char AutoMux_makeMuxInfoAndSend(int outChannel, unsigned char isNeedSendDevMux)
+unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char isNeedSendDevMux)
 {
 	list_t sendList;
 	MuxPrgInfoGet_st *pmtPrg;
@@ -282,7 +282,7 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 }
 
 
-unsigned char MakeOutputBytesAndSend(int outChn)
+unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 {
 	unsigned char *tmpBytes;
 	unsigned int tmpBytesLen=0;
@@ -290,7 +290,7 @@ unsigned char MakeOutputBytesAndSend(int outChn)
 	int sendLen = MakeOutPutBytes(outChn,  tmpBytes, &tmpBytesLen);
 	if (sendLen > 0)
 	{
-		if (SendOutputPrgInfo(outChn, tmpBytes, sendLen))
+		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen))
 			return 1;
 	}
 	return 0;
