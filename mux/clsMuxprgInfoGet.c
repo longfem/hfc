@@ -169,7 +169,7 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
           // for(i=0;i<rlen;i++)
           //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
               
-        prgCnt = ( buf[7]<<8 | buf[6]) & 0xffff;       
+        prgCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
         res = ok;
 
     }
@@ -202,13 +202,13 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
         communicate(ip, sendbuf, 9, buf, &rlen);
     
 
-        if(rlen <= 11) {
+        if(rlen < 9) {
             return error;
         }
 
-        nowCnt = (buf[10] << 8 | buf[9]) & 0xFFFF;
+        nowCnt = (buf[8] << 8 | buf[7]) & 0xFFFF;
         
-        cmdStringAddr = 11;
+        cmdStringAddr = 7;
         for (j = 0; j < nowCnt; j++)
         {
             muxPrgInfo = NULL;
@@ -254,7 +254,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
           // for(i=0;i<slen;i++)
           //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
               
-        pidCnt = ( buf[7]<<8 | buf[6]) & 0xffff;       
+        pidCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
         res = ok;
 
     }
@@ -281,18 +281,18 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
         sendbuf[8]=(unsigned char)((i + 1) & 0xff);
         memset(buf, 0, sizeof(buf));
         communicate(ip, sendbuf, 9, buf, &rlen);
-        if( 11 == rlen ){
+        if(  rlen < 9 ){
           // for(i=0;i<slen;i++)
           //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
+            return error;
+        }
+        else{        
               
             nowCnt = ( buf[10]<<8 | buf[9]) & 0xffff;       
             res = ok;
-        }
-        else{        
-            return error;
         } 
         ////////////////////
-        cmdStringAddr= 11;
+        cmdStringAddr= 7;
         for (j = 0; j < nowCnt; j++)
         {
             MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));

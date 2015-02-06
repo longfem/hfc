@@ -109,8 +109,10 @@ int main(int argc,char *argv[])
 
     
 
+    PrgMuxInfoGet(ip);
+
 //////////////////  sendPrograms
-    sendPrograms(ip, 1);
+    //sendPrograms(ip, 1);
 
 ////////////////get out programs end//////////////
 ///////////////////////////case devinfo////////////////////////

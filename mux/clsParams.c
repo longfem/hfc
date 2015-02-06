@@ -49,5 +49,10 @@ void Init(int outChannelNumMax)
 
 	clsProgram.pidMap_eachTransmit_numberMax = 200; // 每次PID映射表传输最大个数
 
+	//add by stan for getmux info init global var
+	//MuxPrgInfoGet_st list array
+	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
+	//MuxPidInfo_st list array
+	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
 	
 }
