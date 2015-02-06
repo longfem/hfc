@@ -1,4 +1,3 @@
-
 #include "datastructdef.h"
 #include "list.h"
 

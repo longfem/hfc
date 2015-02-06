@@ -145,6 +145,17 @@ function devinfo_output(devType){
 			+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
 			
 		+'</ul>'
+		+'<ul id="table_menu2" class="contextMenu ui-helper-hidden">'
+			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
+			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
+			+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
+			
+		+'</ul>'
 		+'<!-- Definition of context menu -->'
 		+'<ul id="program_menu" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
@@ -162,6 +173,27 @@ function devinfo_output(devType){
 			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
 		+'</ul>'
 		+'<ul id="inputprg_menu" class="contextMenu ui-helper-hidden">'
+			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+		+'</ul>'
+		+'<ul id="program_menu2" class="contextMenu ui-helper-hidden">'
+			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li>---</li>'
+			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除这个节目</a></li>'
+			+'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑这个节目</a></li>'			
+			+'<li class="menu_deleteall"><a href="#deleteall"><span class="ui-icon ui-icon-closethick"></span>删除下一级所有自增描述符</a></li>'			
+			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
+			
+			+'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
+			+'<li class="menu_prgitems" style="display:none"><a href="#itmes"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'			
+			+'<li class="menu_re_prg" style="display:none"><a href="#re_prg"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'			
+			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
+			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
+		+'</ul>'
+		+'<ul id="inputprg_menu2" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
 			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
 			+'<li>---</li>'
@@ -219,7 +251,7 @@ function devinfo_output(devType){
 					+'<input type="checkbox" class="sl_cat">    CAT</input>'
 					+'<input type="checkbox" class="sl_nit">    NIT</input>'
 			+'</fieldset>'
-			+'<label id="tag_channel" style="dispaly:none"></label>'
+			+'<label id="tag_channel" style="display:none"></label>'
 		+'</div>'
 		+'<div id="dialog-pid" title="PID表">'
 			+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_pid"></table>'
@@ -387,7 +419,7 @@ function devinfo_output(devType){
 		var jsondata = new Array();
 		var prgindex = new Array();
 		var jsonstr;
-		if(nodes === Null){
+		if(_selectcount == 0){
 			alert("请选择节目!");
 			return;
 		}
@@ -555,7 +587,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: channel_root,
 		menu: {
-			selector: "#inputprg_menu",
+			selector: "#inputprg_menu2",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
@@ -658,7 +690,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: programData,
 		menu: {
-			selector: "#program_menu",
+			selector: "#program_menu2",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
@@ -721,12 +753,11 @@ function devinfo_output(devType){
 							 url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel=1",
 							 dataType: "json",
 							 success: function(data){
-								alert(data);
 								//JSON.parse(data);
-								$('.item_transid').val(data.streamId);
-								$('.item_netid').val(data.networkId);
+								$('.item_transid').val('0x' + data.streamId.toString(16));
+								$('.item_netid').val('0x' + data.networkId.toString(16));
 								
-								$('.item_orignetid').val(data.oringal_networkid);
+								$('.item_orignetid').val('0x' + data.oringal_networkid.toString(16));
 								$('.item_out').val(data.outputRate);
 								if(data.isAutoRaiseVersion){
 									$('.autoinc_ver')[0].checked = true;
@@ -808,7 +839,7 @@ function devinfo_output(devType){
 		minExpandLevel:3,
 		source: table_root,
 		menu: {
-			selector: "#table_menu",
+			selector: "#table_menu2",
 			position: {my: "center"},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -1173,25 +1204,22 @@ function devinfo_output(devType){
 		autoOpen: false,
 		width: 470,
 		modal: true,
-		buttons: {				
+		buttons: {							
 			"确定": function() {
-				var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ $('.item_netid').val() + ',"streamId":' + $('.item_transid').val() + ',"oringal_networkid":' + $('.item_orignetid').val() + ',"outputRate":' + $('.item_out').val()+ ',"isAutoRaiseVersion":' +
-				$('.autoinc_ver')[0].checked == true?1:0 + ',"version":' + $('.item_version')[0].textContent + ',"isAutoRankPAT":' + $('pat_auto')[0].checked == true?1:0 + ',"isNeedSend_cat":' + $('.sl_cat')[0].checked == true?1:0 + ',"isNeedSend_nit":' + $('.sl_nit')[0].checked == true?1:0 + 
-				',"isNeedSend_pat":' + $('.sl_pat')[0].checked == true?1:0 + ',"isNeedSend_pmt":' + $('.sl_pmt')[0].checked == true?1:0 + ',"isNeedSend_sdt":' + $('.sl_sdt')[0].checked == true?1:0 + '}';
+				var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ Number($('.item_netid').val()) + ',"streamId":' + Number($('.item_transid').val()) + ',"oringal_networkid":' + Number($('.item_orignetid').val()) + ',"outputRate":' + Number($('.item_out').val())+ ',"isAutoRaiseVersion":' + ($('.autoinc_ver')[0].checked == true?1:0) + ',"version":' + Number($('.item_version')[0].textContent) + ',"isAutoRankPAT":' + ($('.pat_auto')[0].checked == true?1:0) + ',"isNeedSend_cat":' + ($('.sl_cat')[0].checked == true?1:0) + ',"isNeedSend_nit":' + ($('.sl_nit')[0].checked == true?1:0) + ',"isNeedSend_pat":' + ($('.sl_pat')[0].checked == true?1:0) + ',"isNeedSend_pmt":' + ($('.sl_pmt')[0].checked == true?1:0) + ',"isNeedSend_sdt":' + ($('.sl_sdt')[0].checked == true?1:0) + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
 					 async:false,
 					 url: "http://"+localip+":4000/do/programs/setchanneloutinfo",
-					 data: jsonstr,
+					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
-						
+						if(data.sts == 1){
+							
+						}
 					 },    
 					 error : function(err) {    
-						  // view("异常！");   
-						var xxx = err;
-						alert("异常！====="+JSON.stringify(err));    
 					 }   
 				});
 				dig_itmes.dialog( "close" );
