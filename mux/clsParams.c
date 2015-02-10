@@ -50,9 +50,44 @@ void Init(int outChannelNumMax)
 	clsProgram.pidMap_eachTransmit_numberMax = 200; // 每次PID映射表传输最大个数
 
 	//add by stan for getmux info init global var
-	//MuxPrgInfoGet_st list array
-	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
-	//MuxPidInfo_st list array
-	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);
+	//MuxPrgInfoGet_st list array	
 	
+	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
+	list_t *PrgPmtMux = NULL;
+	for(i=0; i< clsProgram._outChannelCntMax; i++){
+		PrgPmtMux = malloc(sizeof(list_t));
+		list_init(PrgPmtMux);
+        list_append(clsProgram.PrgPmtMuxList, PrgPmtMux);
+	}
+	//MuxPidInfo_st list array
+	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
+	list_t   *prgAVMux = NULL;
+	for(i=0; i< clsProgram._outChannelCntMax; i++){
+		prgAVMux = malloc(sizeof(list_t));
+		list_init(prgAVMux);
+        list_append(clsProgram.PrgAVMuxList, prgAVMux);		
+	} 
+	//////////////////////////////////////////////////////////////////////////////
+	// clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
+	// MuxPrgInfoGet_st *muxPrgInfo = NULL;
+	// for(i=0; i< clsProgram._outChannelCntMax; i++){
+	// 	muxPrgInfo = malloc(sizeof(MuxPrgInfoGet_st));
+	// 	muxPrgInfo->inChannel = 0x00;
+ //        muxPrgInfo->prgIndex =  0x00;
+ //        muxPrgInfo->prgNum   =  0x00;        
+ //        muxPrgInfo->prgPid = 0x00;
+ //        list_init(&clsProgram.PrgPmtMuxList[i]);
+ //        list_append(&clsProgram.PrgPmtMuxList[i], muxPrgInfo);
+	// }
+	// //MuxPidInfo_st list array
+	// clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
+	// MuxPidInfo_st   *prgAVMux = NULL;
+	// for(i=0; i< clsProgram._outChannelCntMax; i++){
+	// 	prgAVMux = malloc(sizeof(MuxPidInfo_st));
+	// 	prgAVMux->inChannel = 0x00;
+	// 	prgAVMux->oldPid = 0x00;
+	// 	prgAVMux->newPid = 0x00;
+	// 	list_init(&clsProgram.PrgAVMuxList[i]);
+ //        list_append(&clsProgram.PrgAVMuxList[i], prgAVMux);		
+	// } 
 }

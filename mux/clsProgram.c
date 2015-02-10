@@ -308,11 +308,17 @@ unsigned char PrgMuxInfoGet(char *ip)
 
 	ErrorTypeEm res;
   
+  	list_t *PrgPmtMux = NULL;
+  	list_t   *prgAVMux = NULL;
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
-	{		 
-		if (GetOutProgramMuxMap(ip, i + 1, &clsProgram.PrgPmtMuxList[i]) != ok)
+	{	
+		list_get(clsProgram.PrgPmtMuxList, i,&PrgPmtMux);	 
+		if (GetOutProgramMuxMap(ip, i + 1, PrgPmtMux) != ok)
 			return 0;
-		if (GetOutPidMuxMap(ip, i + 1, &clsProgram.PrgAVMuxList[i]) != ok)
+
+		
+		list_get(clsProgram.PrgAVMuxList, i,&prgAVMux);	 
+		if (GetOutPidMuxMap(ip, i + 1, prgAVMux) != ok)
 			return 0;
 	}
 
