@@ -542,6 +542,49 @@ ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel)
 
 }
 
+// ErrorTypeEm GetCatDesList(int channelId, list_t *catDesList)
+// {
+//     int iAddr = 0;
+//     byte[] cmdBytes = new byte[20];
+//     catDesList = new ArrayList();
+
+//     cmdBytes[iAddr++] = _startBytes[0];
+//     cmdBytes[iAddr++] = _startBytes[1];
+//     cmdBytes[iAddr++] = 0x11;
+//     cmdBytes[iAddr++] = 5;
+//     cmdBytes[iAddr++] = (byte)channelId;
+//     Array.Copy(cmdBytes, _buf, iAddr);
+//     int readLen = netConn.WriteAndRead(_buf, iAddr);
+//     ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
+//     if (checkRslt != ErrorTypeEm.ok)
+//         return ErrorTypeEm.cmd;
+
+//     // --- cat描述符 ---
+//     int desCntIndex = 1;
+//     int catDesCnt = _buf[iAddr++];
+//     for (int i = 0; i < catDesCnt; i++)
+//     {
+//         CA_descriptor catDesInfo = new CA_descriptor();
+//         catDesInfo.userNew = false;
+//         catDesInfo.inChannel = channelId;
+//         catDesInfo.index = desCntIndex++;
+//         catDesInfo.tag = _buf[iAddr++];
+//         catDesInfo.descriptor_length = _buf[iAddr++];
+//         if (catDesInfo.descriptor_length < 4)
+//             break;
+//         catDesInfo.inCaSysId = catDesInfo.outCaSysId = ClsDataOper.BigFormat_fromBytes(iAddr, 2, _buf);
+//         iAddr += 2;
+//         int tmpBytes = _buf[iAddr++];
+//         catDesInfo.reserved = tmpBytes >> 5;
+//         catDesInfo.inCaPid = catDesInfo.outCaPid = ((tmpBytes & 0x1f) << 8) | _buf[iAddr++];
+//         catDesInfo.private_data_byte = new byte[catDesInfo.descriptor_length - 4];
+//         Array.Copy(_buf, iAddr, catDesInfo.private_data_byte, 0, catDesInfo.private_data_byte.Length);
+//         catDesList.Add(catDesInfo);
+//         iAddr += catDesInfo.private_data_byte.Length;
+//     }
+//     return ErrorTypeEm.ok;
+// }
+
 list_t * MaketPaketSection(unsigned char *table, int length)
 {
     list_t *outList = malloc(sizeof(list_t));
