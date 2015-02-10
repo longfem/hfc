@@ -177,7 +177,7 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
         freeMuxPrgInfoList(muxPrgInfoList);     
    }
 
-    muxPrgInfoList = malloc(sizeof(list_t));  
+    
     //get call channal signal status
     memset(sendbuf,0,sizeof(sendbuf));
     sendbuf[0]=0x77;
@@ -203,6 +203,8 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
         return error;
     } 
         
+    muxPrgInfoList = malloc(sizeof(list_t));  
+    list_init(muxPrgInfoList);    
 //////////////////////////////////////////////
     MuxPrgInfoGet_st *muxPrgInfo = NULL;
 
@@ -251,6 +253,29 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
     return ok;
 }
 
+
+void freeMuxPidInfoList(list_t *muxPidInfoList){
+    if(muxPidInfoList = NULL){
+        printf("muxPidInfoList = NULL; not need free\n" );
+        return;
+    }
+
+    int i=0;
+    int muxPidnfoListLen = list_len(muxPidInfoList);
+
+    MuxPidInfo_st *pMuxPidInfo = NULL;
+    for(i = muxPidnfoListLen; i > 0; i--){
+        list_get(muxPidInfoList, i, &pMuxPidInfo);
+        free(pMuxPidInfo);
+        pMuxPidInfo = NULL;
+        list_pop_tail(muxPidInfoList);        
+    }
+
+    muxPidInfoList = NULL;
+}
+
+
+//MuxPidInfo_st
 ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) // MuxPidInfo_st
 {
 
@@ -261,6 +286,13 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     int prgCnt =0;
     enum ErrorTypeEm res;
     
+
+    //free
+   if(muxPidInfoList){
+        freeMuxPidInfoList(muxPidInfoList);     
+   }
+
+   
 
     int pidCnt  = 0, i=0, j =0;
     memset(sendbuf,0,sizeof(sendbuf));
@@ -288,7 +320,8 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
         return error;
     } 
     /////////////////////////////////////////////////
-    muxPidInfoList = malloc(sizeof(list_t));
+    muxPidInfoList = malloc(sizeof(list_t)); 
+    list_init(muxPidInfoList);
 
     int getCnt = pidCnt / clsProgram.pidMap_eachTransmit_numberMax + ((pidCnt % clsProgram.pidMap_eachTransmit_numberMax > 0) ? 1 : 0);
     int nowCnt = 0;
