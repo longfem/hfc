@@ -300,6 +300,40 @@ typedef struct ClsParams
 	Database_st *pvalueTree;
 }ClsParams_st; 
 
+typedef struct sdtPrgName_t
+{
+	 int service_id; // 16b
+	 int reserved_future_use; // 6b
+	 int EIT_schedule_flag; // 1b
+	 int EIT_present_following_flag; // 1b
+	 int runing_status; // 3b
+	 int free_CA_mode; // 1b
+	 int descriptors_loop_length; // 12b
+	int desListLen;
+	Commdes_t *desList; // Commdes_st
+}sdtPrgName_st;
+
+typedef struct sdt_senction_t
+{
+	 int table_id; // 8b
+	 int section_syntax_indicator; // 1b
+	 int reserved_future_use1; // 1b
+	int reserved0; // 2b
+	 int section_length; // 12b
+	 int transport_stream_id; // 16b
+	 int reserved1; // 2b
+	 int version_number; // 5b
+	 int current_next_indicator; // 1b
+	 int section_number; // 8b
+	 int last_section_number; // 8b
+	 int original_network_id; // 16b
+	 int reserved_future_use2; // 8b
+	 int nameListLen;
+ 	 sdtPrgName_st *nameList; // Commdes_st
+	 int crc32; // 32b
+}sdt_senction_st;
+
+
 #pragma pack()
 
 #endif	

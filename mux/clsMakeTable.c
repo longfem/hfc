@@ -1,6 +1,5 @@
 
 #include <stdio.h>
-#include "EnumDef.h"
 #include "datastructdef.h"
 #include "list.h"
 
@@ -34,6 +33,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	int version = 2;
 	unsigned char patTable[188];
 	unsigned char pmtTable[188];
+		unsigned char sdtTable[6 * 188];
 	Dev_prgInfo_st *ptmpPrgInfo;
 
 	int streamId = outChnArray[outChnIndex].streamId;
@@ -95,7 +95,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}
 
 	//for (i = 0; i < list_len(&prginfolist); i++)
-	for (i = 0; i < 1; i++)
+	for (i = 0; i < list_len(&prginfolist); i++)
 	{
 		list_get(&prginfolist, i, &ptmpPrgInfo);	
 		rstPat=CreatePmtStan(ptmpPrgInfo,pmtTable,version);
@@ -129,6 +129,39 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 #endif
 
 	}	
+
+
+
+	rstPat=CreateSdt(prginfolist,sdtTable, streamId, oringinalNetworkId, version);		
+
+	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
+	memcpy(pbuff->pbuf, sdtTable, sizeof(sdtTable));
+	pbuff->bufLen=sizeof(sdtTable);
+
+	if (!rstPat)
+	{
+
+	  return 0;
+	}
+	else
+	{	
+	   printf("make SDT SUCCESSFULL---%d\n",rstPat);
+	   
+	}
+	
+#if 1
+
+	sdt_senction_st *p_sdt = (sdt_senction_st*)malloc(sizeof(sdt_senction_st));	
+	rstPat=ParseSdt(pbuff->pbuf, 5, p_sdt);	
+
+
+	if(rstPat)
+	{
+	   printf("PRASE sdt SUCCESSFULL---%d\n",rstPat);
+       printSDT(p_sdt);
+	}
+#endif
+
 
 return 1;
 
@@ -263,6 +296,77 @@ void printPMT(pmt_senction_st* PMTS)
 	}
 }
 
+
+
+
+
+void printSDT(sdt_senction_st* SDTS)
+{
+
+	int i;
+	int j;
+
+	printf("crc32----%d\n",SDTS->crc32);
+	printf("current_next_indicator----%d\n",SDTS->current_next_indicator);
+	printf("last_section_number----%d\n",SDTS->last_section_number);
+	printf("original_network_id----%d\n",SDTS->original_network_id);
+	printf("reserved_future_use1----%d\n",SDTS->reserved_future_use1);
+	printf("reserved_future_use1----%d\n",SDTS->reserved_future_use2);
+
+
+	printf("reserved0----%d\n",SDTS->reserved0);
+	printf("reserved1----%d\n",SDTS->reserved1);
+	
+	printf("section_length----%d\n",SDTS->section_length);
+	printf("section_number----%d\n",SDTS->section_number);
+	printf("section_syntax_indicator----%d\n",SDTS->section_syntax_indicator);
+
+	printf("table_id----%d\n",SDTS->table_id);
+    printf("transport_stream_id----%d\n",SDTS->transport_stream_id);
+	printf("version_number----%d\n",SDTS->version_number);
+
+	int k;
+
+
+	sdtPrgName_st* p_last_sdtPrgName_t = SDTS->nameList;
+
+	for (i = 0; i < SDTS->nameListLen; i++)
+	{	              
+		printf("descriptors_loop_length ----%d\n",p_last_sdtPrgName_t->descriptors_loop_length);
+		printf("EIT_present_following_flag----%d\n",p_last_sdtPrgName_t->EIT_present_following_flag);
+		printf("EIT_schedule_flag----%d\n",p_last_sdtPrgName_t->EIT_schedule_flag);
+		printf("free_CA_mode----%d\n",p_last_sdtPrgName_t->free_CA_mode);
+		printf("DataStream_st streamType----%d\n",p_last_sdtPrgName_t->reserved_future_use);
+
+		printf("runing_status ----%d\n",p_last_sdtPrgName_t->runing_status);
+		
+		printf("service_id----%d\n",p_last_sdtPrgName_t->service_id);
+		
+
+		Commdes_t* p_program = p_last_sdtPrgName_t->desList;
+		for (j = 0; j< p_last_sdtPrgName_t->desListLen; j++)
+		{
+			printf("Commdes_st index----%d\n",p_program->index);
+			printf("Commdes_st tag ----%d\n",p_program->tag);
+			printf("Commdes_st userNew----%d\n",p_program->userNew);
+			printf("Commdes_st dataLen is :%d  vList: ",p_program->dataLen);
+
+			unsigned char *ptmp=p_program->data;
+
+			for (k = 0; k < p_program->dataLen; k++)
+			{
+
+				printf(" %d  ",*ptmp++);			
+
+			}
+
+			p_program++;
+		}
+
+		p_last_sdtPrgName_t++;
+	}
+}
+
 int AutoMakeNewPid(int outChannel)
 {
 
@@ -307,6 +411,7 @@ void ClsMuxInit(int _outMaxNum,int treeView_inLength)
 			pclsMux=(ClsMux_st*)malloc(sizeof(ClsMux_st));
 			list_init(&pclsMux->table_pat);
 			list_init(&pclsMux->table_pmtList);
+			list_init(&pclsMux->table_sdt);
 		}
 		for (i = 0; i < treeView_inLength; i++)
 		{
@@ -316,6 +421,12 @@ void ClsMuxInit(int _outMaxNum,int treeView_inLength)
 				pbuff->pbuf=malloc(188);
 				pbuff->bufLen=999;
 				list_append(&pclsMux->table_pat,pbuff);
+
+
+				pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+				pbuff->pbuf=malloc(6 * 188);
+				pbuff->bufLen=999;
+				list_append(&pclsMux->table_sdt,pbuff);
 
 
 				list_t *table_pmt=(list_t*)malloc(sizeof(list_t));

@@ -27,7 +27,7 @@ Dev_prgInfo_st* buildOoutPrgList()
 }
 
 
-unsigned  long  CrcBytes(unsigned char *inBytes,int offset, int length)
+static unsigned  long  CrcBytes(unsigned char inBytes[],int offset, int length)
 {
 	if (TRUE)
 	{
@@ -204,7 +204,7 @@ int  CreatePatStan(list_t  prginfolist,unsigned char patTable[],int streamId, in
 			//printf("prgnumber:%d ",p_patPrg_t->program_number);
 
 
-		
+
 
 		}
 
@@ -474,10 +474,10 @@ int  CreatePmtStan(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int ver
 
 
 			memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
-			iAddr += desInfoTmp->dataLen;	
+			iAddr += desInfoTmp->dataLen;
 
 			desInfoTmp++;
-			p_Commdes_st++;			
+			p_Commdes_st++;
 
 
 		}
@@ -562,7 +562,7 @@ int  CreatePmtStan(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int ver
 
 					memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
 					iAddr += desInfoTmp->dataLen;
-				
+
 
 					desInfoTmp++;
 					p_Commdes_st++;
@@ -737,7 +737,7 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
 	BigFormat_intToBytes(((0xf << 12)  // reserved3
 	| (p_pmt->program_info_length & 0xfff)), tmpBytes, iAddr - p_pmt->program_info_length - 2, 2);
 
-	
+
 
 	if (outPrgInfo->pdataStreamList !=NULL)
 	{
@@ -852,10 +852,11 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
 
 	return p_pmt;
 }
-#if 0
+#if 1
         int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int originalNetworkId, int verisonNumber)
         {
 
+			printf("aaaaaaaaaaaaaaaaaaa\n");
 
 			int i;
     		int iAddr = 0;
@@ -873,7 +874,7 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
             tmpBytes[iAddr++] = 0x10;
             tmpBytes[iAddr++] = 0;
 
-            // -- sdt -- 
+            // -- sdt --
             tmpBytes[iAddr++] = 0x42;
             int sectionLenAddr = iAddr;
             iAddr += 2; // 跳过长度字节
@@ -886,12 +887,13 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
             iAddr += BigFormat_intToBytes(originalNetworkId, tmpBytes, iAddr, 2);
             tmpBytes[iAddr++] = 0xff; // reaserved_future_use
 
- 
-       
-		for (i = 0; i <list_len(&prginfolist); i++)
+
+
+//list_len(&prginfolist)
+		for (i = 0; i <1; i++)
 		{
-			list_get(&prginfolist, i, &ptmpPrgInfo);
-                    iAddr += BigFormat_intToBytes(ptmpPrgInfo.prgNum, tmpBytes, iAddr, 2);
+				list_get(&prginfolist, i, &ptmpPrgInfo);
+                    iAddr += BigFormat_intToBytes(ptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);
                     tmpBytes[iAddr++] = (unsigned char)((0x3f << 2) // reserved_future_use
                         | (0 << 1) // EIT_schedule_flag
                         | (0 << 0)); // EIT_present_following_flag
@@ -900,69 +902,99 @@ pmt_senction_st * CreatePmtNoju(Dev_prgInfo_st *outPrgInfo, unsigned char tmpByt
 
                     // 添加自定义名称
                     tmpBytes[iAddr++] = 0x48;
-                    string prgNameTmp = ptmpPrgInfo.prgName;
-                    if (prgNameTmp == null)
-                        prgNameTmp = string.Empty;
-                    byte[] nameStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(prgNameTmp);
-                    string providerNameTmp = prgInfoTmp.providerName;
-                    if (providerNameTmp == null)
-                        providerNameTmp = string.Empty;
-                    byte[] privoderStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(providerNameTmp);
-                    tmpBytes[iAddr++] = (byte)(1 + 1 + 1 + nameStrBytesTmp.Length + privoderStrBytesTmp.Length);
-                    tmpBytes[iAddr++] = (byte)prgInfoTmp.serviceType;
-                    tmpBytes[iAddr++] = (byte)privoderStrBytesTmp.Length;
-                    Array.Copy(privoderStrBytesTmp, 0, tmpBytes, iAddr, privoderStrBytesTmp.Length);
-                    iAddr += privoderStrBytesTmp.Length;
-                    tmpBytes[iAddr++] = (byte)nameStrBytesTmp.Length;
-                    Array.Copy(nameStrBytesTmp, 0, tmpBytes, iAddr, nameStrBytesTmp.Length);
-                    iAddr += nameStrBytesTmp.Length;
-#if 1
-                    if (prgInfoTmp.sdtDesList != null)
-                    {
 
-                        foreach (Commdes_st desInfoTmp in prgInfoTmp.sdtDesList)
-                        {
-                            if (desInfoTmp.tag == 0x48) // service_tag
+					unsigned char *prgNameTmp=malloc(ptmpPrgInfo->prgNameLen);
+					memcpy(prgNameTmp, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+
+                 //   if (ptmpPrgInfo->prgNameLen == 0)
+                      // prgNameTmp = string.Empty;//最后需要打开
+                    //byte[] nameStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(prgNameTmp);
+
+				 	unsigned char *providerNameTmp=malloc(ptmpPrgInfo->providerNameLen);
+					memcpy(providerNameTmp, ptmpPrgInfo->providerName, ptmpPrgInfo->providerNameLen);
+                   //    if (providerNameTmp == null)
+                     //   providerNameTmp = string.Empty;
+                   // byte[] privoderStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(providerNameTmp);
+
+				   tmpBytes[iAddr++] = (unsigned char)(1 + 1 + 1 + ptmpPrgInfo->prgNameLen + ptmpPrgInfo->providerNameLen);
+                    tmpBytes[iAddr++] =(unsigned char) ptmpPrgInfo->serviceType;
+
+                    tmpBytes[iAddr++] = (unsigned char)ptmpPrgInfo->providerNameLen;
+					memcpy(tmpBytes+iAddr,providerNameTmp, ptmpPrgInfo->providerNameLen);
+
+                    iAddr += ptmpPrgInfo->providerNameLen;
+
+                    tmpBytes[iAddr++] = (unsigned char)ptmpPrgInfo->prgNameLen;
+                    memcpy(tmpBytes+iAddr,prgNameTmp, ptmpPrgInfo->prgNameLen);
+
+                    iAddr += ptmpPrgInfo->prgNameLen;
+#if 1
+					printf("ptmpPrgInfo->psdtDesListLen %d\n",ptmpPrgInfo->psdtDesListLen);
+
+              		for (i = 0; i < ptmpPrgInfo->psdtDesListLen; i++)
+                    {
+						Commdes_t* desInfoTmp = ptmpPrgInfo->psdtDesList;
+
+							printf("desInfoTmp->tag %d\n",desInfoTmp->tag);
+
+                            if (desInfoTmp->tag == 0x48) // service_tag
                                 continue;
-                            tmpBytes[iAddr++] = (byte)(desInfoTmp.tag);
-                            tmpBytes[iAddr++] = (byte)(desInfoTmp.data.Length);
-                            Array.Copy(desInfoTmp.data, 0, tmpBytes, iAddr, desInfoTmp.data.Length);
-                            iAddr += desInfoTmp.data.Length;
-                        }
+							tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
+							tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
+
+
+							memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
+							iAddr += desInfoTmp->dataLen;
+
+
                     }
 #endif
 
-
-                    ClsDataOper.BigFormat_intToBytes(((4 << 13)  // runing_status
-                        | ((prgInfoTmp.isCrypto ? 1 : 0) << 12) // free_CA_mode
+					printf("now the len%d\n",iAddr);
+                       int isCrypto;
+					   if(ptmpPrgInfo->isCrypto)
+					   	{
+					   	isCrypto=1;
+					   	}
+					   else
+					   	{
+					   	isCrypto=0;
+					   	}
+                    BigFormat_intToBytes(((4 << 13)  // runing_status
+                        | (isCrypto << 12) // free_CA_mode
                         | ((iAddr - des_length_addr - 2) & 0xfff)), tmpBytes, des_length_addr, 2); // des_loop_length
                 }
-       
 
-            int numLenTmp = ((0xf << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff));
-            ClsDataOper.BigFormat_intToBytes(numLenTmp, tmpBytes, sectionLenAddr, 2);
+
+
+            int numLenTmp = ((0xf << 12) |((iAddr + 4 - sectionLenAddr - 2) & 0xfff));
+            BigFormat_intToBytes(numLenTmp, tmpBytes, sectionLenAddr, 2);
 
 
             // -- crc --
-            uint crcWord = myCrc.CrcBytes(tmpBytes, 5, iAddr - 5);
-            iAddr += ClsDataOper.BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
+        	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
+			iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
+
+
+#if 1
+
+				for(i=0; i<iAddr; i++)
+				printf("  %d		  offset:%d  \n",tmpBytes[i],i);
+
+				printf("sdt table length is %d\n",iAddr);
+#endif
+
+
 
             if (iAddr < 1021) // 1108
             {
-                sdtTable = new byte[iAddr];
-                Array.Copy(tmpBytes, sdtTable, iAddr);
-                return Error_psiTable.ok;
+         	for (i = 0; i < iAddr; i++)
+					sdtTable[i] = tmpBytes[i];
+				return 1;
             }
-            else
-            {
-                sdtTable = null;
-                return Error_psiTable.tableLenOverflow;
-            }
+			return 0;
+
         }
-
-
-
-
 #endif
 int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 {
@@ -1010,7 +1042,7 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 	{
 		tmppStart++;
 		int tmppmtDesLen =buf[tmppStart++];
-		tmppStart += tmppmtDesLen;		
+		tmppStart += tmppmtDesLen;
 		tmpLen++;
 	}
 
@@ -1058,13 +1090,13 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 			if (tmpes_info_lengh > 0)
 			{
 				int tmpppStart = tmppStart;
-				int tmpppEnd = tmpppStart + tmpes_info_lengh;				
+				int tmpppEnd = tmpppStart + tmpes_info_lengh;
 
 				while (tmpppStart + 2 < tmpppEnd)
 				{
 					tmpppStart++;
 					int tmpdsDesLen =buf[tmpppStart++];
-					tmpppStart += tmpdsDesLen;					
+					tmpppStart += tmpdsDesLen;
 					cLen[tmpLen]=cLen[tmpLen]+1;
 				}
 			}
@@ -1098,7 +1130,7 @@ int  ParsePmt(unsigned char buf[], int offset, pmt_senction_st *p_pmt)
 				int ppStart = pStart;
 				int ppEnd = ppStart + es_info_lengh;
 				int indexL2 = 1;
-				printf("tmpdatastremcomdstLen            :%d\n ",cLen[q]);
+				//printf("tmpdatastremcomdstLen            :%d\n ",cLen[q]);
 
 
 				p_DataStream_st->desNodeLen=cLen[q];
@@ -1186,7 +1218,7 @@ for (i = 0; i < prgListLen / 4; i++){
 
 	p_first_patPrg_t->program_number = (buf[iAddr] << 8) | buf[++iAddr];
 	iAddr++;
-	
+
 	tmpByteValue = buf[iAddr++];
 	p_first_patPrg_t->reserved = (tmpByteValue >> 5) & 0x7;
 	p_first_patPrg_t->pid = ((tmpByteValue & 0x1f) << 8) | buf[iAddr++];
@@ -1198,7 +1230,7 @@ for (i = 0; i < prgListLen / 4; i++){
 
 
 }
-printf("ccccccccccccccccccc\n ");
+
 
 p_pat->crc32 = (buf[iAddr] << 24) | (buf[++iAddr] << 16) | (buf[++iAddr] << 8) | buf[++iAddr];
 iAddr++;
@@ -1206,6 +1238,140 @@ iAddr++;
 return 1;
 }
 
+int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
+	{
+		int i;
+		int iAddr = offset;
+		int tmpByteValue;
+
+		sdtSec->table_id = buf[iAddr++];
+		tmpByteValue = buf[iAddr++];
+		sdtSec->section_syntax_indicator = (tmpByteValue >> 7) & 0x1;
+		sdtSec->reserved_future_use1 = (tmpByteValue >> 6) & 0x1;
+		sdtSec->reserved0 = (tmpByteValue >> 4) & 0x3;
+		sdtSec->section_length = ((tmpByteValue & 0xf) << 8) | buf[iAddr++];
+
+		if (sdtSec->section_length < 9 || sdtSec->section_length > 1101)
+			return 0;
+		if (CrcBytes(buf, offset, 3 + sdtSec->section_length) != 0)
+			return 0;
+
+		sdtSec->transport_stream_id = (buf[iAddr] << 8) | buf[++iAddr];
+		iAddr++;
+		tmpByteValue = buf[iAddr++];
+		sdtSec->reserved1 = (tmpByteValue >> 6) & 0x3;
+		sdtSec->version_number = (tmpByteValue >> 1) & 0x1f;
+		sdtSec->current_next_indicator = (tmpByteValue >> 0) & 0x1;
+		sdtSec->section_number = buf[iAddr++];
+		sdtSec->last_section_number = buf[iAddr++];
+		sdtSec->original_network_id = ((buf[iAddr] << 8) & 0xff00) | buf[++iAddr];
+		iAddr++;
+		sdtSec->reserved_future_use2 = buf[iAddr++];
+
+		int pStart = iAddr;
+		int pEnd = pStart + sdtSec->section_length - 12;
+
+
+
+
+	   int tmppStart=pStart;
+
+		int tmpLen=0;
+		unsigned char cLen[188];
+		while (tmppStart + 5 <= pEnd)
+		{
+			cLen[tmpLen]=0;
+			tmppStart++;
+			tmppStart++;	tmppStart++;
+		    tmpByteValue =buf[tmppStart++];
+			int tmpes_info_lengh = ((tmpByteValue << 8) & 0x0f00) | buf[tmppStart++];
+
+
+
+			int tmpppStart = tmppStart;
+			int tmpppEnd = tmpppStart + tmpes_info_lengh;
+			//printf("tmpppStart:%d\n ",tmpppStart);
+			while (tmpppStart + 2 < tmpppEnd)
+			{
+				tmpppStart++;
+				int tmpdsDesLen =buf[tmpppStart++];
+				tmpppStart += tmpdsDesLen;
+				tmppStart+=2 + tmpdsDesLen;
+				cLen[tmpLen]=cLen[tmpLen]+1;				
+			}
+
+
+			tmppStart+=tmpes_info_lengh;
+			tmpLen++;
+		}
+
+	
+
+		sdtSec->nameListLen =tmpLen;
+		sdtSec->nameList=(sdtPrgName_st*)malloc(sizeof(sdtPrgName_st)*tmpLen);
+		sdtPrgName_st *nameNode= sdtSec->nameList;
+
+
+		int q=0;
+
+
+
+		while (pStart + 5 <= pEnd)
+		{
+		
+			nameNode->service_id = ((buf[pStart] << 8) & 0xff00) | buf[++pStart];
+			pStart++;
+			tmpByteValue = buf[pStart++];
+			nameNode->reserved_future_use = (tmpByteValue >> 2) & 0x3f;
+			nameNode->EIT_schedule_flag = (tmpByteValue >> 1) & 0x01;
+			nameNode->EIT_present_following_flag = (tmpByteValue >> 0) & 0x01;
+			tmpByteValue = buf[pStart++];
+			nameNode->runing_status = (tmpByteValue >> 5) & 0x07;
+			nameNode->free_CA_mode = (tmpByteValue >> 4) & 0x01;
+			nameNode->descriptors_loop_length = ((tmpByteValue << 8) & 0x0f00) | buf[pStart++];
+
+			int ppStart = pStart;
+			int ppEnd = ppStart + nameNode->descriptors_loop_length;
+			int indexDes = 1;
+			if (nameNode->descriptors_loop_length >= 2)
+			{
+				//nameNode.desList = new ArrayList();
+			}
+
+
+
+				nameNode->desListLen=cLen[q];
+				nameNode->desList=(Commdes_t*)malloc(sizeof(Commdes_t)*cLen[q]);
+				Commdes_t* desNode= nameNode->desList;
+			while (ppStart + 2 <= ppEnd)
+			{
+				desNode->index = indexDes++;
+				desNode->tag = buf[ppStart++];
+				int desNodeLen = buf[ppStart++];
+				if (ppStart + desNodeLen <= ppEnd)
+				{
+					desNode->data  = malloc(desNodeLen);
+					memcpy(desNode->data, buf+ppStart, desNodeLen);
+					desNode->dataLen=desNodeLen;
+
+
+				}
+				ppStart += desNodeLen;
+				pStart += 2 + desNodeLen;
+				desNode++;
+			}
+
+			iAddr += 5 + nameNode->descriptors_loop_length;
+			nameNode++;
+			q++;
+		}
+
+
+		sdtSec->crc32 = (buf[iAddr] << 24) | (buf[++iAddr] << 16) | (buf[++iAddr] << 8) | buf[++iAddr];
+		iAddr++;
+
+		return 1;
+	}
 
 
 
