@@ -93,18 +93,25 @@ void getTableJson(int channel, char *outprg){
 	cJSON_AddStringToObject(tablejson,"key", "id1.2");
 	cJSON_AddStringToObject(tablejson,"title", "PMT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
+	BufferUn_st *sdt = NULL;
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_pmt){
 		pmt_senction_st *p_pmt;
+		sdt_senction_st *p_sdt;
 		BufferUn_st *outPMTBuffer;
 		list_t *tablePmt;
 		DataStream_t *pdataStreamList;
-		
-		list_get(&(pclsMux->table_pmtList), channel-1, &tablePmt);
+		cJSON_AddItemToObject(tablejson, "children", prgarray = cJSON_CreateArray());
+		list_get(&(pclsMux->table_pmtList), channel-1, &tablePmt);	
+		list_get(&(pclsMux->table_sdt), channel-1, &sdt);
+		if(sdt != NULL){
+			p_sdt = (sdt_senction_st*)malloc(sizeof(sdt_senction_st));
+			ParseSdt(sdt->pbuf, 5, p_sdt);	
+		}				
 		for(i=0;i<list_len(tablePmt);i++){
 			list_get(tablePmt,i,&outPMTBuffer);
 			p_pmt = (pmt_senction_st*)malloc(sizeof(pmt_senction_st));
-			if(ParsePmt(outPMTBuffer->pbuf, 5, p_pmt)){//pmt
-				cJSON_AddItemToObject(tablejson, "children", prgarray = cJSON_CreateArray());
+			int isPmtCrypto = 0;
+			if(ParsePmt(outPMTBuffer->pbuf, 5, p_pmt)){//pmt				
 				cJSON_AddItemToArray(prgarray,prgjson = cJSON_CreateObject());
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "id1.2.%d", i+1);//1.2.1
@@ -112,7 +119,9 @@ void getTableJson(int channel, char *outprg){
 				cJSON_AddFalseToObject(prgjson,"expanded");
 				cJSON_AddStringToObject(prgjson,"key", idstr);
 				memset(str, 0, sizeof(str));
-				sprintf(str,"PMT for SID 0x%04x - %s", p_pmt->program_number, "CCTV 1" );
+				memset(idstr, 0, sizeof(idstr));
+				OutPsiTable_inSdt_search_prgInfo(p_sdt, p_pmt->program_number, idstr, &isPmtCrypto);
+				sprintf(str,"PMT for SID 0x%04x - %s", p_pmt->program_number, idstr );
 				cJSON_AddStringToObject(prgjson,"title", str);
 				cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
 				
@@ -239,11 +248,11 @@ void getTableJson(int channel, char *outprg){
 						
 					}
 				}					
-				free(p_pmt);
+				
 			}else{
-				free(p_pmt);
+				
 			}
-		
+			free(p_pmt);
 		}
 	}
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
@@ -251,8 +260,7 @@ void getTableJson(int channel, char *outprg){
 	cJSON_AddTrueToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.3");
 	cJSON_AddStringToObject(tablejson,"title", "SDT");
-	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
-	BufferUn_st *sdt;
+	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");	
 	sdt_senction_st *p_sdt;
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_sdt){
 		list_get(&(pclsMux->table_sdt), channel-1, &sdt);
@@ -263,7 +271,7 @@ void getTableJson(int channel, char *outprg){
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
 				cJSON_AddTrueToObject(subTablejson,"expanded");
-				sprintf(idstr, "id1.3.1.%d", i);//1.3.0.1
+				sprintf(idstr, "id1.3.%d", i);//1.3.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				switch(i){
 					case 1:
@@ -295,12 +303,21 @@ void getTableJson(int channel, char *outprg){
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
 				cJSON_AddTrueToObject(subTablejson,"expanded");
-				sprintf(idstr, "id1.3.%d.%d", i+4, i);//1.3.4.1
+				sprintf(idstr, "id1.3.%d", i+4);//1.3.4.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				memset(str, 0, sizeof(str));
-				sprintf(str,"业务[0x%x] EIT Sched[Not Present] EIT PF[Not Present] RunningStatus[Running]", p_last_sdtPrgName_t->service_id);
+				sprintf(str,"业务[0x%04x] EIT Sched[%s] EIT PF[%s] RunningStatus[Running]", p_last_sdtPrgName_t->service_id, p_last_sdtPrgName_t->EIT_schedule_flag==0?"NOT Present":"Present", p_last_sdtPrgName_t->EIT_present_following_flag==0?"NOT Present":"Present");
 				cJSON_AddStringToObject(subTablejson,"title", str);
 				cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
+				
+				cJSON_AddItemToObject(subTablejson, "children", streamsarray = cJSON_CreateArray());	
+				cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());				
+				cJSON_AddTrueToObject(streamjson,"folder");
+				cJSON_AddFalseToObject(streamjson,"expanded");
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "id1.3.%d.%d", i+4, 1);//1.3.4.1
+				cJSON_AddStringToObject(streamjson,"key", idstr);
+				cJSON_AddStringToObject(streamjson,"title", "server descriptor");
 				p_last_sdtPrgName_t++;
 			}
 			free(p_sdt);
@@ -345,6 +362,47 @@ void getTableJson(int channel, char *outprg){
 	//释放内存	
 	cJSON_Delete(tablesarray);		
 	free(prgjsonstring);
+}
+
+int OutPsiTable_inSdt_search_prgInfo(sdt_senction_st *p_sdt, int seriveid, char *prgName, int *isCrpto)
+{
+	int i = 0, j = 0;
+	if (p_sdt->nameList != NULL && p_sdt->nameListLen > 0)
+	{
+		sdtPrgName_st *nameList = p_sdt->nameList;
+		for(i=0;i<p_sdt->nameListLen;i++){
+			if (nameList->service_id == seriveid)
+			{
+				memcpy(isCrpto, &nameList->free_CA_mode, sizeof(nameList->free_CA_mode));
+				if (nameList->desList != NULL && nameList->desListLen > 0)
+				{
+					Commdes_t *desList = nameList->desList;
+					for(j=0;j<nameList->desListLen;j++){
+						if (desList->tag == 0x48) // service_tag
+						{
+							int iTagAddr = 0;
+							int sdtDes_descriptor_length = desList->dataLen;//.data[iTagAddr++];
+							int serviceType = desList->data[iTagAddr++];
+							int providerNameLen = desList->data[iTagAddr++];							
+							iTagAddr += providerNameLen;
+							int serviceNameLen = desList->data[iTagAddr++];
+							if (serviceNameLen > 0)
+							{
+								memcpy(prgName, desList->data+iTagAddr, serviceNameLen);
+							}else{
+								memcpy(prgName, "未命名", 6);
+							}
+						}
+						desList++;
+					}
+				}
+				return 1;
+			}
+			nameList++;
+		}		
+	}
+
+	return 0;
 }
 
  
