@@ -310,7 +310,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
 
      if( 9 == rlen ){
           // for(i=0;i<slen;i++)
-          //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
+          //   printf("Recive GetOutPidMuxMap buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         pidCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
         res = ok;
@@ -319,7 +319,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     else{        
         return error;
     } 
-    /////////////////////////////////////////////////
+    
     muxPidInfoList = malloc(sizeof(list_t)); 
     list_init(muxPidInfoList);
 
