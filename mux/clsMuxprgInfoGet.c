@@ -138,6 +138,27 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
     return res;    
 }
 
+void freeMuxPrgInfoList(list_t *muxPrgInfoList){
+    if(muxPrgInfoList = NULL){
+        printf("muxPrgInfoList = NULL; not need free\n" );
+        return;
+    }
+
+    int i=0;
+    int muxPrgInfoListLen = list_len(muxPrgInfoList);
+
+    MuxPrgInfoGet_st *pMuxPrgInfo = NULL;
+    for(i = muxPrgInfoListLen; i > 0; i--){
+        list_get(muxPrgInfoList, i, &pMuxPrgInfo);
+        free(pMuxPrgInfo);
+        pMuxPrgInfo = NULL;
+        list_pop_tail(muxPrgInfoList);        
+    }
+
+    muxPrgInfoList = NULL;
+}
+
+//MuxPrgInfoGet_st
 ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList) // MuxPrgInfo_st
 {
    
@@ -151,6 +172,11 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
 
     ErrorTypeEm res;
    
+   //free
+   if(muxPrgInfoList){
+        freeMuxPrgInfoList(muxPrgInfoList);     
+   }
+
     muxPrgInfoList = malloc(sizeof(list_t));  
     //get call channal signal status
     memset(sendbuf,0,sizeof(sendbuf));
