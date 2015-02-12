@@ -37,6 +37,42 @@ var dataSet1 = [
 	['2','22'],
 	['3','24']	
 ];
+
+function checkselectedprg(){
+	var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
+	var inCh = 1, flag = 0; //通道号	
+	var jsondata = new Array();
+	var prgindex = new Array();
+	var jsonstr;
+	nodes.forEach(function(node) {
+		flag = 0;
+		prgindex = new Array();
+		var chstr = "inCh" + inCh;
+		if( node.hasChildren() ) {
+			var prgnodes = node.children;				
+			prgnodes.forEach(function(prgnode) {					
+				prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
+				flag++;
+			});					
+		}
+		jsonstr = chstr+':{' + prgindex.toString() +'}';
+		jsondata[inCh-1] = jsonstr;
+		inCh++;
+	});	
+	$.ajax({
+		 type: "GET",
+		 async:false,
+		 url: "http://"+localip+":4000/do/programs/selectprgs",
+		 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+		 dataType: "json",
+		 success: function(data){
+			
+		 },    
+		 error : function(err) { 
+			alert(err);
+		 }   
+	});
+}
 	
 function devinfo_output(devType){
 	$('.main-content').empty();
@@ -676,6 +712,7 @@ function devinfo_output(devType){
 			});
 			prgnode.setTitle("节目: "+ _selectcount);
 			prgnode.render();
+			checkselectedprg();
 		},
 		click: function(event, data) {			
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){

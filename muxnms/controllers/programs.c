@@ -33,6 +33,54 @@ extern ClsParams_st *pdb;
 	free(jsonstring);
 } 
 
+static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg){
+	int k = 0, cm = 0;
+	outprg = malloc(sizeof(Dev_prgInfo_st));
+	memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));				
+	//pmt
+	outprg->pmtDesList = malloc(outprg->pmtDesListLen * sizeof(Commdes_t) );
+	Commdes_t *pmtDesInfo = outprg->pmtDesList;
+	Commdes_t *inpmtDesInfo = inprg->pmtDesList;
+	for (k = 0; k < outprg->pmtDesListLen; k++)
+	{  
+		memcpy(pmtDesInfo, inpmtDesInfo, sizeof(Commdes_t) );
+		pmtDesInfo++;
+		inpmtDesInfo++;
+	}
+	//stream data
+	outprg->pdataStreamList = malloc(outprg->pdataStreamListLen * sizeof(DataStream_t));
+	DataStream_t *pdataStreamInfo = outprg->pdataStreamList;
+	DataStream_t *inpdataStreamInfo = inprg->pdataStreamList;
+	for (k = 0; k < outprg->pdataStreamListLen; k++)
+	{  
+		memcpy(pdataStreamInfo, inpdataStreamInfo, sizeof(DataStream_t) );
+		pdataStreamInfo->desNode = malloc(pdataStreamInfo->desNodeLen * sizeof(Commdes_t));                    
+		Commdes_t *pdataStreamDesInfo = pdataStreamInfo->desNode;
+		Commdes_t *inpdataStreamDesInfo = inpdataStreamInfo->desNode;
+		for (cm = 0; cm < pdataStreamInfo->desNodeLen; cm++)
+		{ 
+			memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
+			pdataStreamDesInfo++;
+			inpdataStreamDesInfo++;
+		}
+		pdataStreamInfo++;
+		inpdataStreamInfo++;
+	}
+	//SDT 描述符
+	outprg->psdtDesList = malloc(outprg->psdtDesListLen * sizeof(Commdes_t));
+	Commdes_t *psdtDesInfo = outprg->psdtDesList;
+	Commdes_t *inpsdtDesInfo = inprg->psdtDesList;
+	for (k = 0; k < outprg->psdtDesListLen; k++)
+	{ 					
+		memcpy(psdtDesInfo, inpsdtDesInfo, sizeof(Commdes_t) );
+		psdtDesInfo->data = malloc(inpsdtDesInfo->dataLen);
+		memcpy(psdtDesInfo->data, inpsdtDesInfo->data, inpsdtDesInfo->dataLen);
+		psdtDesInfo++;
+		inpsdtDesInfo++;
+	}
+	list_append(&(outpst->prgNodes), outprg);
+}
+
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
     char ip[16] = "192.168.1.134";//param("ip"); 
@@ -54,22 +102,129 @@ static void getoutprg(HttpConn *conn) {
     
 } 
 
-/*制表准备工作*/
-static void maketable(HttpConn *conn) { 
-	int i = 0, j = 0, k = 0,cm = 0, pos = 0, prgindex = 0;
+static void selectprgs(HttpConn *conn) {
+	int i = 0, j = 0, k = 0,cm = -1, pos = 0, prgindex = 0, hascontained = 0;
 	char str[6] = {0};
 	char idstr[4] = {0};
-	char outstring[20480] = {0};
+	char result[10] = {0};
 	ChannelProgramSt *pst = NULL;
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *inprg = NULL;
 	Dev_prgInfo_st *outprg = NULL;
+	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
+	pos = atoi(mprGetJson(jsonparam, "channel"));
+	int prgnum = atoi(mprGetJson(jsonparam, "prgnum"));
+	list_get(&(clsProgram.outPrgList), pos-1, &outpst);
+	if(list_len(&outpst->prgNodes) == 0){
+		list_init(&(outpst->prgNodes));
+		//提取要制表的节目信息
+		for(i=0; i<clsProgram._intChannelCntMax; i++){
+			sprintf(str, "inCh%d", i+1);				
+			if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){				
+				//获取输入通道信息
+				list_get(&(clsProgram.inPrgList), i, &pst);
+				//加入输出通道列表
+				outpst->channelId = i+1;
+				//加入输出节目信息
+				for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
+					sprintf(idstr, "id%d", j);
+					prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
+					list_get(&(pst->prgNodes), prgindex-1, &inprg);	
+					cpyprg(outpst, outprg, inprg);												
+				}		
+			}
+		}
+	}else{
+		//判断选择的节目是增加还是减少
+		if(prgnum > list_len(&outpst->prgNodes)){
+			//add
+			for(i=0; i<clsProgram._intChannelCntMax; i++){
+				sprintf(str, "inCh%d", i+1);				
+				if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){					
+					//获取输入通道信息
+					list_get(&(clsProgram.inPrgList), i, &pst);
+					for(j=0;j<7;j++){
+						list_get(&(pst->prgNodes), j, &inprg);	
+					}
+					//加入输出通道列表
+					outpst->channelId = i+1;
+					//加入输出节目信息
+					for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
+						hascontained = 0;
+						sprintf(idstr, "id%d", j);
+						prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
+						list_get(&(pst->prgNodes), prgindex-1, &inprg);	
+						for(k=0;k<list_len(&outpst->prgNodes);k++){	
+							list_get(&(outpst->prgNodes), k, &outprg);	
+							if(outprg->index == inprg->index){
+								hascontained = 1;
+								break;
+							}
+						}						
+						if(hascontained == 0){
+							cpyprg(outpst, outprg, inprg);
+							break;
+						}
+					}
+				}
+			}
+			
+		}else{
+			//delete		
+			for(k=0;k<list_len(&outpst->prgNodes);k++){
+				hascontained = 0;
+				list_get(&(outpst->prgNodes), k, &outprg);	
+				for(i=0; i<clsProgram._intChannelCntMax; i++){
+					sprintf(str, "inCh%d", i+1);				
+					if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){		
+						//获取输入通道信息
+						list_get(&(clsProgram.inPrgList), i, &pst);
+						//加入输出通道列表
+						outpst->channelId = i+1;
+						//加入输出节目信息
+						for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
+							sprintf(idstr, "id%d", j);
+							prgindex = atoi(mprGetJson(mprGetJsonObj(jsonparam, str ), idstr));
+							list_get(&(pst->prgNodes), prgindex-1, &inprg);	
+							if(outprg->index == inprg->index){
+								hascontained = 1;
+								break;
+							}
+						}
+					}
+				}
+				if(hascontained == 0){
+					//此节目已删除
+					//释放内存
+					freeProgramsMalloc(outprg);					
+					list_pop(&(outpst->prgNodes), k);
+					break;
+				}
+			}
+		}
+		
+	}
+	rendersts(result, 1);
+	render(result);
+}
+
+/*制表准备工作*/
+static void maketable(HttpConn *conn) { 
+	//int i = 0, j = 0, k = 0,cm = 0, pos = 0, prgindex = 0;
+	//char str[6] = {0};
+	//char idstr[4] = {0};
+	int pos = 0;
+	char outstring[20480] = {0};
+	//ChannelProgramSt *pst = NULL;
+	//ChannelProgramSt *outpst = NULL;
+	//Dev_prgInfo_st *inprg = NULL;
+	//Dev_prgInfo_st *outprg = NULL;
 	
 	//ChannelProgramSt *testoutpst = NULL;
 	//Dev_prgInfo_st *testoutprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
-	
+	/*
 	list_get(&(clsProgram.outPrgList), pos-1, &outpst);
 	if(outpst != NULL){
 		if(list_len(&(outpst->prgNodes)) !=0){					
@@ -140,7 +295,7 @@ static void maketable(HttpConn *conn) {
 			}		
 		}
 	}	
-	
+	*/
 	//list_get(&(clsProgram.outPrgList), 0, &testoutpst);
 	//list_get(&(testoutpst->prgNodes), 0, &testoutprg);
 	//printf("===%d===>>>>%d\n", testoutprg->prgNum, testoutprg->chnId);
@@ -155,12 +310,12 @@ static void maketable(HttpConn *conn) {
     
 } 
 
-static void getTable(HttpConn *conn) { 
+static void makestreamtable(HttpConn *conn) { 
     char outstring[1024] = {0};
 	MprJson *jsonparam = httpGetParams(conn); 
-    char *prgcount = mprGetJson(jsonparam, "prgnum"); 
-	int count = atoi(prgcount);
-	
+    char *inChn = mprGetJson(jsonparam, "channel"); 
+	int inCh = atoi(inChn);
+	getStreamJson(inCh, outstring);
 	render(outstring);    
 } 
 
@@ -233,6 +388,20 @@ static void setchanneloutinfo(HttpConn *conn) {
 	render(rsts); 
 } 
 
+static void getprginfo(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn); 
+    char *inChn = mprGetJson(jsonparam, "channel"); 
+	char *oChn = mprGetJson(jsonparam, "och"); 
+	char *prgid = mprGetJson(jsonparam, "prgid"); 
+	int inCh = atoi(inChn);
+	int oCh = atoi(oChn);
+	int id = atoi(prgid);
+	ChannelProgramSt *outpst = NULL;
+	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
+	
+	render("");
+} 
+
 static void common(HttpConn *conn) {
 	
 	
@@ -283,10 +452,12 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineBase(route, common);
 	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
+	espDefineAction(route, "programs-cmd-getprginfo", getprginfo);
+	espDefineAction(route, "programs-cmd-selectprgs", selectprgs);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
 	espDefineAction(route, "programs-cmd-writetable", writetable);
-	espDefineAction(route, "programs-cmd-getTable", getTable);
+	espDefineAction(route, "programs-cmd-makestreamtable", makestreamtable);
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
 	
