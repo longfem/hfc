@@ -138,6 +138,27 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
     return res;    
 }
 
+void freeMuxPrgInfoList(list_t *muxPrgInfoList){
+    if(muxPrgInfoList = NULL){
+        printf("muxPrgInfoList = NULL; not need free\n" );
+        return;
+    }
+
+    int i=0;
+    int muxPrgInfoListLen = list_len(muxPrgInfoList);
+
+    MuxPrgInfoGet_st *pMuxPrgInfo = NULL;
+    for(i = muxPrgInfoListLen; i > 0; i--){
+        list_get(muxPrgInfoList, i, &pMuxPrgInfo);
+        free(pMuxPrgInfo);
+        pMuxPrgInfo = NULL;
+        list_pop_tail(muxPrgInfoList);        
+    }
+
+    muxPrgInfoList = NULL;
+}
+
+//MuxPrgInfoGet_st
 ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList) // MuxPrgInfo_st
 {
    
@@ -151,7 +172,12 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
 
     ErrorTypeEm res;
    
-    muxPrgInfoList = malloc(sizeof(list_t));  
+   //free
+   if(muxPrgInfoList){
+        freeMuxPrgInfoList(muxPrgInfoList);     
+   }
+
+    
     //get call channal signal status
     memset(sendbuf,0,sizeof(sendbuf));
     sendbuf[0]=0x77;
@@ -177,6 +203,8 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
         return error;
     } 
         
+    muxPrgInfoList = malloc(sizeof(list_t));  
+    list_init(muxPrgInfoList);    
 //////////////////////////////////////////////
     MuxPrgInfoGet_st *muxPrgInfo = NULL;
 
@@ -225,6 +253,29 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
     return ok;
 }
 
+
+void freeMuxPidInfoList(list_t *muxPidInfoList){
+    if(muxPidInfoList = NULL){
+        printf("muxPidInfoList = NULL; not need free\n" );
+        return;
+    }
+
+    int i=0;
+    int muxPidnfoListLen = list_len(muxPidInfoList);
+
+    MuxPidInfo_st *pMuxPidInfo = NULL;
+    for(i = muxPidnfoListLen; i > 0; i--){
+        list_get(muxPidInfoList, i, &pMuxPidInfo);
+        free(pMuxPidInfo);
+        pMuxPidInfo = NULL;
+        list_pop_tail(muxPidInfoList);        
+    }
+
+    muxPidInfoList = NULL;
+}
+
+
+//MuxPidInfo_st
 ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) // MuxPidInfo_st
 {
 
@@ -235,6 +286,13 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     int prgCnt =0;
     enum ErrorTypeEm res;
     
+
+    //free
+   if(muxPidInfoList){
+        freeMuxPidInfoList(muxPidInfoList);     
+   }
+
+   
 
     int pidCnt  = 0, i=0, j =0;
     memset(sendbuf,0,sizeof(sendbuf));
@@ -252,7 +310,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
 
      if( 9 == rlen ){
           // for(i=0;i<slen;i++)
-          //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
+          //   printf("Recive GetOutPidMuxMap buf[%d]=0x[%02x]\n",i, buf[i]);    
               
         pidCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
         res = ok;
@@ -261,8 +319,9 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     else{        
         return error;
     } 
-    /////////////////////////////////////////////////
-    muxPidInfoList = malloc(sizeof(list_t));
+    
+    muxPidInfoList = malloc(sizeof(list_t)); 
+    list_init(muxPidInfoList);
 
     int getCnt = pidCnt / clsProgram.pidMap_eachTransmit_numberMax + ((pidCnt % clsProgram.pidMap_eachTransmit_numberMax > 0) ? 1 : 0);
     int nowCnt = 0;
@@ -482,6 +541,49 @@ ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel)
     return ok;
 
 }
+
+// ErrorTypeEm GetCatDesList(int channelId, list_t *catDesList)
+// {
+//     int iAddr = 0;
+//     byte[] cmdBytes = new byte[20];
+//     catDesList = new ArrayList();
+
+//     cmdBytes[iAddr++] = _startBytes[0];
+//     cmdBytes[iAddr++] = _startBytes[1];
+//     cmdBytes[iAddr++] = 0x11;
+//     cmdBytes[iAddr++] = 5;
+//     cmdBytes[iAddr++] = (byte)channelId;
+//     Array.Copy(cmdBytes, _buf, iAddr);
+//     int readLen = netConn.WriteAndRead(_buf, iAddr);
+//     ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
+//     if (checkRslt != ErrorTypeEm.ok)
+//         return ErrorTypeEm.cmd;
+
+//     // --- cat描述符 ---
+//     int desCntIndex = 1;
+//     int catDesCnt = _buf[iAddr++];
+//     for (int i = 0; i < catDesCnt; i++)
+//     {
+//         CA_descriptor catDesInfo = new CA_descriptor();
+//         catDesInfo.userNew = false;
+//         catDesInfo.inChannel = channelId;
+//         catDesInfo.index = desCntIndex++;
+//         catDesInfo.tag = _buf[iAddr++];
+//         catDesInfo.descriptor_length = _buf[iAddr++];
+//         if (catDesInfo.descriptor_length < 4)
+//             break;
+//         catDesInfo.inCaSysId = catDesInfo.outCaSysId = ClsDataOper.BigFormat_fromBytes(iAddr, 2, _buf);
+//         iAddr += 2;
+//         int tmpBytes = _buf[iAddr++];
+//         catDesInfo.reserved = tmpBytes >> 5;
+//         catDesInfo.inCaPid = catDesInfo.outCaPid = ((tmpBytes & 0x1f) << 8) | _buf[iAddr++];
+//         catDesInfo.private_data_byte = new byte[catDesInfo.descriptor_length - 4];
+//         Array.Copy(_buf, iAddr, catDesInfo.private_data_byte, 0, catDesInfo.private_data_byte.Length);
+//         catDesList.Add(catDesInfo);
+//         iAddr += catDesInfo.private_data_byte.Length;
+//     }
+//     return ErrorTypeEm.ok;
+// }
 
 list_t * MaketPaketSection(unsigned char *table, int length)
 {
