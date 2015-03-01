@@ -103,7 +103,7 @@ static void getoutprg(HttpConn *conn) {
 } 
 
 static void selectprgs(HttpConn *conn) {
-	int i = 0, j = 0, k = 0,cm = -1, pos = 0, prgindex = 0, hascontained = 0;
+	int i = 0, j = 0, k = 0, pos = 0, prgindex = 0, hascontained = 0;
 	char str[6] = {0};
 	char idstr[4] = {0};
 	char result[10] = {0};
@@ -143,9 +143,6 @@ static void selectprgs(HttpConn *conn) {
 				if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){					
 					//获取输入通道信息
 					list_get(&(clsProgram.inPrgList), i, &pst);
-					for(j=0;j<7;j++){
-						list_get(&(pst->prgNodes), j, &inprg);	
-					}
 					//加入输出通道列表
 					outpst->channelId = i+1;
 					//加入输出节目信息
@@ -196,7 +193,7 @@ static void selectprgs(HttpConn *conn) {
 				if(hascontained == 0){
 					//此节目已删除
 					//释放内存
-					freeProgramsMalloc(outprg);					
+					freeProgramsMalloc(outprg);							
 					list_pop(&(outpst->prgNodes), k);
 					break;
 				}
@@ -388,18 +385,53 @@ static void setchanneloutinfo(HttpConn *conn) {
 	render(rsts); 
 } 
 
-static void getprginfo(HttpConn *conn) { 
-	MprJson *jsonparam = httpGetParams(conn); 
-    char *inChn = mprGetJson(jsonparam, "channel"); 
-	char *oChn = mprGetJson(jsonparam, "och"); 
-	char *prgid = mprGetJson(jsonparam, "prgid"); 
-	int inCh = atoi(inChn);
-	int oCh = atoi(oChn);
-	int id = atoi(prgid);
+static void getprginfo(HttpConn *conn) { 	
+	int i = 0, j = 0;	
+	char str[512] = {0};
+	char prgname[32] = {0};
 	ChannelProgramSt *outpst = NULL;
+	Dev_prgInfo_st *outprg = NULL;
+	cJSON *result = cJSON_CreateObject();
+	cJSON *streamarray, *streamjson;
+	char* jsonstring;	
+	MprJson *jsonparam = mprParseJson(espGetQueryString(conn)); 
+	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	int inCh = atoi(mprGetJson(jsonparam, "channel"));
+	int prgnum = atoi(mprGetJson(jsonparam, "prgNum"));
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
+	for(i=0; i<list_len(&outpst->prgNodes); i++){
+		list_get(&outpst->prgNodes, i, &outprg);	
+		if(outprg->prgNum == prgnum){	
+			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
+			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
+			cJSON_AddNumberToObject(result,"streamId", outprg->streamId);
+			cJSON_AddNumberToObject(result,"networkId", outprg->networkId);
+			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
+			cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
+			cJSON_AddNumberToObject(result,"newPcrPid", outprg->newPcrPid);
+			memcpy(prgname, outprg->prgName, outprg->prgNameLen);			
+			cJSON_AddStringToObject(result,"prgName", prgname);
+			cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
+			DataStream_t *streaminfo = outprg->pdataStreamList;
+			for(j=0; j<outprg->pdataStreamListLen; j++) {
+				cJSON_AddItemToArray(streamarray,streamjson = cJSON_CreateObject());
+				cJSON_AddNumberToObject(streamjson,"NO", j);
+				cJSON_AddNumberToObject(streamjson,"streamtype", streaminfo->streamType);
+				cJSON_AddNumberToObject(streamjson,"inpid", streaminfo->inPid);
+				cJSON_AddNumberToObject(streamjson,"outPid", streaminfo->outPid);
+				cJSON_AddNumberToObject(streamjson,"inChn", streaminfo->inChn);
+				streaminfo++;
+			}
+			break;
+		}
+	}
+	jsonstring = cJSON_PrintUnformatted(result);
+	memcpy(str, jsonstring, strlen(jsonstring));
 	
-	render("");
+	//释放内存	
+	cJSON_Delete(result);		
+	free(jsonstring);
+	render(str); 
 } 
 
 static void common(HttpConn *conn) {
@@ -452,7 +484,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineBase(route, common);
 	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
-	espDefineAction(route, "programs-cmd-getprginfo", getprginfo);
+	espDefineAction(route, "programs-cmd-getprginfo", getprginfo);//menu-edit
 	espDefineAction(route, "programs-cmd-selectprgs", selectprgs);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);

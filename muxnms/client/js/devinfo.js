@@ -340,23 +340,6 @@ function devinfo_output(devType){
 		]
 	}); 
 	
-	//编辑节目对话框表
-	$('#tbl_editprg').dataTable( {
-		"data": dataSet,
-		"order": [[ 0, "asc" ]],
-		"paging":   false,
-		"info":     false,
-		"searching":   false,
-		"scrollCollapse": true,
-		"columns": [
-			{ "title": "序号" },
-			{ "title": "输入通道", "width": "70px"},
-			{ "title": "流类型"},
-			{ "title": "输入PID(Hex)"},
-			{ "title": "输出PID(Hex)" }
-		]
-	});    	
-	
 	//表结构右侧table
 	$('#tbl_outtable').dataTable( {
 		"data": dataSet,
@@ -623,7 +606,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: channel_root,
 		menu: {
-			selector: "#inputprg_menu2",
+			selector: "#inputprg_menu",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
@@ -727,7 +710,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: programData,
 		menu: {
-			selector: "#program_menu2",
+			selector: "#program_menu",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
@@ -771,7 +754,54 @@ function devinfo_output(devType){
 						
 						break;
 					} case '#edit': {
-						dialog.dialog( "open" );
+						//获取编辑节目信息
+						$.ajax({
+							type: "GET",
+							async:false,
+							url: "http://"+localip+":4000/do/programs/getprginfo",
+							data:'{channel:'+1+ ',prgNum:'+data.node.data.prgNum+'}',
+							dataType: "json",
+							success: function(data){
+								$('.prg_name').val(data.prgName);
+								$('.prg_no').val(data.prgNum.toString());
+								$('.prg_pid').val(data.pmtPid.toString(16));
+								$('.prg_prc').val(data.chnId.toString());
+								$('.prg_prc1').val(data.oldPcrPid.toString(16));
+								$('.prg_prc2').val(data.newPcrPid.toString(16));
+								dataSet.length = 0;	
+								$.each(data.children, function(key, itemv) {
+									var streamtype;
+									if(itemv.streamtype == 2){
+										streamtype = "MPEG2 Video";
+									}else if(itemv.streamtype == 4){
+										streamtype = "MPEG2 Audio";
+									}
+									var item = [itemv.NO,itemv.inChn, streamtype,itemv.inpid,itemv.outpid];
+									dataSet[dataSet.length] = item;
+								});
+								//编辑节目对话框表
+								$('#tbl_editprg').dataTable( {
+									"data": dataSet,
+									"order": [[ 0, "asc" ]],
+									"paging":   false,
+									"info":     false,
+									"searching":   false,
+									"scrollCollapse": true,
+									"columns": [
+										{ "title": "序号" },
+										{ "title": "输入通道", "width": "70px"},
+										{ "title": "流类型"},
+										{ "title": "输入PID(Hex)"},
+										{ "title": "输出PID(Hex)" }
+									]
+								});    	
+							},    
+							error : function(err) {    
+								var xxx = err;
+								alert("异常！====="+JSON.stringify(err));    
+							}   
+						});
+						dialog_edit.dialog( "open" );
 						break;
 					} case '#deleteall': {
 						
@@ -876,7 +906,7 @@ function devinfo_output(devType){
 		minExpandLevel:3,
 		source: table_root,
 		menu: {
-			selector: "#table_menu2",
+			selector: "#table_menu",
 			position: {my: "center"},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -927,7 +957,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: channel_root,
 		menu: {
-			selector: "#inputprg_menu",
+			selector: "#inputprg_menu2",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 				if(data.node.key == "id1.0"){
@@ -1029,7 +1059,7 @@ function devinfo_output(devType){
 		minExpandLevel:2,
 		source: programData,
 		menu: {
-			selector: "#program_menu",
+			selector: "#program_menu2",
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
@@ -1073,7 +1103,7 @@ function devinfo_output(devType){
 						
 						break;
 					} case '#edit': {
-						dialog.dialog( "open" );
+						dialog_edit.dialog( "open" );
 						break;
 					} case '#deleteall': {
 						
@@ -1120,7 +1150,7 @@ function devinfo_output(devType){
 		minExpandLevel:3,
 		source: table_root,
 		menu: {
-			selector: "#table_menu",
+			selector: "#table_menu2",
 			position: {my: "center"},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -1216,23 +1246,23 @@ function devinfo_output(devType){
 	});
 	
 	//编辑节目右键菜单弹出对话框
-	var dialog = $( "#dialog-form" ).dialog({
+	var dialog_edit = $( "#dialog-form" ).dialog({
 		autoOpen: false,
 		height: 500,
 		width: 770,
 		modal: true,
 		buttons: {
 			"添加":function() {
-			  dialog.dialog( "close" );
+			  dialog_edit.dialog( "close" );
 			} ,
 			"删除":function() {
-			  dialog.dialog( "close" );
+			  dialog_edit.dialog( "close" );
 			},
 			"确定": function() {
-			  dialog.dialog( "close" );
+			  dialog_edit.dialog( "close" );
 			},
 			"取消": function() {
-			  dialog.dialog( "close" );
+			  dialog_edit.dialog( "close" );
 			}
 		}
 	});
