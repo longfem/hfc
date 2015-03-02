@@ -1,5 +1,5 @@
-﻿var _selectcount = 0;//节目计数
-
+var _selectcount = 0;//节目计数
+var _tbleditcount = 0;//edit表stream计数
 var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
@@ -241,7 +241,23 @@ function devinfo_output(devType){
 					+'<td><label>名称</label></td>'
 					+'<td><input type="text" class="prg_name" value=""></input></td>'
 					+'<td><label>业务类型</label></td>'
-					+'<td><select ><option value ="1">digital television service</option><option value ="2">analog television service</option></select></td>'
+					+'<td>'
+						+'<select >'
+							+'<option value ="1">[1]digital television service</option><option value ="2">[2]digital radio sound service</option>'
+							+'<option value ="3">[3]teletext service</option><option value ="4">[4]NVOD refrence service</option>'
+							+'<option value ="5">[5]NVOD time-shifted service</option><option value ="6">[6]mosaic service</option>'
+							+'<option value ="7">[7]PAL coded signal</option><option value ="8">[8]SECAN coded signal</option>'
+							+'<option value ="9">[9]D/D2 MAC</option><option value ="10">[10]FM radio</option>'
+							+'<option value ="11">[11]NTSC coded signal</option><option value ="12">[12]data broadcast service</option>'
+							+'<option value ="13">[13]reserved for CIU(EN 50221[16])</option><option value ="14">[14]RCS Map(see EN 301 790[34])</option>'
+							+'<option value ="15">[15]RCS FLS(see EN 301 790[34])</option><option value ="16">[16]DVB MHP service</option>'
+							+'<option value ="17">[17]MPEG-2 HD digital television service</option><option value ="18">[18]Reserved</option>'
+							+'<option value ="19">[19]Reserved</option><option value ="20">[20]Reserved</option>'
+							+'<option value ="21">[21]Reserved</option><option value ="22">[22]advanced codec SD digital television service</option>'
+							+'<option value ="23">[23]advanced codec SD NVOD time-shifted service</option><option value ="24">[24]advanced codec SD NVOD refrence service</option>'
+							+'<option value ="25">[25]advanced codec HD digital television service</option><option value ="26">[26]advanced codec HD NVOD time-shifted service</option>'
+							+'<option value ="27">[27]advanced codec HD NVOD refrence service</option>'
+						+'</select></td>'
 				+'</tr>'
 				+'<tr>'
 					+'<td><label>提供商名称</label></td>'
@@ -372,7 +388,7 @@ function devinfo_output(devType){
 			{ "title": "OUT-PID"},
 			{ "title": "TYPE" }
 		]
-	});
+	});	
 	
 	var tabs = $("#devoutput").tabs();
 	$( "#output-read" ).button({
@@ -770,31 +786,74 @@ function devinfo_output(devType){
 								$('.prg_prc2').val(data.newPcrPid.toString(16));
 								dataSet.length = 0;	
 								$.each(data.children, function(key, itemv) {
-									var streamtype;
+									/* var streamtype;
 									if(itemv.streamtype == 2){
 										streamtype = "MPEG2 Video";
 									}else if(itemv.streamtype == 4){
 										streamtype = "MPEG2 Audio";
-									}
-									var item = [itemv.NO,itemv.inChn, streamtype,itemv.inpid,itemv.outpid];
+									} */
+									var item = [itemv.NO,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
 									dataSet[dataSet.length] = item;
 								});
+								_tbleditcount = dataSet.length;
 								//编辑节目对话框表
-								$('#tbl_editprg').dataTable( {
-									"data": dataSet,
-									"order": [[ 0, "asc" ]],
-									"paging":   false,
-									"info":     false,
-									"searching":   false,
-									"scrollCollapse": true,
-									"columns": [
-										{ "title": "序号" },
-										{ "title": "输入通道", "width": "70px"},
-										{ "title": "流类型"},
-										{ "title": "输入PID(Hex)"},
-										{ "title": "输出PID(Hex)" }
-									]
-								});    	
+								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+									$('#tbl_editprg').dataTable().fnAddData(dataSet);
+								}else{
+									$('#tbl_editprg').dataTable( {
+										"data": dataSet,
+										"order": [[ 0, "asc" ]],
+										"paging":   false,
+										"info":     false,
+										"searching":   false,
+										"scrollCollapse": true,										
+										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+											switch(aData[2]){
+												case 2:
+													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+														+'<option value ="1">1-MPEG1 Video</option>'
+														+'<option value ="2" selected="selected">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4">4-MPEG2 Audio</option>'												
+													+'</select>' );
+													break;
+												case 4:
+													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+														+'<option value ="1">1-MPEG1 Video</option>'
+														+'<option value ="2">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4" selected="selected">4-MPEG2 Audio</option>'												
+													+'</select>' );
+													break;
+												default:
+													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+														+'<option value ="1" class="selected">1-MPEG1 Video</option>'
+														+'<option value ="2">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4">4-MPEG2 Audio</option>'												
+													+'</select>' );
+											}
+											$('td:eq(3)', nRow).html( '<input type="text" class="edit_inpid" value="'+ aData[3] + '"></input>' );
+											$('td:eq(4)', nRow).html( '<input type="text" class="edit_outpid" value="'+ aData[4] + '"></input>' );
+											
+										},		
+										"columns": [
+											{ "title": "序号" },
+											{ "title": "输入通道", "width": "70px"},
+											{ "title": "流类型"},
+											{ "title": "输入PID(Hex)"},
+											{ "title": "输出PID(Hex)" }
+										]
+									});   
+									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
+										if ( $(this).hasClass('selected') ) {
+											$(this).removeClass('selected');
+										}else {
+											$('#tbl_editprg').DataTable().$('tr.selected').removeClass('selected');
+											$(this).addClass('selected');
+										}
+									} );
+								}							
 							},    
 							error : function(err) {    
 								var xxx = err;
@@ -1249,20 +1308,46 @@ function devinfo_output(devType){
 	var dialog_edit = $( "#dialog-form" ).dialog({
 		autoOpen: false,
 		height: 500,
-		width: 770,
+		width: 820,
 		modal: true,
 		buttons: {
 			"添加":function() {
-			  dialog_edit.dialog( "close" );
+				$('#tbl_editprg').DataTable().row.add( [
+					_tbleditcount,
+					2,
+					'MPEG2 Audio',
+					200,
+					200
+				] ).draw();
+				_tbleditcount++;
 			} ,
 			"删除":function() {
-			  dialog_edit.dialog( "close" );
+				$('#tbl_editprg').DataTable().row('.selected').remove().draw( false );
 			},
 			"确定": function() {
-			  dialog_edit.dialog( "close" );
+				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
+				var jsonstr = '{"channel":' + Number($('.prg_prc').val()) + ',"prgname":' + $('.prg_name').val() + ',"prgNum":' + Number($('.prg_no').val()) + ',"pmtpid":' + Number($('.prg_pid').val()) + ',"oldpcrpid":' + Number($('.prg_prc1').val()) + ',"newpcrpid":' + Number($('.prg_prc2').val())+ '}';
+				//下发配置
+				$.ajax({
+					 type: "GET",
+					 async:false,
+					 url: "http://"+localip+":4000/do/programs/setprginfo",
+					 data: JSON.parse(jsonstr),
+					 dataType: "json",
+					 success: function(data){
+						if(data.sts == 1){
+							
+						}
+					 },    
+					 error : function(err) {    
+					 }   
+				});
+				dialog_edit.dialog( "close" );
+				$('#tbl_editprg').dataTable().fnClearTable();
 			},
 			"取消": function() {
 			  dialog_edit.dialog( "close" );
+			  $('#tbl_editprg').dataTable().fnClearTable();
 			}
 		}
 	});
@@ -1406,5 +1491,4 @@ function dev_outset() {
         event.preventDefault();
 		alert('------------------!!!');
     });
-
 }

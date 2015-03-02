@@ -53,7 +53,7 @@ static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo
 	DataStream_t *inpdataStreamInfo = inprg->pdataStreamList;
 	for (k = 0; k < outprg->pdataStreamListLen; k++)
 	{  
-		memcpy(pdataStreamInfo, inpdataStreamInfo, sizeof(DataStream_t) );
+		memcpy(pdataStreamInfo, inpdataStreamInfo, sizeof(DataStream_t) );		
 		pdataStreamInfo->desNode = malloc(pdataStreamInfo->desNodeLen * sizeof(Commdes_t));                    
 		Commdes_t *pdataStreamDesInfo = pdataStreamInfo->desNode;
 		Commdes_t *inpdataStreamDesInfo = inpdataStreamInfo->desNode;
@@ -418,7 +418,7 @@ static void getprginfo(HttpConn *conn) {
 				cJSON_AddNumberToObject(streamjson,"NO", j);
 				cJSON_AddNumberToObject(streamjson,"streamtype", streaminfo->streamType);
 				cJSON_AddNumberToObject(streamjson,"inpid", streaminfo->inPid);
-				cJSON_AddNumberToObject(streamjson,"outPid", streaminfo->outPid);
+				cJSON_AddNumberToObject(streamjson,"outpid", streaminfo->outPid);
 				cJSON_AddNumberToObject(streamjson,"inChn", streaminfo->inChn);
 				streaminfo++;
 			}
@@ -433,6 +433,21 @@ static void getprginfo(HttpConn *conn) {
 	free(jsonstring);
 	render(str); 
 } 
+
+static void setprginfo(HttpConn *conn) { 	
+	char rsts[20] = {0};
+	MprJson *jsonparam = httpGetParams(conn); 	
+	int inCh = atoi(mprGetJson(jsonparam, "channel"));
+	char *prgname = mprGetJson(jsonparam, "prgname");
+	int prgNum = atoi(mprGetJson(jsonparam, "prgNum"));
+	int pmtpid = atoi(mprGetJson(jsonparam, "pmtpid"));
+	int oldpcrpid = atoi(mprGetJson(jsonparam, "oldpcrpid"));
+	int newpcrpid = atoi(mprGetJson(jsonparam, "newpcrpid"));
+	
+	
+	rendersts(rsts, 1);
+	render(rsts); 
+}
 
 static void common(HttpConn *conn) {
 	
@@ -485,6 +500,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
 	espDefineAction(route, "programs-cmd-getprginfo", getprginfo);//menu-edit
+	espDefineAction(route, "programs-cmd-setprginfo", setprginfo);//menu-edit
 	espDefineAction(route, "programs-cmd-selectprgs", selectprgs);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
