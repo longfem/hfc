@@ -542,48 +542,72 @@ ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel)
 
 }
 
-// ErrorTypeEm GetCatDesList(int channelId, list_t *catDesList)
-// {
-//     int iAddr = 0;
-//     byte[] cmdBytes = new byte[20];
-//     catDesList = new ArrayList();
+ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
+{
 
-//     cmdBytes[iAddr++] = _startBytes[0];
-//     cmdBytes[iAddr++] = _startBytes[1];
-//     cmdBytes[iAddr++] = 0x11;
-//     cmdBytes[iAddr++] = 5;
-//     cmdBytes[iAddr++] = (byte)channelId;
-//     Array.Copy(cmdBytes, _buf, iAddr);
-//     int readLen = netConn.WriteAndRead(_buf, iAddr);
-//     ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
-//     if (checkRslt != ErrorTypeEm.ok)
-//         return ErrorTypeEm.cmd;
+    unsigned char buf[100];
+    int i = 0, j=0;
+    unsigned char sendbuf[20];
+    int slen=0;
 
-//     // --- cat描述符 ---
-//     int desCntIndex = 1;
-//     int catDesCnt = _buf[iAddr++];
-//     for (int i = 0; i < catDesCnt; i++)
-//     {
-//         CA_descriptor catDesInfo = new CA_descriptor();
-//         catDesInfo.userNew = false;
-//         catDesInfo.inChannel = channelId;
-//         catDesInfo.index = desCntIndex++;
-//         catDesInfo.tag = _buf[iAddr++];
-//         catDesInfo.descriptor_length = _buf[iAddr++];
-//         if (catDesInfo.descriptor_length < 4)
-//             break;
-//         catDesInfo.inCaSysId = catDesInfo.outCaSysId = ClsDataOper.BigFormat_fromBytes(iAddr, 2, _buf);
-//         iAddr += 2;
-//         int tmpBytes = _buf[iAddr++];
-//         catDesInfo.reserved = tmpBytes >> 5;
-//         catDesInfo.inCaPid = catDesInfo.outCaPid = ((tmpBytes & 0x1f) << 8) | _buf[iAddr++];
-//         catDesInfo.private_data_byte = new byte[catDesInfo.descriptor_length - 4];
-//         Array.Copy(_buf, iAddr, catDesInfo.private_data_byte, 0, catDesInfo.private_data_byte.Length);
-//         catDesList.Add(catDesInfo);
-//         iAddr += catDesInfo.private_data_byte.Length;
-//     }
-//     return ErrorTypeEm.ok;
-// }
+    int dataAddr, iAddr;
+    enum ErrorTypeEm res;
+
+    memset(sendbuf, 0, sizeof(sendbuf));
+    sendbuf[iAddr++]=0x77;
+    sendbuf[iAddr++]=0x6C;
+    sendbuf[iAddr++]=0x11;    
+    sendbuf[iAddr++]=0x05;
+    sendbuf[iAddr++]=(unsigned char)channelId;
+
+    memset(buf,0,sizeof(buf));
+    communicate(ip, sendbuf, iAddr, buf, &slen);
+
+    if( slen ==6 ){        
+        res = ok;
+
+    }
+    else{            
+        return error;          
+    }
+
+    // --- cat描述符 ---
+    int desCntIndex = 1;
+    int catDesCnt = buf[iAddr++];
+
+    catDesList = malloc(sizeof(list_t));
+    list_init(catDesList);
+    //////////////////////////////////////////////////////
+   
+
+    // --- cat描述符 ---    
+    CA_descriptor *catDesInfo = NULL;
+    for (i = 0; i < catDesCnt; i++)
+    {
+        catDesInfo = malloc(sizeof(CA_descriptor));
+        catDesInfo->userNew = 0;
+        catDesInfo->inChannel = channelId;
+        catDesInfo->index = desCntIndex++;
+        catDesInfo->tag = buf[iAddr++];
+        catDesInfo->descriptor_length = buf[iAddr++];
+        if (catDesInfo->descriptor_length < 4)
+            break;
+        catDesInfo->inCaSysId = catDesInfo->outCaSysId = (buf[iAddr] << 8 | buf[iAddr + 1]) & 0xffff;
+        iAddr += 2;
+        int tmpBytes = buf[iAddr++];
+        catDesInfo->reserved = tmpBytes >> 5;
+        catDesInfo->inCaPid = catDesInfo->outCaPid = ((tmpBytes & 0x1f) << 8) | buf[iAddr++];
+        catDesInfo->private_data_byte_len = catDesInfo->descriptor_length - 4;
+        catDesInfo->private_data_byte = (unsigned char *)malloc(catDesInfo->private_data_byte_len);
+        memcpy(catDesInfo->private_data_byte, buf + iAddr, catDesInfo->private_data_byte_len);
+        
+        list_append(catDesList, catDesInfo);
+        
+        iAddr += catDesInfo->private_data_byte_len;
+    }
+
+    return ok;
+}
 
 list_t * MaketPaketSection(unsigned char *table, int length)
 {

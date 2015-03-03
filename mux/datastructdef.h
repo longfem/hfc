@@ -177,11 +177,17 @@ typedef struct MuxPidInfo_t
 }MuxPidInfo_st;
 
 
+typedef struct Chn_ca_t
+{
+	int version_number; // 5b
+	list_t caIdenList; // CA_descriptor
+}Chn_ca_st;
+
 typedef struct ChannelProgramt
 {
 	int channelId;
 	list_t prgNodes; // struct Dev_prgInfo_st
-	//Chn_ca_st caNode;
+	Chn_ca_st caNode;
 	list_t userPrgNodes; // struct User_prgInfo_t
 	list_t dtPidList; // MuxPidInfo_st , 透传表, 数组以输出通道为序
 }ChannelProgramSt;
@@ -215,6 +221,23 @@ typedef struct pat_senction_t
 	 patPrg_t *patPrg_tList; 
 	 int crc32; // 32b
 }pat_senction_st;
+
+typedef struct CA_descriptor_t
+{
+	 unsigned char userNew; // 用户自定义内容
+	 int inChannel;
+	 int index;
+	 int tag;
+	 int descriptor_length;	 
+	 //int [] CA_system_id_list; // b16 for(;;)
+	 int inCaSysId;
+	 int outCaSysId;
+	 int reserved;
+	 int inCaPid;
+	 int outCaPid;
+	 int private_data_byte_len;
+	 unsigned char *private_data_byte;
+}CA_descriptor;
 
 typedef struct pmt_senction_t
  {
