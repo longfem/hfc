@@ -311,6 +311,8 @@ void getTableJson(int channel, char *outprg){
 				cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
 				
 				cJSON_AddItemToObject(subTablejson, "children", streamsarray = cJSON_CreateArray());	
+				//TODO
+				//未添加自定义描述符
 				cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());				
 				cJSON_AddTrueToObject(streamjson,"folder");
 				cJSON_AddFalseToObject(streamjson,"expanded");
@@ -318,6 +320,7 @@ void getTableJson(int channel, char *outprg){
 				sprintf(idstr, "id1.3.%d.%d", i+4, 1);//1.3.4.1
 				cJSON_AddStringToObject(streamjson,"key", idstr);
 				cJSON_AddStringToObject(streamjson,"title", "server descriptor");
+				cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 				p_last_sdtPrgName_t++;
 			}
 			free(p_sdt);
@@ -362,6 +365,18 @@ void getTableJson(int channel, char *outprg){
 	//释放内存	
 	cJSON_Delete(tablesarray);		
 	free(prgjsonstring);
+}
+
+void getStreamJson(int channel, char *outprg){
+	char* jsonstring;
+	cJSON *streamjson;
+	
+	
+	
+	
+	//释放内存	
+	cJSON_Delete(streamjson);		
+	free(jsonstring);
 }
 
 int OutPsiTable_inSdt_search_prgInfo(sdt_senction_st *p_sdt, int seriveid, char *prgName, int *isCrpto)

@@ -32,12 +32,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		list_get(&(clsProgram.inPrgList), inChn-1, &pst);
 		if( list_len(&pst->prgNodes) > 0){
 			freePrograms(&pst->prgNodes);
-			/*for(j=0; j< list_len(&pst->prgNodes); j++){
-				list_get(&pst->prgNodes, j, &PrgInfo);
-				if(PrgInfo != NULL)
-					freeProgramsMalloc(PrgInfo);
-					//free(PrgInfo);
-			}	*/
 		}
 			
 		for(i=0; i<list_len(&prginfolist); i++) {
@@ -54,8 +48,9 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddStringToObject(prgjson,"title", str);
 			cJSON_AddTrueToObject(prgjson,"folder");
 			cJSON_AddFalseToObject(prgjson,"expanded");
-			cJSON_AddStringToObject(prgjson,"prgkey", prgkey);
+			//cJSON_AddStringToObject(prgjson,"prgkey", prgkey);
 			cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
+			cJSON_AddNumberToObject(prgjson, "prgNum", ptmpPrgInfo->prgNum);
 			sprintf(idstr, "id1.%d.%d", inChn, (i+1));//1.2.1	
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
@@ -87,13 +82,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			//unsigned char tmpstr[100] = {0};
 			for(j=0; j<ptmpPrgInfo->pmtDesListLen; j++) {
 				memcpy(tmpinfo, ptmpPrgInfo->pmtDesList+offset, sizeof(Commdes_t) );
-				/*memcpy(tmpstr, tmpinfo->data, tmpinfo->dataLen );
-				if(tmpinfo->dataLen ==3){
-					printf("-----%d-->>%d:::%d:::%d\n", tmpinfo->dataLen, tmpstr[0],tmpstr[1],tmpstr[2]);
-				}else{
-					printf("-----%d-->>%d:::%d:::%d::::%d\n", tmpinfo->dataLen, tmpstr[0],tmpstr[1],tmpstr[2],tmpstr[3]);
-				}
-				*/
 				offset += 1;
 			}
 			free(tmpinfo);
