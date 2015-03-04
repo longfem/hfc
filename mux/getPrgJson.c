@@ -21,6 +21,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	}		
     res = getPrograms(ip, inChn, &prginfolist);	
 	if(0 != res){
+		GetCatDesList(ip, inChn, &pst->caNode.caIdenList);
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
 		sprintf(prgkey, "id1.%d", inChn);//1.2

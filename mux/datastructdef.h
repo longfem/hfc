@@ -357,7 +357,7 @@ typedef struct sdt_senction_t
 }sdt_senction_st;
 
 
-#pragma pack(pop)
+#pragma pack()
 
 #endif	
 

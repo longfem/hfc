@@ -796,7 +796,7 @@ function devinfo_output(devType){
 									}else if(itemv.streamtype == 4){
 										streamtype = "MPEG2 Audio";
 									} */
-									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid,itemv.index];
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
 									dataSet[dataSet.length] = item;
 								});
 								_tbleditcount = dataSet.length;
@@ -839,7 +839,6 @@ function devinfo_output(devType){
 											}
 											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
 											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
-											$('td:eq(5)', nRow).html( '<input type="text" id="r_index'+iDisplayIndex+ '" name="r_index'+iDisplayIndex+ '" value="'+ aData[5] + '"></input>' );
 											
 										},		
 										"columns": [
@@ -847,8 +846,7 @@ function devinfo_output(devType){
 											{ "title": "输入通道", "width": "70px"},
 											{ "title": "流类型"},
 											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" },
-											{ "title": "索引号", "visible": false},
+											{ "title": "输出PID(Hex)" }
 										]
 									});   
 									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -1320,13 +1318,12 @@ function devinfo_output(devType){
 		buttons: {
 			"添加":function() {
 				$('#tbl_editprg').DataTable().row.add( [
-					_tbleditcount,
-					2,
+					Number(_tbl_edit[0].rows[_tbl_edit[0].rows.length - 1].firstChild.textContent) + 1,
+					Number($('.prg_prc').val()),
 					'MPEG2 Audio',
 					200,
 					200
 				] ).draw();
-				_tbleditcount++;
 			} ,
 			"删除":function() {
 				$('#tbl_editprg').DataTable().row('.selected').remove().draw( false );

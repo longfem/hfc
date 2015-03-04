@@ -17,6 +17,7 @@
 #include "getOutPrograms.h"
 #include "getTableJson.h"
 #include "sendPrograms.h"
+#include "clsMuxprgInfoGet.h"
 
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
@@ -93,7 +94,7 @@ static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
     char ip[16] = "192.168.1.134";//param("ip"); 
-    char *inChn = mprGetJson(jsonparam, "inch"); 
+    cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[20480] = {0}; 	
     getprgsJson(ip, inCh, pProg);
@@ -110,9 +111,13 @@ static void getoutprg(HttpConn *conn) {
 	if( list_len(&outpst->prgNodes) > 0){
 		freePrograms(&outpst->prgNodes);
 	}
+	if(1){
+		//PrgMuxInfoGet(ip);
+	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(ip, outChn);
 	} 
+	
 	render("%d", clsProgram._intChannelCntMax);
     
 } 
@@ -239,7 +244,7 @@ static void maketable(HttpConn *conn) {
 static void makestreamtable(HttpConn *conn) { 
     char outstring[1024] = {0};
 	MprJson *jsonparam = httpGetParams(conn); 
-    char *inChn = mprGetJson(jsonparam, "channel"); 
+    cchar *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
 	getStreamJson(inCh, outstring);
 	render(outstring);    
@@ -247,7 +252,7 @@ static void makestreamtable(HttpConn *conn) {
 
 static void writetable(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn); 
-    char *inChn = mprGetJson(jsonparam, "channel"); 
+    cchar *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
 	char rsts[20] = {0};
 	if(!sendPrograms("192.168.1.134", inCh)){
@@ -260,7 +265,7 @@ static void writetable(HttpConn *conn) {
 
 static void getchanneloutinfo(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn); 
-    char *inChn = mprGetJson(jsonparam, "channel"); 
+    cchar *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);	
 	char rsts[20] = {0};
 	if(!pdb){
@@ -367,7 +372,7 @@ static void getprginfo(HttpConn *conn) {
 } 
 
 static void setprginfo(HttpConn *conn) { 	
-	int i = 0, j = 0, cm = 0, index = 0;
+	int i = 0, j = 0, cm = 0, index = 0, matched = 0;
 	char rsts[20] = {0};
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
@@ -386,24 +391,25 @@ static void setprginfo(HttpConn *conn) {
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);	
 		if(outprg->prgNum == orgialprgNum){	
-			printf("==========edit begin==========%d\n", outprg->prgNum);
 			outprg->prgNum = prgNum;
 			outprg->pmtPid = pmtpid;
 			outprg->oldPcrPid = oldpcrpid;
 			outprg->newPcrPid = newpcrpid;
 			outprg->prgNameLen = strlen(prgname);
-			memcpy(outprg->prgName, prgname, outprg->prgNameLen);
-			printf("==========22222==========\n");
+			memcpy(outprg->prgName, prgname, outprg->prgNameLen);			
 			//修改节目数据流信息
 			//重新分配新的数据流内存
-			/*DataStream_t *StreamList = malloc(streamcnt * sizeof(DataStream_t));
-			printf("=========33333==========\n");
+			DataStream_t *StreamList = malloc(streamcnt * sizeof(DataStream_t));			
 			DataStream_t *pdataStreamInfo = StreamList;			
-			for(i=0; i<streamcnt; i++){
+			for(i=0; i<streamcnt; i++){				
 				DataStream_t *oldpdataStreamInfo = outprg->pdataStreamList;
-				index = atoi(mprGetJson(jsonparam, "index"+i));
+				memset(rsts, 0, sizeof(rsts));
+				sprintf(rsts, "index%d", i);
+				index = atoi(mprGetJson(jsonparam, rsts));
+				matched = 0;
 				for(j=0; j<outprg->pdataStreamListLen; j++){
 					if(oldpdataStreamInfo->index == index){
+						matched = 1;
 						//复制数据流到新内存空间
 						memcpy(pdataStreamInfo, oldpdataStreamInfo, sizeof(DataStream_t));
 						pdataStreamInfo->desNode = malloc(oldpdataStreamInfo->desNodeLen * sizeof(Commdes_t));                    
@@ -412,37 +418,54 @@ static void setprginfo(HttpConn *conn) {
 						for (cm = 0; cm < pdataStreamInfo->desNodeLen; cm++)
 						{ 
 							memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
+							pdataStreamDesInfo->data = malloc(inpdataStreamDesInfo->dataLen * sizeof(unsigned char) );
+							memcpy(pdataStreamDesInfo->data, inpdataStreamDesInfo->data, inpdataStreamDesInfo->dataLen * sizeof(unsigned char));
 							pdataStreamDesInfo++;
 							inpdataStreamDesInfo++;
-						}
-						//修改新数据流
-						pdataStreamInfo->streamType = atoi(mprGetJson(jsonparam, "r_streamtype"+i));
-						pdataStreamInfo->inPid = atoi(mprGetJson(jsonparam, "r_inpid"+i));
-						pdataStreamInfo->outPid = atoi(mprGetJson(jsonparam, "r_outpid"+i));
+						}						
 					}
 					oldpdataStreamInfo++;
+				}
+				//修改新数据流
+				memset(rsts, 0, sizeof(rsts));
+				sprintf(rsts, "r_streamtype%d", i);
+				pdataStreamInfo->streamType = atoi(mprGetJson(jsonparam, rsts));
+				memset(rsts, 0, sizeof(rsts));
+				sprintf(rsts, "r_inpid%d", i);
+				pdataStreamInfo->inPid = atoi(mprGetJson(jsonparam, rsts));
+				memset(rsts, 0, sizeof(rsts));
+				sprintf(rsts, "r_outpid%d", i);
+				pdataStreamInfo->outPid = atoi(mprGetJson(jsonparam, rsts));
+						
+				if(matched == 0){
+					//新增加的流数据
+					pdataStreamInfo->index = index;
+					oldpdataStreamInfo--;
+					pdataStreamInfo->inChn = oldpdataStreamInfo->inChn;
+					pdataStreamInfo->desNodeLen = 0;					
 				}
 				pdataStreamInfo++;
 			}
 			//释放原始内存空间
 			if(outprg->pdataStreamListLen>0){
 				for(i=0; i< outprg->pdataStreamListLen; i++){
-					for(j=0; j < outprg->pdataStreamList[i].destlen; j++)
+					for(j=0; j < outprg->pdataStreamList[i].desNodeLen; j++)
 					{				
-						if(outprg->pdataStreamList[i].desNode[j].data){
+						if(outprg->pdataStreamList[i].desNode[j].dataLen){
 							free(outprg->pdataStreamList[i].desNode[j].data);
-							outprg->pdataStreamList[i].desNode[j].data = NULL;
+							outprg->pdataStreamList[i].desNode[j].data = NULL;					
 						}												
 					}
 					free(outprg->pdataStreamList[i].desNode);
-					outprg->pdataStreamList[i].desNode = NULL;				
-				}
+					outprg->pdataStreamList[i].desNode = NULL;
+				
+				}		
 				free(outprg->pdataStreamList);
 				outprg->pdataStreamList = NULL;
 			}
 			//重新指向新的内存空间
 			outprg->pdataStreamListLen = streamcnt;
-			outprg->pdataStreamList = StreamList;*/
+			outprg->pdataStreamList = StreamList;			
 		}
 	}
 	rendersts(rsts, 1);
