@@ -14,7 +14,12 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	Dev_prgInfo_st *ptmpPrgInfo;
 	Dev_prgInfo_st *PrgInfo;
 	ChannelProgramSt *pst = NULL;
-    res = getPrograms(ip, inChn, &prginfolist);		
+	//释放输入通道节目占用的内存
+	list_get(&(clsProgram.inPrgList), inChn-1, &pst);
+	if( list_len(&pst->prgNodes) > 0){
+		freePrograms(&pst->prgNodes);
+	}		
+    res = getPrograms(ip, inChn, &prginfolist);	
 	if(0 != res){
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
@@ -27,22 +32,18 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		cJSON_AddStringToObject(channeljson,"key", idstr);
 		cJSON_AddStringToObject(channeljson,"icon", "img/channel_in.ico");
 		
-		cJSON_AddItemToObject(channeljson, "children", prgsarray = cJSON_CreateArray());
-		//释放输入通道节目占用的内存
-		list_get(&(clsProgram.inPrgList), inChn-1, &pst);
-		if( list_len(&pst->prgNodes) > 0){
-			freePrograms(&pst->prgNodes);
-		}
-			
+		cJSON_AddItemToObject(channeljson, "children", prgsarray = cJSON_CreateArray());		
+				
 		for(i=0; i<list_len(&prginfolist); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
-			list_get(&prginfolist, i, &ptmpPrgInfo);	
+			list_get(&prginfolist, i, &ptmpPrgInfo);			
 			//PrgInfo = malloc(sizeof(Dev_prgInfo_st));
 			//memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));
-			list_append(&pst->prgNodes, ptmpPrgInfo);			
+			list_append(&pst->prgNodes, ptmpPrgInfo);	
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			
 			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
@@ -74,7 +75,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddStringToObject(subprgjson,"prgkey", prgkey);
 			cJSON_AddStringToObject(subprgjson,"key", idstr);
 			cJSON_AddStringToObject(subprgjson,"icon", "img/channel_in.ico");
-
 			int j=0, k=0;
 			//PMT
 			Commdes_t *tmpinfo = malloc(sizeof(Commdes_t));

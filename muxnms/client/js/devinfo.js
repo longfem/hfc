@@ -1,5 +1,8 @@
 var _selectcount = 0;//节目计数
 var _tbleditcount = 0;//edit表stream计数
+var _orgialprgNum = 0;//编辑节目号
+var _editnodekey = ""; //编辑节目节点key
+var _tbl_edit;
 var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
@@ -267,7 +270,7 @@ function devinfo_output(devType){
 				+'</tr>'
 				+'<tr>'
 					+'<td><label>PRC通道</label></td>'
-					+'<td><input style="disabled" type="text" class="prg_prc" value="2"></input></td>'
+					+'<td><input disabled="disabled" type="text" class="prg_prc" value="2"></input></td>'
 					+'<td><label>PRC_PID(Hex)</label></td>'
 					+'<td><input type="text" style="width:50px" class="prg_prc1" value="488"></input> --><input style="width:50px" type="text" class="prg_prc2" value="488"></input><input style="margin-left:10px" type="checkbox">加扰</input></td>'
 				+'</tr>'
@@ -778,6 +781,7 @@ function devinfo_output(devType){
 							data:'{channel:'+1+ ',prgNum:'+data.node.data.prgNum+'}',
 							dataType: "json",
 							success: function(data){
+								_orgialprgNum = data.prgNum;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -792,7 +796,7 @@ function devinfo_output(devType){
 									}else if(itemv.streamtype == 4){
 										streamtype = "MPEG2 Audio";
 									} */
-									var item = [itemv.NO,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid,itemv.index];
 									dataSet[dataSet.length] = item;
 								});
 								_tbleditcount = dataSet.length;
@@ -800,7 +804,7 @@ function devinfo_output(devType){
 								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
 									$('#tbl_editprg').dataTable().fnAddData(dataSet);
 								}else{
-									$('#tbl_editprg').dataTable( {
+									_tbl_edit = $('#tbl_editprg').dataTable( {
 										"data": dataSet,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
@@ -810,7 +814,7 @@ function devinfo_output(devType){
 										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
 											switch(aData[2]){
 												case 2:
-													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex+ '" name="r_streamtype'+iDisplayIndex +'">'
 														+'<option value ="1">1-MPEG1 Video</option>'
 														+'<option value ="2" selected="selected">2-MPEG2 Video</option>'
 														+'<option value ="3">3-MPEG1 Audio</option>'
@@ -818,7 +822,7 @@ function devinfo_output(devType){
 													+'</select>' );
 													break;
 												case 4:
-													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
 														+'<option value ="1">1-MPEG1 Video</option>'
 														+'<option value ="2">2-MPEG2 Video</option>'
 														+'<option value ="3">3-MPEG1 Audio</option>'
@@ -826,15 +830,16 @@ function devinfo_output(devType){
 													+'</select>' );
 													break;
 												default:
-													$('td:eq(2)', nRow).html( '<select class="edit_selector'+iDisplayIndex +'">'
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
 														+'<option value ="1" class="selected">1-MPEG1 Video</option>'
 														+'<option value ="2">2-MPEG2 Video</option>'
 														+'<option value ="3">3-MPEG1 Audio</option>'
 														+'<option value ="4">4-MPEG2 Audio</option>'												
 													+'</select>' );
 											}
-											$('td:eq(3)', nRow).html( '<input type="text" class="edit_inpid" value="'+ aData[3] + '"></input>' );
-											$('td:eq(4)', nRow).html( '<input type="text" class="edit_outpid" value="'+ aData[4] + '"></input>' );
+											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
+											$('td:eq(5)', nRow).html( '<input type="text" id="r_index'+iDisplayIndex+ '" name="r_index'+iDisplayIndex+ '" value="'+ aData[5] + '"></input>' );
 											
 										},		
 										"columns": [
@@ -842,7 +847,8 @@ function devinfo_output(devType){
 											{ "title": "输入通道", "width": "70px"},
 											{ "title": "流类型"},
 											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" }
+											{ "title": "输出PID(Hex)" },
+											{ "title": "索引号", "visible": false},
 										]
 									});   
 									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -861,6 +867,7 @@ function devinfo_output(devType){
 							}   
 						});
 						dialog_edit.dialog( "open" );
+						_editnodekey = data.node.key;
 						break;
 					} case '#deleteall': {
 						
@@ -1325,8 +1332,12 @@ function devinfo_output(devType){
 				$('#tbl_editprg').DataTable().row('.selected').remove().draw( false );
 			},
 			"确定": function() {
+				var strindex = "";
+				for(var i=1;i<_tbl_edit[0].rows.length;i++){
+					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
+				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + Number($('.prg_prc').val()) + ',"prgname":' + $('.prg_name').val() + ',"prgNum":' + Number($('.prg_no').val()) + ',"pmtpid":' + Number($('.prg_pid').val()) + ',"oldpcrpid":' + Number($('.prg_prc1').val()) + ',"newpcrpid":' + Number($('.prg_prc2').val())+ '}';
+				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + '","orgialprgNum":' + _orgialprgNum + ',"prgNum":' + Number($('.prg_no').val()) + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
@@ -1336,7 +1347,10 @@ function devinfo_output(devType){
 					 dataType: "json",
 					 success: function(data){
 						if(data.sts == 1){
-							
+							var node = $("#channel").fancytree("getTree").getNodeByKey(_editnodekey);
+							node.data.prgNum = Number($('.prg_no').val());
+							node.title = "节目"+node.data.prgNum+"(0X"+ node.data.prgNum.toString(16)+"):PID(0X"+$('.prg_pid').val() +") PCR_PID(0X"+$('.prg_prc2').val() +") - "+$('.prg_name').val() ;
+							node.renderTitle();
 						}
 					 },    
 					 error : function(err) {    
