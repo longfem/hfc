@@ -52,20 +52,21 @@ void Init(int outChannelNumMax)
 	//add by stan for getmux info init global var
 	//MuxPrgInfoGet_st list array	
 	
-	clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
-	list_t *PrgPmtMux = NULL;
+	// 对于二重指针是分两步，比如：
+ //   float **Cluster=(float **)malloc(sizeof(float *)*K)
+ //    for(i=0;i<K;i++) 
+ //    Cluster[i]=(float *)malloc(sizeof(float)*N);
+
+	clsProgram.PrgPmtMuxList = (list_t **)  malloc(sizeof(list_t *) * clsProgram._outChannelCntMax);		
+	
 	for(i=0; i< clsProgram._outChannelCntMax; i++){
-		PrgPmtMux = malloc(sizeof(list_t));
-		list_init(PrgPmtMux);
-        list_append(clsProgram.PrgPmtMuxList, PrgPmtMux);
+		clsProgram.PrgPmtMuxList[i] = NULL;		
 	}
+
 	//MuxPidInfo_st list array
-	clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
-	list_t   *prgAVMux = NULL;
+	clsProgram.PrgAVMuxList = (list_t **) malloc(sizeof(list_t *) * clsProgram._outChannelCntMax);		
 	for(i=0; i< clsProgram._outChannelCntMax; i++){
-		prgAVMux = malloc(sizeof(list_t));
-		list_init(prgAVMux);
-        list_append(clsProgram.PrgAVMuxList, prgAVMux);		
+		clsProgram.PrgAVMuxList[i] = NULL;
 	} 
 	//////////////////////////////////////////////////////////////////////////////
 	// clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
