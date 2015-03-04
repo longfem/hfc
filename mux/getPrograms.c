@@ -155,7 +155,6 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 ptmpPrgInfo->prgName = (unsigned char *)malloc(prgNameLen);
 				memset(ptmpPrgInfo->prgName, 0,  prgNameLen);
                 memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr),  prgNameLen); 	
-				
                 iAddr += prgNameLen;                           
                 int providerNameLen = buf[iAddr];
                 iAddr += 1;     
