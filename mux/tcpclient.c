@@ -101,15 +101,21 @@ int main(int argc,char *argv[])
 
 /////////////////////
     initTestGetPrgJson();
-    ret = getOutPrograms(ip, 0);
 
-    //int inCh = atoi(inChn);
-    char pProg[20480] = {0};    
-    getprgsJson(ip, 2, pProg);
+
+    PrgMuxInfoGet(ip);
+
+    
+    
+    // ret = getOutPrograms(ip, 0);
+
+    // //int inCh = atoi(inChn);
+    // char pProg[20480] = {0};    
+    // getprgsJson(ip, 2, pProg);
 
     
 
-    PrgMuxInfoGet(ip);
+    
 
 //////////////////  sendPrograms
     //sendPrograms(ip, 1);

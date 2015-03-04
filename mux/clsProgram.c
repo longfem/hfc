@@ -312,13 +312,13 @@ unsigned char PrgMuxInfoGet(char *ip)
   	list_t   *prgAVMux = NULL;
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{	
-		list_get(clsProgram.PrgPmtMuxList, i,&PrgPmtMux);	 
-		if (GetOutProgramMuxMap(ip, i + 1, PrgPmtMux) != ok)
+		 	 
+		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList[i]) != ok)
 			return 0;
 
 		
-		list_get(clsProgram.PrgAVMuxList, i,&prgAVMux);	 
-		if (GetOutPidMuxMap(ip, i + 1, prgAVMux) != ok)
+		
+		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList[i]) != ok)
 			return 0;
 	}
 

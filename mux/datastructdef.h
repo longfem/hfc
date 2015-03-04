@@ -309,8 +309,8 @@ typedef struct  ClsProgram_t
 	 int subPrgPid_max; // = 0x1ff0;
 	 int *m_autoMuxStartPid; // 自动映射起始PID _outChannelCntMax=2 为数量
 	// ClsMux muxer = null;
-	 list_t *PrgPmtMuxList; // MuxPrgInfoGet_st  list Array
-	 list_t *PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
+	 list_t **PrgPmtMuxList; // MuxPrgInfoGet_st  list Array
+	 list_t **PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
 	 list_t *nitSection; // list Array Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
 	 int pidMap_eachTransmit_numberMax;
