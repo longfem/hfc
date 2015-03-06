@@ -798,12 +798,6 @@ function devinfo_output(devType){
 								$('.prg_prc2').val(data.newPcrPid.toString(16));
 								dataSet.length = 0;	
 								$.each(data.children, function(key, itemv) {
-									/* var streamtype;
-									if(itemv.streamtype == 2){
-										streamtype = "MPEG2 Video";
-									}else if(itemv.streamtype == 4){
-										streamtype = "MPEG2 Audio";
-									} */
 									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
 									dataSet[dataSet.length] = item;
 								});
