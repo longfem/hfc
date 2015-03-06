@@ -52,9 +52,17 @@ function checkselectedprg(){
 		prgindex = new Array();
 		var chstr = "inCh" + inCh;
 		if( node.hasChildren() ) {
-			var prgnodes = node.children;				
-			prgnodes.forEach(function(prgnode) {					
-				prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
+			var prgnodes = node.children;	
+			prgnodes.forEach(function(prgnode) {
+				var tmpstr = '{id:' + prgnode.data.index;
+				var offset = 0;
+				prgnode.children.forEach(function(streamnode){
+					if(streamnode.data.index){
+						tmpstr += ',index'+offset+':'+streamnode.data.index;
+						offset++;
+					};					
+				})
+				prgindex[flag] = 'id' + flag + ':' + tmpstr + '}';
 				flag++;
 			});					
 		}
@@ -801,7 +809,8 @@ function devinfo_output(devType){
 								});
 								_tbleditcount = dataSet.length;
 								//编辑节目对话框表
-								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
+									$('#tbl_editprg').dataTable().fnClearTable();
 									$('#tbl_editprg').dataTable().fnAddData(dataSet);
 								}else{
 									_tbl_edit = $('#tbl_editprg').dataTable( {
@@ -1354,11 +1363,9 @@ function devinfo_output(devType){
 					 }   
 				});
 				dialog_edit.dialog( "close" );
-				$('#tbl_editprg').dataTable().fnClearTable();
 			},
 			"取消": function() {
 			  dialog_edit.dialog( "close" );
-			  $('#tbl_editprg').dataTable().fnClearTable();
 			}
 		}
 	});

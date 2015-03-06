@@ -101,7 +101,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
 					cJSON_AddFalseToObject(subprgjson,"expanded");
-					cJSON_AddStringToObject(subprgjson,"prgkey", prgkey);
+					cJSON_AddNumberToObject(subprgjson, "index", streaminfo->index);
 					cJSON_AddStringToObject(subprgjson,"key", idstr);
 					cJSON_AddStringToObject(subprgjson,"icon", "img/favicon.ico");
 					
@@ -111,7 +111,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "video stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
@@ -120,7 +119,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "data stream alignment descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
@@ -129,7 +127,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
@@ -138,7 +135,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "stream identifier descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 				
@@ -151,7 +147,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
 					cJSON_AddFalseToObject(subprgjson,"expanded");
-					cJSON_AddStringToObject(subprgjson,"prgkey", prgkey);
+					cJSON_AddNumberToObject(subprgjson, "index", streaminfo->index);
 					cJSON_AddStringToObject(subprgjson,"key", idstr);
 					cJSON_AddStringToObject(subprgjson,"icon", "img/audio.ico");
 					
@@ -162,7 +158,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "ISO 639 language descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
@@ -171,7 +166,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "audio stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
@@ -180,7 +174,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
-					cJSON_AddStringToObject(streamjson,"prgkey", prgkey);
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");				
 				}				
