@@ -262,7 +262,7 @@ static void selectprgs(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
-	int prgnum = atoi(mprGetJson(jsonparam, "prgnum"));
+	int prgcnt = atoi(mprGetJson(jsonparam, "prgcnt"));	
 	list_get(&(clsProgram.outPrgList), pos-1, &outpst);
 	if(list_len(&outpst->prgNodes) == 0){
 		list_init(&(outpst->prgNodes));
@@ -286,7 +286,7 @@ static void selectprgs(HttpConn *conn) {
 		}
 	}else{
 		//判断选择的节目是增加还是减少
-		if(prgnum >= list_len(&outpst->prgNodes)){
+		if(prgcnt >= list_len(&outpst->prgNodes)){
 			//add
 			for(i=0; i<clsProgram._intChannelCntMax; i++){
 				sprintf(str, "inCh%d", i+1);				
@@ -304,18 +304,15 @@ static void selectprgs(HttpConn *conn) {
 						list_get(&(pst->prgNodes), prgindex-1, &inprg);	
 						for(k=0;k<list_len(&outpst->prgNodes);k++){	
 							list_get(&(outpst->prgNodes), k, &outprg);	
-							if(outprg->index == inprg->index){
+							if(outprg->pmtPid == inprg->pmtPid){
 								hascontained = 1;
-								if(prgnum == list_len(&outpst->prgNodes)){
-									//stream data
-									cpystream(outprg, inprg, streamjson);
-								}
+								//stream data
+								cpystream(outprg, inprg, streamjson);
 								break;
 							}
 						}						
-						if(hascontained == 0){							
+						if(hascontained == 0){		
 							cpyprg(outpst, outprg, inprg, streamjson);													
-							break;
 						}
 					}
 				}
@@ -338,7 +335,7 @@ static void selectprgs(HttpConn *conn) {
 							MprJson *streamjson = mprGetJsonObj(mprGetJsonObj(jsonparam, str ), idstr);
 							prgindex = atoi(mprGetJson(streamjson, "id"));
 							list_get(&(pst->prgNodes), prgindex-1, &inprg);	
-							if(outprg->index == inprg->index){
+							if(outprg->pmtPid == inprg->pmtPid){
 								hascontained = 1;
 								break;
 							}
@@ -350,7 +347,6 @@ static void selectprgs(HttpConn *conn) {
 					//释放内存
 					freeProgramsMalloc(outprg);							
 					list_pop(&(outpst->prgNodes), k);
-					break;
 				}
 			}
 		}
@@ -466,13 +462,13 @@ static void getprginfo(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn)); 
 	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
-	int prgnum = atoi(mprGetJson(jsonparam, "prgNum"));
+	int pmtPid = atoi(mprGetJson(jsonparam, "pmtPid"));
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);
-		//printf("==========read=====%d=====%d\n", prgnum, outprg->prgNum);
-		if(outprg->prgNum == prgnum){	
-			//printf("==========read begin==========%d\n", outprg->prgNum);
+		//printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
+		if(outprg->pmtPid == pmtPid){	
+			//printf("==========read begin==========%d\n", outprg->pmtPid);
 			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
 			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
 			cJSON_AddNumberToObject(result,"streamId", outprg->streamId);
@@ -516,18 +512,18 @@ static void setprginfo(HttpConn *conn) {
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	cchar *prgname = mprGetJson(jsonparam, "prgname");
 	int prgNum = atoi(mprGetJson(jsonparam, "prgNum"));
-	int pmtpid = atoi(mprGetJson(jsonparam, "pmtpid"));
+	int pmtPid = atoi(mprGetJson(jsonparam, "pmtpid"));
 	int oldpcrpid = atoi(mprGetJson(jsonparam, "oldpcrpid"));
 	int newpcrpid = atoi(mprGetJson(jsonparam, "newpcrpid"));
 	int streamcnt = atoi(mprGetJson(jsonparam, "streamcnt"));
-	int orgialprgNum = atoi(mprGetJson(jsonparam, "orgialprgNum"));
+	int orgiralpmtPid = atoi(mprGetJson(jsonparam, "orgiralpmtpid"));
 	//查找编辑节目
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);	
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);	
-		if(outprg->prgNum == orgialprgNum){	
+		if(outprg->pmtPid == orgiralpmtPid){	
 			outprg->prgNum = prgNum;
-			outprg->pmtPid = pmtpid;
+			outprg->pmtPid = pmtPid;
 			outprg->oldPcrPid = oldpcrpid;
 			outprg->newPcrPid = newpcrpid;
 			outprg->prgNameLen = strlen(prgname);

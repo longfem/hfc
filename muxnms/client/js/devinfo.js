@@ -1,6 +1,6 @@
 var _selectcount = 0;//节目计数
 var _tbleditcount = 0;//edit表stream计数
-var _orgialprgNum = 0;//编辑节目号
+var _pmtPid = 0;//编辑节目pid
 var _editnodekey = ""; //编辑节目节点key
 var _tbl_edit;
 var channel_root = [
@@ -74,7 +74,7 @@ function checkselectedprg(){
 		 type: "GET",
 		 async:false,
 		 url: "http://"+localip+":4000/do/programs/selectprgs",
-		 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+		 data: '{' + jsondata.toString() + ',channel:'+1+',prgcnt:'+_selectcount+'}',
 		 dataType: "json",
 		 success: function(data){
 			
@@ -679,37 +679,35 @@ function devinfo_output(devType){
 			var selNodes = data.tree.getSelectedNodes();			
 			$.map(selNodes, function(node){				
 				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
-				switch(node.key.length){
-					case 7:	//节目节点
+				var arr = node.key.match(/\./g);
+				switch(arr.length){
+					case 2:	//节目节点
 						if(channeltree.getNodeByKey(node.key) == null){
 							tmpnode.addNode(node.toDict());
 							_selectcount++;
 						}						
 						break;
-					case 9:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+					case 3: //流节点
+						if(channeltree.getNodeByKey(node.getParent().key) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 						}else{
-							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							_selectcount++;
 						}						
 						break;
-					case 11:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
-							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
-								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+					case 4:
+						if(channeltree.getNodeByKey(node.getParent().getParent().key) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.getParent().key) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							}else{
-								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 							}							
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
 							_selectcount++;
-							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 						}		
 						//count++;
@@ -741,7 +739,8 @@ function devinfo_output(devType){
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
-				if(data.node.key == "id1.0"){
+				var arr = data.node.key.match(/\./g);
+				if(arr.length == 1){
 					$(".menu_add").css("display", "none");
 					$(".menu_deleteall").css("display", "none");
 					$(".menu_edit").css("display", "none");
@@ -751,7 +750,7 @@ function devinfo_output(devType){
 					$(".menu_re_prg").css("display", "block");
 					$(".menu_re_pid").css("display", "block");
 					$(".menu_pidtrans").css("display", "block");
-				}else{
+				}else if(arr.length == 2){
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
 					$(".menu_re_prg").css("display", "none");
@@ -761,6 +760,16 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "block");
 					$(".menu_delete").css("display", "block");
+				}else{
+					$(".menu_prgdeleteall").css("display", "none");
+					$(".menu_prgitems").css("display", "none");
+					$(".menu_re_prg").css("display", "none");
+					$(".menu_re_pid").css("display", "none");
+					$(".menu_pidtrans").css("display", "none");
+					$(".menu_add").css("display", "block");
+					$(".menu_deleteall").css("display", "block");
+					$(".menu_edit").css("display", "none");
+					$(".menu_delete").css("display", "none");
 				}
 			    
 			},
@@ -786,10 +795,10 @@ function devinfo_output(devType){
 							type: "GET",
 							async:false,
 							url: "http://"+localip+":4000/do/programs/getprginfo",
-							data:'{channel:'+1+ ',prgNum:'+data.node.data.prgNum+'}',
+							data:'{channel:'+1+ ',pmtPid:'+data.node.data.pmtPid+'}',
 							dataType: "json",
 							success: function(data){
-								_orgialprgNum = data.prgNum;
+								_pmtPid = data.pmtPid;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -1069,37 +1078,35 @@ function devinfo_output(devType){
 			var selNodes = data.tree.getSelectedNodes();			
 			$.map(selNodes, function(node){				
 				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
-				switch(node.key.length){
-					case 7:	//节目节点
+				var arr = node.key.match(/\./g);
+				switch(arr.length){
+					case 2:	//节目节点
 						if(channeltree.getNodeByKey(node.key) == null){
 							tmpnode.addNode(node.toDict());
-							count++;
+							_selectcount++;
 						}						
 						break;
-					case 9:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+					case 3: //流节点
+						if(channeltree.getNodeByKey(node.getParent().key) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 						}else{
-							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
+							_selectcount++;
 						}						
 						break;
-					case 11:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
-							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
-								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+					case 4:
+						if(channeltree.getNodeByKey(node.getParent().getParent().key) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.getParent().key) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							}else{
-								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 							}							
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
-							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							_selectcount++;
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 						}		
 						//count++;
@@ -1130,7 +1137,8 @@ function devinfo_output(devType){
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
-				if(data.node.key == "id1.0"){
+				var arr = data.node.key.match(/\./g);
+				if(arr.length == 1){
 					$(".menu_add").css("display", "none");
 					$(".menu_deleteall").css("display", "none");
 					$(".menu_edit").css("display", "none");
@@ -1140,7 +1148,7 @@ function devinfo_output(devType){
 					$(".menu_re_prg").css("display", "block");
 					$(".menu_re_pid").css("display", "block");
 					$(".menu_pidtrans").css("display", "block");
-				}else{
+				}else if(arr.length == 2){
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
 					$(".menu_re_prg").css("display", "none");
@@ -1150,6 +1158,16 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "block");
 					$(".menu_delete").css("display", "block");
+				}else{
+					$(".menu_prgdeleteall").css("display", "none");
+					$(".menu_prgitems").css("display", "none");
+					$(".menu_re_prg").css("display", "none");
+					$(".menu_re_pid").css("display", "none");
+					$(".menu_pidtrans").css("display", "none");
+					$(".menu_add").css("display", "block");
+					$(".menu_deleteall").css("display", "block");
+					$(".menu_edit").css("display", "none");
+					$(".menu_delete").css("display", "none");
 				}
 			    
 			},
@@ -1337,7 +1355,7 @@ function devinfo_output(devType){
 					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + '","orgialprgNum":' + _orgialprgNum + ',"prgNum":' + Number($('.prg_no').val()) + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
+				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + ',"prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":' +  _pmtPid + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
