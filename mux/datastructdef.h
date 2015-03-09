@@ -356,6 +356,50 @@ typedef struct sdt_senction_t
 	 int crc32; // 32b
 }sdt_senction_st;
 
+typedef struct Nit_streamLoop_st
+{
+	 int streamId;
+	 int original_network_id;
+	 unsigned char **desList; // Commdes_st
+	 int *byteLen;
+	 int desListLen;
+
+}Nit_streamLoop_t;
+
+typedef struct Nit_section_st
+{
+	int networkId;
+	int version;
+	Commdes_t *nameList; // Commdes_st
+	int nameListLen;
+	Nit_streamLoop_t *streamLoop; // Nit_streamLoop_st
+	int streamLoopLen;
+}Nit_section_t;
+
+typedef struct cat_senction_t
+{
+	 int table_id; // 8b
+	 int section_syntax_indicator; // 1b
+	 int flag_0; // 1b
+	 int reserved0; // 2b
+	 int section_length; // 12b
+	 int reserved1; // 18b
+	 int reserved2; // 2b
+	 int version_number; // 5b
+	 int current_next_indicator; // 1b
+	 int section_number; // 8b
+	 int last_section_number; // 8b
+	 CA_descriptor *caIdenList; // CA_descriptor
+	 int caIdenListLen;
+	 int crc32; // 32b
+}cat_senction_st;
+typedef struct replacePidt
+{
+	//internal byte inChannel;
+	 int oldPid;
+	 int newPid;
+}replacePidst;
+
 
 #pragma pack()
 
