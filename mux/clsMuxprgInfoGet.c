@@ -286,13 +286,11 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     int prgCnt =0;
     enum ErrorTypeEm res;
     
-
     //free
    if(muxPidInfoList){
         freeMuxPidInfoList(muxPidInfoList);     
    }
 
-   
 
     int pidCnt  = 0, i=0, j =0;
     memset(sendbuf,0,sizeof(sendbuf));
@@ -320,6 +318,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
         return error;
     } 
     
+
     muxPidInfoList = malloc(sizeof(list_t)); 
     list_init(muxPidInfoList);
 
@@ -345,9 +344,8 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
           //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
             return error;
         }
-        else{        
-              
-            nowCnt = ( buf[10]<<8 | buf[9]) & 0xffff;       
+        else{        			
+            nowCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
             res = ok;
         } 
         ////////////////////
@@ -360,7 +358,7 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
             cmdStringAddr += 2;
             muxPidInfo->newPid = buf[cmdStringAddr+1] << 8 | buf[cmdStringAddr];
             cmdStringAddr += 2;
-            list_append(muxPidInfoList, muxPidInfo);            
+            list_append(muxPidInfoList, muxPidInfo); 		
         }
     }
     return ok;
