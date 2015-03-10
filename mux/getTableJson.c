@@ -124,38 +124,57 @@ void getTableJson(int channel, char *outprg){
 				sprintf(str,"PMT for SID 0x%04x - %s", p_pmt->program_number, idstr );
 				cJSON_AddStringToObject(prgjson,"title", str);
 				cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
-				
 				cJSON_AddItemToObject(prgjson, "children", subTablearray = cJSON_CreateArray());
-				for(j=1;j<8;j++){ //TODO
-					cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
-					cJSON_AddTrueToObject(subTablejson,"folder");
-					cJSON_AddFalseToObject(subTablejson,"expanded");
-					sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
-					cJSON_AddStringToObject(subTablejson,"key", idstr);
+				for(j=1;j<8;j++){ //TODO					
 					switch(j){
 						case 1:
+							cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+							cJSON_AddTrueToObject(subTablejson,"folder");
+							cJSON_AddFalseToObject(subTablejson,"expanded");
+							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							memset(str, 0, sizeof(str));
 							sprintf(str,"版本：%02d", p_pmt->version_number );
 							cJSON_AddStringToObject(subTablejson,"title", str);
 							cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 							break;
 						case 2: 
+							cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+							cJSON_AddTrueToObject(subTablejson,"folder");
+							cJSON_AddFalseToObject(subTablejson,"expanded");
+							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							memset(str, 0, sizeof(str));
 							sprintf(str,"PCR pid 0x%04x", p_pmt->pcrPid );
 							cJSON_AddStringToObject(subTablejson,"title", str);
 							cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 							break;
 						case 3:
+							cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+							cJSON_AddTrueToObject(subTablejson,"folder");
+							cJSON_AddFalseToObject(subTablejson,"expanded");
+							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							memset(str, 0, sizeof(str));
 							sprintf(str,"业务ID 0x%04x", p_pmt->program_number );
 							cJSON_AddStringToObject(subTablejson,"title", str);
 							cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 							break;
 						case 4:
+							cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+							cJSON_AddTrueToObject(subTablejson,"folder");
+							cJSON_AddFalseToObject(subTablejson,"expanded");
+							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							cJSON_AddStringToObject(subTablejson,"title", "maximun bitrate descriptor");
 							cJSON_AddStringToObject(subTablejson,"icon", "img/channel_in.ico");
 							break;
 						case 5:
+							cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+							cJSON_AddTrueToObject(subTablejson,"folder");
+							cJSON_AddFalseToObject(subTablejson,"expanded");
+							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							cJSON_AddStringToObject(subTablejson,"title", "multiplex buffer utilization descriptor");
 							cJSON_AddStringToObject(subTablejson,"icon", "img/channel_in.ico");
 							break;
@@ -163,6 +182,11 @@ void getTableJson(int channel, char *outprg){
 							pdataStreamList = p_pmt->pdataStreamList;
 							for(k=0;k<p_pmt->pdataStreamListLen;k++){
 								if(2 == pdataStreamList->streamType){
+									cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+									cJSON_AddTrueToObject(subTablejson,"folder");
+									cJSON_AddFalseToObject(subTablejson,"expanded");
+									sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+									cJSON_AddStringToObject(subTablejson,"key", idstr);
 									memset(str, 0, sizeof(str));						
 									sprintf(str,"流 %d pid(0x%x) MPEG2 Video", 2, pdataStreamList->outPid);
 									cJSON_AddStringToObject(subTablejson,"title", str);
@@ -208,6 +232,11 @@ void getTableJson(int channel, char *outprg){
 							pdataStreamList = p_pmt->pdataStreamList;
 							for(k=0;k<p_pmt->pdataStreamListLen;k++){
 								if(4 == pdataStreamList->streamType){
+									cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+									cJSON_AddTrueToObject(subTablejson,"folder");
+									cJSON_AddFalseToObject(subTablejson,"expanded");
+									sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
+									cJSON_AddStringToObject(subTablejson,"key", idstr);
 									memset(str, 0, sizeof(str));						
 									sprintf(str,"流 %d pid(0x%x) MPEG2 Audio", 4, pdataStreamList->outPid);
 									cJSON_AddStringToObject(subTablejson,"title", str);

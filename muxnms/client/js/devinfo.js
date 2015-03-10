@@ -1,6 +1,6 @@
 var _selectcount = 0;//节目计数
 var _tbleditcount = 0;//edit表stream计数
-var _orgialprgNum = 0;//编辑节目号
+var _pmtPid = 0;//编辑节目pid
 var _editnodekey = ""; //编辑节目节点key
 var _tbl_edit;
 var channel_root = [
@@ -52,9 +52,17 @@ function checkselectedprg(){
 		prgindex = new Array();
 		var chstr = "inCh" + inCh;
 		if( node.hasChildren() ) {
-			var prgnodes = node.children;				
-			prgnodes.forEach(function(prgnode) {					
-				prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
+			var prgnodes = node.children;	
+			prgnodes.forEach(function(prgnode) {
+				var tmpstr = '{id:' + prgnode.data.index;
+				var offset = 0;
+				prgnode.children.forEach(function(streamnode){
+					if(streamnode.data.index){
+						tmpstr += ',index'+offset+':'+streamnode.data.index;
+						offset++;
+					};					
+				})
+				prgindex[flag] = 'id' + flag + ':' + tmpstr + '}';
 				flag++;
 			});					
 		}
@@ -66,7 +74,7 @@ function checkselectedprg(){
 		 type: "GET",
 		 async:false,
 		 url: "http://"+localip+":4000/do/programs/selectprgs",
-		 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+		 data: '{' + jsondata.toString() + ',channel:'+1+',prgcnt:'+_selectcount+'}',
 		 dataType: "json",
 		 success: function(data){
 			
@@ -245,7 +253,7 @@ function devinfo_output(devType){
 					+'<td><input type="text" class="prg_name" value=""></input></td>'
 					+'<td><label>业务类型</label></td>'
 					+'<td>'
-						+'<select >'
+						+'<select id="r_servicetype">'
 							+'<option value ="1">[1]digital television service</option><option value ="2">[2]digital radio sound service</option>'
 							+'<option value ="3">[3]teletext service</option><option value ="4">[4]NVOD refrence service</option>'
 							+'<option value ="5">[5]NVOD time-shifted service</option><option value ="6">[6]mosaic service</option>'
@@ -357,42 +365,8 @@ function devinfo_output(devType){
 			{ "title": "输入PID(Hex)"},
 			{ "title": "输出PID(Hex)" }
 		]
-	}); 
-	
-	//表结构右侧table
-	$('#tbl_outtable').dataTable( {
-		"data": dataSet,
-		"order": [[ 0, "asc" ]],
-		"paging":   false,
-		"info":     false,
-		"searching":   false,
-		"scrollCollapse": true,
-		"columns": [
-			{ "title": "NO"},
-			{ "title": "CH"},
-			{ "title": "IN-PID", "width":"30%"},
-			{ "title": "OUT-PID"},
-			{ "title": "TYPE" }
-		]
-	});
-	
-	//表结构右侧table2
-	$('#tbl_outtable2').dataTable( {
-		"data": dataSet,
-		"order": [[ 0, "asc" ]],
-		"paging":   false,
-		"info":     false,
-		"searching":   false,
-		"scrollCollapse": true,
-		"columns": [
-			{ "title": "NO"},
-			{ "title": "CH"},
-			{ "title": "IN-PID", "width":"30%"},
-			{ "title": "OUT-PID"},
-			{ "title": "TYPE" }
-		]
-	});	
-	
+	}); 	
+
 	var tabs = $("#devoutput").tabs();
 	$( "#output-read" ).button({
       icons: {
@@ -491,6 +465,46 @@ function devinfo_output(devType){
 				alert(err);
 			 }   
 		});
+		//获取制表后输出流表
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/streamtable",
+			 data: '{channel:'+1+',prgnum:'+_selectcount+'}',
+			 dataType: "json",
+			 success: function(data){
+				var StreamData = [];	
+				$.each(data, function(key, itemv) {
+					var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
+					StreamData[StreamData.length] = item;					
+				});
+				//编辑数据流表
+				if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {									
+					$('#tbl_outtable').dataTable().fnClearTable();
+					$('#tbl_outtable').dataTable().fnAddData(StreamData);
+				}else{
+					//表结构右侧table
+					$('#tbl_outtable').dataTable( {
+						"data": StreamData,
+						"order": [[ 0, "asc" ]],
+						"paging":   false,
+						"info":     false,
+						"searching":   false,
+						"scrollCollapse": true,
+						"columns": [
+							{ "title": "NO"},
+							{ "title": "CH"},
+							{ "title": "IN-PID", "width":"30%"},
+							{ "title": "OUT-PID"},
+							{ "title": "TYPE" }
+						]
+					});
+				}				
+			 },    
+			 error : function(err) { 
+				alert(err);
+			 }   
+		});
     });
 	
 	$( "#output-write" ).button({
@@ -575,6 +589,10 @@ function devinfo_output(devType){
 		var jsondata = new Array();
 		var prgindex = new Array();
 		var jsonstr;
+		if(_selectcount == 0){
+			alert("请选择节目!");
+			return;
+		}
 		nodes.forEach(function(node) {
 			flag = 0;
 			prgindex = new Array();
@@ -595,15 +613,56 @@ function devinfo_output(devType){
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/programs/maketable",
-			 data: '{' + jsondata.toString() + ',channel:'+2+'}',
-			 dataType: "text",
+			data: '{' + jsondata.toString() + ',channel:'+2+',prgnum:'+_selectcount+'}',
+			 dataType: "json",
 			 success: function(data){
-				
+				var tablenode = $("#out_tree2").fancytree("getTree").getNodeByKey("id1.0");
+				tablenode.addChildren(data);
 			 },    
 			 error : function(err) {    
 				  // view("异常！");   
 				var xxx = err;
 				//  alert("异常！====="+JSON.stringify(err));    
+			 }   
+		});
+		//获取制表后输出流表
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/streamtable",
+			 data: '{channel:'+2+',prgnum:'+_selectcount+'}',
+			 dataType: "json",
+			 success: function(data){
+				var StreamData = [];	
+				$.each(data, function(key, itemv) {
+					var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
+					StreamData[StreamData.length] = item;						
+				});
+				//编辑数据流表
+				if ( $.fn.dataTable.isDataTable( '#tbl_outtable2' ) ) {									
+					$('#tbl_outtable2').dataTable().fnClearTable();
+					$('#tbl_outtable2').dataTable().fnAddData(StreamData);
+				}else{
+					//表结构右侧table
+					$('#tbl_outtable2').dataTable( {
+						"data": StreamData,
+						"order": [[ 0, "asc" ]],
+						"paging":   false,
+						"info":     false,
+						"searching":   false,
+						"scrollCollapse": true,
+						"columns": [
+							{ "title": "NO"},
+							{ "title": "CH"},
+							{ "title": "IN-PID", "width":"30%"},
+							{ "title": "OUT-PID"},
+							{ "title": "TYPE" }
+						]
+					});
+				}				
+			 },    
+			 error : function(err) { 
+				alert(err);
 			 }   
 		});
     });
@@ -671,37 +730,35 @@ function devinfo_output(devType){
 			var selNodes = data.tree.getSelectedNodes();			
 			$.map(selNodes, function(node){				
 				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
-				switch(node.key.length){
-					case 7:	//节目节点
+				var arr = node.key.match(/\./g);
+				switch(arr.length){
+					case 2:	//节目节点
 						if(channeltree.getNodeByKey(node.key) == null){
 							tmpnode.addNode(node.toDict());
 							_selectcount++;
 						}						
 						break;
-					case 9:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+					case 3: //流节点
+						if(channeltree.getNodeByKey(node.getParent().key) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 						}else{
-							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							_selectcount++;
 						}						
 						break;
-					case 11:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
-							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
-								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+					case 4:
+						if(channeltree.getNodeByKey(node.getParent().getParent().key) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.getParent().key) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							}else{
-								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 							}							
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
 							_selectcount++;
-							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 						}		
 						//count++;
@@ -733,7 +790,8 @@ function devinfo_output(devType){
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
-				if(data.node.key == "id1.0"){
+				var arr = data.node.key.match(/\./g);
+				if(arr.length == 1){
 					$(".menu_add").css("display", "none");
 					$(".menu_deleteall").css("display", "none");
 					$(".menu_edit").css("display", "none");
@@ -743,7 +801,7 @@ function devinfo_output(devType){
 					$(".menu_re_prg").css("display", "block");
 					$(".menu_re_pid").css("display", "block");
 					$(".menu_pidtrans").css("display", "block");
-				}else{
+				}else if(arr.length == 2){
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
 					$(".menu_re_prg").css("display", "none");
@@ -753,6 +811,16 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "block");
 					$(".menu_delete").css("display", "block");
+				}else{
+					$(".menu_prgdeleteall").css("display", "none");
+					$(".menu_prgitems").css("display", "none");
+					$(".menu_re_prg").css("display", "none");
+					$(".menu_re_pid").css("display", "none");
+					$(".menu_pidtrans").css("display", "none");
+					$(".menu_add").css("display", "block");
+					$(".menu_deleteall").css("display", "block");
+					$(".menu_edit").css("display", "none");
+					$(".menu_delete").css("display", "none");
 				}
 			    
 			},
@@ -770,7 +838,9 @@ function devinfo_output(devType){
 						data.node.setExpanded(false);
 						break;
 					} case '#delete': {
-						
+						var nodekey = data.node.key;
+						data.node.remove();
+						$("#devlist").fancytree("getTree").getNodeByKey(nodekey).toggleSelected();
 						break;
 					} case '#edit': {
 						//获取编辑节目信息
@@ -778,30 +848,26 @@ function devinfo_output(devType){
 							type: "GET",
 							async:false,
 							url: "http://"+localip+":4000/do/programs/getprginfo",
-							data:'{channel:'+1+ ',prgNum:'+data.node.data.prgNum+'}',
+							data:'{channel:'+1+ ',pmtPid:'+data.node.data.pmtPid+'}',
 							dataType: "json",
 							success: function(data){
-								_orgialprgNum = data.prgNum;
+								_pmtPid = data.pmtPid;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
 								$('.prg_prc').val(data.chnId.toString());
 								$('.prg_prc1').val(data.oldPcrPid.toString(16));
 								$('.prg_prc2').val(data.newPcrPid.toString(16));
+								$('#r_servicetype')[0].options[Number(data.serviceType) - 1].selected = true;
 								dataSet.length = 0;	
 								$.each(data.children, function(key, itemv) {
-									/* var streamtype;
-									if(itemv.streamtype == 2){
-										streamtype = "MPEG2 Video";
-									}else if(itemv.streamtype == 4){
-										streamtype = "MPEG2 Audio";
-									} */
-									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid,itemv.index];
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
 									dataSet[dataSet.length] = item;
 								});
 								_tbleditcount = dataSet.length;
 								//编辑节目对话框表
-								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
+									$('#tbl_editprg').dataTable().fnClearTable();
 									$('#tbl_editprg').dataTable().fnAddData(dataSet);
 								}else{
 									_tbl_edit = $('#tbl_editprg').dataTable( {
@@ -839,7 +905,6 @@ function devinfo_output(devType){
 											}
 											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
 											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
-											$('td:eq(5)', nRow).html( '<input type="text" id="r_index'+iDisplayIndex+ '" name="r_index'+iDisplayIndex+ '" value="'+ aData[5] + '"></input>' );
 											
 										},		
 										"columns": [
@@ -847,8 +912,7 @@ function devinfo_output(devType){
 											{ "title": "输入通道", "width": "70px"},
 											{ "title": "流类型"},
 											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" },
-											{ "title": "索引号", "visible": false},
+											{ "title": "输出PID(Hex)" }
 										]
 									});   
 									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -876,7 +940,9 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#prgdeleteall': {
-						
+						var nodekey = data.node.key;
+						node.removeChildren();
+						$("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
 						break;
 					} case '#itmes': {
 						//获取输出通道设置信息
@@ -1068,37 +1134,35 @@ function devinfo_output(devType){
 			var selNodes = data.tree.getSelectedNodes();			
 			$.map(selNodes, function(node){				
 				var tmpnode = channeltree.getNodeByKey(node.getParent().key);	
-				switch(node.key.length){
-					case 7:	//节目节点
+				var arr = node.key.match(/\./g);
+				switch(arr.length){
+					case 2:	//节目节点
 						if(channeltree.getNodeByKey(node.key) == null){
 							tmpnode.addNode(node.toDict());
-							count++;
+							_selectcount++;
 						}						
 						break;
-					case 9:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){				//	判断是否已存在节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
+					case 3: //流节点
+						if(channeltree.getNodeByKey(node.getParent().key) != null){				//	判断是否已存在节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 						}else{
-							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict());//添加节目节点
+							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
+							_selectcount++;
 						}						
 						break;
-					case 11:
-						var prgkey = node.key.substring(0,7);
-						if(channeltree.getNodeByKey(prgkey) != null){					//	判断是否已存在节目节点
-							if(channeltree.getNodeByKey(node.key.substring(0,9)) != null){	//判断是否已存在节目子节点
-								channeltree.getNodeByKey(node.key.substring(0,9)).addNode(node.toDict());
+					case 4:
+						if(channeltree.getNodeByKey(node.getParent().getParent().key) != null){					//	判断是否已存在节目节点
+							if(channeltree.getNodeByKey(node.getParent().key) != null){	//判断是否已存在节目子节点
+								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());
 							}else{
-								channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+								channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 								channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 							}							
 						}else{
 							channeltree.getNodeByKey(node.key.substring(0,5)).addNode(node.getParent().getParent().toDict());//添加节目节点
-							channeltree.getNodeByKey(prgkey).addNode(node.toDict());
-							count++;
-							channeltree.getNodeByKey(prgkey).addNode(node.getParent().toDict()); 	//添加节目子节点
+							_selectcount++;
+							channeltree.getNodeByKey(node.getParent().getParent().key).addNode(node.getParent().toDict()); 	//添加节目子节点
 							channeltree.getNodeByKey(node.getParent().key).addNode(node.toDict());	//添加目标子节点
 						}		
 						//count++;
@@ -1129,7 +1193,8 @@ function devinfo_output(devType){
 			position: {my: "center"},
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
-				if(data.node.key == "id1.0"){
+				var arr = data.node.key.match(/\./g);
+				if(arr.length == 1){
 					$(".menu_add").css("display", "none");
 					$(".menu_deleteall").css("display", "none");
 					$(".menu_edit").css("display", "none");
@@ -1139,7 +1204,7 @@ function devinfo_output(devType){
 					$(".menu_re_prg").css("display", "block");
 					$(".menu_re_pid").css("display", "block");
 					$(".menu_pidtrans").css("display", "block");
-				}else{
+				}else if(arr.length == 2){
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
 					$(".menu_re_prg").css("display", "none");
@@ -1149,6 +1214,16 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "block");
 					$(".menu_delete").css("display", "block");
+				}else{
+					$(".menu_prgdeleteall").css("display", "none");
+					$(".menu_prgitems").css("display", "none");
+					$(".menu_re_prg").css("display", "none");
+					$(".menu_re_pid").css("display", "none");
+					$(".menu_pidtrans").css("display", "none");
+					$(".menu_add").css("display", "block");
+					$(".menu_deleteall").css("display", "block");
+					$(".menu_edit").css("display", "none");
+					$(".menu_delete").css("display", "none");
 				}
 			    
 			},
@@ -1166,10 +1241,99 @@ function devinfo_output(devType){
 						data.node.setExpanded(false);
 						break;
 					} case '#delete': {
-						
+						var nodekey = data.node.key;
+						data.node.remove();
+						$("#devlist2").fancytree("getTree").getNodeByKey(nodekey).toggleSelected();						
 						break;
 					} case '#edit': {
+						//获取编辑节目信息
+						$.ajax({
+							type: "GET",
+							async:false,
+							url: "http://"+localip+":4000/do/programs/getprginfo",
+							data:'{channel:'+2+ ',pmtPid:'+data.node.data.pmtPid+'}',
+							dataType: "json",
+							success: function(data){
+								_pmtPid = data.pmtPid;
+								$('.prg_name').val(data.prgName);
+								$('.prg_no').val(data.prgNum.toString());
+								$('.prg_pid').val(data.pmtPid.toString(16));
+								$('.prg_prc').val(data.chnId.toString());
+								$('.prg_prc1').val(data.oldPcrPid.toString(16));
+								$('.prg_prc2').val(data.newPcrPid.toString(16));
+								dataSet.length = 0;	
+								$.each(data.children, function(key, itemv) {
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
+									dataSet[dataSet.length] = item;
+								});
+								_tbleditcount = dataSet.length;
+								//编辑节目对话框表
+								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
+									$('#tbl_editprg').dataTable().fnClearTable();
+									$('#tbl_editprg').dataTable().fnAddData(dataSet);
+								}else{
+									_tbl_edit = $('#tbl_editprg').dataTable( {
+										"data": dataSet,
+										"order": [[ 0, "asc" ]],
+										"paging":   false,
+										"info":     false,
+										"searching":   false,
+										"scrollCollapse": true,										
+										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+											switch(aData[2]){
+												case 2:
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex+ '" name="r_streamtype'+iDisplayIndex +'">'
+														+'<option value ="1">1-MPEG1 Video</option>'
+														+'<option value ="2" selected="selected">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4">4-MPEG2 Audio</option>'												
+													+'</select>' );
+													break;
+												case 4:
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+														+'<option value ="1">1-MPEG1 Video</option>'
+														+'<option value ="2">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4" selected="selected">4-MPEG2 Audio</option>'												
+													+'</select>' );
+													break;
+												default:
+													$('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+														+'<option value ="1" class="selected">1-MPEG1 Video</option>'
+														+'<option value ="2">2-MPEG2 Video</option>'
+														+'<option value ="3">3-MPEG1 Audio</option>'
+														+'<option value ="4">4-MPEG2 Audio</option>'												
+													+'</select>' );
+											}
+											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
+											
+										},		
+										"columns": [
+											{ "title": "序号" },
+											{ "title": "输入通道", "width": "70px"},
+											{ "title": "流类型"},
+											{ "title": "输入PID(Hex)"},
+											{ "title": "输出PID(Hex)" }
+										]
+									});   
+									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
+										if ( $(this).hasClass('selected') ) {
+											$(this).removeClass('selected');
+										}else {
+											$('#tbl_editprg').DataTable().$('tr.selected').removeClass('selected');
+											$(this).addClass('selected');
+										}
+									} );
+								}							
+							},    
+							error : function(err) {    
+								var xxx = err;
+								alert("异常！====="+JSON.stringify(err));    
+							}   
+						});
 						dialog_edit.dialog( "open" );
+						_editnodekey = data.node.key;
 						break;
 					} case '#deleteall': {
 						
@@ -1178,7 +1342,9 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#prgdeleteall': {
-						
+						var nodekey = data.node.key;
+						node.removeChildren();
+						$("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
 						break;
 					} case '#itmes': {
 						dig_itmes.dialog( "open" );
@@ -1320,13 +1486,12 @@ function devinfo_output(devType){
 		buttons: {
 			"添加":function() {
 				$('#tbl_editprg').DataTable().row.add( [
-					_tbleditcount,
-					2,
+					Number(_tbl_edit[0].rows[_tbl_edit[0].rows.length - 1].firstChild.textContent) + 1,
+					Number($('.prg_prc').val()),
 					'MPEG2 Audio',
 					200,
 					200
 				] ).draw();
-				_tbleditcount++;
 			} ,
 			"删除":function() {
 				$('#tbl_editprg').DataTable().row('.selected').remove().draw( false );
@@ -1337,7 +1502,7 @@ function devinfo_output(devType){
 					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + '","orgialprgNum":' + _orgialprgNum + ',"prgNum":' + Number($('.prg_no').val()) + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
+				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + ',"prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":' +  _pmtPid + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
@@ -1357,11 +1522,9 @@ function devinfo_output(devType){
 					 }   
 				});
 				dialog_edit.dialog( "close" );
-				$('#tbl_editprg').dataTable().fnClearTable();
 			},
 			"取消": function() {
 			  dialog_edit.dialog( "close" );
-			  $('#tbl_editprg').dataTable().fnClearTable();
 			}
 		}
 	});

@@ -24,9 +24,10 @@ int freeProgramsMalloc(Dev_prgInfo_st * data)
 					data->pdataStreamList[i].desNode[j].data = NULL;					
 				}												
 			}
-			free(data->pdataStreamList[i].desNode);
-			data->pdataStreamList[i].desNode = NULL;
-		
+			if(data->pdataStreamList[i].desNodeLen>0){
+				free(data->pdataStreamList[i].desNode);
+				data->pdataStreamList[i].desNode = NULL;
+			}		
 		}		
 		free(data->pdataStreamList);
 		data->pdataStreamList = NULL;
