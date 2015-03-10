@@ -98,3 +98,30 @@ int sendOutPutOption(char *ip, int outChnId)
 
 	printf("option 4\n");
 }
+
+
+// 记录某个输入通道是否有数据要求
+// void RecordInputChnUseStatus(int outChnId)
+// {
+// 	int outChannelIndex = outChnId - 1;
+// 	for (int iInput = 0; iInput < _inMaxNum; iInput++)
+// 	{
+// 		clsProgram.needInputData[outChannelIndex, iInput] = false;
+// 	}
+// 	if (clsProgram.PrgAVMuxList != null && clsProgram.PrgAVMuxList[outChannelIndex] != null)
+// 	{
+// 		foreach (MuxPidInfo_st tmpPidInfo in clsProgram.PrgAVMuxList[outChannelIndex])
+// 		{
+// 			if (tmpPidInfo.inChannel > 0 && tmpPidInfo.inChannel <= clsProgram.needInputData.Length)
+// 				clsProgram.needInputData[outChannelIndex, tmpPidInfo.inChannel - 1] = true;
+// 		}
+// 	}
+// 	if (clsProgram.outPrgList[outChannelIndex].dtPidList != null)
+// 	{
+// 		foreach (MuxPidInfo_st tmpPidInfo in clsProgram.outPrgList[outChannelIndex].dtPidList)
+// 		{
+// 			if (tmpPidInfo.inChannel > 0 && tmpPidInfo.inChannel <= clsProgram.needInputData.Length)
+// 				clsProgram.needInputData[outChannelIndex, tmpPidInfo.inChannel - 1] = true;
+// 		}
+// 	}
+// }

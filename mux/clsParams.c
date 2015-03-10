@@ -70,23 +70,23 @@ void Init(int outChannelNumMax)
 	} 
 	//////////////////////////////////////////////////////////////////////////////
 	// clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
-	// MuxPrgInfoGet_st *muxPrgInfo = NULL;
+	// mux
 	// for(i=0; i< clsProgram._outChannelCntMax; i++){
 	// 	muxPrgInfo = malloc(sizeof(MuxPrgInfoGet_st));
 	// 	muxPrgInfo->inChannel = 0x00;
- //        muxPrgInfo->prgIndex =  0x00;
- //        muxPrgInfo->prgNum   =  0x00;        
+ //        
+ //           
  //        muxPrgInfo->prgPid = 0x00;
  //        list_init(&clsProgram.PrgPmtMuxList[i]);
  //        list_append(&clsProgram.PrgPmtMuxList[i], muxPrgInfo);
 	// }
 	// //MuxPidInfo_st list array
 	// clsProgram.PrgAVMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
-	// MuxPidInfo_st   *prgAVMux = NULL;
+	// MuxPidInfo_st
 	// for(i=0; i< clsProgram._outChannelCntMax; i++){
 	// 	prgAVMux = malloc(sizeof(MuxPidInfo_st));
 	// 	prgAVMux->inChannel = 0x00;
-	// 	prgAVMux->oldPid = 0x00;
+	// 	prgAVMux->oldPid = 
 	// 	prgAVMux->newPid = 0x00;
 	// 	list_init(&clsProgram.PrgAVMuxList[i]);
  //        list_append(&clsProgram.PrgAVMuxList[i], prgAVMux);		

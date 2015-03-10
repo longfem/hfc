@@ -315,7 +315,7 @@ unsigned char PrgMuxInfoGet(char *ip)
 		 	 
 		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList[i]) != ok)
 			return 0;
-
+			
 		
 		
 		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList[i]) != ok)
