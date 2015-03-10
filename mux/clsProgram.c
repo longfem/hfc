@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include "list.h"
 #include "EnumDef.h"
-#include "datastructdef.h"
 #include "communicate.h"
 #include "clsProgram.h"
 #include "clsMuxprgInfoGet.h"
@@ -659,13 +658,12 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 	}
 
 	int lastThisPidMapToNewPid = -1;
-	list_t *PrgAVMuxList=(list_t*)malloc(sizeof(list_t));
-	list_init(PrgAVMuxList);
+
 
 
 	ChannelProgramSt *inpst;
 	Dev_prgInfo_st *inPrgInfoTmp;
-	for ( i = 0; i < 1; i++)
+	for ( i = 0; i <clsProgram._outChannelCntMax; i++)
 	{
 		if (outChannel != 0 && (outChannel != i + 1))
 			continue;
@@ -673,6 +671,11 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 		MuxPidInfo_st *pidMapTmp;
 
 		//for test ,西贡弄好，需要关掉
+
+		#if 0
+			
+		list_t *PrgAVMuxList=(list_t*)malloc(sizeof(list_t));
+		list_init(PrgAVMuxList);
 		if (list_len(PrgAVMuxList)==0)
 		{
 			for ( j = 0; j < clsProgram._outChannelCntMax; j++)
@@ -693,6 +696,15 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 				list_pop_tail(PrgAVMuxListI);
 			}
 		}
+
+		#endif
+
+	//list_t *PrgAVMuxList=(list_t*)malloc(sizeof(list_t));
+	//list_init(PrgAVMuxList);
+		
+    	list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
+  		list_init(PrgAVMuxListI);  
+
 
 		//printPrgAVMuxList();
 		// ChannelProgramSt *outpst = NULL;
@@ -971,39 +983,41 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 			}
 			//printPrgAVMuxList();
 		}
+	
+		if(list_len(PrgAVMuxListI)>0)
+				{
+					clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
+					printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
+				}
 	}
-	printPrgAVMuxList(PrgAVMuxList);
 	return 1;
 }
 
 
 
-
-
-void printPrgAVMuxList(list_t *PrgAVMuxList)
+void printPrgAVMuxList(list_t *PrgAVMuxListI)
 {
 	int j;
 	int k;
 
-	printf("list_len(&PrgAVMuxList %d\n",list_len(PrgAVMuxList));
-	//	for ( j = 0; j < list_len(&PrgAVMuxList); j++)
-	for ( j = 0; j < 1; j++)
+	//printf("list_len(&PrgAVMuxList %d\n",list_len(PrgAVMuxList));
+
+	//for ( j = 0; j < 1; j++)
+	//{
+	//	list_t *PrgAVMuxListI;
+		//list_get(PrgAVMuxList,j,&PrgAVMuxListI);
+
+	printf("list_len(&PrgAVMuxListIiii %d\n",list_len(PrgAVMuxListI));
+
+	for ( k = 0; k < list_len(PrgAVMuxListI); k++)
 	{
-		list_t *PrgAVMuxListI;
-		list_get(PrgAVMuxList,j,&PrgAVMuxListI);
-
-		printf("list_len(&PrgAVMuxListIiii %d\n",list_len(PrgAVMuxListI));
-
-		for ( k = 0; k < list_len(PrgAVMuxListI); k++)
-		{
-			MuxPidInfo_st *pidMapTmp;
-			list_get(PrgAVMuxListI,k,&pidMapTmp);
-			printf("pidMapTmp->inChannel %d   ",pidMapTmp->inChannel);
-			printf("pidMapTmp->newPid %d   ",pidMapTmp->newPid);
-			printf("pidMapTmp->oldPid %d\n",pidMapTmp->oldPid);
-
-
-		}
+		MuxPidInfo_st *pidMapTmp;
+		list_get(PrgAVMuxListI,k,&pidMapTmp);
+		printf("pidMapTmp->inChannel %d   ",pidMapTmp->inChannel);
+		printf("pidMapTmp->newPid %d   ",pidMapTmp->newPid);
+		printf("pidMapTmp->oldPid %d\n",pidMapTmp->oldPid);
 
 	}
+
+	//}
 }

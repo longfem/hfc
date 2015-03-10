@@ -1,4 +1,4 @@
-
+#include "datastructdef.h"
 
 
 #ifndef _CLS_PROGRAM_H_

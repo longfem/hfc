@@ -217,7 +217,7 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
 
-#if 1
+#if 0
 
 	for(i=0; i<iAddr; i++)
 		printf("  %d          offset:%d  \n",tmpBytes[i],i);
@@ -236,6 +236,8 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 
 	iAddr -= 4;
 	p_pat->crc32 = (tmpBytes[iAddr++] << 24) | (tmpBytes[iAddr++] << 16) | (tmpBytes[iAddr++] << 8) | tmpBytes[iAddr++];
+	free(p_pat);
+	p_pat=NULL;
 
 	return 0;
 }
@@ -407,9 +409,9 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 
 
-				dataStreamInfoTmp->desNodeLen=dataStreamInfoTmp->desNodeLen;
-				dataStreamInfoTmp->desNode=(Commdes_t*)malloc(sizeof(Commdes_t)*(dataStreamInfoTmp->desNodeLen));
-				Commdes_t* p_Commdes_st= dataStreamInfoTmp->desNode;
+				//dataStreamInfoTmp->desNodeLen=dataStreamInfoTmp->desNodeLen;
+				//dataStreamInfoTmp->desNode=(Commdes_t*)malloc(sizeof(Commdes_t)*(dataStreamInfoTmp->desNodeLen));
+				//Commdes_t* p_Commdes_st= dataStreamInfoTmp->desNode;
 
 
 				for (j = 0; j < dataStreamInfoTmp->desNodeLen; j++)
@@ -420,10 +422,10 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 					sescLen += desInfoTmp->dataLen;
 
 
-					p_Commdes_st->tag = desInfoTmp->tag;
-					p_Commdes_st->index = indexL2++;
-					p_Commdes_st->data = malloc(desInfoTmp->dataLen);
-					memcpy(p_Commdes_st->data, desInfoTmp->data, desInfoTmp->dataLen);
+					//p_Commdes_st->tag = desInfoTmp->tag;
+					//p_Commdes_st->index = indexL2++;
+					//p_Commdes_st->data = malloc(desInfoTmp->dataLen);
+					//memcpy(p_Commdes_st->data, desInfoTmp->data, desInfoTmp->dataLen);
 
 
 					tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
@@ -435,7 +437,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 
 					desInfoTmp++;
-					p_Commdes_st++;
+				//	p_Commdes_st++;
 
 				}
 			}
@@ -566,6 +568,11 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 		tmpBytes[iAddr++] = (unsigned char)ptmpPrgInfo->prgNameLen;
 		memcpy(tmpBytes+iAddr,prgNameTmp, ptmpPrgInfo->prgNameLen);
 
+
+
+
+		free(prgNameTmp);		
+		free(providerNameTmp);
 		iAddr += ptmpPrgInfo->prgNameLen;
 #if 1
 

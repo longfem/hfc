@@ -41,6 +41,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	//if (AutoMakeNewPid(outChnId)==0)
 		//return 0;	
 
+  //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
 
 	int streamId = outChnArray[outChnIndex].streamId;
@@ -96,15 +97,16 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
 	while(list_len(tablePmt))
 	{
+	    BufferUn_st  *outPMTBuffer;
+		list_get(tablePmt,list_len(tablePmt)-1,&outPMTBuffer);
+		free(outPMTBuffer->pbuf);
 		list_pop_tail(tablePmt);	
 	}
-
 	//for (i = 0; i < list_len(&prginfolist); i++)
 	for (i = 0; i < list_len(&prginfolist); i++)
 	{
 		list_get(&prginfolist, i, &ptmpPrgInfo);	
 		rstPat=CreatePmt(ptmpPrgInfo,pmtTable,version);
-
 		if(rstPat)
 		{
 			printf("make pmt SUCCESSFULL---%d\n",rstPat);

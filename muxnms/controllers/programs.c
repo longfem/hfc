@@ -14,6 +14,7 @@
 #include "communicate.h"
 #include "getPrograms.h"
 #include "clsParams.h"
+#include "clsProgram.h"
 #include "getOutPrograms.h"
 #include "getTableJson.h"
 #include "sendPrograms.h"
@@ -35,7 +36,7 @@ extern ClsParams_st *pdb;
 } 
 
 static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, MprJson *streamjson){
-	int k = 0, cm = 0, i = 0, j = 0, index = 0;	
+	int cm = 0, i = 0, j = 0, index = 0;	
 	char rsts[8] = {0};
 	int streamcnt = mprGetJsonLength(streamjson) - 1;
 	//修改节目数据流信息
@@ -234,11 +235,11 @@ static void getoutprg(HttpConn *conn) {
     char ip[16] = "192.168.1.134";
 	int outChn = 0;
 	//先释放全局outprg内存空间
-	ChannelProgramSt *outpst = NULL;	
+	/*ChannelProgramSt *outpst = NULL;	
 	list_get(&(clsProgram.outPrgList), 0, &outpst);
 	if( list_len(&outpst->prgNodes) > 0){
 		freePrograms(&outpst->prgNodes);
-	}
+	}*/
 	if(1){
 		PrgMuxInfoGet(ip);
 	}
@@ -363,11 +364,44 @@ static void maketable(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	//制表
-	MakeTable(pos);
-	
-	
+	MakeTable(pos);	
 	//获取制表后结果
 	getTableJson(pos, outstring);
+	render(outstring);
+    
+} 
+
+/*制表后获取输出流表*/
+static void streamtable(HttpConn *conn) { 
+	int pos = 0, i = 0;
+	char outstring[1024] = {0};
+	cJSON *streamsarray,*streamjson;
+	char* streamjsonstring;
+	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
+	pos = atoi(mprGetJson(jsonparam, "channel"));
+	streamsarray = cJSON_CreateArray();	
+	if(list_len(&clsProgram.PrgAVMuxList)>0)
+	{
+		list_t *AVMuxList = clsProgram.PrgAVMuxList[pos - 1];
+		for ( i = 0; i < list_len(AVMuxList); i++)
+		{
+			MuxPidInfo_st *pidMapTmp;
+			list_get(AVMuxList,i,&pidMapTmp);
+			cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
+			cJSON_AddNumberToObject(streamjson, "NO", i+1);
+			cJSON_AddNumberToObject(streamjson, "chn", pidMapTmp->inChannel);
+			cJSON_AddNumberToObject(streamjson, "newPid", pidMapTmp->newPid);
+			cJSON_AddNumberToObject(streamjson, "oldPid", pidMapTmp->oldPid);
+			cJSON_AddStringToObject(streamjson,"type", "Programme");
+		}
+	}
+	streamjsonstring = cJSON_PrintUnformatted(streamsarray);
+		
+	memcpy(outstring, streamjsonstring, strlen(streamjsonstring));
+	//printf("------>>>%d\n",strlen(prgjsonstring));
+	//释放内存	
+	cJSON_Delete(streamsarray);		
+	free(streamjsonstring);
 	render(outstring);
     
 } 
@@ -471,7 +505,7 @@ static void getprginfo(HttpConn *conn) {
 			//printf("==========read begin==========%d\n", outprg->pmtPid);
 			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
 			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
-			cJSON_AddNumberToObject(result,"streamId", outprg->streamId);
+			cJSON_AddNumberToObject(result,"serviceType", outprg->serviceType);
 			cJSON_AddNumberToObject(result,"networkId", outprg->networkId);
 			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
 			cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
@@ -659,6 +693,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-selectprgs", selectprgs);
 	espDefineAction(route, "programs-cmd-getoutprg", getoutprg);
 	espDefineAction(route, "programs-cmd-maketable", maketable);
+	espDefineAction(route, "programs-cmd-streamtable", streamtable);
 	espDefineAction(route, "programs-cmd-writetable", writetable);
 	espDefineAction(route, "programs-cmd-makestreamtable", makestreamtable);
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
