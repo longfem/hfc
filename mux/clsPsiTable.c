@@ -193,7 +193,7 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 			p_patPrg_t->pid=ptmpPrgInfo->pmtPid;
 
 
-			printf("prgnumber:%d \n",ptmpPrgInfo->prgNum);
+			//printf("prgnumber:%d \n",ptmpPrgInfo->prgNum);
 
 
 			iAddr += BigFormat_intToBytes(ptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number	 :16; //╫зд©╨е

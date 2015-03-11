@@ -1,4 +1,5 @@
 var _selectcount = 0;//节目计数
+var _intChannelCntMax = 0;//设备输入通道数
 var _tbleditcount = 0;//edit表stream计数
 var _pmtPid = 0;//编辑节目pid
 var _editnodekey = ""; //编辑节目节点key
@@ -378,23 +379,22 @@ function devinfo_output(devType){
 		$("#channel").fancytree("getTree").reload();
 		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
 		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
-		var _intChannelCntMax = 0;//设备输入通道数
-		//获取输出通道信息
+		//获取全局初始化信息
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/getoutprg",
+			 url: "http://"+localip+":4000/do/programs/getglobalinfo",
 			// data: {ip:"192.168.1.134", inch:2},
-			 dataType: "text",
+			 dataType: "json",
 			 success: function(data){
-				_intChannelCntMax = Number(data);
+				_intChannelCntMax = data._intChannelCntMax;
+				_selectcount = data._selectcount0;
 			 },    
 			 error : function(err) {    
-				  // view("异常！");   
-				var xxx = err;
-				  alert("异常！====="+JSON.stringify(err));    
+   
 			 }   
 		});
+		
 		if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
 			for(var i=1;i<_intChannelCntMax+1; i++){
 				$.ajax({
@@ -416,7 +416,36 @@ function devinfo_output(devType){
 					 }   
 				});
 			}
-		}	
+		}
+
+		//获取输出通道信息
+		$.ajax({
+			 type: "GET",
+			 async:false,
+			 url: "http://"+localip+":4000/do/programs/getoutprg?inch=1",
+			// data: {ip:"192.168.1.134", inch:2},
+			 dataType: "json",
+			 success: function(data){
+				if(data.sts == 1){
+					
+				}else{
+					$.each(data, function(key, prg) {
+						var nkey = "id1." + prg.ch;
+						node = $("#channel").fancytree("getTree").getNodeByKey(nkey);
+						node.addChildren(prg.children);
+						var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+						node = $("#devlist").fancytree("getTree").getNodeByKey(prgkey);
+						node.setSelected(true);
+					});
+				}
+				
+			 },    
+			 error : function(err) {    
+				  // view("异常！");   
+				var xxx = err;
+				  alert("异常！====="+JSON.stringify(err));    
+			 }   
+		});
     });
 	
 	$( "#output-table" ).button({

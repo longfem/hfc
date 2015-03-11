@@ -232,22 +232,19 @@ static void getprg(HttpConn *conn) {
 } 
 
 static void getoutprg(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn);
+	int Chn = atoi(mprGetJson(jsonparam, "inch")); 
     char ip[16] = "192.168.1.134";
+	char outprg[10240] = {0};
 	int outChn = 0;
-	//先释放全局outprg内存空间
-	/*ChannelProgramSt *outpst = NULL;	
-	list_get(&(clsProgram.outPrgList), 0, &outpst);
-	if( list_len(&outpst->prgNodes) > 0){
-		freePrograms(&outpst->prgNodes);
-	}*/
 	if(1){
 		PrgMuxInfoGet(ip);
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(ip, outChn);
 	} 
-	
-	render("%d", clsProgram._intChannelCntMax);
+	getoutprgsJson(ip, Chn - 1, outprg);
+	render(outprg);
     
 } 
 
@@ -643,6 +640,28 @@ static void common(HttpConn *conn) {
 	
 }
 
+static void getglobalinfo(HttpConn *conn) { 
+	char str[64] = {0};
+	char idstr[16] = {0};
+	int i = 0;
+	ChannelProgramSt *prginfo;
+	cJSON *result = cJSON_CreateObject();
+	char* jsonstring;
+	cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
+	/*for(i=0;i<clsProgram._outChannelCntMax;i++){
+		memset(idstr,0, sizeof(idstr));
+		sprintf(idstr, "_selectcount%d", i+1);
+		list_get(&clsProgram.outPrgList, i, &prginfo);
+		cJSON_AddNumberToObject(result, idstr, list_len(&prginfo->prgNodes));
+	}*/
+	jsonstring = cJSON_PrintUnformatted(result);
+	memcpy(str, jsonstring, strlen(jsonstring));
+	//释放内存	
+	cJSON_Delete(result);		
+	free(jsonstring);
+	render(str);
+}
+
 static void espinit() {	
 	int i=0;
 	ChannelProgramSt *pst = NULL;
@@ -695,9 +714,11 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-maketable", maketable);
 	espDefineAction(route, "programs-cmd-streamtable", streamtable);
 	espDefineAction(route, "programs-cmd-writetable", writetable);
+	espDefineAction(route, "programs-cmd-getglobalinfo", getglobalinfo);
 	espDefineAction(route, "programs-cmd-makestreamtable", makestreamtable);
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
+	
 	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
