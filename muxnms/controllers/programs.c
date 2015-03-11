@@ -130,7 +130,7 @@ static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInf
 }
 
 static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, MprJson *streamjson){
-	int k = 0, cm = 0, i = 0, j = 0, index = 0;	
+	int k = 0, cm = 0, i = 0, index = 0;	
 	char str[8] = {0};	
 	outprg = malloc(sizeof(Dev_prgInfo_st));
 	memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));				
@@ -236,13 +236,14 @@ static void getoutprg(HttpConn *conn) {
 	int Chn = atoi(mprGetJson(jsonparam, "inch")); 
     char ip[16] = "192.168.1.134";
 	char outprg[10240] = {0};
-	int outChn = 0;
+	int outChn = 0;	
 	if(1){
 		PrgMuxInfoGet(ip);
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(ip, outChn);
 	} 
+
 	getoutprgsJson(ip, Chn - 1, outprg);
 	render(outprg);
     
@@ -481,6 +482,40 @@ static void setchanneloutinfo(HttpConn *conn) {
 	render(rsts); 
 } 
 
+static void getpidtransinfo(HttpConn *conn) { 
+	int i = 0;
+	char outprg[512] = {0};
+	MprJson *jsonparam = httpGetParams(conn); 
+    cchar *inChn = mprGetJson(jsonparam, "channel"); 	
+	int inCh = atoi(inChn);
+	cJSON *result, *pidarrayjsn,*pidjson;
+	char *jsonstring;
+	MuxPidInfo_st *mpf = NULL;
+	ChannelProgramSt *outpst = NULL;
+	result = cJSON_CreateObject();
+	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);	
+	if(list_len(&outpst->dtPidList)>0){
+		cJSON_AddNumberToObject(result,"cnt", list_len(&outpst->dtPidList));
+		cJSON_AddItemToObject(result, "children", pidarrayjsn = cJSON_CreateArray());
+		for(i=0;i<list_len(&outpst->dtPidList);i++){			
+			list_get(&outpst->dtPidList,i, &mpf);
+			cJSON_AddItemToArray(pidarrayjsn,pidjson = cJSON_CreateObject());
+			cJSON_AddNumberToObject(pidjson,"NO", i);
+			cJSON_AddNumberToObject(pidjson,"ch", mpf->inChannel);
+			cJSON_AddNumberToObject(pidjson,"oldPid", mpf->oldPid);
+			cJSON_AddNumberToObject(pidjson,"newPid", mpf->newPid);
+		}
+	}else{		
+		cJSON_AddNumberToObject(result,"cnt", 0);		
+	}
+	jsonstring = cJSON_PrintUnformatted(result);
+	memcpy(outprg, jsonstring, strlen(jsonstring));
+	//释放内存	
+	cJSON_Delete(result);		
+	free(jsonstring);
+	render(outprg);
+}
+
 static void getprginfo(HttpConn *conn) { 	
 	int i = 0, j = 0;	
 	char str[512] = {0};
@@ -642,9 +677,9 @@ static void common(HttpConn *conn) {
 
 static void getglobalinfo(HttpConn *conn) { 
 	char str[64] = {0};
-	char idstr[16] = {0};
-	int i = 0;
-	ChannelProgramSt *prginfo;
+	//char idstr[16] = {0};
+	//int i = 0;
+	//ChannelProgramSt *prginfo;
 	cJSON *result = cJSON_CreateObject();
 	char* jsonstring;
 	cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
@@ -718,7 +753,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-makestreamtable", makestreamtable);
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
-	
+	espDefineAction(route, "programs-cmd-getpidtransinfo", getpidtransinfo);
 	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

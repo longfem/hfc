@@ -350,23 +350,7 @@ function devinfo_output(devType){
 			{ "title": "标签", "width":"40%" },
 			{ "title": "描述符"}
 		]
-	});
-	
-	//PID表
-	$('#tbl_pid').dataTable( {
-		"data": dataSet,
-		"order": [[ 0, "asc" ]],
-		"paging":   false,
-		"info":     false,
-		"searching":   false,
-		"scrollCollapse": true,
-		"columns": [
-			{ "title": "序号" },
-			{ "title": "通道"},
-			{ "title": "输入PID(Hex)"},
-			{ "title": "输出PID(Hex)" }
-		]
-	}); 	
+	});	 	
 
 	var tabs = $("#devoutput").tabs();
 	$( "#output-read" ).button({
@@ -1032,8 +1016,7 @@ function devinfo_output(devType){
 								var xxx = err;
 								alert("异常！====="+JSON.stringify(err));    
 							 }   
-						});
-						
+						});						
 						break;
 					} case '#re_prg': {
 						
@@ -1042,6 +1025,54 @@ function devinfo_output(devType){
 						
 						break;
 					} case '#pidtrans': {
+						//获取pid透传表信息
+						$.ajax({
+							 type: "GET",
+							 async:false,
+							 url: "http://"+localip+":4000/do/programs/getpidtransinfo?channel=1",
+							 dataType: "json",
+							 success: function(data){
+								var pidData = [];
+								if(data.cnt != 0){
+									$.each(data.children, function(key, itemv) {
+										var item = [itemv.NO,itemv.ch, itemv.newPid.toString(16),itemv.oldPid.toString(16)];
+										pidData[pidData.length] = item;					
+									});
+								}									
+								
+								//编辑数据流表
+								if ( $.fn.dataTable.isDataTable( '#tbl_pid' ) ) {									
+									$('#tbl_pid').dataTable().fnClearTable();
+									$('#tbl_pid').dataTable().fnAddData(pidData);
+								}else{
+									//PID表
+									$('#tbl_pid').dataTable( {
+										"data": pidData,
+										"order": [[ 0, "asc" ]],
+										"paging":   false,
+										"info":     false,
+										"searching":   false,
+										"scrollCollapse": true,
+										"columns": [
+											{ "title": "序号" },
+											{ "title": "通道"},
+											{ "title": "输入PID(Hex)"},
+											{ "title": "输出PID(Hex)" }
+										]
+									});
+									$('#tbl_pid tbody').on( 'click', 'tr', function () {
+										if ( $(this).hasClass('selected') ) {
+											$(this).removeClass('selected');
+										}else {
+											$('#tbl_pid').DataTable().$('tr.selected').removeClass('selected');
+											$(this).addClass('selected');
+										}
+									} );
+								}				
+							 },    
+							 error : function(err) {      
+							 }   
+						});
 						dialog_pid.dialog( "open" );
 						break;
 					} default: {
