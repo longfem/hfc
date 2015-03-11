@@ -64,6 +64,7 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 	int prgNodesLen = 0;
 	int i=0, j=0;
 
+	list_init(&sendList);
 	if (outPrgListLen > 0 )
 	{
 		for (i = 0; i < outPrgListLen; i++)
@@ -95,9 +96,9 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 											
 				}
 
-				// ErrorTypeEm rslt = muxer.SendOutPrgMuxMap(i + 1, &sendList);
-				// if (rslt != ErrorTypeEm.ok)
-				// 	return false;
+				 ErrorTypeEm rslt = SendOutPrgMuxMap(ip, i + 1, &sendList);
+				 if (rslt != ok)
+				 	return 0;
 			}
 			
 
