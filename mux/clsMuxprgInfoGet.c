@@ -139,14 +139,13 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
 }
 
 void freeMuxPrgInfoList(list_t *muxPrgInfoList){
-    if(muxPrgInfoList = NULL){
+    if(muxPrgInfoList == NULL){
         printf("muxPrgInfoList = NULL; not need free\n" );
         return;
     }
 
     int i=0;
     int muxPrgInfoListLen = list_len(muxPrgInfoList);
-
     MuxPrgInfoGet_st *pMuxPrgInfo = NULL;
     for(i = muxPrgInfoListLen; i > 0; i--){
         list_get(muxPrgInfoList, i, &pMuxPrgInfo);
@@ -255,14 +254,12 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
 
 
 void freeMuxPidInfoList(list_t *muxPidInfoList){
-    if(muxPidInfoList = NULL){
+    if(muxPidInfoList == NULL){
         printf("muxPidInfoList = NULL; not need free\n" );
         return;
     }
-
     int i=0;
     int muxPidnfoListLen = list_len(muxPidInfoList);
-
     MuxPidInfo_st *pMuxPidInfo = NULL;
     for(i = muxPidnfoListLen; i > 0; i--){
         list_get(muxPidInfoList, i, &pMuxPidInfo);
@@ -270,7 +267,6 @@ void freeMuxPidInfoList(list_t *muxPidInfoList){
         pMuxPidInfo = NULL;
         list_pop_tail(muxPidInfoList);        
     }
-
     muxPidInfoList = NULL;
 }
 

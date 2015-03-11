@@ -313,7 +313,7 @@ unsigned char PrgMuxInfoGet(char *ip)
 	{	
 		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList[i]) != ok)
 			return 0;
-
+		
 		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList[i]) != ok)
 			return 0;
 	}
@@ -629,7 +629,7 @@ int AutoMakeNewPid(int outChannel)
 
 
 
-int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList)
+int MakePidMapTable(int outChannel,list_t  prginfolist)
 {
 	int i;
 	int j;
@@ -647,8 +647,6 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 	int lastThisPidMapToNewPid = -1;
 
 
-
-
 	ChannelProgramSt *inpst;
 	Dev_prgInfo_st *inPrgInfoTmp;
 	for ( i = 0; i <clsProgram._outChannelCntMax; i++)
@@ -658,7 +656,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 		int  isNoticeSamePid = 1;
 		MuxPidInfo_st *pidMapTmp;
 
-		//for test ,西贡弄好，需要关掉
+		//for test ,西贡弄好，需要关掿
 
 		#if 0
 			
@@ -674,7 +672,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 			}
 		}
 
-		//子数组下的元素清空
+		//子数组下的元素清穿
 		list_t *PrgAVMuxListI;
 		list_get(PrgAVMuxList,i,&PrgAVMuxListI);
 		if(list_len(PrgAVMuxListI)>0)//清空
@@ -692,7 +690,24 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 		
     	list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
   		list_init(PrgAVMuxListI);  
+		
+        freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);		
+	#if 0  
+		//ȥࠕclsProgram.PrgAVMuxList[i]		
+		if(clsProgram.PrgAVMuxList[i] != NULL)
+		{
+			//list_t *tmpAVMuxList=clsProgram.PrgAVMuxList[i];
+			while(list_len(clsProgram.PrgAVMuxList[i]))
+			{
+			    MuxPidInfo_st  *outPMTBuffer;
+				list_get(clsProgram.PrgAVMuxList[i],list_len(clsProgram.PrgAVMuxList[i])-1,&outPMTBuffer);
+				free(outPMTBuffer);
+				list_pop_tail(clsProgram.PrgAVMuxList[i]);	
+			}
+		}
 
+		#endif
+		clsProgram.PrgAVMuxList[i] = NULL;
 
 		//printPrgAVMuxList();
 		// ChannelProgramSt *outpst = NULL;
@@ -790,7 +805,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 							{
 								if (isNoticeSamePid)
 								{
-									//这里我直接终止
+									//这里我直接终歿
 									return 0;
 								}
 								outdata=outDesInfoTmp->data;
@@ -846,7 +861,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 					{
 						if (isNoticeSamePid==1)
 						{
-							//这里我直接终止
+							//这里我直接终歿
 							return 0;
 						}
 
