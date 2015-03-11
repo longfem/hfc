@@ -963,7 +963,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist, list_t *stanPrgAVMuxList
 							pidMapTmp->inChannel = outPrgInfoTmp->chnId;
 							pidMapTmp->oldPid = oldPid;
 							pidMapTmp->newPid = pid;
-							list_append(PrgAVMuxListI,pidMapTmp);
+							list_append(PrgAVMuxListI, pidMapTmp);
 						}
 					}
 				}
