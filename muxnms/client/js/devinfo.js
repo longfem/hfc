@@ -3,7 +3,9 @@ var _intChannelCntMax = 0;//设备输入通道数
 var _tbleditcount = 0;//edit表stream计数
 var _pmtPid = 0;//编辑节目pid
 var _editnodekey = ""; //编辑节目节点key
+var _channel = 1; //操作中的通道
 var _tbl_edit;
+var _tbl_pid;
 var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
@@ -837,7 +839,8 @@ function devinfo_output(devType){
 				}
 			    
 			},
-			select: function(event, data){				
+			select: function(event, data){	
+				_channel = 1;
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -861,7 +864,7 @@ function devinfo_output(devType){
 							type: "GET",
 							async:false,
 							url: "http://"+localip+":4000/do/programs/getprginfo",
-							data:'{channel:'+1+ ',pmtPid:'+data.node.data.pmtPid+'}',
+							data:'{channel:' + _channel + ',pmtPid:' + data.node.data.pmtPid + '}',
 							dataType: "json",
 							success: function(data){
 								_pmtPid = data.pmtPid;
@@ -1046,13 +1049,18 @@ function devinfo_output(devType){
 									$('#tbl_pid').dataTable().fnAddData(pidData);
 								}else{
 									//PID表
-									$('#tbl_pid').dataTable( {
+									_tbl_pid = $('#tbl_pid').dataTable( {
 										"data": pidData,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
 										"info":     false,
 										"searching":   false,
 										"scrollCollapse": true,
+										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+											$('td:eq(1)', nRow).html( '<input type="text" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1].toString(16) + '"></input>' );
+											$('td:eq(2)', nRow).html( '<input type="text" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2].toString(16) + '"></input>' );
+											$('td:eq(3)', nRow).html( '<input type="text" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3].toString(16) + '"></input>' );
+										},		
 										"columns": [
 											{ "title": "序号" },
 											{ "title": "通道"},
@@ -1503,20 +1511,44 @@ function devinfo_output(devType){
 	//PID透传右键菜单弹出对话框
 	var dialog_pid = $( "#dialog-pid" ).dialog({
 		autoOpen: false,
-		width: 600,
+		width: 650,
 		modal: true,
 		buttons: {
 			"添加": function() {
-			  dialog_pid.dialog( "close" );
+				var index = 0;
+				if(Number(_tbl_pid[0].rows[_tbl_pid[0].rows.length - 1].firstChild.textContent) != NaN){
+					index++;
+				}
+				$('#tbl_pid').DataTable().row.add( [
+					index,
+					1,
+					0,
+					0
+				] ).draw();
 			},
 			"删除": function() {
-			  dialog_pid.dialog( "close" );
+				$('#tbl_pid').DataTable().row('.selected').remove().draw( false );
 			},
 			"确定": function() {
-			  dialog_pid.dialog( "close" );
+				var data = $('#tbl_pid').DataTable().$('input').serialize();
+				var jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + ',"' + data.replace(/&/g, ',"').replace(/=/g, '":') +  '}';
+				//下发配置
+				$.ajax({
+					 type: "GET",
+					 async:false,
+					 url: "http://"+localip+":4000/do/programs/setpidtransinfo",
+					 data: JSON.parse(jsonstr),
+					 dataType: "json",
+					 success: function(data){
+						
+					 },    
+					 error : function(err) {    
+					 }   
+				});
+				dialog_pid.dialog( "close" );
 			},
 			"取消": function() {
-			  dialog_pid.dialog( "close" );
+				dialog_pid.dialog( "close" );
 			}
 		}
 	});

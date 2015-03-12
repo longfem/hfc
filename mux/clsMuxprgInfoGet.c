@@ -147,7 +147,7 @@ void freeMuxPrgInfoList(list_t *muxPrgInfoList){
     int i=0;
     int muxPrgInfoListLen = list_len(muxPrgInfoList);
     MuxPrgInfoGet_st *pMuxPrgInfo = NULL;
-    for(i = muxPrgInfoListLen; i > 0; i--){
+    for(i = muxPrgInfoListLen - 1; i > -1; i--){
         list_get(muxPrgInfoList, i, &pMuxPrgInfo);
         free(pMuxPrgInfo);
         pMuxPrgInfo = NULL;

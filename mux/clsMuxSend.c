@@ -107,10 +107,12 @@ int SendTable(char *ip, int outChnId)
 	// 		rslt = 0;
 	// }
 	
-	if (SendTable_psi_finish(ip, outChnId) != ok)
+	if (SendTable_psi_finish(ip, outChnId) != ok){
 		rslt = 0;
-	else
+	}
+	else{
 		rslt = SendPidMap(ip, outChnId);
+	}
 		
 	printf("fuck 4\n");
 	return rslt;
@@ -173,19 +175,24 @@ void SendMux(char *ip, int outChnId)
 		isNeedDesInfoSend = 0;
 		return;
 	}
+	
     unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(ip, outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
     if (!sendRslt)
     {	    
 	    isNeedDesInfoSend = 0;
 	    return;
     }
-    printf("sendMux will send table outChnId=%d\n", outChnId);
+    
 	SendTable(ip, outChnId);
 	//if (isNeedDesInfoSend)
 	{
+		
+		printf("ffffuck 5\n");
 		MakeOutputBytesAndSend(ip, outChnId);
+		printf("ffffuck 6\n");
 	}
 
+		
 	// RecordInputChnUseStatus(outChnId);
 
 	// if (_isEnableScrambleModule) // 如果存在加扰模块
