@@ -1038,7 +1038,7 @@ function devinfo_output(devType){
 								var pidData = [];
 								if(data.cnt != 0){
 									$.each(data.children, function(key, itemv) {
-										var item = [itemv.NO,itemv.ch, itemv.newPid.toString(16),itemv.oldPid.toString(16)];
+										var item = [itemv.NO,itemv.ch, itemv.oldPid.toString(16),itemv.newPid.toString(16)];
 										pidData[pidData.length] = item;					
 									});
 								}									
@@ -1046,7 +1046,9 @@ function devinfo_output(devType){
 								//编辑数据流表
 								if ( $.fn.dataTable.isDataTable( '#tbl_pid' ) ) {									
 									$('#tbl_pid').dataTable().fnClearTable();
-									$('#tbl_pid').dataTable().fnAddData(pidData);
+									if(pidData.length != 0){
+										$('#tbl_pid').dataTable().fnAddData(pidData);
+									}
 								}else{
 									//PID表
 									_tbl_pid = $('#tbl_pid').dataTable( {
@@ -1057,12 +1059,12 @@ function devinfo_output(devType){
 										"searching":   false,
 										"scrollCollapse": true,
 										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
-											$('td:eq(1)', nRow).html( '<input type="text" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1].toString(16) + '"></input>' );
-											$('td:eq(2)', nRow).html( '<input type="text" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2].toString(16) + '"></input>' );
-											$('td:eq(3)', nRow).html( '<input type="text" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3].toString(16) + '"></input>' );
+											$('td:eq(1)', nRow).html( '<input type="text" pattern="([0-9]{1}$)" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1] + '"></input>' );
+											$('td:eq(2)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2] + '"></input>' );
+											$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
 										},		
 										"columns": [
-											{ "title": "序号" },
+											{ "title": "序号", "width": "50px" },
 											{ "title": "通道"},
 											{ "title": "输入PID(Hex)"},
 											{ "title": "输出PID(Hex)" }
@@ -1515,9 +1517,11 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {
 			"添加": function() {
-				var index = 0;
-				if(Number(_tbl_pid[0].rows[_tbl_pid[0].rows.length - 1].firstChild.textContent) != NaN){
+				var index = Number(_tbl_pid[0].rows[_tbl_pid[0].rows.length - 1].firstChild.textContent);
+				if( index != NaN){
 					index++;
+				}else{
+					index = 0;
 				}
 				$('#tbl_pid').DataTable().row.add( [
 					index,
@@ -1530,8 +1534,13 @@ function devinfo_output(devType){
 				$('#tbl_pid').DataTable().row('.selected').remove().draw( false );
 			},
 			"确定": function() {
+				var jsonstr;
 				var data = $('#tbl_pid').DataTable().$('input').serialize();
-				var jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + ',"' + data.replace(/&/g, ',"').replace(/=/g, '":') +  '}';
+				if(data == ""){
+					jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + '}';
+				}else{
+					jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') +  '"}';
+				}				
 				//下发配置
 				$.ajax({
 					 type: "GET",

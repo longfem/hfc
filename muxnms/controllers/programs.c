@@ -518,8 +518,9 @@ static void getpidtransinfo(HttpConn *conn) {
 
 static void setpidtransinfo(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn); 
-	//printf("==========setpidtransinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	printf("==========setpidtransinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	char idstr[16] = {0};
+	cchar *tmpstr;
 	int i = 0;
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	int pidcnt = atoi(mprGetJson(jsonparam, "pidcnt"));
@@ -535,18 +536,23 @@ static void setpidtransinfo(HttpConn *conn) {
 			list_pop_tail(&outpst->dtPidList);			
 		}
 	}
-	printf("====setpidtransinfo=====1\n");
+	
 	//存储新数据
 	for(i=0;i<pidcnt;i++){
 		memset(idstr, 0, sizeof(idstr));
 		sprintf(idstr, "p_ch%d", i);
 		mpf = malloc(sizeof(MuxPidInfo_st));
-		mpf->inChannel = atoi(mprGetJson(jsonparam, "idstr"));
+		printf("====setpidtransinfo=====0----%s\n", idstr);
+		tmpstr = mprGetJson(jsonparam, idstr);
+		sscanf(tmpstr, "%d", &mpf->inChannel);
+		printf("====setpidtransinfo=====1\n");
 		sprintf(idstr, "p_oldpid%d", i);
-		mpf->oldPid = atoi(mprGetJson(jsonparam, "idstr"));
-		sprintf(idstr, "p_newpid%d", i);
-		mpf->newPid = atoi(mprGetJson(jsonparam, "idstr"));
+		tmpstr = mprGetJson(jsonparam, idstr);
+		sscanf(tmpstr, "%x", &mpf->oldPid);
 		printf("====setpidtransinfo=====2\n");
+		sprintf(idstr, "p_newpid%d", i);
+		tmpstr = mprGetJson(jsonparam, idstr);	
+		sscanf(tmpstr, "%x", &mpf->newPid);
 		list_append(&outpst->dtPidList, mpf);
 		printf("====setpidtransinfo=====3\n");
 	}

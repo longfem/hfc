@@ -322,7 +322,7 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 
 int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 {
-	//ChannelProgramSt *pst = NULL;	
+	ChannelProgramSt *pst = NULL;	
 	
 	Dev_prgInfo_st * proginfo = NULL;
 	outBytes = NULL;
