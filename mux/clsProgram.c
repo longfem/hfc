@@ -109,38 +109,53 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 
 }
 
-void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
+void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen)
 {
+	Dev_prgInfo_st *proginfo;
+
 	unsigned char *pBuf = NULL, pTemp= NULL;
-	int i=0, j=0, bufLen=0;
+	int i=0, j=0, bufLen=0, k=0;
 	if(proginfo == NULL){
 		printf("proginfo NULL \n");
 		return -1;
 	}
 
-	//compute need malloc buf len
-	bufLen += sizeof(Dev_prgInfo_st); // struct sizeof(Dev_prgInfo_st) 	
-	bufLen += proginfo->pmtDesListLen;   //pmtDesListLen
-	
 
-	for(i=0; i< proginfo->pmtDesListLen; i++){
-		bufLen += sizeof(Commdes_t);
-		bufLen += proginfo->pmtDesList->dataLen;
-	}
+	bufLen += sizeof(ChannelProgramSt);
 
-	bufLen += 4;   //pdataStreamListLen;	 
+	int listlen = list_len(&poutList->prgNodes);
 
-	for(i=0;  i < proginfo->pdataStreamListLen; i++){
-		bufLen += sizeof(DataStream_t);
+	bufLen += 4;  //listlen
+	printf("list len = %d\n", listlen);
 
-		for(j=0; j< proginfo->pdataStreamList->destlen; j++){
+	for(k=0; k < listlen; k ++){
+		//compute on prg need malloc buf len
+
+		list_get(poutList->prgNodes, k, &proginfo);
+		bufLen += sizeof(Dev_prgInfo_st); // struct sizeof(Dev_prgInfo_st) 	
+		bufLen += proginfo->pmtDesListLen;   //pmtDesListLen
+		
+
+		for(i=0; i< proginfo->pmtDesListLen; i++){
 			bufLen += sizeof(Commdes_t);
-			bufLen += proginfo->pdataStreamList->desNode->dataLen;
+			bufLen += proginfo->pmtDesList->dataLen;
 		}
+
+		bufLen += 4;   //pdataStreamListLen;	 
+
+		for(i=0;  i < proginfo->pdataStreamListLen; i++){
+			bufLen += sizeof(DataStream_t);
+
+			for(j=0; j< proginfo->pdataStreamList->destlen; j++){
+				bufLen += sizeof(Commdes_t);
+				bufLen += proginfo->pdataStreamList->desNode->dataLen;
+			}
+		}
+
+		bufLen+= proginfo->prgNameLen; //
+		bufLen+= proginfo->providerNameLen; //
 	}
 
-	bufLen+= proginfo->prgNameLen; //
-	bufLen+= proginfo->providerNameLen; //
 	bufLen +=4; // Crc 32;
 	
 	//malloc now
@@ -149,46 +164,56 @@ void cSerialize(Dev_prgInfo_st *proginfo, unsigned char * pOutbuf, int *outLen)
 	//copy now	
 	//copy pmt
 	pTemp = pBuf;
-	memcpy(pBuf, proginfo, sizeof(Dev_prgInfo_st));
-	pTemp += sizeof(Dev_prgInfo_st);	
-	memcpy(pTemp, (unsigned char *)&proginfo->pmtDesListLen, 4 );
+
+	memcpy(pTemp, poutList, sizeof(ChannelProgramSt));
+	pTemp += sizeof(ChannelProgramSt);
+	memcpy(pTemp, (unsigned char *)&listlen, 4 );
 	pTemp +=4;
+	for(k=0; k < listlen; k ++){
+		list_get(poutList->prgNodes, k, &proginfo);
+		memcpy(pTemp, proginfo, sizeof(Dev_prgInfo_st));
+		pTemp += sizeof(Dev_prgInfo_st);	
+		memcpy(pTemp, (unsigned char *)&proginfo->pmtDesListLen, 4 );
+		pTemp +=4;
 
-	
+		
 
-	for(i=0; i< proginfo->pmtDesListLen; i++){
-		memcpy(pTemp, proginfo->pmtDesList + i, sizeof(Commdes_t));
-		pTemp += sizeof(Commdes_t);
-
-		memcpy(pTemp, proginfo->pmtDesList->data, proginfo->pmtDesList->dataLen);				
-		pTemp+=	proginfo->pmtDesList->dataLen;
-	}
-
-	//copy datastream
-	memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
-	pTemp +=4;
-	for(i=0 ; i < proginfo->pdataStreamListLen; i++){
-		memcpy(pTemp, &proginfo->pdataStreamList[i], sizeof(DataStream_t));
-		pTemp += sizeof(DataStream_t);
-		for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
-			memcpy(pTemp, &proginfo->pdataStreamList[i].desNode[j], sizeof(Commdes_t));
+		for(i=0; i< proginfo->pmtDesListLen; i++){
+			memcpy(pTemp, proginfo->pmtDesList + i, sizeof(Commdes_t));
 			pTemp += sizeof(Commdes_t);
-			memcpy(pTemp, proginfo->pdataStreamList[i].desNode[j].data, proginfo->pdataStreamList[i].desNode[j].dataLen);
-			pTemp += proginfo->pdataStreamList[i].desNode[j].dataLen;
-		}
-	}	
 
-	//prgName
-	if(proginfo->prgNameLen > 0){
-		memcpy(pTemp, proginfo->prgName, proginfo->prgNameLen);
-		pTemp += 4;	
+			memcpy(pTemp, proginfo->pmtDesList->data, proginfo->pmtDesList->dataLen);				
+			pTemp+=	proginfo->pmtDesList->dataLen;
+		}
+
+		//copy datastream
+		memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
+		pTemp +=4;
+		for(i=0 ; i < proginfo->pdataStreamListLen; i++){
+			memcpy(pTemp, &proginfo->pdataStreamList[i], sizeof(DataStream_t));
+			pTemp += sizeof(DataStream_t);
+			for(j=0; j< proginfo->pdataStreamList[i].destlen; j++){
+				memcpy(pTemp, &proginfo->pdataStreamList[i].desNode[j], sizeof(Commdes_t));
+				pTemp += sizeof(Commdes_t);
+				memcpy(pTemp, proginfo->pdataStreamList[i].desNode[j].data, proginfo->pdataStreamList[i].desNode[j].dataLen);
+				pTemp += proginfo->pdataStreamList[i].desNode[j].dataLen;
+			}
+		}	
+
+		//prgName
+		if(proginfo->prgNameLen > 0){
+			memcpy(pTemp, proginfo->prgName, proginfo->prgNameLen);
+			pTemp += 4;	
+		}
+		
+		//providerName    
+		if(proginfo->providerNameLen > 0){
+			memcpy(pTemp, proginfo->providerName, proginfo->providerNameLen);
+			pTemp += 4;		
+		}
 	}
+
 	
-	//providerName    
-	if(proginfo->providerNameLen > 0){
-		memcpy(pTemp, proginfo->providerName, proginfo->providerNameLen);
-		pTemp += 4;		
-	}
 	
 	//psdt
 
@@ -278,7 +303,7 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 
 
 	cSerialize(proginfo, outBytes, outLen);
-	return outLen;
+	return 0;
 }
 
 
