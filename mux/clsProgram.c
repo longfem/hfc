@@ -109,8 +109,10 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 
 void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen)
 {
-	Dev_prgInfo_st *proginfo;
+	Dev_prgInfo_st *proginfo = NULL;
 
+	Commdes_t *pPmrDes = NULL;
+	DataStream_t *pdataStreamInfo = NULL;
 	unsigned char *pBuf = NULL, pTemp= NULL;
 	int i=0, j=0, bufLen=0, k=0;
 	if(proginfo == NULL){
@@ -129,12 +131,12 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 	for(k=0; k < listlen; k ++){
 		//compute on prg need malloc buf len
 
-		list_get(poutList->prgNodes, k, &proginfo);
+		list_get(&poutList->prgNodes, k, &proginfo);
 		bufLen += sizeof(Dev_prgInfo_st); // struct sizeof(Dev_prgInfo_st) 	
 		bufLen += proginfo->pmtDesListLen;   //pmtDesListLen
 		
 
-		Commdes_t *pPmrDes = proginfo->pmtDesList;
+		pPmrDes = proginfo->pmtDesList;
 		for(i=0; i< proginfo->pmtDesListLen; i++){
 			bufLen += sizeof(Commdes_t);
 			bufLen += pPmrDes->dataLen;
@@ -144,7 +146,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 		bufLen += 4;   //pdataStreamListLen;	 
 
 		printf(" serial 2 pdataStreamListLen= %d \n", proginfo->pdataStreamListLen);	
-		DataStream_t *pdataStreamInfo = proginfo->pdataStreamList;
+		pdataStreamInfo = proginfo->pdataStreamList;
 		for(i=0;  i < proginfo->pdataStreamListLen; i++){
 			bufLen += sizeof(DataStream_t);
 
@@ -181,7 +183,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 	memcpy(pTemp, (unsigned char *)&listlen, 4 );
 	pTemp +=4;
 	for(k=0; k < listlen; k ++){
-		list_get(poutList->prgNodes, k, &proginfo);
+		list_get(&poutList->prgNodes, k, &proginfo);
 		memcpy(pTemp, proginfo, sizeof(Dev_prgInfo_st));
 		pTemp += sizeof(Dev_prgInfo_st);	
 		memcpy(pTemp, (unsigned char *)&proginfo->pmtDesListLen, 4 );
@@ -335,14 +337,14 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 {
 	//ChannelProgramSt *pst = NULL;	
 	
-	Dev_prgInfo_st * proginfo = NULL;
+	ChannelProgramSt * pOutList = NULL;
 	outBytes = NULL;
 	
 	printf("bytes out outChn = %d 1\n", outChn);
-	list_get(&clsProgram.outPrgList, outChn - 1, &pst);
+	list_get(&clsProgram.outPrgList, outChn - 1, &pOutList);
 
 	printf("bytes out 2 = %d\n", outLen);
-	cSerialize(proginfo, outBytes, outLen);
+	cSerialize(pOutList, outBytes, outLen);
 
 	printf("bytes out 3\n");
 	return *outLen;
