@@ -516,6 +516,45 @@ static void getpidtransinfo(HttpConn *conn) {
 	render(outprg);
 }
 
+static void setpidtransinfo(HttpConn *conn) { 
+	MprJson *jsonparam = httpGetParams(conn); 
+	//printf("==========setpidtransinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	char idstr[16] = {0};
+	int i = 0;
+	int inCh = atoi(mprGetJson(jsonparam, "channel"));
+	int pidcnt = atoi(mprGetJson(jsonparam, "pidcnt"));
+	MuxPidInfo_st *mpf = NULL;
+	ChannelProgramSt *outpst = NULL;
+	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
+	//释放原dtPidList内存空间
+	if(list_len(&outpst->dtPidList)>0){
+		for(i=list_len(&outpst->dtPidList)-1;i>-1;i--){			
+			list_get(&outpst->dtPidList,i, &mpf);
+			free(mpf);
+			mpf = NULL;
+			list_pop_tail(&outpst->dtPidList);			
+		}
+	}
+	printf("====setpidtransinfo=====1\n");
+	//存储新数据
+	for(i=0;i<pidcnt;i++){
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "p_ch%d", i);
+		mpf = malloc(sizeof(MuxPidInfo_st));
+		mpf->inChannel = atoi(mprGetJson(jsonparam, "idstr"));
+		sprintf(idstr, "p_oldpid%d", i);
+		mpf->oldPid = atoi(mprGetJson(jsonparam, "idstr"));
+		sprintf(idstr, "p_newpid%d", i);
+		mpf->newPid = atoi(mprGetJson(jsonparam, "idstr"));
+		printf("====setpidtransinfo=====2\n");
+		list_append(&outpst->dtPidList, mpf);
+		printf("====setpidtransinfo=====3\n");
+	}
+	memset(idstr, 0, sizeof(idstr));
+	rendersts(idstr, 1);
+	render(idstr); 
+}
+
 static void getprginfo(HttpConn *conn) { 	
 	int i = 0, j = 0;	
 	char str[512] = {0};
@@ -754,6 +793,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
 	espDefineAction(route, "programs-cmd-getpidtransinfo", getpidtransinfo);
+	espDefineAction(route, "programs-cmd-setpidtransinfo", setpidtransinfo);
 	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

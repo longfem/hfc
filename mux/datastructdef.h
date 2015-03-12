@@ -27,7 +27,6 @@ typedef struct DataStream_st
 	int inPid;
 	int outPid;
 	int desNodeLen;
-	int destlen;
 	Commdes_t *desNode; // Commdes_st
 }DataStream_t;
 
