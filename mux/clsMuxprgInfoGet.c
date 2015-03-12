@@ -1208,7 +1208,7 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
 {
     unsigned char buf[1024];
     int i = 0, j=0;
-    unsigned char sendbuf[200];
+    unsigned char sendbuf[1024];
     int slen=0;
 
     int dataAddr, iAddr=0;

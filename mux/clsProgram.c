@@ -360,12 +360,16 @@ unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 	printf("bytes 1\n");
 		
 	int sendLen = MakeOutPutBytes(outChn,  tmpBytes, &tmpBytesLen);
-	printf("bytes 2\n");
+	printf("bytes 2 MakeOutPutBytes len = %d\n", sendLen);
 	if (sendLen > 0)
 	{
 		printf("bytes 3\n");
-		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen))
+		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen)){
+			free(tmpBytes);
 			return 1;
+		}
+
+		free(tmpBytes);
 		
 		printf("bytes 4\n");
 	}
