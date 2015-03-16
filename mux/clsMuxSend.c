@@ -179,6 +179,7 @@ void SendMux(char *ip, int outChnId)
     unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(ip, outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
     if (!sendRslt)
     {	    
+		printf("ffffuck dd\n");
 	    isNeedDesInfoSend = 0;
 	    return;
     }

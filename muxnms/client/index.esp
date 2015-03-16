@@ -159,8 +159,8 @@
 					recdata = data;
 				 },    
 				 error : function(err) {    
-					var xxx = err;
-					  alert("异常！====="+JSON.stringify(err));    
+					//var xxx = err;
+					//alert("异常！====="+JSON.stringify(err));    
 				 }   
 			});
 			//

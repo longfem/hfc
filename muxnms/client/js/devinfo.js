@@ -1064,7 +1064,7 @@ function devinfo_output(devType){
 											$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
 										},		
 										"columns": [
-											{ "title": "序号", "width": "50px" },
+											{ "title": "序号", "width": "60px" },
 											{ "title": "通道"},
 											{ "title": "输入PID(Hex)"},
 											{ "title": "输出PID(Hex)" }
@@ -1518,7 +1518,7 @@ function devinfo_output(devType){
 		buttons: {
 			"添加": function() {
 				var index = Number(_tbl_pid[0].rows[_tbl_pid[0].rows.length - 1].firstChild.textContent);
-				if( index != NaN){
+				if( index || (index == 0)){
 					index++;
 				}else{
 					index = 0;
@@ -1549,12 +1549,16 @@ function devinfo_output(devType){
 					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
-						
+						if(data.sts == 0){
+							alert("数据输入错误!!");
+							return;
+						}
+						dialog_pid.dialog( "close" );
 					 },    
 					 error : function(err) {    
 					 }   
 				});
-				dialog_pid.dialog( "close" );
+				
 			},
 			"取消": function() {
 				dialog_pid.dialog( "close" );

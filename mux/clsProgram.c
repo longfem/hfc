@@ -107,15 +107,15 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 
 }
 
-void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen)
+void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen)
 {
 	Dev_prgInfo_st *proginfo = NULL;
 
 	Commdes_t *pPmrDes = NULL;
 	DataStream_t *pdataStreamInfo = NULL;
-	unsigned char *pBuf = NULL, pTemp= NULL;
+	unsigned char *pBuf = NULL, *pTemp= NULL;
 	int i=0, j=0, bufLen=0, k=0;
-	if(proginfo == NULL){
+	if(poutList == NULL){
 		printf("proginfo NULL \n");
 		return -1;
 	}
@@ -145,7 +145,6 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 
 		bufLen += 4;   //pdataStreamListLen;	 
 
-		printf(" serial 2 pdataStreamListLen= %d \n", proginfo->pdataStreamListLen);	
 		pdataStreamInfo = proginfo->pdataStreamList;
 		for(i=0;  i < proginfo->pdataStreamListLen; i++){
 			bufLen += sizeof(DataStream_t);
@@ -155,7 +154,6 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 				bufLen += sizeof(Commdes_t);
 				bufLen += pPmrDes->dataLen;
 				pPmrDes++;
-				printf(" serial 33 \n");
 			}
 
 			pdataStreamInfo++;
@@ -172,16 +170,18 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 	//malloc now
 	pBuf = malloc(bufLen);
 
-	printf(" serial 3 \n");
 	
 	//copy now	
 	//copy pmt
 	pTemp = pBuf;
 
-	memcpy(pTemp, poutList, sizeof(ChannelProgramSt));
+	memcpy(pTemp, (unsigned char *)poutList, sizeof(ChannelProgramSt));
+
 	pTemp += sizeof(ChannelProgramSt);
 	memcpy(pTemp, (unsigned char *)&listlen, 4 );
 	pTemp +=4;
+
+	
 	for(k=0; k < listlen; k ++){
 		list_get(&poutList->prgNodes, k, &proginfo);
 		memcpy(pTemp, proginfo, sizeof(Dev_prgInfo_st));
@@ -204,10 +204,13 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 		memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
 		pTemp +=4;
 
+		
 		pdataStreamInfo = proginfo->pdataStreamList;
+		
 		for(i=0 ; i < proginfo->pdataStreamListLen; i++){
 			memcpy(pTemp, pdataStreamInfo, sizeof(DataStream_t));
 			pTemp += sizeof(DataStream_t);
+			
 			
 			pPmrDes = pdataStreamInfo->desNode;
 			for(j=0; j< pdataStreamInfo->desNodeLen; j++){
@@ -221,6 +224,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 			
 			pdataStreamInfo++;
 		}	
+		
 		
 		//prgName
 		if(proginfo->prgNameLen > 0){
@@ -244,11 +248,13 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char * pOutbuf, int *outLen
 	printf(" serial 7 \n");
 
 	if(pBuf != NULL){
-		pOutbuf = pBuf;
+		printf(" serial okkkk  \n");
+		*pOutbuf = pBuf;
 		*outLen = bufLen;
+		
 	} 
 	else{
-		pOutbuf = NULL;
+		*pOutbuf = NULL;
 		*outLen = 0;
 	}       
 	
@@ -333,19 +339,24 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 
 }
 
-int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
+int MakeOutPutBytes(int outChn, unsigned char **outBytes, int *outLen)
 {
 	ChannelProgramSt *pst = NULL;	
-	
+	unsigned char *ptemp = NULL;
+	int i=0;
 	ChannelProgramSt * pOutList = NULL;
-	outBytes = NULL;
 	
 	printf("bytes out outChn = %d 1\n", outChn);
 	list_get(&clsProgram.outPrgList, outChn - 1, &pOutList);
 
 	printf("bytes out 2 = %d\n", outLen);
-	cSerialize(pOutList, outBytes, outLen);
+	cSerialize(pOutList, &ptemp, outLen);
 
+	
+	
+	*outBytes =ptemp;
+	
+		
 	printf("bytes out 3\n");
 	return *outLen;
 
@@ -354,25 +365,33 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 
 unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 {
-	unsigned char *tmpBytes;
+	unsigned char *tmpBytes = NULL;
 	unsigned int tmpBytesLen=0;
 
 	printf("bytes 1\n");
-		
-	int sendLen = MakeOutPutBytes(outChn,  tmpBytes, &tmpBytesLen);
+	int i=0;
+	
+	int sendLen = MakeOutPutBytes(outChn,  &tmpBytes, &tmpBytesLen);
 	printf("bytes 2 MakeOutPutBytes len = %d\n", sendLen);
 	if (sendLen > 0)
 	{
+		for(i=0; i< 10; i++){
+		printf("ptemp[%d]= %x\n", i, tmpBytes[i]);
+		}
 		printf("bytes 3\n");
 		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen)){
+			
+			printf("bytes 31\n");
 			free(tmpBytes);
 			return 1;
 		}
 
-		free(tmpBytes);
+		
 		
 		printf("bytes 4\n");
 	}
+	
+	free(tmpBytes);
 	return 0;
 }
 
