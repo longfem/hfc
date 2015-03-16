@@ -832,9 +832,12 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
       
     //get call channal signal status
     enum ErrorTypeEm res;
-    
+
+    printf("send psi %x xxxx1 %d\n", ptableBytes, length);
     if (ptableBytes == NULL || length < 0)
     {
+        printf("send psi xxxx1 %d\n", length);
+        memset(sendbuf, 0 , sizeof(sendbuf));
         sendbuf[0]=0x77;
         sendbuf[1]=0x6C;
         sendbuf[2]=0x22;
@@ -848,10 +851,10 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 8, buf, &slen);
                 
-        //printf("\n####Recive SendTable_psi pat receive nums=[%d]\n", slen );
+        printf("\n####Recive SendTable_psi pat receive nums=[%d]\n", slen );
         if( slen ==9 ){
-              // for(i=0;i<slen;i++)
-              //   printf("Recive SendTable_psi buf[%d]=0x[%02x]\n",i, buf[i]);
+               //for(i=0;i<slen;i++)
+               //  printf("Recive SendTable_psi buf[%d]=0x[%02x]\n",i, buf[i]);
               
               if(buf[8]==0) {               
                 res = ok;
@@ -867,20 +870,26 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
     }
     /////////////////////////////////////////////////////////send first
 	list_t *paketList = NULL;
-	    
+
+	printf("send psi xxxx1\n");
 
 	paketList = MaketPaketSection(ptableBytes, length);
-        
+
+
+        printf("send psi xxxx2\n");
+
     int paketListLen = list_len(paketList); 
 	if (paketListLen == 0)
 		return 0;
 
+printf("send psi xxxx3\n");
 
     BufferUn_st *pPacket = NULL;
 	for (i = 0; i < paketListLen; i++)
 	{
 		iAddr = 0;
 
+printf("send psi xxxx4\n");
         memset(sendbuf, 0 , sizeof(sendbuf));
         sendbuf[0]=0x77;
         sendbuf[1]=0x6C;
@@ -901,6 +910,8 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 			sendbuf[7] = (unsigned char)(i + 1);
 		}
 
+        printf("send psi xxxx2\n")  ;
+
         pPacket = NULL;
         list_get(paketList, i, &pPacket);
 
@@ -910,7 +921,10 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
         communicate(ip, sendbuf, 8 + pPacket->bufLen, buf, &slen);
 		
 		if( slen > 8 ){
-              res = ok;                        
+              res = ok;
+
+               for(i=0;i<slen;i++)
+                     printf("send paketListLen SendTable_psi buf[%d]=0x[%02x]\n",i, buf[i]);
         }
         else{            
             return error;          

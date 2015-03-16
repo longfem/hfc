@@ -64,19 +64,27 @@ int SendTable(char *ip, int outChnId)
 	}
 	
 	printf("fuck 3\n");
-	// pbuff = NULL;	
-	// list_get(&pclsMux->table_sdt, iChn, &pbuff); 
-	// psiType = sdt;
-	// if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
-	// {					
-	// 	if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
-	// 		rslt = 0;
-	// }
-	// else
-	// {		
-	// 	if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
-	// 		rslt = 0;
-	// }
+	pbuff = NULL;
+	list_get(&pclsMux->table_sdt, iChn, &pbuff);
+	printf("fuck 4\n");
+	psiType = sdt;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
+	{
+	    printf("fuck 5 %x, %d\n", pbuff->pbuf, pbuff->bufLen);
+		if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+
+		printf("fuck 6\n");
+	}
+	else
+	{
+	    printf("fuck 7\n");
+		if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
+			rslt = 0;
+
+		printf("fuck 8\n");
+	}
+	printf("fuck over\n");
 	// pbuff = NULL;	
 	// list_get(&pclsMux->table_cat, iChn, &pbuff); 
 	// psiType = cat;
