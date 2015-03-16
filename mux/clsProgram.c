@@ -343,7 +343,7 @@ int MakeOutPutBytes(int outChn, unsigned char *outBytes, int *outLen)
 	printf("bytes out outChn = %d 1\n", outChn);
 	list_get(&clsProgram.outPrgList, outChn - 1, &pOutList);
 
-	printf("bytes out 2 = %d\n", outLen);
+	printf("bytes out 2 = %d\n", *outLen);
 	cSerialize(pOutList, outBytes, outLen);
 
 	printf("bytes out 3\n");
