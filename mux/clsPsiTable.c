@@ -26,11 +26,11 @@ Dev_prgInfo_st* buildOoutPrgList()
 
 }
 
-unsigned  long  CrcBytes(unsigned char *inBytes,int offset, int length)
+unsigned  int  CrcBytes(unsigned char *inBytes,int offset, int length)
 {
 	if (1)
 	{
-		unsigned  long  crc_table[] = {
+		unsigned  int  crc_table[] = {
 			0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9, 0x130476dc, 0x17c56b6b,
 			0x1a864db2, 0x1e475005, 0x2608edb8, 0x22c9f00f, 0x2f8ad6d6, 0x2b4bcb61,
 			0x350c9b64, 0x31cd86d3, 0x3c8ea00a, 0x384fbdbd, 0x4c11db70, 0x48d0c6c7,
@@ -77,10 +77,10 @@ unsigned  long  CrcBytes(unsigned char *inBytes,int offset, int length)
 
 		int i;
 		int len = offset + length;
-		unsigned  long  crc = 0xffffffff;
+		unsigned  int  crc = 0xffffffff;
 
 		for (i = offset; i < len; i++)
-			crc = (unsigned  long)((crc << 8) ^ crc_table[((crc >> 24) ^ inBytes[i]) & 0xff]);
+			crc = (unsigned  int)((crc << 8) ^ crc_table[((crc >> 24) ^ inBytes[i]) & 0xff]);
 		return crc;
 	}
 	else
@@ -213,7 +213,7 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 	}
 
 
-	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
+	unsigned  int crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
 
