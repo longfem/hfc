@@ -33,7 +33,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	int version = 2;
 	unsigned char patTable[188];
 	unsigned char pmtTable[188];
-	unsigned char sdtTable[6 * 188];
+	unsigned char sdtTable[8 * 188];
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
 
@@ -100,6 +100,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	    BufferUn_st  *outPMTBuffer;
 		list_get(tablePmt,list_len(tablePmt)-1,&outPMTBuffer);
 		free(outPMTBuffer->pbuf);
+		free(outPMTBuffer);
 		list_pop_tail(tablePmt);	
 	}
 	//for (i = 0; i < list_len(&prginfolist); i++)
@@ -120,6 +121,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 		}
 		else
 		{
+			CleanOutputTable(outChnId);
 			return 0;
 
 		}
@@ -142,16 +144,18 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	rstPat=CreateSdt(prginfolist,sdtTable, streamId, oringinalNetworkId, version);		
 
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
-	memcpy(pbuff->pbuf, sdtTable, sizeof(sdtTable));
-	pbuff->bufLen=sizeof(sdtTable);
+	memcpy(pbuff->pbuf, sdtTable,rstPat);
+	pbuff->bufLen=rstPat;
 
 	if (!rstPat)
 	{
+		CleanOutputTable(outChnId);
 
 		return 0;
 	}
 	else
 	{	
+
 		printf("make SDT SUCCESSFULL---%d\n",rstPat);
 
 	}
@@ -401,16 +405,34 @@ void printSDT(sdt_senction_st* SDTS)
 
 int CleanOutputTable(int outChannel)
 {
-	/*
+	
 	BufferUn_st  *pbuff;
 	int outChnIndex=outChannel-1;
-	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
 
-	if(pbuff!=NULL)
+
+	//PAT
+	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
+	pbuff->bufLen=9999;
+
+
+	//PMT
+	list_t *tablePmt;
+	list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
+	while(list_len(tablePmt))
 	{
-	list_append(&pclsMux->table_pat,NULL);
+	    BufferUn_st  *outPMTBuffer;
+		list_get(tablePmt,list_len(tablePmt)-1,&outPMTBuffer);
+		free(outPMTBuffer->pbuf);
+		free(outPMTBuffer);
+		list_pop_tail(tablePmt);	
 	}
-	*/
+
+	//SDT
+	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
+	pbuff->bufLen=9999;
+
+	
+	
 
 }
 
@@ -442,14 +464,14 @@ void ClsMuxInit(int _outMaxNum,int treeView_inLength)
 				BufferUn_st *pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
 
 				pbuff->pbuf=malloc(188);
-				pbuff->bufLen=999;
+				pbuff->bufLen=9999;
 				list_append(&pclsMux->table_pat,pbuff);
 
 
 				pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
 
-				pbuff->pbuf=malloc(6 * 188);
-				pbuff->bufLen=999;
+				pbuff->pbuf=malloc(8 * 188);
+				pbuff->bufLen=9999;
 				list_append(&pclsMux->table_sdt,pbuff);
 
 
