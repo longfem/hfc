@@ -11,6 +11,80 @@
 extern ClsParams_st *pdb;
 extern ClsProgram_st clsProgram;
 
+
+//SearchingStatus GetSearchingStatus(int inChn)
+//{
+//    int iAddr = 0;
+//    byte[] cmdBytes = new byte[20];
+//    cmdBytes[iAddr++] = _startBytes[0];
+//    cmdBytes[iAddr++] = _startBytes[1];
+//    cmdBytes[iAddr++] = 0x11;
+//    cmdBytes[iAddr++] = 0;
+//    cmdBytes[iAddr++] = (byte)inChn;
+//
+//    Array.Copy(cmdBytes, _buf, iAddr);
+//    int readLen = netConn.WriteAndRead(_buf, iAddr);
+//    ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
+//    if (checkRslt != ErrorTypeEm.ok)
+//        return SearchingStatus.Error;
+//    SearchingStatus rtnValue = (SearchingStatus)_buf[iAddr];
+//    return rtnValue;
+//}
+//
+//
+//ErrorTypeEm Search(int inChn)
+//{
+//    isSearchingContinue = true;
+//
+//    int iAddr = 0;
+//    byte[] cmdBytes = new byte[20];
+//    cmdBytes[iAddr++] = _startBytes[0];
+//    cmdBytes[iAddr++] = _startBytes[1];
+//    cmdBytes[iAddr++] = 0x11;
+//    cmdBytes[iAddr++] = 1;
+//    cmdBytes[iAddr++] = (byte)inChn;
+//
+//    Array.Copy(cmdBytes, _buf, iAddr);
+//    int readLen = netConn.WriteAndRead(_buf, iAddr);
+//    ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
+//    if (checkRslt != ErrorTypeEm.ok)
+//    {
+//        ShowInChannelStatus(false, 0);
+//        return ErrorTypeEm.cmd;
+//    }
+//    int rtnValue = _buf[iAddr];
+//    if (rtnValue != 0)
+//        return ErrorTypeEm.cmd;
+//
+//    SearchingStatus searchStatus = SearchingStatus.Error;
+//
+//    //DateTime startTime = DateTime.Now;
+//    int startTimeMinute = DateTime.Now.Minute;
+//    while (isSearchingContinue)
+//    {
+//        Thread.Sleep(200);
+//        searchStatus = GetSearchingStatus(inChn);
+//        if (searchStatus != SearchingStatus.searching)
+//        {
+//            break;
+//        }
+//        int endTimeMinute = DateTime.Now.Minute;
+//        if (endTimeMinute < startTimeMinute)
+//            endTimeMinute += 60;
+//        if (endTimeMinute - startTimeMinute > 3)
+//        {
+//            break;
+//        }
+//    }
+//
+//    if (searchStatus == SearchingStatus.ok)
+//        return ErrorTypeEm.ok;
+//    else
+//        return ErrorTypeEm.cmd;
+//}
+
+
+
 ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
 {
     unsigned char buf[20];
@@ -33,6 +107,9 @@ ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
     sendbuf[6]=(unsigned char) outputRate & 0xff;
     sendbuf[7]=(unsigned char) (outputRate & 0xff00)>>8;
     sendbuf[8]=(unsigned char) (outputRate & 0xff0000>>16);
+
+    for(i=0;i<9;i++)
+                 printf("now will send SetOutRate sendbuf[%d]=0x[%02x]\n",i, sendbuf[i]);
 
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);

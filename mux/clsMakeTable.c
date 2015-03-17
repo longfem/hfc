@@ -30,7 +30,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 
 	//int streamId = 1;
 	//int netWorkId = 16;
-	int version = 2;
+	//int version = 2;
 	unsigned char patTable[188];
 	unsigned char pmtTable[188];
 	unsigned char sdtTable[8 * 188];
@@ -44,15 +44,21 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
   //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
 
+	int selCnt = CountSelectedPrgCnt(outChnId);
+	if (selCnt > 29)
+	{
+		printf("èŠ‚ç›®æ€»æ•° æº¢å‡º*** \n");
+		return 0;
+	}
 	int streamId = outChnArray[outChnIndex].streamId;
 	int netWorkId = outChnArray[outChnIndex].networkId;
 	int oringinalNetworkId = outChnArray[outChnIndex].oringal_networkid;
-	//int version = outChnArray[outChnIndex].version;
+	int version = outChnArray[outChnIndex].version;
 
 	// PAT
 
 	/*
-	if (outChnArray[outChnIndex].isAutoRaiseVersion) // ×Ô¶¯Ôö¼Ó°æ±¾ºÅ
+	if (outChnArray[outChnIndex].isAutoRaiseVersion) // ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ó°æ±¾ï¿½ï¿½
 	{
 	version++;
 	if (version > 31)
