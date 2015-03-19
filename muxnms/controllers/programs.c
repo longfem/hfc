@@ -242,6 +242,7 @@ static void getoutprg(HttpConn *conn) {
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(ip, outChn);
+		LoadBitrateAndTableEnable(ip, outChn);
 	} 
 
 	getoutprgsJson(ip, Chn - 1, outprg);
@@ -372,12 +373,12 @@ static void maketable(HttpConn *conn) {
 /*制表后获取输出流表*/
 static void streamtable(HttpConn *conn) { 
 	int pos = 0, i = 0;
-	char outstring[1024] = {0};
+	char outstring[4096] = {0};
 	cJSON *streamsarray,*streamjson;
 	char* streamjsonstring;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
-	streamsarray = cJSON_CreateArray();	
+	streamsarray = cJSON_CreateArray();
 	if(list_len(&clsProgram.PrgAVMuxList)>0)
 	{
 		list_t *AVMuxList = clsProgram.PrgAVMuxList[pos - 1];
@@ -396,7 +397,7 @@ static void streamtable(HttpConn *conn) {
 	streamjsonstring = cJSON_PrintUnformatted(streamsarray);
 		
 	memcpy(outstring, streamjsonstring, strlen(streamjsonstring));
-	//printf("------>>>%d\n",strlen(prgjsonstring));
+	//printf("---len--->>>%d\n",strlen(streamjsonstring));
 	//释放内存	
 	cJSON_Delete(streamsarray);		
 	free(streamjsonstring);
@@ -453,6 +454,7 @@ static void getchanneloutinfo(HttpConn *conn) {
 	cJSON_AddNumberToObject(pdbjson,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt);
 	cJSON_AddNumberToObject(pdbjson,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt);
 	jsonstring = cJSON_PrintUnformatted(pdbjson);
+	printf("------------outrate------------>>>>%d\n", pdb->pvalueTree->poutChnArray[inCh-1].outputRate);
 	render(jsonstring);
 	cJSON_Delete(pdbjson);
 	free(jsonstring);

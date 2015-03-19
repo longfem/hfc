@@ -196,11 +196,13 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 6, buf, &slen);
     
-    //printf("\n####Recive GetChannelOutputMaxRate receive nums=[%d]\n", slen );
+   // printf("\n####Recive GetChannelOutputMaxRate receive nums=[%d]\n", slen );
+
+
     if( 9 == slen ){
-          // for(i=0;i<slen;i++)
-          //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
-              
+       // for(i=0;i<9;i++)
+       //                  printf("Receive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);
+
         *outRate = ( buf[8]<<24| buf[7]<<8 | buf[6]) & 0xffffff;       
 
          res = ok;
@@ -1419,10 +1421,10 @@ void LoadBitrateAndTableEnable(char *ip, int iChn)
         printf("pdb not init id prggetinfo!\n");
         return ;
     }
-
     unsigned int outrate = 0;
     GetChannelOutputMaxRate(ip, iChn + 1, &outrate);
-    
+
+
     unsigned int rate = pdb->pvalueTree->poutChnArray[iChn].outputRate = outrate;
 
 

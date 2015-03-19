@@ -1481,6 +1481,65 @@ function devinfo_output(devType){
 						$("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
 						break;
 					} case '#itmes': {
+                        //获取输出通道设置信息
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel=2",
+                            dataType: "json",
+                            success: function(data){
+                                //JSON.parse(data);
+                                $('.item_transid').val('0x' + data.streamId.toString(16));
+                                $('.item_netid').val('0x' + data.networkId.toString(16));
+
+                                $('.item_orignetid').val('0x' + data.oringal_networkid.toString(16));
+                                $('.item_out').val(data.outputRate);
+                                if(data.isAutoRaiseVersion){
+                                    $('.autoinc_ver')[0].checked = true;
+                                }else{
+                                    $('.autoinc_ver')[0].checked = false;
+                                }
+                                $('.item_version')[0].textContent = data.version;
+                                if(data.isAutoRankPAT){
+                                    $('.pat_auto')[0].checked = true;
+                                }else{
+                                    $('.pat_auto')[0].checked = false;
+                                }
+                                if(data.isNeedSend_cat){
+                                    $('.sl_cat')[0].checked = true;
+                                }else{
+                                    $('.sl_cat')[0].checked = false;
+                                }
+                                if(data.isNeedSend_nit){
+                                    $('.sl_nit')[0].checked = true;
+                                }else{
+                                    $('.sl_nit')[0].checked = false;
+                                }
+                                if(data.isNeedSend_pat){
+                                    $('.sl_pat')[0].checked = true;
+                                }else{
+                                    $('.sl_pat')[0].checked = false;
+                                }
+                                if(data.isNeedSend_pmt){
+                                    $('.sl_pmt')[0].checked = true;
+                                }else{
+                                    $('.sl_pmt')[0].checked = false;
+                                }
+                                if(data.isNeedSend_sdt){
+                                    $('.sl_sdt')[0].checked = true;
+                                }else{
+                                    $('.sl_sdt')[0].checked = false;
+                                }
+                                $('#tag_channel')[0].textContent = 2;
+
+                                dig_itmes.dialog( "open" );
+                            },
+                            error : function(err) {
+                                // view("异常！");
+                                var xxx = err;
+                                alert("异常！====="+JSON.stringify(err));
+                            }
+                        });
 						dig_itmes.dialog( "open" );
 						break;
 					} case '#re_prg': {
@@ -1726,8 +1785,22 @@ function devinfo_output(devType){
 				dig_itmes.dialog( "close" );
 			},
 			"应用":function() {
-				
-				dig_itmes.dialog( "close" );
+                var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ Number($('.item_netid').val()) + ',"streamId":' + Number($('.item_transid').val()) + ',"oringal_networkid":' + Number($('.item_orignetid').val()) + ',"outputRate":' + Number($('.item_out').val())+ ',"isAutoRaiseVersion":' + ($('.autoinc_ver')[0].checked == true?1:0) + ',"version":' + Number($('.item_version')[0].textContent) + ',"isAutoRankPAT":' + ($('.pat_auto')[0].checked == true?1:0) + ',"isNeedSend_cat":' + ($('.sl_cat')[0].checked == true?1:0) + ',"isNeedSend_nit":' + ($('.sl_nit')[0].checked == true?1:0) + ',"isNeedSend_pat":' + ($('.sl_pat')[0].checked == true?1:0) + ',"isNeedSend_pmt":' + ($('.sl_pmt')[0].checked == true?1:0) + ',"isNeedSend_sdt":' + ($('.sl_sdt')[0].checked == true?1:0) + '}';
+                //下发配置
+                $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+localip+":4000/do/programs/setchanneloutinfo",
+                    data: JSON.parse(jsonstr),
+                    dataType: "json",
+                    success: function(data){
+                        if(data.sts == 1){
+
+                        }
+                    },
+                    error : function(err) {
+                    }
+                });
 			}
 		}
 	});
