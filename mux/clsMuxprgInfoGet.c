@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 
 #include "datastructdef.h"
 #include "communicate.h"
@@ -1438,4 +1438,80 @@ void LoadBitrateAndTableEnable(char *ip, int iChn)
     pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt = (tableEnableFlag & 0x4) > 0;
     pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat = (tableEnableFlag & 0x8) > 0;
     pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit = (tableEnableFlag & 0x10) > 0;
+}
+
+int GetSearchingStatus(char *ip, int inChn)
+{
+    int iAddr = 0;
+    int rlen=0;
+    unsigned char sendbuf[20];
+    unsigned char buf[1024];
+    sendbuf[iAddr++] = 0x77;
+    sendbuf[iAddr++] = 0x6C;
+    sendbuf[iAddr++] = 0x11;
+    sendbuf[iAddr++] = 0;
+    sendbuf[iAddr++] = (unsigned char)inChn;
+
+    communicate(ip, sendbuf, iAddr, buf, &rlen);
+    if(rlen <= iAddr){
+        return -1;
+    }
+    int rtnValue = buf[iAddr];
+    return rtnValue;
+
+}
+
+ErrorTypeEm Search(char *ip, int inChn)
+{
+    unsigned char buf[1024];
+    int i = 0, j=0;
+    unsigned char sendbuf[1024];
+    int iAddr = 0;
+    int rlen=0;
+    //byte[] cmdBytes = new byte[20];
+    sendbuf[iAddr++] = 0x77;
+    sendbuf[iAddr++] = 0x6C;
+    sendbuf[iAddr++] = 0x11;
+    sendbuf[iAddr++] = 1;
+    sendbuf[iAddr++] = (unsigned char)inChn;
+
+    communicate(ip, sendbuf, iAddr, buf, &rlen);
+    if(rlen <= iAddr){
+        //搜索失败
+        return cmd;
+    }
+    int rtnValue = buf[iAddr];
+    if (rtnValue != 0)
+        return cmd;
+
+    int searchStatus = -1;
+    //DateTime startTime = DateTime.Now;
+    time_t rawtime;
+    struct tm * timeinfo;
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    int startTimeMinute = timeinfo->tm_min;
+    while (1)
+    {
+        usleep(200);
+        searchStatus = GetSearchingStatus(ip, inChn);
+        if (searchStatus != 1)
+        {
+            break;
+        }
+        time ( &rawtime );
+        timeinfo = localtime ( &rawtime );
+        int endTimeMinute = timeinfo->tm_min;
+        if (endTimeMinute < startTimeMinute)
+            endTimeMinute += 60;
+        if (endTimeMinute - startTimeMinute > 3)
+        {
+            break;
+        }
+    }
+
+    if (searchStatus == 2)
+        return ok;
+    else
+        return cmd;
 }

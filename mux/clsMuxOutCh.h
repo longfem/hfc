@@ -1,6 +1,6 @@
 
-#include "EnumDef.h"
 
+#include "EnumDef.h"
 
 #ifndef _CLS_MUX_OUT_CHANNEL_H_
 #define _CLS_MUX_OUT_CHANNEL_H_
@@ -17,6 +17,7 @@ ErrorTypeEm GetOutChnTableVer(char *ip, int outChn, unsigned char *outTableVer);
 ErrorTypeEm SetOutChnTableVer(char *ip, int outChn, unsigned char outTableVer);
 ErrorTypeEm GetTableEnableFlag(char *ip, int outChn, unsigned int *outStatus);
 ErrorTypeEm SetTableEnableFlag(char *ip, int outChn, unsigned int outStatus);
+
 #endif
 
 

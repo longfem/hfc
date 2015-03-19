@@ -87,6 +87,79 @@ function checkselectedprg(){
 		 }   
 	});
 }
+
+function readprgs(){
+    $("#devlist").fancytree("getTree").reload();
+    $("#channel").fancytree("getTree").reload();
+    var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
+    var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+    //获取全局初始化信息
+    $.ajax({
+        type: "GET",
+        async:false,
+        url: "http://"+localip+":4000/do/programs/getglobalinfo",
+        // data: {ip:"192.168.1.134", inch:2},
+        dataType: "json",
+        success: function(data){
+            _intChannelCntMax = data._intChannelCntMax;
+        },
+        error : function(err) {
+
+        }
+    });
+
+    if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
+        for(var i=1;i<_intChannelCntMax+1; i++){
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
+                // data: {ip:"192.168.1.134", inch:2},
+                dataType: "json",
+                success: function(data){
+                    data = JSON.stringify(data).replace('\\','');
+                    //alert("-----"+data);
+                    var treeData1 = JSON.parse(data);
+                    node.addChildren(treeData1);
+                },
+                error : function(err) {
+                    // view("异常！");
+                    var xxx = err;
+                    alert("异常！====="+JSON.stringify(err));
+                }
+            });
+        }
+    }
+
+    //获取输出通道信息
+    $.ajax({
+        type: "GET",
+        async:false,
+        url: "http://"+localip+":4000/do/programs/getoutprg?inch=1",
+        // data: {ip:"192.168.1.134", inch:2},
+        dataType: "json",
+        success: function(data){
+            if(data.sts == 1){
+
+            }else{
+                $.each(data, function(key, prg) {
+                    var nkey = "id1." + prg.ch;
+                    node = $("#channel").fancytree("getTree").getNodeByKey(nkey);
+                    node.addChildren(prg.children);
+                    var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                    node = $("#devlist").fancytree("getTree").getNodeByKey(prgkey);
+                    node.setSelected(true);
+                });
+            }
+
+        },
+        error : function(err) {
+            // view("异常！");
+            var xxx = err;
+            alert("异常！====="+JSON.stringify(err));
+        }
+    });
+}
 	
 function devinfo_output(devType){
 	$('.main-content').empty();
@@ -105,6 +178,7 @@ function devinfo_output(devType){
 						+'<div id="channel" class="program"></div>'
 					+'</div>'
 					+'<div class="tbn_div">'
+                        +'<button id="output-search" class="STRING_SEARCH">搜索</button>'
 						+'<button id="output-read" class="STRING_READ">读取</button>'
 						+'<button id="output-table" class="STRING_WRITE">制表</button>'
 						+'<button id="output-write" class="STRING_WRITE">应用</button>'					
@@ -154,6 +228,7 @@ function devinfo_output(devType){
 						+'<div id="channel" class="program"></div>'
 					+'</div>'
 					+'<div class="tbn_div">'
+                        +'<button id="output-search" class="STRING_SEARCH">搜索</button>'
 						+'<button id="output-read" class="STRING_READ">读取</button>'
 						+'<button id="output-table" class="STRING_WRITE">制表</button>'
 						+'<button id="output-write" class="STRING_WRITE">应用</button>'					
@@ -338,6 +413,10 @@ function devinfo_output(devType){
 				+'</div>'
 			+'</div>'
 		+'</div>'
+        +'<div id="progress-dialog" title="搜索">'
+            +'<div class="progress-label" data-ch = 1>正在准备搜索...</div>'
+            +'<div id="progressbar"></div>'
+        +'</div>'
 	);
 	
 	//描述符表
@@ -355,83 +434,68 @@ function devinfo_output(devType){
 	});	 	
 
 	var tabs = $("#devoutput").tabs();
+    $( "#output-search" ).button({
+        icons: {
+            primary: "ui-icon-search"
+        }
+    }).click(function( event ) {
+        event.preventDefault();
+        if(_intChannelCntMax == 0){
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "http://"+localip+":4000/do/programs/getglobalinfo",
+                // data: {ip:"192.168.1.134", inch:2},
+                dataType: "json",
+                success: function(data){
+                    _intChannelCntMax = data._intChannelCntMax;
+                },
+                error : function(err) {
+
+                }
+            });
+        }
+        if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
+            progress_dialog.dialog( "open" );
+            progressbar.progressbar( "value", 0 );
+            for(var i=1;i<_intChannelCntMax+1; i++){
+                $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+localip+":4000/do/programs/search?inch="+i,
+                    // data: {ip:"192.168.1.134", inch:2},
+                    dataType: "json",
+                    success: function(data){
+                        //更新进度条
+                        if(data.sts != 0){
+                            alert("搜索出现异常!!");
+                            return;
+                        }
+                        if(_intChannelCntMax == data.process){
+                            progressbar.progressbar( "value", 10 * 10 );
+                        }else{
+                            progressbar.progressbar( "value", Math.round(data.process*100/_intChannelCntMax ));
+                            $('.progress-label')[0].dataset.ch = data.process + 1;
+                        }
+
+                    },
+                    error : function(err) {
+                        // view("异常！");
+                        var xxx = err;
+                        alert("异常！====="+JSON.stringify(err));
+                    }
+                });
+            }
+        }
+    });
+
 	$( "#output-read" ).button({
       icons: {
         primary: "ui-icon-comment"
       }
     }).click(function( event ) {
         event.preventDefault();
-		$("#devlist").fancytree("getTree").reload();
-		$("#channel").fancytree("getTree").reload();
-		var node = $("#devlist").fancytree("getTree").getNodeByKey("id1.0");
-		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
-		//获取全局初始化信息
-		$.ajax({
-			 type: "GET",
-			 async:false,
-			 url: "http://"+localip+":4000/do/programs/getglobalinfo",
-			// data: {ip:"192.168.1.134", inch:2},
-			 dataType: "json",
-			 success: function(data){
-				_intChannelCntMax = data._intChannelCntMax;
-				_selectcount = data._selectcount0;
-			 },    
-			 error : function(err) {    
-   
-			 }   
-		});
-		
-		if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
-			for(var i=1;i<_intChannelCntMax+1; i++){
-				$.ajax({
-					 type: "GET",
-					 async:false,
-					 url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
-					// data: {ip:"192.168.1.134", inch:2},
-					 dataType: "json",
-					 success: function(data){
-						data = JSON.stringify(data).replace('\\','');
-						//alert("-----"+data);
-						var treeData1 = JSON.parse(data);				
-						node.addChildren(treeData1);
-					 },    
-					 error : function(err) {    
-						  // view("异常！");   
-						var xxx = err;
-						  alert("异常！====="+JSON.stringify(err));    
-					 }   
-				});
-			}
-		}
-
-		//获取输出通道信息
-		$.ajax({
-			 type: "GET",
-			 async:false,
-			 url: "http://"+localip+":4000/do/programs/getoutprg?inch=1",
-			// data: {ip:"192.168.1.134", inch:2},
-			 dataType: "json",
-			 success: function(data){
-				if(data.sts == 1){
-					
-				}else{
-					$.each(data, function(key, prg) {
-						var nkey = "id1." + prg.ch;
-						node = $("#channel").fancytree("getTree").getNodeByKey(nkey);
-						node.addChildren(prg.children);
-						var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
-						node = $("#devlist").fancytree("getTree").getNodeByKey(prgkey);
-						node.setSelected(true);
-					});
-				}
-				
-			 },    
-			 error : function(err) {    
-				  // view("异常！");   
-				var xxx = err;
-				  alert("异常！====="+JSON.stringify(err));    
-			 }   
-		});
+		readprgs();
     });
 	
 	$( "#output-table" ).button({
@@ -1667,6 +1731,26 @@ function devinfo_output(devType){
 			}
 		}
 	});
+
+    var progressbar = $( "#progressbar" ),
+        progressLabel = $( ".progress-label" );
+    var progress_dialog = $( "#progress-dialog" ).dialog({
+        autoOpen: false,
+        closeOnEscape: false,
+        resizable: false
+    });
+    progressbar.progressbar({
+        value: true,
+        change: function() {
+            progressLabel.text( "正在搜索第 " + $('.progress-label')[0].dataset.ch + " 通道" );
+        },
+        complete: function() {
+            $('.progress-label')[0].dataset.ch = 1;
+            progressLabel.text( "Complete!" );
+            progress_dialog.dialog( "close" );
+            readprgs();
+        }
+    });
 }
 
 

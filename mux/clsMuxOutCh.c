@@ -1,6 +1,6 @@
 
 
-#include "EnumDef.h"
+//#include "EnumDef.h"
 #include "communicate.h"
 #include "clsMuxOutCh.h"
 

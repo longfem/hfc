@@ -748,24 +748,38 @@ static void common(HttpConn *conn) {
 
 static void getglobalinfo(HttpConn *conn) { 
 	char str[64] = {0};
-	//char idstr[16] = {0};
-	//int i = 0;
-	//ChannelProgramSt *prginfo;
 	cJSON *result = cJSON_CreateObject();
 	char* jsonstring;
 	cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
-	/*for(i=0;i<clsProgram._outChannelCntMax;i++){
-		memset(idstr,0, sizeof(idstr));
-		sprintf(idstr, "_selectcount%d", i+1);
-		list_get(&clsProgram.outPrgList, i, &prginfo);
-		cJSON_AddNumberToObject(result, idstr, list_len(&prginfo->prgNodes));
-	}*/
 	jsonstring = cJSON_PrintUnformatted(result);
 	memcpy(str, jsonstring, strlen(jsonstring));
 	//释放内存	
 	cJSON_Delete(result);		
 	free(jsonstring);
 	render(str);
+}
+
+static void search(HttpConn *conn) {
+	char ip[16] = "192.168.1.134";
+	char str[64] = {0};
+	int i = 0, rst = 0;
+    char* jsonstring;
+    MprJson *jsonparam = httpGetParams(conn);
+    //printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+    int inCh = atoi(mprGetJson(jsonparam, "inch"));
+    rst = Search(ip, inCh);
+
+    cJSON *result = cJSON_CreateObject();
+    cJSON_AddNumberToObject(result, "sts", rst);
+    cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
+    cJSON_AddNumberToObject(result, "process", inCh);
+    jsonstring = cJSON_PrintUnformatted(result);
+    memset(str, 0, sizeof(str));
+    memcpy(str, jsonstring, strlen(jsonstring));
+    render(str);
+    //释放内存
+    cJSON_Delete(result);
+    free(jsonstring);
 }
 
 static void espinit() {	
@@ -826,6 +840,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
 	espDefineAction(route, "programs-cmd-getpidtransinfo", getpidtransinfo);
 	espDefineAction(route, "programs-cmd-setpidtransinfo", setpidtransinfo);
+	espDefineAction(route, "programs-cmd-search", search);
 	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

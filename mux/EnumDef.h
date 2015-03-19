@@ -18,7 +18,7 @@
 		invalid, guest, user, admin
 	}UserGroupEm;
 
-	typedef enum ConnectTypeEm 
+	typedef enum ConnectTypeEm
 	{
 		TCP = 1, UDP = 2, COM = 3
 	}ConnectTypeEm;
@@ -34,9 +34,14 @@
 	}ErrorTypeEm;
 
 
-	typedef enum PsiTableType 
+	typedef enum PsiTableType
 	{
 		pat = 1, pmt = 2, sdt = 3, cat = 4, nit = 5
 	}PsiTableType;
 
-#endif 
+/*	typedef enum SearchingStatus
+    {
+        Error, noSearched = 0, searching = 1, Ok = 2
+    }SearchingStatus
+*/
+#endif
