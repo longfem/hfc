@@ -49,7 +49,7 @@ int SendTable(char *ip, int outChnId)
 	int table_pmtListLen = list_len(&pclsMux->table_pmtList);
 	list_get(&pclsMux->table_pmtList, iChn, &table_pmt);
 
-	
+
 	int table_pmtLen = 0;
 	if(NULL!= table_pmt){
 		table_pmtLen = list_len(table_pmt);
@@ -57,8 +57,8 @@ int SendTable(char *ip, int outChnId)
 
 
 
-	if (pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt && 
-		table_pmt != NULL 
+	if (pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt &&
+		table_pmt != NULL
 		&& table_pmtLen > 0
 		)
 	{
@@ -88,6 +88,7 @@ int SendTable(char *ip, int outChnId)
 		if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
 			rslt = 0;
 	}
+	///////////////////////////////////////////////////////////////////////////////////////
 	// pbuff = NULL;	
 	// list_get(&pclsMux->table_cat, iChn, &pbuff); 
 	// psiType = cat;
@@ -178,7 +179,7 @@ void SendMux(char *ip, int outChnId)
 
 	printf("sendMux 1 outChnId=%d\n", outChnId);
 
-	int selCnt = CountSelectedPrgCnt(outChnId);
+    int selCnt = CountSelectedPrgCnt(outChnId);
 	//MuxPrgNumMax
 	if (selCnt > o_selectedPrgCntMax) 
 	{		
