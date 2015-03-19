@@ -80,7 +80,7 @@ int sendPrograms(char *ip, int outChnId)
 	{		
 		sendOutPutMuxInfo(ip, outChnId);
 		printf("2\n");
-//		sendOutPutOption(ip, outChnId);
+		sendOutPutOption(ip, outChnId);
 
 		printf("sendPrograms finish\n");
 	}

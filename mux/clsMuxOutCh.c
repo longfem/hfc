@@ -453,6 +453,9 @@ ErrorTypeEm SetTableEnableFlag(char *ip, int outChn, unsigned int outStatus)
     sendbuf[6]=(unsigned char) (outStatus & 0xff);
     sendbuf[7]=(unsigned char) ((outStatus & 0xff00) >> 8);
 
+     for(i=0;i<8;i++)
+                     printf("now will send SetTableEnableFlag  sendbuf[%d]=0x[%02x]\n",i, sendbuf[i]);
+
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 8, buf, &slen);
     

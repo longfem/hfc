@@ -28,11 +28,11 @@ int SendTable(char *ip, int outChnId)
 
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
 	{
-		printf("send_pat begin\n");
-	    for(i=0;i<pbuff->bufLen;i++){
-	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
-	    }
-	    printf("send_pat end\n");
+//		printf("send_pat begin\n");
+//	    for(i=0;i<pbuff->bufLen;i++){
+//	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
+//	    }
+//	    printf("send_pat end\n");
 		if (SendTable_psi(ip, outChnId, pat, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 	}
