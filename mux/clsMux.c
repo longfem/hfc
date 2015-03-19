@@ -78,7 +78,7 @@ int sendOutPutOption(char *ip, int outChnId)
 {
 	int outChnIndexTmp = outChnId - 1;
 	printf("option 1\n");
-//	pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate= 7340144;
+
 //	ErrorTypeEm errRslt = SetOutRate(ip, outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);
 
 	printf("option 2\n");
