@@ -763,32 +763,38 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
     //get call channal signal status
     enum ErrorTypeEm res;
 
-    if(pmtList==NULL ) return error;
+
 
     unsigned int pmtListLen = list_len(pmtList);
-    if(pmtListLen <=0) return error;
-    
-    sendbuf[0]=0x77;
-    sendbuf[1]=0x6C;
-    sendbuf[2]=0x22;
-    sendbuf[3]=(unsigned char)outChannel;
-    sendbuf[4]=0x02; //type pmt
-    sendbuf[5]=0x02;
-    sendbuf[6]=0x00;
 
-    
 
-    memset(buf,0,sizeof(buf));
-    communicate(ip, sendbuf, 7, buf, &slen);
-    
-   
-    if( slen < 7 ){
-          // for(i=0;i<slen;i++)
-          //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
-            res = error;
-            return res;
-                         
+    if(pmtList==NULL || pmtListLen ==0){
+        sendbuf[0]=0x77;
+        sendbuf[1]=0x6C;
+        sendbuf[2]=0x22;
+        sendbuf[3]=(unsigned char)outChannel;
+        sendbuf[4]=0x02; //type pmt
+        sendbuf[5]=0x02;
+        sendbuf[6]=0x00;
+
+
+
+        memset(buf,0,sizeof(buf));
+        communicate(ip, sendbuf, 7, buf, &slen);
+
+        printf("pmtList = NULL will return\n");
+        if( slen < 7 ){
+              // for(i=0;i<slen;i++)
+              //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
+                res = error;
+        }else{
+            res = ok;
+        }
+
+        return res;
     }
+    
+
 	
     res = ok;
 

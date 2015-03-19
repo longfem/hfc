@@ -30,7 +30,7 @@ int SendTable(char *ip, int outChnId)
 	{
 		printf("send_pat begin\n");
 	    for(i=0;i<pbuff->bufLen;i++){
-	       printf("send_pat[%d]=%x ",i, pbuff->pbuf[i]);
+	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
 	    }
 	    printf("send_pat end\n");
 		if (SendTable_psi(ip, outChnId, pat, pbuff->pbuf, pbuff->bufLen) != ok)
@@ -62,12 +62,6 @@ int SendTable(char *ip, int outChnId)
 		&& table_pmtLen > 0
 		)
 	{
-	    list_get(table_pmt, iChn, &pbuff);
-	    printf("send_pmt begin\n");
-		for(i=0;i<pbuff->bufLen;i++){
-		   printf("send_pmt[%d]=%x ",i, pbuff->pbuf[i]);
-		}
-		printf("send_pmt end\n");
 
 		if (SendTable_pmt(ip, outChnId, table_pmt) != ok)
            rslt = 0;
