@@ -213,7 +213,7 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 	}
 
 
-	unsigned  int crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
+	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
 
@@ -634,7 +634,7 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 	{
 		for (i = 0; i < iAddr; i++)
 			sdtTable[i] = tmpBytes[i];
-		return 1;
+		return iAddr;
 	}
 	return 0;
 

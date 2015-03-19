@@ -456,10 +456,12 @@ ErrorTypeEm SetTableEnableFlag(char *ip, int outChn, unsigned int outStatus)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 8, buf, &slen);
     
-    //printf("\n####Recive SetTableEnableFlag receive nums=[%d]\n", slen );
+    printf("\n####Recive SetTableEnableFlag receive nums=[%d]\n", slen );
+    for(i=0;i<slen;i++)
+                 printf("Recive SetTableEnableFlag buf[%d]=0x[%02x]\n",i, buf[i]);
+
     if( 9 == slen ){
-           for(i=0;i<slen;i++)
-             printf("Recive SetTableEnableFlag buf[%d]=0x[%02x]\n",i, buf[i]);    
+
          
          res = ok;
 

@@ -126,7 +126,6 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 	int listlen = list_len(&poutList->prgNodes);
 
 	bufLen += 4;  //listlen
-	printf("list len = %d\n", listlen);
 
 	for(k=0; k < listlen; k ++){
 		//compute on prg need malloc buf len
@@ -245,8 +244,6 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 
 	//psdt
 
-	printf(" serial 7 \n");
-
 	if(pBuf != NULL){
 		printf(" serial okkkk  \n");
 		*pOutbuf = pBuf;
@@ -257,8 +254,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		*pOutbuf = NULL;
 		*outLen = 0;
 	}       
-	
-	printf(" serial 18\n");
+
 }
 
 int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
@@ -345,19 +341,13 @@ int MakeOutPutBytes(int outChn, unsigned char **outBytes, int *outLen)
 	unsigned char *ptemp = NULL;
 	int i=0;
 	ChannelProgramSt * pOutList = NULL;
-	
-	printf("bytes out outChn = %d 1\n", outChn);
+
 	list_get(&clsProgram.outPrgList, outChn - 1, &pOutList);
 
-	printf("bytes out 2 = %d\n", outLen);
 	cSerialize(pOutList, &ptemp, outLen);
-
-	
 	
 	*outBytes =ptemp;
-	
-		
-	printf("bytes out 3\n");
+
 	return *outLen;
 
 }
@@ -368,27 +358,17 @@ unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 	unsigned char *tmpBytes = NULL;
 	unsigned int tmpBytesLen=0;
 
-	printf("bytes 1\n");
 	int i=0;
 	
 	int sendLen = MakeOutPutBytes(outChn,  &tmpBytes, &tmpBytesLen);
-	printf("bytes 2 MakeOutPutBytes len = %d\n", sendLen);
+
 	if (sendLen > 0)
 	{
-		for(i=0; i< 10; i++){
-		printf("ptemp[%d]= %x\n", i, tmpBytes[i]);
-		}
-		printf("bytes 3\n");
 		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen)){
-			
 			printf("bytes 31\n");
 			free(tmpBytes);
 			return 1;
 		}
-
-		
-		
-		printf("bytes 4\n");
 	}
 	
 	free(tmpBytes);
