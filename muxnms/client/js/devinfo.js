@@ -417,6 +417,9 @@ function devinfo_output(devType){
             +'<div class="progress-label" data-ch = 1>正在准备搜索...</div>'
             +'<div id="progressbar"></div>'
         +'</div>'
+        +'<div id="progress-notification" title="通知">'
+        +'<p>正在应用设置...</p>'
+        +'</div>'
 	);
 	
 	//描述符表
@@ -592,16 +595,18 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
+        dig_notification.dialog("open");
 		$.ajax({
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/programs/writetable?channel=" + 1,
 			 dataType: "json",
 			 success: function(data){
-				
+                 dig_notification.dialog("close");
 			 },    
 			 error : function(err) { 
 				//alert(err);
+                 dig_notification.dialog("close");
 			 }   
 		});
 		//alert('------------------!!!');
@@ -751,8 +756,20 @@ function devinfo_output(devType){
         primary: "ui-icon-pencil"
       }
     }).click(function( event ) {
-        event.preventDefault();
-		alert('------------------!!!');
+        dig_notification.dialog("open");
+        $.ajax({
+            type: "GET",
+            async:false,
+            url: "http://"+localip+":4000/do/programs/writetable?channel=" + 2,
+            dataType: "json",
+            success: function(data){
+                dig_notification.dialog("close");
+            },
+            error : function(err) {
+                //alert(err);
+                dig_notification.dialog("close");
+            }
+        });
     });
 	
 	//输入通道树
@@ -771,7 +788,9 @@ function devinfo_output(devType){
 					$(".menu_delete").css("display", "none");
 				}else if(data.node.key.length == 5){
 					$(".menu_delete").css("display", "block");
-				}			    
+				}else{
+                    $(".menu_delete").css("display", "none");
+                }
 			},
 			select: function(event, data){				
 				switch(data.menuId){
@@ -788,6 +807,7 @@ function devinfo_output(devType){
 						break;
 					} case '#delete': {
 						while( data.node.hasChildren() ) {
+                            data.node.setSelected(false);
 							data.node.getFirstChild().remove();
 						}
 						break;
@@ -1086,10 +1106,136 @@ function devinfo_output(devType){
 						});						
 						break;
 					} case '#re_prg': {
-						
-						break;
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+localip+":4000/do/programs/reprgnum?inch=1",
+                            dataType: "json",
+                            success: function(data){
+                                if(data.sts == 1){
+                                    //获取输出通道信息
+                                    $("#channel").fancytree("getTree").reload();
+                                    $.ajax({
+                                        type: "GET",
+                                        async:false,
+                                        url: "http://"+localip+":4000/do/programs/getoutprg?inch=1",
+                                        // data: {ip:"192.168.1.134", inch:2},
+                                        dataType: "json",
+                                        success: function(data){
+                                            if(data.sts == 1){
+
+                                            }else{
+                                                $.each(data, function(key, prg) {
+                                                    var nkey = "id1." + prg.ch;
+                                                    node = $("#channel").fancytree("getTree").getNodeByKey(nkey);
+                                                    node.addChildren(prg.children);
+                                                    var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                                                    node = $("#devlist").fancytree("getTree").getNodeByKey(prgkey);
+                                                    node.setSelected(true);
+                                                });
+                                            }
+                                        },
+                                        error : function(err) {
+                                            alert("异常！====="+JSON.stringify(err));
+                                        }
+                                    });
+                                    $("#channel2").fancytree("getTree").reload();
+                                    $.ajax({
+                                        type: "GET",
+                                        async:false,
+                                        url: "http://"+localip+":4000/do/programs/getoutprg?inch=2",
+                                        // data: {ip:"192.168.1.134", inch:2},
+                                        dataType: "json",
+                                        success: function(data){
+                                            if(data.sts == 1){
+
+                                            }else{
+                                                $.each(data, function(key, prg) {
+                                                    var nkey = "id1." + prg.ch;
+                                                    node = $("#channel2").fancytree("getTree").getNodeByKey(nkey);
+                                                    node.addChildren(prg.children);
+                                                    var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                                                    node = $("#devlist2").fancytree("getTree").getNodeByKey(prgkey);
+                                                    node.setSelected(true);
+                                                });
+                                            }
+                                        },
+                                        error : function(err) {
+                                            alert("异常！====="+JSON.stringify(err));
+                                        }
+                                    });
+                                }
+                            },
+                            error : function(err) {
+                                alert("异常！====="+JSON.stringify(err));
+                            }
+                        });
+                    break;
 					} case '#re_pid': {
-						
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+localip+":4000/do/programs/reprgpid?inch=1",
+                        dataType: "json",
+                        success: function(data){
+                            if(data.sts == 1){
+                                //获取输出通道信息
+                                $("#channel").fancytree("getTree").reload();
+                                $.ajax({
+                                    type: "GET",
+                                    async:false,
+                                    url: "http://"+localip+":4000/do/programs/getoutprg?inch=1",
+                                    // data: {ip:"192.168.1.134", inch:2},
+                                    dataType: "json",
+                                    success: function(data){
+                                        if(data.sts == 1){
+
+                                        }else{
+                                            $.each(data, function(key, prg) {
+                                                var nkey = "id1." + prg.ch;
+                                                node = $("#channel").fancytree("getTree").getNodeByKey(nkey);
+                                                node.addChildren(prg.children);
+                                                var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                                                node = $("#devlist").fancytree("getTree").getNodeByKey(prgkey);
+                                                node.setSelected(true);
+                                            });
+                                        }
+                                    },
+                                    error : function(err) {
+                                        alert("异常！====="+JSON.stringify(err));
+                                    }
+                                });
+                                $("#channel2").fancytree("getTree").reload();
+                                $.ajax({
+                                    type: "GET",
+                                    async:false,
+                                    url: "http://"+localip+":4000/do/programs/getoutprg?inch=2",
+                                    // data: {ip:"192.168.1.134", inch:2},
+                                    dataType: "json",
+                                    success: function(data){
+                                        if(data.sts == 1){
+
+                                        }else{
+                                            $.each(data, function(key, prg) {
+                                                var nkey = "id1." + prg.ch;
+                                                node = $("#channel2").fancytree("getTree").getNodeByKey(nkey);
+                                                node.addChildren(prg.children);
+                                                var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                                                node = $("#devlist2").fancytree("getTree").getNodeByKey(prgkey);
+                                                node.setSelected(true);
+                                            });
+                                        }
+                                    },
+                                    error : function(err) {
+                                        alert("异常！====="+JSON.stringify(err));
+                                    }
+                                });
+                            }
+                        },
+                        error : function(err) {
+                            alert("异常！====="+JSON.stringify(err));
+                        }
+                    });
 						break;
 					} case '#pidtrans': {
 						//获取pid透传表信息
@@ -1730,7 +1876,7 @@ function devinfo_output(devType){
 					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + ',"prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":' +  _pmtPid + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
+				var jsonstr = '{"channel":' + 1 + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":' +  _pmtPid + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
@@ -1823,6 +1969,11 @@ function devinfo_output(devType){
             progress_dialog.dialog( "close" );
             readprgs();
         }
+    });
+
+    var dig_notification = $( "#progress-notification" ).dialog({
+        autoOpen: false,
+        width: 300
     });
 }
 

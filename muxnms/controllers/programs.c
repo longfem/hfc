@@ -220,6 +220,29 @@ static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo
 	list_append(&(outpst->prgNodes), outprg);
 }
 
+static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAddedUseNewPidValue)
+{
+    int i = 0;
+    MuxPidInfo_st *mp = NULL;
+    if(list_len(pidList)>0){
+        for(i=0;i<list_len(pidList);i++){
+            list_get(pidList, i, &mp);
+            if(mp->oldPid == oldPid){
+                return mp->newPid;
+            }
+        }
+    }
+    MuxPidInfo_st *mps = malloc(sizeof(MuxPidInfo_st));
+    memcpy(&mps->inChannel, &chnId, sizeof(int));
+    //mps->inChannel = chnId;
+    memcpy(&mps->oldPid, &oldPid, sizeof(int));
+    //mps->oldPid = oldPid;
+    memcpy(&mps->newPid, &ifNotAddedUseNewPidValue, sizeof(int));
+    //mps->newPid = ifNotAddedUseNewPidValue;
+    list_append(pidList, mps);
+    return ifNotAddedUseNewPidValue;
+}
+
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
     char ip[16] = "192.168.1.134";//param("ip"); 
@@ -231,11 +254,11 @@ static void getprg(HttpConn *conn) {
     
 } 
 
-static void getoutprg(HttpConn *conn) { 
+static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
 	int Chn = atoi(mprGetJson(jsonparam, "inch")); 
     char ip[16] = "192.168.1.134";
-	char outprg[10240] = {0};
+	char outprg[20480] = {0};
 	int outChn = 0;	
 	if(1){
 		PrgMuxInfoGet(ip);
@@ -784,6 +807,105 @@ static void search(HttpConn *conn) {
     free(jsonstring);
 }
 
+static void reprgnum(HttpConn *conn) {
+	char ip[16] = "192.168.1.134";
+	char str[64] = {0};
+	int i = 0,j = 0, prgNumCnt = 0;
+	ChannelProgramSt *outpst = NULL;
+	Dev_prgInfo_st *outprg = NULL;
+    MprJson *jsonparam = httpGetParams(conn);
+    int inCh = atoi(mprGetJson(jsonparam, "inch"));
+    for ( i = 0; i < clsProgram._outChannelCntMax; i++){
+        if (inCh == 0 || inCh == i + 1){
+            prgNumCnt = clsProgram.prgNum_min;
+            list_get(&(clsProgram.outPrgList), i, &outpst);
+            if(list_len(&outpst->prgNodes)>0){
+                for(j=0; j<list_len(&outpst->prgNodes); j++){
+                	list_get(&outpst->prgNodes, j, &outprg);
+                	memcpy(&outprg->prgNum, &prgNumCnt, sizeof(int));
+                    prgNumCnt++;
+                }
+            }
+        }
+    }
+    //TODO
+    //clsProgram.userPrgNodes
+
+    rendersts(str, 1);
+    render(str);
+}
+
+static void reprgpid(HttpConn *conn) {
+	char ip[16] = "192.168.1.134";
+	char str[64] = {0};
+	int i = 0,j = 0, k = 0, pidPrgStart = 0, pidAvStart = 0;
+	list_t *usingPidList;
+	list_init(usingPidList);
+	ChannelProgramSt *outpst = NULL;
+	Dev_prgInfo_st *outprg = NULL;
+    MprJson *jsonparam = httpGetParams(conn);
+    int inCh = atoi(mprGetJson(jsonparam, "inch"));
+    for ( i = 0; i < clsProgram._outChannelCntMax; i++){
+        if (inCh == 0 || inCh == i + 1){
+            pidPrgStart = clsProgram.prgPid_min;
+            pidAvStart = clsProgram.subPrgPid_min;
+            list_get(&clsProgram.outPrgList, i, &outpst);
+            if(list_len(&outpst->prgNodes)>0){
+                for(j=0; j<list_len(&outpst->prgNodes); j++){
+                	list_get(&outpst->prgNodes, j, &outprg);
+                	int newPid = SeekReplacedPid(usingPidList, outprg->chnId, outprg->pmtPid, pidPrgStart);
+                	if (newPid != outprg->pmtPid || pidPrgStart == outprg->pmtPid)
+                    {
+                        memcpy(&outprg->pmtPid, &newPid, sizeof(int));
+                        pidPrgStart++;
+                    }
+                    if (outprg->newPcrPid != 0x1fff)
+                    {
+                        newPid = SeekReplacedPid(usingPidList, outprg->chnId, outprg->oldPcrPid, pidAvStart);
+                        if (newPid != outprg->oldPcrPid || pidAvStart == outprg->oldPcrPid)
+                        {
+                            memcpy(&outprg->newPcrPid, &newPid, sizeof(int));
+                            pidAvStart++;
+                        }
+                    }
+                    pidAvStart = DesPidRefresh2(outprg->chnId, outprg->index, -1, outprg->pmtDesList, outprg->pmtDesListLen, pidAvStart, usingPidList);
+                    if(outprg->pdataStreamList != NULL && outprg->pdataStreamListLen>0){
+                        DataStream_t *dst = outprg->pdataStreamList;
+                        for(k=0;k<outprg->pdataStreamListLen;k++){
+                            newPid = SeekReplacedPid(usingPidList, dst->inChn, dst->inPid, pidAvStart);
+                            if (newPid != dst->inPid)
+                            {
+                                memcpy(&dst->outPid, &newPid, sizeof(int));
+                                pidAvStart++;
+                            }
+                            else if (pidAvStart == dst->inPid)
+                            {
+                                pidAvStart++;
+                            }
+                            pidAvStart = DesPidRefresh2(outprg->chnId, outprg->index, dst->index,
+                            			dst->desNode, dst->desNodeLen, pidAvStart, usingPidList);
+                            dst++;
+                        }
+                    }
+                }
+            }
+
+            //TODO
+            //clsProgram.userPrgNodes
+        }
+    }
+
+    //释放内存
+    MuxPidInfo_st *mp = NULL;
+    for(i=0;i<list_len(usingPidList);i++){
+        list_get(usingPidList, i, &mp);
+        free(mp);
+        list_pop(usingPidList, i);
+    }
+    rendersts(str, 1);
+    render(str);
+}
+
 static void espinit() {	
 	int i=0;
 	ChannelProgramSt *pst = NULL;
@@ -843,6 +965,8 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-getpidtransinfo", getpidtransinfo);
 	espDefineAction(route, "programs-cmd-setpidtransinfo", setpidtransinfo);
 	espDefineAction(route, "programs-cmd-search", search);
+	espDefineAction(route, "programs-cmd-reprgnum", reprgnum);
+	espDefineAction(route, "programs-cmd-reprgpid", reprgpid);
 	
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
