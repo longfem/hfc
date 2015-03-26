@@ -6,30 +6,80 @@
 #include <sys/socket.h>
 #include "esp.h"
 #include "devinfo.h"
+#include "cJSON.h"
 /*
     Create a new resource in the database
  */ 
- 
- void substr(const char*str,unsigned start, unsigned end, char *stbuf)
+static void rendersts(const char *str,int status)
+{
+	cJSON *result = cJSON_CreateObject();
+	char* jsonstring;
+	cJSON_AddNumberToObject(result,"sts", status);
+	jsonstring = cJSON_PrintUnformatted(result);
+	memcpy(str, jsonstring, strlen(jsonstring));
+	//释放内存
+	cJSON_Delete(result);
+	free(jsonstring);
+}
+
+void substr(const char*str,unsigned start, unsigned end, char *stbuf)
 {
    unsigned n = end - start;
    strncpy(stbuf, str + start, n);
    stbuf[n] = 0;
 }
 
-static void reboot() { 
+static void reboot() {
+    char str[16] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限设置Ip
+        render(str);
+        return;
+    }
     char ip[16] = "192.168.1.134";
 	rebootDevice(ip);
-	render("reboot");
+	rendersts(str, 1);
+	render(str);
 }
 
-static void reset() { 
+static void reset() {
+    char str[16] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
     char ip[16] = "192.168.1.134";
 	restoreFactory(ip);
-	render("reset");
+	rendersts(str, 1);
+	render(str);
 }
 
-static void setDevip(HttpConn *conn) { 
+static void setDevip(HttpConn *conn) {
+    char str[16] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限设置Ip
+        render(str);
+        return;
+    }
 	cchar *param = espGetQueryString(conn);	
     char ip[16] = "192.168.1.134";
 	char newip[16] = {0}; 	
@@ -48,8 +98,42 @@ static void setDevip(HttpConn *conn) {
 	if(0 == setIp(ip, tmpip)){
 		setGateway(ip, tmpgatway);
 		getSubMask(ip, tmpsubmask);
-	}	
-	render("-----------------setIp receive %s====%s=====%s\n", newip, newgatway, submask);
+	}
+	rendersts(str, 1);
+	render(str);
+}
+
+static void setPassword(HttpConn *conn) {
+    char str[16] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
+    MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
+    cchar *oldpassword = mprGetJson(jsonparam, "oldpassword");
+    cchar *newpassword = mprGetJson(jsonparam, "newpassword");
+
+    cchar *username = getSessionVar("userName");
+    //Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE );
+    EdiRec *user = readRecWhere("user", "username", "==", username);
+    MprJson *userjson = mprParseJson(ediRecAsJson(user, 0));
+    //printf("=======password====%s========%s\n", oldpassword, mprGetJson(userjson, "password"));
+    if(strcmp(oldpassword, mprGetJson(userjson, "password")) == 0){
+        ediSetField(user, "password", newpassword);
+        updateRec(user);
+        rendersts(str, 1);
+    }else{
+        rendersts(str, 0);
+    }
+    //ediClose(db);
+    render(str);
 }
 
 
@@ -64,6 +148,7 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
     espDefineAction(route, "globalopt-cmd-reboot", reboot);
 	espDefineAction(route, "globalopt-cmd-reset", reset);
 	espDefineAction(route, "globalopt-cmd-setDevip", setDevip);
+	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
     
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

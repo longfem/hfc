@@ -43,7 +43,8 @@
 							<ul>               
 								<li id="l41"><a href="">设备升级</a></li>               
 								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
-								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>  
+								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
+								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
 							</ul>
 						</li>	
 						<li class="subs" id="l5">
@@ -148,7 +149,6 @@
 		);		
 		
 		function toHome() {
-			//TODO
 			//获取设备基本信息				
 			$.ajax({
 				 type: "GET",

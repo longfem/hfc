@@ -8,32 +8,23 @@
             'version': { type: 'string' },
         },
         data: [
-            [ 1,'201405262218530',],
+            [ 1,'201004121637121',],
         ],
     },
-    'post': {
+    'user': {
         hints: {
-            ncols: 3
-        },
-        schema: {
-            'id': { type: 'int', autoinc: true, index: true, key: true },
-            'title': { type: 'string' },
-            'body': { type: 'text' },
-        },
-        data: [
-        ],
-    },
-    'User': {
-        hints: {
-            ncols: 3
+            ncols: 4
         },
         schema: {
             'id': { type: 'int', autoinc: true, index: true, key: true },
             'username': { type: 'string' },
             'password': { type: 'string' },
+            'roles': { type: 'string' },
         },
         data: [
-            [ 1,'root','root',],
+            [ 1,'root','root','root',],
+            [ 2,'admin','888888','admin',],
+            [ 3,'user','888888','user',],
         ],
     },
 }

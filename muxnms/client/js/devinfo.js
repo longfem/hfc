@@ -540,48 +540,54 @@ function devinfo_output(devType){
 			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
 			 dataType: "json",
 			 success: function(data){
-				var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
-				tablenode.addChildren(data);
-			 },    
-			 error : function(err) { 
-				alert(err);
-			 }   
-		});
-		//获取制表后输出流表
-		$.ajax({
-			 type: "GET",
-			 async:false,
-			 url: "http://"+localip+":4000/do/programs/streamtable",
-			 data: '{channel:'+1+',prgnum:'+_selectcount+'}',
-			 dataType: "json",
-			 success: function(data){
-				var StreamData = [];	
-				$.each(data, function(key, itemv) {
-					var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
-					StreamData[StreamData.length] = item;					
-				});
-				//编辑数据流表
-				if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {									
-					$('#tbl_outtable').dataTable().fnClearTable();
-					$('#tbl_outtable').dataTable().fnAddData(StreamData);
-				}else{
-					//表结构右侧table
-					$('#tbl_outtable').dataTable( {
-						"data": StreamData,
-						"order": [[ 0, "asc" ]],
-						"paging":   false,
-						"info":     false,
-						"searching":   false,
-						"scrollCollapse": true,
-						"columns": [
-							{ "title": "NO"},
-							{ "title": "CH"},
-							{ "title": "IN-PID", "width":"30%"},
-							{ "title": "OUT-PID"},
-							{ "title": "TYPE" }
-						]
-					});
-				}				
+                 if(data.sts == 5){
+                     alert("权限不足，请与管理员联系");
+                     return;
+                 }
+				 var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+				 tablenode.addChildren(data);
+                 //获取制表后输出流表
+                 $.ajax({
+                     type: "GET",
+                     async:false,
+                     url: "http://"+localip+":4000/do/programs/streamtable",
+                     data: '{channel:'+1+',prgnum:'+_selectcount+'}',
+                     dataType: "json",
+                     success: function(data){
+                         var StreamData = [];
+                         $.each(data, function(key, itemv) {
+                             var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
+                             StreamData[StreamData.length] = item;
+                         });
+                         //编辑数据流表
+                         if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
+                             $('#tbl_outtable').dataTable().fnClearTable();
+                             $('#tbl_outtable').dataTable().fnAddData(StreamData);
+                         }else{
+                             //表结构右侧table
+                             var tout = $('#tbl_outtable').dataTable( {
+                                 "data": StreamData,
+                                 "order": [[ 0, "asc" ]],
+                                 "paging":   false,
+                                 "info":     false,
+                                 "searching":   false,
+                                 "scrollY": 390,
+                                 "bAutoWidth": false,
+                                 "columns": [
+                                     { "title": "NO"},
+                                     { "title": "CH"},
+                                     { "title": "IN-PID"},
+                                     { "title": "OUT-PID"},
+                                     { "title": "TYPE" }
+                                 ]
+                             });
+                             tout.fnDraw();
+                         }
+                     },
+                     error : function(err) {
+                         alert(err);
+                     }
+                 });
 			 },    
 			 error : function(err) { 
 				alert(err);
@@ -602,6 +608,9 @@ function devinfo_output(devType){
 			 url: "http://"+localip+":4000/do/programs/writetable?channel=" + 1,
 			 dataType: "json",
 			 success: function(data){
+                 if(data.sts == 5){
+                     alert("权限不足，请与管理员联系");
+                 }
                  dig_notification.dialog("close");
 			 },    
 			 error : function(err) { 
@@ -763,6 +772,9 @@ function devinfo_output(devType){
             url: "http://"+localip+":4000/do/programs/writetable?channel=" + 2,
             dataType: "json",
             success: function(data){
+                if(data.sts == 5){
+                    alert("权限不足，请与管理员联系");
+                }
                 dig_notification.dialog("close");
             },
             error : function(err) {
@@ -1123,7 +1135,6 @@ function devinfo_output(devType){
                                         dataType: "json",
                                         success: function(data){
                                             if(data.sts == 1){
-
                                             }else{
                                                 $.each(data, function(key, prg) {
                                                     var nkey = "id1." + prg.ch;
@@ -1164,6 +1175,9 @@ function devinfo_output(devType){
                                             alert("异常！====="+JSON.stringify(err));
                                         }
                                     });
+                                }else if(data.sts == 5){
+                                    alert("权限不足，请与管理员联系");
+                                    return;
                                 }
                             },
                             error : function(err) {
@@ -1230,6 +1244,9 @@ function devinfo_output(devType){
                                         alert("异常！====="+JSON.stringify(err));
                                     }
                                 });
+                            }else if(data.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                                return;
                             }
                         },
                         error : function(err) {
@@ -1821,7 +1838,9 @@ function devinfo_output(devType){
 						if(data.sts == 0){
 							alert("数据输入错误!!");
 							return;
-						}
+						}else if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
+                        }
 						dialog_pid.dialog( "close" );
 					 },    
 					 error : function(err) {    
@@ -1890,7 +1909,9 @@ function devinfo_output(devType){
 							node.data.prgNum = Number($('.prg_no').val());
 							node.title = "节目"+node.data.prgNum+"(0X"+ node.data.prgNum.toString(16)+"):PID(0X"+$('.prg_pid').val() +") PCR_PID(0X"+$('.prg_prc2').val() +") - "+$('.prg_name').val() ;
 							node.renderTitle();
-						}
+						}else if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
+                        }
 					 },    
 					 error : function(err) {    
 					 }   
@@ -1918,8 +1939,8 @@ function devinfo_output(devType){
 					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
-						if(data.sts == 1){
-							
+						if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
 						}
 					 },    
 					 error : function(err) {    
@@ -1940,8 +1961,8 @@ function devinfo_output(devType){
                     data: JSON.parse(jsonstr),
                     dataType: "json",
                     success: function(data){
-                        if(data.sts == 1){
-
+                        if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
                         }
                     },
                     error : function(err) {

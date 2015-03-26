@@ -383,6 +383,17 @@ static void selectprgs(HttpConn *conn) {
 static void maketable(HttpConn *conn) { 
 	int pos = 0;
 	char outstring[20480] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(outstring, 9);
+        render(outstring);
+        return;
+    }
+	if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(outstring, 5);//无权限
+        render(outstring);
+        return;
+    }
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	//制表
@@ -442,6 +453,17 @@ static void writetable(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "channel"); 
 	int inCh = atoi(inChn);
 	char rsts[20] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(rsts, 9);
+        render(rsts);
+        return;
+    }
+	if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(rsts, 5);//无权限
+        render(rsts);
+        return;
+    }
 	if(!sendPrograms("192.168.1.134", inCh)){
 		rendersts(rsts, 1);
 	}else{
@@ -485,6 +507,17 @@ static void getchanneloutinfo(HttpConn *conn) {
 
 static void setchanneloutinfo(HttpConn *conn) { 
 	char rsts[20] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+	    rendersts(rsts, 9);
+        render(rsts);
+        return;
+	}
+	if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(rsts, 5);//无权限
+        render(rsts);
+        return;
+    }
 	MprJson *jsonparam = httpGetParams(conn); 
 	//printf("==========setchanneloutinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     cchar *inChn = mprGetJson(jsonparam, "channel"); 	
@@ -545,6 +578,17 @@ static void setpidtransinfo(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn); 
 	//printf("==========setpidtransinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	char idstr[16] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(idstr, 9);
+        render(idstr);
+        return;
+    }
+	 if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(idstr, 5);//无权限
+        render(idstr);
+        return;
+    }
 	cchar *tmpstr;
 	int i = 0, val = 0;
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
@@ -667,6 +711,17 @@ static void getprginfo(HttpConn *conn) {
 static void setprginfo(HttpConn *conn) { 	
 	int i = 0, j = 0, k = 0, cm = 0, index = 0, matched = 0;
 	char rsts[20] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(rsts, 9);
+        render(rsts);
+        return;
+    }
+     if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(rsts, 5);//无权限
+        render(rsts);
+        return;
+    }
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	MprJson *jsonparam = httpGetParams(conn); 
@@ -810,6 +865,17 @@ static void search(HttpConn *conn) {
 static void reprgnum(HttpConn *conn) {
 	char ip[16] = "192.168.1.134";
 	char str[64] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+     if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
 	int i = 0,j = 0, prgNumCnt = 0;
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
@@ -838,6 +904,17 @@ static void reprgnum(HttpConn *conn) {
 static void reprgpid(HttpConn *conn) {
 	char ip[16] = "192.168.1.134";
 	char str[64] = {0};
+	cchar *role = getSessionVar("role");
+	if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+     if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
 	int i = 0,j = 0, k = 0, pidPrgStart = 0, pidAvStart = 0;
 	list_t *usingPidList;
 	list_init(usingPidList);
