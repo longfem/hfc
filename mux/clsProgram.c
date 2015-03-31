@@ -553,19 +553,172 @@ int NewPid(int inChn, int oldPid, int curPid, int pidOffset, list_t usedPidTree,
 	return newPid;
 }
 
-int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int desListLen,int pidOffset, unsigned char isUsedPid[],list_t usedPidTree)
+int SeekPrgPmtDes_inChn(int inChannel, int prgId, int pmtDesId, Commdes_t *desInfo)
 {
-#if 1
-	int i;
-	int newPid = 0x1fff;
-	//bool isNeedSeekBefore = true;
-	Commdes_t *desInfoTmp=desList;
-	for (i = 0; i < desListLen; i++)
-	{
+    int i = 0, j = 0;
+    ChannelProgramSt *pst = NULL;
+    Dev_prgInfo_st *prg = NULL;
+    Commdes_t *cmt = NULL;
+    list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
+    if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)>0))
+        return 0;
 
-	}
-#endif
-	return 1;
+    for(i=0;i<list_len(&pst->prgNodes);i++){
+        list_get(&pst->prgNodes, i, &prg);
+        if(prg->chnId == inChannel){
+            if(prg->index == prgId){
+                if(prg->pmtDesListLen > 0){
+                    cmt = prg->pmtDesList;
+                    for(j=0;j<prg->pmtDesListLen;j++){
+                        if(cmt->index == pmtDesId){
+                            desInfo = cmt;
+                            return 1;
+                        }
+                    }
+                    break;
+                }
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+int SeekPrgAvDes_inChn(int inChannel, int prgId, int avId, int desId, Commdes_t *desInfo)
+{
+    int i = 0, j = 0, k = 0;
+    ChannelProgramSt *pst = NULL;
+    Dev_prgInfo_st *prg = NULL;
+    DataStream_t *dst = NULL;
+    Commdes_t *cmt = NULL;
+    list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
+    if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)>0))
+        return 0;
+
+    for(i=0;i<list_len(&pst->prgNodes);i++){
+        list_get(&pst->prgNodes, i, &prg);
+        if(prg->chnId == inChannel){
+            if(prg->index == prgId){
+                if(prg->pdataStreamListLen>0){
+                    dst = prg->pdataStreamList;
+                    for(j=0;j<prg->pdataStreamListLen;j++){
+                        if(dst->index == avId){
+                            if(dst->desNodeLen > 0){
+                                cmt = dst->desNode;
+                                for(k=0;k<dst->desNodeLen;k++){
+                                    if(cmt->index == desId){
+                                        desInfo = cmt;
+                                        return 1;
+                                    }
+                                }
+                                break;
+                            }
+                            break;
+                        }
+                    }
+                    break;
+                }
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
+int DesPid_getInPid(int inChn, int prgIndex, int avIndex, int desIndex)
+{
+    int pid = 0x1fff;
+    Commdes_t *desInfoTmp = NULL;
+    //enum DesTypeEnum dte;
+    if (inChn > 0 && prgIndex >= 0)
+    {
+        if (avIndex == -1)
+        { // PMT的DES
+            if (SeekPrgPmtDes_inChn(inChn, prgIndex, desIndex, desInfoTmp))
+            {
+                if (desInfoTmp->tag == 9)//CA
+                {
+                    pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
+                }
+            }
+        }
+        else
+        { // AV的DES
+            if(SeekPrgAvDes_inChn(inChn, prgIndex, avIndex, desIndex, desInfoTmp))
+            {
+                if (desInfoTmp->tag == 9)//CA
+                {
+                    pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
+                }
+            }
+        }
+    }
+    return pid;
+}
+
+int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
+			Commdes_t *desList, int desListLen, int pidOffset, list_t *usingPidList)
+{
+    int i = 0, j = 0;
+    //enum DesTypeEnum dte;
+    if (desList != NULL && desListLen > 0)
+    {
+        //int newPid = 0x1fff;
+        //bool isNeedSeekBefore = true;
+        for (i = 0; i < desListLen; i++)
+        {
+            if (desList->tag == 9)//CA
+            {
+                if (desList->data != NULL && desList->dataLen >= 4)
+                {
+                    int lastReplacePid = -1;
+                    int inPid = 0x1fff;
+                    int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
+                    if (inChn > 0)
+                    {
+                        inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
+                        if (inPid < 0x1fff)
+                        {
+                            MuxPidInfo_st *mp = NULL;
+                            for (j = 0; j < list_len(usingPidList); j++)
+                            {
+                                list_get(usingPidList, j, &mp);
+                                if (mp->inChannel == inChn && mp->oldPid == inPid)
+                                {
+                                    lastReplacePid = mp->newPid;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (lastReplacePid != -1)
+                    {
+                        caPid = lastReplacePid;
+                        desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((lastReplacePid >> 8) & 0x1f));
+                        desList->data[3] = (unsigned char)lastReplacePid;
+                    }
+                    else
+                    {
+                        if (caPid != pidOffset)
+                        {
+                            caPid = pidOffset;
+                            desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((pidOffset >> 8) & 0x1f));
+                            desList->data[3] = (unsigned char)pidOffset;
+
+                            MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));;
+                            muxPidInfo->inChannel = inChn;
+                            muxPidInfo->oldPid = inPid;
+                            muxPidInfo->newPid = caPid;
+                            list_append(usingPidList, muxPidInfo);
+                        }
+                        pidOffset++;
+                    }
+                }
+            }
+            desList++;
+        }
+    }
+    return pidOffset;
 }
 
 int AutoMakeNewPid(int outChannel)
