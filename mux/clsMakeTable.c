@@ -11,21 +11,29 @@ static int isTableInit=0;
 int MakeTable(int outChnId)
 {
 	ChannelProgramSt *outpst = NULL;
+	printf("============111\n");
 	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
 	buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
 
 }
 
+
+
+
 int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prginfolist,Chn_ca_st *caNode)
 {
+
+	
+
+
 	//Error_psiTable errFlag;
 	int outChnIndex = outChnId - 1;
 	int rstPat;
 	int i;
 
-
+    printf("============222\n");
 	ClsMuxInit(2,2);
-	ClsMuxInit(2,2);
+	//ClsMuxInit(2,2);
 
 
 	//int streamId = 1;
@@ -36,10 +44,11 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char sdtTable[8 * 188];
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
-
-
-	//if (AutoMakeNewPid(outChnId)==0)
-		//return 0;	
+    printf("=============begin\n");
+	if (AutoMakeNewPid(outChnId)==0)
+		return 0;
+    printf("=============end\n");
+	//return 0;
 
   //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
@@ -47,9 +56,12 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
 	{
-		printf("节目总数 溢出*** \n");
+		printf("��Ŀ���� ���*** \n");
 		return 0;
 	}
+
+
+
 	int streamId = outChnArray[outChnIndex].streamId;
 	int netWorkId = outChnArray[outChnIndex].networkId;
 	int oringinalNetworkId = outChnArray[outChnIndex].oringal_networkid;
@@ -57,16 +69,14 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 
 	// PAT
 
-	/*
-	if (outChnArray[outChnIndex].isAutoRaiseVersion) // �Զ����Ӱ汾��
+
+	if (outChnArray[outChnIndex].isAutoRaiseVersion==1) // �Զ����Ӱ汾��
 	{
-	version++;
-	if (version > 31)
-	version = 0;
-	outChnArray[outChnIndex].version = version;
-	//db.SettingSave();
+		version++;
+		if (version > 31)
+			version = 0;
+		outChnArray[outChnIndex].version = version;
 	}
-	*/
 	BufferUn_st  *pbuff;
 
 

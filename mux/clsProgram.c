@@ -440,119 +440,6 @@ unsigned char PrgMuxInfoGet(char *ip)
 	return 1;
 }
 
-
-int NewProgramNum(int curNum, list_t prgNumList)
-{
-	int iNewPrgNum = -1;
-	int isRepeat = 0;
-	int i;
-
-	int *prgNumTmp;
-	for (i= 0; i < list_len(&prgNumList); i++)
-	{
-
-		list_get(&prgNumList,i,&prgNumTmp);
-		if (*prgNumTmp == curNum)
-		{
-			isRepeat = 1;
-			break;
-		}
-	}
-	if (isRepeat==0)
-	{
-		list_append(&prgNumList,&curNum);
-		return curNum;
-	}
-
-	for (i = 1; i < 0xffff; i++)
-	{
-		isRepeat = 0;
-		for (i= 0; i < list_len(&prgNumList); i++)
-		{
-			list_get(&prgNumList,i,&prgNumTmp);
-			if (*prgNumTmp == i)
-			{
-				isRepeat = 1;
-				break;
-			}
-
-		}
-		if (!isRepeat)
-		{
-			iNewPrgNum = i;
-			list_append(&prgNumList,&iNewPrgNum);
-			break;
-		}
-	}
-	return iNewPrgNum;
-}
-
-
-int NewPid(int inChn, int oldPid, int curPid, int pidOffset, list_t usedPidTree, unsigned char isUsedPid[] , int isUsedPidLenth, int  repeatIsOk)// replacePidst
-{
-	int newPid = -1;
-	int i;
-	replacePidst *oldNodeTmp;
-
-	// 检查此类输入PID是否已经有被映射过
-	if (oldPid != 0x1fff && oldPid != -1)
-	{
-		for (i = 0; i <list_len(&usedPidTree); i++)
-		{
-
-			list_get(&usedPidTree, i, &oldNodeTmp);
-			if (oldNodeTmp->oldPid == oldPid)
-			{
-				return oldNodeTmp->newPid;
-			}
-
-		}
-	}
-	// 还未被占用过的PID
-	if (isUsedPid[curPid] == 0)
-	{
-		newPid = curPid;
-	}
-	else
-	{
-		if (repeatIsOk && oldPid != 0x1fff && oldPid != -1)
-		{
-			// 是否是被本通道占用
-			//foreach (replacePidst oldNodeTmp in usedPidTree[inChn - 1])
-			for (i = 0; i <list_len(&usedPidTree); i++)
-			{
-
-				list_get(&usedPidTree, i, &oldNodeTmp);
-				if (oldNodeTmp->oldPid == oldPid)
-				{
-					return oldNodeTmp->newPid;
-				}
-			}
-
-		}
-	}
-	// 重新分配PID
-	if (newPid < 0)
-	{
-		for (i = pidOffset; i < isUsedPidLenth; i++)
-		{
-			if (isUsedPid[i]==0)
-			{
-				newPid = i;
-				isUsedPid[i] = 1;
-				break;
-			}
-		}
-	}
-	replacePidst *newPidNode = (replacePidst*)malloc(sizeof(replacePidst));
-	newPidNode->oldPid = oldPid;
-	newPidNode->newPid = newPid;
-	isUsedPid[newPid] = 1;
-	list_append(&usedPidTree,newPidNode);
-
-	return newPid;
-}
-
 int SeekPrgPmtDes_inChn(int inChannel, int prgId, int pmtDesId, Commdes_t *desInfo)
 {
     int i = 0, j = 0;
@@ -721,11 +608,148 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
     return pidOffset;
 }
 
+int NewProgramNum(int curNum, list_t *prgNumList)
+{
+	int iNewPrgNum = -1;
+	int isRepeat = 0;
+	int i;
+	int j;
+
+	int *prgNumTmp;
+	for (i= 0; i < list_len(prgNumList); i++)
+	{
+
+		list_get(prgNumList,i,&prgNumTmp);
+		if (*prgNumTmp == curNum)
+		{
+			isRepeat = 1;
+			break;
+		}
+	}
+	if (isRepeat==0)
+	{
+		int *pcurNum=malloc(sizeof(int));
+		*pcurNum=curNum;
+		list_append(prgNumList,pcurNum);
+		return curNum;
+	}
+
+	for (i = 1; i < 0xffff; i++)
+	{
+		isRepeat = 0;
+		for (j= 0; j < list_len(prgNumList); j++)
+		{
+			list_get(prgNumList,j,&prgNumTmp);
+			if (*prgNumTmp == i)
+			{
+				isRepeat = 1;
+				break;
+			}
+
+		}
+		if (isRepeat==0)
+		{
+			iNewPrgNum = i;
+
+			int *piNewPrgNum=malloc(sizeof(int));
+			*piNewPrgNum=iNewPrgNum;
+			list_append(prgNumList,piNewPrgNum);
+			break;
+		}
+	}
+	return iNewPrgNum;
+}
+
+
+int NewPid(int inChn, int oldPid, int curPid, int pidOffset, list_t usedPidTree, unsigned char isUsedPid[] , int isUsedPidLenth, int  repeatIsOk)// replacePidst
+{
+	int newPid = -1;
+	int i;
+	replacePidst *oldNodeTmp;
+	list_t *usedPidTreeChin;
+	replacePidst *newPidNode;
+
+
+	list_get(&usedPidTree, inChn, &usedPidTreeChin);
+
+
+	if (oldPid != 0x1fff && oldPid != -1)
+	{	
+		for (i = 0; i <list_len(usedPidTreeChin); i++)
+		{
+
+			list_get(usedPidTreeChin, i, &oldNodeTmp);
+			if (oldNodeTmp->oldPid == oldPid)
+			{
+				// printf("oldNodeTmp->newPid111  %d\n",oldNodeTmp->newPid);
+				return oldNodeTmp->newPid;
+
+			}
+
+		}
+	}
+
+	if (isUsedPid[curPid] == 0)
+	{
+
+		newPid = curPid;
+		//printf("newPid  %d\n",newPid);
+	}
+	else
+	{
+		if (repeatIsOk==1 && oldPid != 0x1fff && oldPid != -1)
+		{
+			for (i = 0; i <list_len(usedPidTreeChin); i++)
+			{
+
+				list_get(usedPidTreeChin, i, &oldNodeTmp);
+				if (oldNodeTmp->oldPid == oldPid)
+				{
+					//printf("oldNodeTmp->newPid222  %d\n",oldNodeTmp->newPid);
+					return oldNodeTmp->newPid;
+				}
+			}
+
+		}
+	}
+	//	printf("got new pid  \n");
+	if (newPid < 0)
+	{
+		for (i = pidOffset; i < isUsedPidLenth; i++)
+		{
+			if (isUsedPid[i]==0)
+			{
+				newPid = i;
+				isUsedPid[i] = 1;
+				break;
+			}
+		}
+	}
+	newPidNode = (replacePidst*)malloc(sizeof(replacePidst));
+	newPidNode->oldPid = oldPid;
+	newPidNode->newPid = newPid;
+	isUsedPid[newPid] = 1;
+	list_append(usedPidTreeChin,newPidNode);
+	return newPid;
+}
+
+int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int desListLen,int pidOffset, unsigned char isUsedPid[],list_t usedPidTree)
+{
+#if 1
+	int i;
+	int newPid = 0x1fff;
+	//bool isNeedSeekBefore = true;
+	Commdes_t *desInfoTmp=desList;
+	for (i = 0; i < desListLen; i++)
+	{
+
+	}
+#endif
+	return 1;
+}
+
 int AutoMakeNewPid(int outChannel)
 {
-
-	//printf("get int AutoMakeNewPid\n");
-
 	int i;
 	int j;
 	int iTmp;
@@ -744,54 +768,69 @@ int AutoMakeNewPid(int outChannel)
 
 	list_init(&newUsedPidList);
 
+	list_init(&prgNumList);
+
 
 	for (i = 0; i < newUsedPidListLen; i++)
 	{
-		list_t tmpList;
-		list_init(&tmpList);
-		list_append(&newUsedPidList,&tmpList);
+		list_t *tmpList=(list_t*)malloc(sizeof(list_t));
+		list_init(tmpList);
+		list_append(&newUsedPidList,tmpList);
 	}
 
+	//for (i = 0; i < 1; i++)//for test
+	
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{
+
 		if (outChannel == 0 || outChannel == i + 1)
 		{
 
-			for (j = 0; j < isUsedPidLenth; i++)
+			for (j = 0; j < isUsedPidLenth; j++)
 			{
 				isUsedPid[j]=0;
-			}
+			}			
+
 			for (iTmp = 0; iTmp < newUsedPidListLen; iTmp++)
 			{
 				list_t *tmpList;
 				list_get(&newUsedPidList, iTmp, &tmpList);
-				while(list_len(tmpList))
+
+				while(list_len(tmpList)>0)
 				{
+					replacePidst *replacePidst1;
+					list_get(tmpList,list_len(tmpList)-1,&replacePidst1);
+					free(replacePidst1);
 					list_pop_tail(tmpList);
 				}
 			}
 
-			while(list_len(&prgNumList))
+
+			while(list_len(&prgNumList)>0)
 			{
+				int *piNewPrgNum;
+				list_get(&prgNumList,list_len(&prgNumList)-1,&piNewPrgNum);	
+				free(piNewPrgNum);				
 				list_pop_tail(&prgNumList);
 			}
 			ChannelProgramSt *outpst;
-			list_get(&clsProgram.outPrgList, i, &outpst);
-			//如果存在节目
+		    list_get(&clsProgram.outPrgList, i, &outpst);
+
+
 			if (list_len(&outpst->prgNodes)>0)
 			{
 				for (j = 0; j < list_len(&outpst->prgNodes); j++)
 				{
 					unsigned char  isNewPrgPid = 0;
-					//取出节目结构体
 					Dev_prgInfo_st *prgInfoTmp;
 					list_get(&outpst->prgNodes,j,&prgInfoTmp);
+					printf("program number: %d\n",j);
+					//printPRG(prgInfoTmp);
 					int newPid;
 
 					//if (prgInfoTmp.chnId > 0 && prgInfoTmp.chnId <= _outChannelCntMax)
 					{
 						newPid = NewPid(prgInfoTmp->chnId, 0x1fff, prgInfoTmp->pmtPid, pidPrgStart, newUsedPidList, isUsedPid,isUsedPidLenth,0);
-						//如果pmtpid发生改变需要变新
 						if (prgInfoTmp->pmtPid != newPid)
 						{
 							prgInfoTmp->pmtPid = newPid;
@@ -801,6 +840,7 @@ int AutoMakeNewPid(int outChannel)
 						if (prgInfoTmp->newPcrPid != 0x1fff)
 						{
 							newPid = NewPid(prgInfoTmp->chnId, prgInfoTmp->oldPcrPid, prgInfoTmp->newPcrPid, pidAvStart, newUsedPidList, isUsedPid, isUsedPidLenth,1);
+
 							if (prgInfoTmp->newPcrPid != newPid)
 							{
 								prgInfoTmp->newPcrPid = newPid;
@@ -808,59 +848,81 @@ int AutoMakeNewPid(int outChannel)
 							}
 						}
 
-						//Commdes_st *tmpdesList=prgInfoTmp->psdtDesList;
-						//	tmpdesList+=j;
-						DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, -1,
-							prgInfoTmp->pmtDesList,prgInfoTmp->psdtDesListLen, pidAvStart, isUsedPid, newUsedPidList);
 
-						int newPrgNum = NewProgramNum(prgInfoTmp->prgNum, prgNumList);
+						//DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, -1,
+						//prgInfoTmp->pmtDesList,prgInfoTmp->psdtDesListLen, pidAvStart, isUsedPid, newUsedPidList);
+
+
+						int newPrgNum = NewProgramNum(prgInfoTmp->prgNum, &prgNumList);
 						if (newPrgNum < 0)
 							return 0;
 						if (isNewPrgPid || newPrgNum != prgInfoTmp->prgNum)
 						{
-							//prgInfoTmp->prgNum = newPrgNum;
-							//outPrgList[i].prgNodes.RemoveAt(j);
-							//outPrgList[i].prgNodes.Insert(j, prgInfoTmp);
+							prgInfoTmp->prgNum = newPrgNum;
 						}
 
-						//如果该节目下存在数据流
+#if 1
+						DataStream_t *dsInfoTmp = prgInfoTmp->pdataStreamList;
 						for (iDs = 0; iDs < prgInfoTmp->pdataStreamListLen; iDs++)
-						{
-							DataStream_t *dsInfoTmp = prgInfoTmp->pdataStreamList;
+						{	
+							//printf("com in now\n");
 							newPid = NewPid(prgInfoTmp->chnId, dsInfoTmp->inPid, dsInfoTmp->outPid, pidAvStart, newUsedPidList, isUsedPid,isUsedPidLenth, 1);
+
+							//printf("get out now\n");
+
 							if (dsInfoTmp->outPid != newPid)
 							{
-								//isNewPrgPid = true;
-								//dsInfoTmp.outPid = newPid;
-								//((Dev_prgInfo_st)(outPrgList[i].prgNodes[j])).dataStreamList.RemoveAt(iDs);
-								//((Dev_prgInfo_st)(outPrgList[i].prgNodes[j])).dataStreamList.Insert(iDs, dsInfoTmp);
+								isNewPrgPid = 1;
+								dsInfoTmp->outPid = newPid;								
 							}
-							DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, dsInfoTmp->index,
-								dsInfoTmp->desNode,dsInfoTmp->desNodeLen, pidAvStart,isUsedPid, newUsedPidList);
+							dsInfoTmp++;
 						}
-
+					
+#endif
+			//printPRG(prgInfoTmp);
 					}
+
 				}
 			}
-			//	if (outPrgList[i].caNode.caIdenList != null)
-			if(0)
-			{
-
-
-			}
-
-			if (0)
-			{
-
-			}
-			else
-			{}
 		}
 	}
+
+
+		//	printf("aaaaaaaaaaaaaaa\n");
+	//free all
+	for (iTmp = 0; iTmp < newUsedPidListLen; iTmp++)
+	{
+		list_t *tmpList;
+		list_get(&newUsedPidList, iTmp, &tmpList);
+
+		while(list_len(tmpList)>0)
+		{
+			replacePidst *replacePidst1;
+			list_get(tmpList,list_len(tmpList)-1,&replacePidst1);
+			free(replacePidst1);
+			list_pop_tail(tmpList);
+		}
+	}
+				//printf("bbbbbbbbbbbbb\n");
+	while(list_len(&newUsedPidList)>0)
+	{
+		list_t *tmpList;
+		list_get(&newUsedPidList, list_len(&newUsedPidList)-1, &tmpList);
+		free(tmpList);
+		list_pop_tail(&newUsedPidList);
+	}
+	//	free(&newUsedPidList);
+		//printf("cccccccccccccccccccc\n");
+	while(list_len(&prgNumList)>0)
+	{
+		int *piNewPrgNum;
+		list_get(&prgNumList,list_len(&prgNumList)-1,&piNewPrgNum);	
+		free(piNewPrgNum);				
+		list_pop_tail(&prgNumList);
+	}
+	//free(&prgNumList);
 	return 1;
 }
-
-
 
 int MakePidMapTable(int outChannel,list_t  prginfolist)
 {
@@ -888,58 +950,12 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 			continue;
 		int  isNoticeSamePid = 1;
 		MuxPidInfo_st *pidMapTmp;
+	
+		list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
+		list_init(PrgAVMuxListI); 
 
-		//for test ,西贡弄好，需要关掿
+		freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);		
 
-		#if 0
-			
-		list_t *PrgAVMuxList=(list_t*)malloc(sizeof(list_t));
-		list_init(PrgAVMuxList);
-		if (list_len(PrgAVMuxList)==0)
-		{
-			for ( j = 0; j < clsProgram._outChannelCntMax; j++)
-			{
-				list_t *table_pmt=(list_t*)malloc(sizeof(list_t));
-				list_init(table_pmt);
-				list_append(PrgAVMuxList,table_pmt);
-			}
-		}
-
-		//子数组下的元素清穿
-		list_t *PrgAVMuxListI;
-		list_get(PrgAVMuxList,i,&PrgAVMuxListI);
-		if(list_len(PrgAVMuxListI)>0)//清空
-		{
-			while(list_len(PrgAVMuxListI))
-			{
-				list_pop_tail(PrgAVMuxListI);
-			}
-		}
-
-		#endif
-
-	//list_t *PrgAVMuxList=(list_t*)malloc(sizeof(list_t));
-	//list_init(PrgAVMuxList);
-		
-    	list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
-  		list_init(PrgAVMuxListI);  
-		
-        freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);		
-	#if 0  
-		//ȥࠕclsProgram.PrgAVMuxList[i]		
-		if(clsProgram.PrgAVMuxList[i] != NULL)
-		{
-			//list_t *tmpAVMuxList=clsProgram.PrgAVMuxList[i];
-			while(list_len(clsProgram.PrgAVMuxList[i]))
-			{
-			    MuxPidInfo_st  *outPMTBuffer;
-				list_get(clsProgram.PrgAVMuxList[i],list_len(clsProgram.PrgAVMuxList[i])-1,&outPMTBuffer);
-				free(outPMTBuffer);
-				list_pop_tail(clsProgram.PrgAVMuxList[i]);	
-			}
-		}
-
-		#endif
 		clsProgram.PrgAVMuxList[i] = NULL;
 
 		//printPrgAVMuxList();
@@ -967,27 +983,17 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					list_append(PrgAVMuxListI,pidMapTmp);
 				}
 			}
-
-
-			//		printPrgAVMuxList();
-
+			//printPrgAVMuxList();
 			if (outPrgInfoTmp->pmtDesListLen>0)
 			{
-				//foreach (Commdes_st outDesInfoTmp in outPrgInfoTmp.pmtDesList)
 				Commdes_t *outDesInfoTmp = outPrgInfoTmp->pmtDesList;
 				for (k = 0; k < outPrgInfoTmp->pmtDesListLen; k++)
 				{
-
 					if (outDesInfoTmp->tag == 0x9 && (outDesInfoTmp->userNew!=0))
 					{
 						int oldPid = 0x1fff;
 						int isBreakDesSeek = 0;
-
-
-					
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
-					
-						
 						for (k = 0; k < list_len(&inpst->prgNodes); k++)
 						{
 							list_get(&prginfolist,k,&inPrgInfoTmp);//这里我先直接从输出中取，测试for
@@ -1050,7 +1056,6 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 								pid = lastThisPidMapToNewPid;
 							}
 						}
-						// 添加映射信息
 						if (isAddedPid[pid]==0)
 						{
 							isAddedPid[pid]=1;
@@ -1064,22 +1069,15 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					outDesInfoTmp++;
 				}
 			}
-
-
-		//	printPrgAVMuxList();
-
-
+			//	printPrgAVMuxList();
 			DataStream_t *DataStream_stTmp = outPrgInfoTmp->pdataStreamList;
 			for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)
 			{
-
-				// 查找是否有替换过此PID
 				lastThisPidMapToNewPid = -1;
 				for (  l= 0; l < list_len(PrgAVMuxListI); l++)
 				{
 					MuxPidInfo_st *lastPidInfoTmp;
 					list_get(PrgAVMuxListI,l,&lastPidInfoTmp);
-
 					if(lastPidInfoTmp->oldPid == DataStream_stTmp->inPid && lastPidInfoTmp->inChannel == outPrgInfoTmp->chnId)
 					{
 						lastThisPidMapToNewPid = lastPidInfoTmp->newPid;
@@ -1087,22 +1085,17 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					}
 
 				}
-
 				if (lastThisPidMapToNewPid != -1)
 				{
 					if (DataStream_stTmp->outPid != lastThisPidMapToNewPid)
 					{
 						if (isNoticeSamePid==1)
 						{
-							//这里我直接终歿
 							return 0;
 						}
-
 						DataStream_stTmp->outPid = lastThisPidMapToNewPid;
-
 					}
 				}
-				// 添加映射信息
 				if (isAddedPid[DataStream_stTmp->outPid]==0)
 				{
 					isAddedPid[DataStream_stTmp->outPid] = 1;
@@ -1120,11 +1113,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					if (outDesInfoTmp->tag == 0x9 && !outDesInfoTmp->userNew)
 					{
 						int oldPid = 0x1fff;
-
-	
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
-
-
 						for (m = 0; m < 1; m++)//list inprg list
 						{
 							list_get(&inpst->prgNodes,m,&inPrgInfoTmp);	
@@ -1137,9 +1126,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							{
 								if (DataStream_stTmpTmp->index != DataStream_stTmp->index)
 									continue;
-
 								Commdes_t *inDesInfoTmp=DataStream_stTmpTmp->desNode;
-
 								for (o = 0; o < DataStream_stTmpTmp->desNodeLen; o++)//list datastreamlist of inprglist
 								{
 									if (inDesInfoTmp->index != outDesInfoTmp->index)
@@ -1168,13 +1155,9 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 						int pid = (*outdata<< 8) & 0x1f00;
 						outdata+=1;
 						pid |= *outdata;
-
-						// 查找是否有替换过此PID
 						lastThisPidMapToNewPid = -1;
-
 						for (oprgPidInfo= 0; oprgPidInfo < list_len(&PrgAVMuxListI); oprgPidInfo++)
 						{
-
 							MuxPidInfo_st *lastPidInfoTmp;
 							list_get(&PrgAVMuxListI,oprgPidInfo,&lastPidInfoTmp);
 
@@ -1192,7 +1175,6 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 								{
 									return 0;
 								}
-
 								outdata=outDesInfoTmp->data;
 								outdata+=2;
 								*outdata&= 0xe0;
@@ -1202,8 +1184,6 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 								pid = lastThisPidMapToNewPid;
 							}
 						}
-
-						// 添加映射信息
 						if (isAddedPid[pid]==0)
 						{
 							isAddedPid[pid] = 1;
@@ -1219,39 +1199,44 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 			}
 			//printPrgAVMuxList();
 		}
-	
 		if(list_len(PrgAVMuxListI)>0)
-				{
-					clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
-					printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
-				}
+		{
+			clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
+		//	printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
+		}
 	}
 	return 1;
 }
-
-
 
 void printPrgAVMuxList(list_t *PrgAVMuxListI)
 {
 	int j;
 	int k;
-
-	//printf("list_len(&PrgAVMuxList %d\n",list_len(PrgAVMuxList));
-
-	//for ( j = 0; j < 1; j++)
-	//{
-	//	list_t *PrgAVMuxListI;
-		//list_get(PrgAVMuxList,j,&PrgAVMuxListI);
-
-	/*for ( k = 0; k < list_len(PrgAVMuxListI); k++)
+	for ( k = 0; k < list_len(PrgAVMuxListI); k++)
 	{
 		MuxPidInfo_st *pidMapTmp;
 		list_get(PrgAVMuxListI,k,&pidMapTmp);
 		printf("pidMapTmp->inChannel %d   ",pidMapTmp->inChannel);
 		printf("pidMapTmp->newPid %d   ",pidMapTmp->newPid);
 		printf("pidMapTmp->oldPid %d\n",pidMapTmp->oldPid);
-
 	}
-	*/
-	//}
+}
+
+void printPRG(Dev_prgInfo_st* SDTS)
+{
+	int i;
+	int j;
+	printf("********\n");
+		printf("SDTS->chnId----%d\n",SDTS->chnId);
+	printf("newPcrPid----%d\n",SDTS->newPcrPid);
+	printf("oldPcrPid----%d\n",SDTS->oldPcrPid);
+	printf("pmtPid----%d\n",SDTS->pmtPid);
+	printf("prgNum----%d\n",SDTS->prgNum);
+
+	DataStream_t* dsInfoTmp = SDTS->pdataStreamList;
+	for (i = 0; i < SDTS->pdataStreamListLen; i++)
+	{
+		printf("dsInfoTmp->outPid----%d\n",dsInfoTmp->outPid);
+		dsInfoTmp++;
+	}
 }

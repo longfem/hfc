@@ -7,7 +7,7 @@
 unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char isNeedSendDevMux);
 unsigned char MakeOutputBytesAndSend(char *ip, int outChn);
 unsigned char PrgMuxInfoGet(char *ip);
-int NewProgramNum(int curNum, list_t prgNumList);
+int NewProgramNum(int curNum, list_t *prgNumList);
 int NewPid(int inChn, int oldPid, int curPid, int pidOffset, list_t usedPidTree, unsigned char isUsedPid[] , int isUsedPidLenth, int  repeatIsOk);
 int DesPid_getInPid(int inChn, int prgIndex, int avIndex, int desIndex);
 int SeekPrgPmtDes_inChn(int inChannel, int prgId, int pmtDesId, Commdes_t *desInfo);

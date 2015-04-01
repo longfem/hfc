@@ -1,24 +1,26 @@
 /* 
     login Controller for esp-html-mvc (esp-html-mvc) 
  */  
-#include "esp.h"  
+#include "esp.h"
+
 static void checkLogin() {  
     cchar *name = param("username");  
     cchar *pwd = param("password");
-	//Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE );
-	/*EdiRec *user1 = ediCreateRec(db, "User");
-	ediSetField(user1, "username", "root");
-	ediSetField(user1, "password", "root");
-	printf("=======3====\n");
-	if(!ediUpdateRec(db, user1)){
-		ediSave(db);
-	}*/
+    Edi *db = ediOpen("muxnms.mdb", "mdb", EDI_CREATE);
+
+    //MprJson *mjson = mprParseJson("{level: 3,user: 'root',desc: 'test log',logtime: '19.99'}");
+//    EdiRec *user2 = ediCreateRec(db, "user");
+//    EdiRec *optlog = ediCreateRec(db, "optlog");
+//    ediSetField(optlog, "title", "test");
+//    ediSetField(optlog, "body", "test");
+//    printf("==========user2=======rec->nfields====%d\n", user2->nfields);
+//    printf("==========optlog=======rec->nfields====%d\n", optlog->nfields);
+    //int res = updateRec(optlog);
+    //printf("==========%d========555\n", res);
+
 	//读取用户认证信息
 	EdiRec *user = readRecWhere("user", "username", "==", name);
 	MprJson *jsonparam = mprParseJson(ediRecAsJson(user, 0));
-	//printf("==========jsonparam===========%s\n", mprJsonToString(jsonparam, MPR_JSON_QUOTES));
-	//ediClose(db);
-	//printf("===username===>>>>%s======password=====>>>%s\n", mprGetJson(jsonparam, "username"), mprGetJson(jsonparam, "password"));
     if(strcmp(mprGetJson(jsonparam, "username"),name) && strcmp(mprGetJson(jsonparam, "password"),pwd))  
     {  
         redirect("/login.esp");   
@@ -27,7 +29,6 @@ static void checkLogin() {
 		setSessionVar("userName", name);
 		setSessionVar("role", mprGetJson(jsonparam, "roles"));
         redirect("/index.esp");
-		 
     }        
 }  
 
