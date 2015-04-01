@@ -77,7 +77,7 @@ int sendOutPutMuxInfo(char *ip, int outChnId){
 int sendOutPutOption(char *ip, int outChnId)
 {
 	int outChnIndexTmp = outChnId - 1;
-	printf("option 1\n");
+	printf("clsMux file SetOutRate=[%d] \n", pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);
 
 //	ErrorTypeEm errRslt = SetOutRate(ip, outChnId, pdb->pvalueTree->poutChnArray[outChnIndexTmp].outputRate);
 

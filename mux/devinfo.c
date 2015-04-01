@@ -190,13 +190,13 @@ void restoreFactory(char *ip)
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x01;
-    sendbuf[3]=0xf4;
+    sendbuf[3]=0xf2;
     
     
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 4, buf, &slen);
     
-    //printf("\n#### reboot Device\n");
+    //printf("\n#### refactory Device\n");
     
     
 }
