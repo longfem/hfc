@@ -1,3 +1,10 @@
+How to upgrade rootfs wdm 4100B
+
+update tar rootfs- lib folder into device rootfs /lib to update libc glibc
+mux-arm-rootfs.tar.bz2
+
+
+
 How to run appweb in arm
 gcc version 4.0.0 (DENX ELDK 4.1 4.0.0)
 
