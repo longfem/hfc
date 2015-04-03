@@ -46,7 +46,7 @@ var dataSet1 = [
 	['3','24']	
 ];
 
-function checkselectedprg(){
+function checkselectedprg(data){
 	var nodes;
     var snt;
     if(_channel == 1){
@@ -167,7 +167,7 @@ function readprgs(){
                     var nkey = "id1." + prg.ch;
                     node = channeltree.getNodeByKey(nkey);
                     node.addChildren(prg.children);
-                    var prgkey = "id1." + prg.ch +"."+prg.pmtPid;
+                    var prgkey = "id1." + prg.ch +"."+prg.children.index;
                     node = devlisttree.getNodeByKey(prgkey);
                     node.setSelected(true);
                     if(_channel == 1){
@@ -875,17 +875,19 @@ function devinfo_output(devType){
                     case 1:	//通道节点
                         if(data.node.key == "id1.0"){
                             $.each(data.node.children, function(index,chnode){
-                                $.each(chnode.children, function(index,prgnode){
-                                    if(channeltree.getNodeByKey(prgnode.key) != null){
-                                        channeltree.getNodeByKey(prgnode.key).remove();
-                                        tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                        tmpnode.addNode(prgnode.toDict(true));
-                                    }else{
-                                        tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                        tmpnode.addNode(prgnode.toDict(true));
-                                        _selectcount++;
-                                    }
-                                });
+                                if(chnode.children != null){
+                                    $.each(chnode.children, function(index,prgnode){
+                                        if(channeltree.getNodeByKey(prgnode.key) != null){
+                                            channeltree.getNodeByKey(prgnode.key).remove();
+                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                            tmpnode.addNode(prgnode.toDict(true));
+                                        }else{
+                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                            tmpnode.addNode(prgnode.toDict(true));
+                                            _selectcount++;
+                                        }
+                                    });
+                                }
                             });
 
                         }else{
@@ -979,7 +981,7 @@ function devinfo_output(devType){
             }
 			prgnode.setTitle("节目: "+ _selectcount);
 			prgnode.render();
-            checkselectedprg();
+            checkselectedprg(data);
 		},
 		click: function(event, data) {			
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
@@ -1442,19 +1444,20 @@ function devinfo_output(devType){
                     case 1:	//通道节点
                         if(data.node.key == "id1.0"){
                             $.each(data.node.children, function(index,chnode){
-                                $.each(chnode.children, function(index,prgnode){
-                                    if(channeltree.getNodeByKey(prgnode.key) != null){
-                                        channeltree.getNodeByKey(prgnode.key).remove();
-                                        tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                        tmpnode.addNode(prgnode.toDict(true));
-                                    }else{
-                                        tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                        tmpnode.addNode(prgnode.toDict(true));
-                                        _selectcount2++;
-                                    }
-                                });
+                                if(chnode.children != null){
+                                    $.each(chnode.children, function(index,prgnode){
+                                        if(channeltree.getNodeByKey(prgnode.key) != null){
+                                            channeltree.getNodeByKey(prgnode.key).remove();
+                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                            tmpnode.addNode(prgnode.toDict(true));
+                                        }else{
+                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                            tmpnode.addNode(prgnode.toDict(true));
+                                            _selectcount2++;
+                                        }
+                                    });
+                                }
                             });
-
                         }else{
                             $.each(data.node.children, function(index,item){
                                 if(channeltree.getNodeByKey(item.key) != null){

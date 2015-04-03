@@ -51,7 +51,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
 			cJSON_AddNumberToObject(prgjson, "pmtPid", ptmpPrgInfo->pmtPid);
 			cJSON_AddNumberToObject(prgjson, "chnid", ptmpPrgInfo->chnId);
-			sprintf(idstr, "id1.%d.%d", inChn, ptmpPrgInfo->pmtPid);//1.2.1	
+			sprintf(idstr, "id1.%d.%d", inChn, ptmpPrgInfo->index);//1.2.1
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
 			
@@ -61,12 +61,12 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddStringToObject(subprgjson,"title", "maximun bitrate descriptor");
 			cJSON_AddTrueToObject(subprgjson,"folder");
 			cJSON_AddFalseToObject(subprgjson,"expanded");
-			sprintf(idstr, "id1.%d.%d.1", inChn, ptmpPrgInfo->pmtPid);
+			sprintf(idstr, "id1.%d.%d.1", inChn, ptmpPrgInfo->index);
 			cJSON_AddStringToObject(subprgjson,"key", idstr);
 			cJSON_AddStringToObject(subprgjson,"icon", "img/channel_in.ico");
 			
 			cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());	
-			sprintf(idstr, "id1.%d.%d.2", inChn, ptmpPrgInfo->pmtPid);
+			sprintf(idstr, "id1.%d.%d.2", inChn, ptmpPrgInfo->index);
 			cJSON_AddStringToObject(subprgjson,"title", "multiplex buffer utilization descriptor");
 			cJSON_AddTrueToObject(subprgjson,"folder");
 			cJSON_AddFalseToObject(subprgjson,"expanded");
@@ -92,7 +92,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 				if(2 == streaminfo->streamType){
 					//MPEG2 VIDEO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d", inChn, ptmpPrgInfo->index, streaminfo->index);
 					sprintf(str,"MPEG2 VIDEO  [PID(0x%x)]",  streaminfo->inPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
@@ -103,7 +103,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					
 					cJSON_AddItemToObject(subprgjson, "children", streamsarray = cJSON_CreateArray());
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.1", inChn,  ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.1", inChn,  ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "video stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -111,7 +111,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.2", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.2", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "data stream alignment descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -119,7 +119,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.3", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.3", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -127,7 +127,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.4", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.4", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "stream identifier descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -138,7 +138,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 				}else if(4 == streaminfo->streamType){
 					//MPEG2 AUDIO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d", inChn, ptmpPrgInfo->index, streaminfo->index);
 					sprintf(str,"MPEG2 AUDIO  [PID(0x%x)]",  streaminfo->inPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
@@ -150,7 +150,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					//stream json
 					cJSON_AddItemToObject(subprgjson, "children", audiosarray = cJSON_CreateArray());
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.1", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.1", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "ISO 639 language descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -158,7 +158,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.2", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.2", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "audio stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -166,7 +166,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.3", inChn, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.3", inChn, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -250,7 +250,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
 			cJSON_AddNumberToObject(prgjson, "chnid", ptmpPrgInfo->chnId);
 			cJSON_AddNumberToObject(prgjson, "pmtPid", ptmpPrgInfo->pmtPid);
-			sprintf(idstr, "id1.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid);//1.2.1
+			sprintf(idstr, "id1.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->index);//1.2.1
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
 			
@@ -260,12 +260,12 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddStringToObject(subprgjson,"title", "maximun bitrate descriptor");
 			cJSON_AddTrueToObject(subprgjson,"folder");
 			cJSON_AddFalseToObject(subprgjson,"expanded");
-			sprintf(idstr, "id1.%d.%d.1", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid);
+			sprintf(idstr, "id1.%d.%d.1", ptmpPrgInfo->chnId, ptmpPrgInfo->index);
 			cJSON_AddStringToObject(subprgjson,"key", idstr);
 			cJSON_AddStringToObject(subprgjson,"icon", "img/channel_in.ico");
 			
 			cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());	
-			sprintf(idstr, "id1.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid);
+			sprintf(idstr, "id1.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->index);
 			cJSON_AddStringToObject(subprgjson,"title", "multiplex buffer utilization descriptor");
 			cJSON_AddTrueToObject(subprgjson,"folder");
 			cJSON_AddFalseToObject(subprgjson,"expanded");
@@ -290,7 +290,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 				if(2 == streaminfo->streamType){
 					//MPEG2 VIDEO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					sprintf(str,"MPEG2 VIDEO  [PID(0x%x)]",  streaminfo->inPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
@@ -301,7 +301,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					
 					cJSON_AddItemToObject(subprgjson, "children", streamsarray = cJSON_CreateArray());
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.1", ptmpPrgInfo->chnId,  ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.1", ptmpPrgInfo->chnId,  ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "video stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -309,7 +309,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "data stream alignment descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -317,7 +317,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.3", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.3", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -325,7 +325,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.4", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.4", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "stream identifier descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -336,7 +336,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 				}else if(4 == streaminfo->streamType){
 					//MPEG2 AUDIO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					sprintf(str,"MPEG2 AUDIO  [PID(0x%x)]",  streaminfo->inPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
@@ -348,7 +348,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					//stream json
 					cJSON_AddItemToObject(subprgjson, "children", audiosarray = cJSON_CreateArray());
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.1", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.1", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "ISO 639 language descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -356,7 +356,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.2", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "audio stream descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
@@ -364,7 +364,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 					
 					cJSON_AddItemToArray(audiosarray,streamjson = cJSON_CreateObject());
-					sprintf(idstr, "id1.%d.%d.%d.3", ptmpPrgInfo->chnId, ptmpPrgInfo->pmtPid, streaminfo->index);
+					sprintf(idstr, "id1.%d.%d.%d.3", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
 					cJSON_AddStringToObject(streamjson,"title", "maximum bitrate descriptor");
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");

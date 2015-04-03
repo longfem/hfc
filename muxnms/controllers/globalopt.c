@@ -9,7 +9,8 @@
 #include "cJSON.h"
 /*
     Create a new resource in the database
- */ 
+ */
+ char ip[16] = "192.168.1.134";
 static void rendersts(const char *str,int status)
 {
 	cJSON *result = cJSON_CreateObject();
@@ -42,7 +43,7 @@ static void reboot() {
         render(str);
         return;
     }
-    char ip[16] = "192.168.1.134";
+    //char ip[16] = "192.168.1.134";
 	rebootDevice(ip);
 	rendersts(str, 1);
 	render(str);
@@ -61,7 +62,7 @@ static void reset() {
         render(str);
         return;
     }
-    char ip[16] = "192.168.1.134";
+    //char ip[16] = "192.168.1.134";
 	restoreFactory(ip);
 	rendersts(str, 1);
 	render(str);
@@ -81,7 +82,7 @@ static void setDevip(HttpConn *conn) {
         return;
     }
 	cchar *param = espGetQueryString(conn);	
-    char ip[16] = "192.168.1.134";
+    //char ip[16] = "192.168.1.134";
 	char newip[16] = {0}; 	
 	char newgatway[16] = {0}; 
 	char submask[16] = {0}; 
