@@ -45,6 +45,7 @@
 								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
 								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
 								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
+								<!-- <li id="l45"><a href="javascript:gbl_export()">导出配置</a></li> -->
 							</ul>
 						</li>	
 						<li class="subs" id="l5">
@@ -101,7 +102,7 @@
 				if(err.responseText == "login.esp"){
 					window.location = "/login.esp";
 				}
-				 //alert("异常！====="+JSON.stringify(err));    
+				alert("异常！====="+JSON.stringify(err));
 			 }   
 		});
 		$('.main-content').empty();

@@ -20,15 +20,21 @@ static void checkLogin() {
 
 	//读取用户认证信息
 	EdiRec *user = readRecWhere("user", "username", "==", name);
+	if(user == NULL){
+	    redirect("/login.esp");
+	    return;
+	}
 	MprJson *jsonparam = mprParseJson(ediRecAsJson(user, 0));
-    if(strcmp(mprGetJson(jsonparam, "username"),name) && strcmp(mprGetJson(jsonparam, "password"),pwd))  
-    {  
-        redirect("/login.esp");   
-    }else{  
-		setSessionVar("isAuthed", "true");
-		setSessionVar("userName", name);
-		setSessionVar("role", mprGetJson(jsonparam, "roles"));
+
+    if(strcmp(mprGetJson(jsonparam, "password"),pwd) == 0 )
+    {
+        setSessionVar("isAuthed", "true");
+        setSessionVar("userName", name);
+        setSessionVar("role", mprGetJson(jsonparam, "roles"));
         redirect("/index.esp");
+
+    }else{  
+		redirect("/login.esp");
     }        
 }  
 

@@ -238,3 +238,33 @@ function gbl_password() {
         });
     });
 }
+
+function gbl_export() {
+    $.ajax({
+        type: "GET",
+        async:false,
+        url: "http://192.168.1.249:4000/do/programs/getprg?inch="+1,
+        // data: {ip:"192.168.1.134", inch:2},
+        dataType: "json",
+        success: function(data){
+            data = JSON.stringify(data).replace('\\','');
+            //alert("-----"+data);
+            var fso, tf;
+            try{
+                fso = new ActiveXObject("Scripting.FileSystemObject");
+                tf = fso.CreateTextFile("F:\\DB_USER.json", true);
+                tf.WriteLine(data);
+            }catch(err){
+                alert("=====>>>"+err);
+
+            }finally{
+                tf.Close();
+            }
+        },
+        error : function(err) {
+            // view("异常！");
+            var xxx = err;
+            alert("异常！====="+JSON.stringify(err));
+        }
+    });
+}
