@@ -32,7 +32,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		cJSON_AddStringToObject(channeljson,"icon", "img/channel_in.ico");
 		
 		cJSON_AddItemToObject(channeljson, "children", prgsarray = cJSON_CreateArray());		
-				
+		printf("---->>>getprgsJson\n");
 		for(i=0; i<list_len(&prginfolist); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
 			list_get(&prginfolist, i, &ptmpPrgInfo);			
@@ -42,7 +42,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
-			
+			printf("---->>>getprgsJson22\n");
 			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
@@ -87,7 +87,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			DataStream_t *streaminfo = malloc(sizeof(DataStream_t));
 			for(j=0; j<ptmpPrgInfo->pdataStreamListLen; j++) {			
 				memcpy(streaminfo, ptmpPrgInfo->pdataStreamList+offset, sizeof(DataStream_t) );
-				//printf("-----%x-->>%x\n", streaminfo->inPid, streaminfo->streamType);
+				printf("-----%x-->>%x\n", streaminfo->inPid, streaminfo->streamType);
 				offset += 1;				
 				if(2 == streaminfo->streamType){
 					//MPEG2 VIDEO
