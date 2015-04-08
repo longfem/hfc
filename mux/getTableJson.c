@@ -6,7 +6,7 @@ extern ClsProgram_st clsProgram;
 extern ClsMux_st *pclsMux;
 extern ClsParams_st *pdb;
 
-void getTableJson(int channel, char *outprg){
+void getTableJson(int channel, char *outprg, int flag){
 	char str[100] = {0};
 	char idstr[20] = {0};
 	int i = 0, j = 0, k = 0;
@@ -16,6 +16,7 @@ void getTableJson(int channel, char *outprg){
 	cJSON *tablesarray, *tablejson, *prgarray, *prgjson, *subTablearray, *subTablejson, *streamsarray, *streamjson;
 	tablesarray = cJSON_CreateArray();
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
+	cJSON_AddNumberToObject(tablejson, "sts", flag);//制表状态码
 	cJSON_AddTrueToObject(tablejson,"folder");
 	cJSON_AddTrueToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.1");

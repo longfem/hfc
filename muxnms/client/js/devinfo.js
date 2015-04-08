@@ -702,6 +702,9 @@ function devinfo_output(devType){
                      alert("权限不足，请与管理员联系");
                      return;
                  }
+                 if(data[0].sts == -1001){
+                     alert("在节目表和透传表有相同PID,请删除其中一个后重试!");
+                 }
 				 var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
 				 tablenode.addChildren(data);
                  //获取制表后输出流表

@@ -954,8 +954,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 		list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
 		list_init(PrgAVMuxListI); 
 
-		freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);		
-
+		freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);	
 		clsProgram.PrgAVMuxList[i] = NULL;
 
 		//printPrgAVMuxList();
@@ -991,6 +990,8 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 				{
 					if (outDesInfoTmp->tag == 0x9 && (outDesInfoTmp->userNew!=0))
 					{
+					#if 0
+	
 						int oldPid = 0x1fff;
 						int isBreakDesSeek = 0;
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
@@ -1065,8 +1066,9 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							pidMapTmp->newPid = pid;
 							list_append(PrgAVMuxListI,pidMapTmp);
 						}
+					#endif 
 					}
-					outDesInfoTmp++;
+					outDesInfoTmp++;					
 				}
 			}
 			//	printPrgAVMuxList();
@@ -1112,6 +1114,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 				{
 					if (outDesInfoTmp->tag == 0x9 && !outDesInfoTmp->userNew)
 					{
+					#if 0
 						int oldPid = 0x1fff;
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
 						for (m = 0; m < 1; m++)//list inprg list
@@ -1193,6 +1196,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							pidMapTmp->newPid = pid;
 							list_append(PrgAVMuxListI, pidMapTmp);
 						}
+					#endif
 					}
 				}
 				DataStream_stTmp++;
@@ -1202,11 +1206,53 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 		if(list_len(PrgAVMuxListI)>0)
 		{
 			clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
-		//	printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
+			//printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
 		}
 	}
 	return 1;
 }
+
+
+
+int DirectlyTransmit_repeatePid_verify(int outChn)
+{
+    int i,j;
+	if (clsProgram.PrgAVMuxList[outChn - 1] == NULL)
+		return 1;
+
+	ChannelProgramSt *outpst = NULL;
+	list_get(&(clsProgram.outPrgList), outChn-1, &outpst);
+	if (list_len(&outpst->dtPidList) == 0)
+		return 1;
+	
+	MuxPidInfo_st *pidTmp;
+	MuxPidInfo_st *avPidTmp;
+
+	for (i = 0; i < list_len(&outpst->dtPidList); i++)
+		{
+			 list_get(&outpst->dtPidList, i, &pidTmp);
+			 //printf("outpst->dtPidList %d\n",pidTmp->oldPid);
+
+		for (j = 0; j < list_len(clsProgram.PrgAVMuxList[outChn - 1]); j++)
+		{
+			list_get(clsProgram.PrgAVMuxList[outChn - 1], j, &avPidTmp);
+			
+			//printf("PrgAVMuxList %d\n",avPidTmp->oldPid);
+			if (avPidTmp->inChannel == pidTmp->inChannel)
+			{
+				if (avPidTmp->oldPid != -1 && avPidTmp->oldPid == pidTmp->oldPid)
+				{
+					printf("DirectlyTransmit_repeatePid_verify failed  avPidTmp->oldPid: %d\n",avPidTmp->oldPid);
+					return 0;
+				}
+			}		
+		}
+
+		}
+
+	return 1;
+}
+
 
 void printPrgAVMuxList(list_t *PrgAVMuxListI)
 {
@@ -1227,7 +1273,7 @@ void printPRG(Dev_prgInfo_st* SDTS)
 	int i;
 	int j;
 	printf("********\n");
-		printf("SDTS->chnId----%d\n",SDTS->chnId);
+	printf("SDTS->chnId----%d\n",SDTS->chnId);
 	printf("newPcrPid----%d\n",SDTS->newPcrPid);
 	printf("oldPcrPid----%d\n",SDTS->oldPcrPid);
 	printf("pmtPid----%d\n",SDTS->pmtPid);

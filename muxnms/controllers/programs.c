@@ -38,52 +38,22 @@ static void rendersts(const char *str,int status)
 static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streamindex, int flag){
 	int cm = 0, i = 0, j = 0, hascontained = 0, streamlen = outprg->pdataStreamListLen;
 	DataStream_t *StreamList = NULL;
-	//修改节目数据流信息
-	if(flag == 1){//add stream
-	    DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
-	    StreamList = malloc((outprg->pdataStreamListLen+1) * sizeof(DataStream_t));
-        for(j=0; j<outprg->pdataStreamListLen; j++){
-            memcpy(StreamList, outpdataStreamInfo, sizeof(DataStream_t));
-            StreamList->desNode = malloc(outpdataStreamInfo->desNodeLen * sizeof(Commdes_t));
-            Commdes_t *pdataStreamDesInfo = StreamList->desNode;
-            Commdes_t *inpdataStreamDesInfo = outpdataStreamInfo->desNode;
-            for (cm = 0; cm < outpdataStreamInfo->desNodeLen; cm++)
-            {
-                memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
-                pdataStreamDesInfo->data = malloc(inpdataStreamDesInfo->dataLen * sizeof(unsigned char) );
-                memcpy(pdataStreamDesInfo->data, inpdataStreamDesInfo->data, inpdataStreamDesInfo->dataLen * sizeof(unsigned char));
-                pdataStreamDesInfo++;
-                inpdataStreamDesInfo++;
-            }
-            outpdataStreamInfo++;
-            StreamList++;
+	//找到新添加的数据流添加到outprg
+    DataStream_t *pdataStreamInfo = inprg->pdataStreamList;
+    for(j=0; j<inprg->pdataStreamListLen; j++){
+        if(pdataStreamInfo->index == streamindex){
+            hascontained = 1;
+            streamlen++;
+            break;
         }
-        //找到新添加的数据流添加到outprg
-        DataStream_t *pdataStreamInfo = inprg->pdataStreamList;
-        for(j=0; j<inprg->pdataStreamListLen; j++){
-            if(pdataStreamInfo->index == streamindex){
-                hascontained = 1;
-                memcpy(StreamList, pdataStreamInfo, sizeof(DataStream_t));
-                StreamList->desNode = malloc(pdataStreamInfo->desNodeLen * sizeof(Commdes_t));
-                Commdes_t *pdataStreamDesInfo = StreamList->desNode;
-                Commdes_t *inpdataStreamDesInfo = pdataStreamInfo->desNode;
-                for (cm = 0; cm < pdataStreamInfo->desNodeLen; cm++)
-                {
-                    memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
-                    pdataStreamDesInfo->data = malloc(inpdataStreamDesInfo->dataLen * sizeof(unsigned char) );
-                    memcpy(pdataStreamDesInfo->data, inpdataStreamDesInfo->data, inpdataStreamDesInfo->dataLen * sizeof(unsigned char));
-                    pdataStreamDesInfo++;
-                    inpdataStreamDesInfo++;
-                }
-                streamlen++;
-                break;
-            }
-        }
-	}else{//delete stream
-	    DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
-        StreamList = malloc((outprg->pdataStreamListLen-1) * sizeof(DataStream_t));
-        for(j=0; j<outprg->pdataStreamListLen; j++){
-            if(outpdataStreamInfo->index != streamindex){
+        pdataStreamInfo++;
+    }
+    if(hascontained == 1){
+        //修改节目数据流信息
+        if(flag == 1){//add stream
+            DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
+            StreamList = malloc(streamlen * sizeof(DataStream_t));
+            for(j=0; j<outprg->pdataStreamListLen; j++){
                 memcpy(StreamList, outpdataStreamInfo, sizeof(DataStream_t));
                 StreamList->desNode = malloc(outpdataStreamInfo->desNodeLen * sizeof(Commdes_t));
                 Commdes_t *pdataStreamDesInfo = StreamList->desNode;
@@ -96,19 +66,45 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
                     pdataStreamDesInfo++;
                     inpdataStreamDesInfo++;
                 }
+                outpdataStreamInfo++;
+                StreamList++;
             }
-            outpdataStreamInfo++;
-            StreamList++;
+            //找到新添加的数据流添加到outprg
+            memcpy(StreamList, pdataStreamInfo, sizeof(DataStream_t));
+            StreamList->desNode = malloc(pdataStreamInfo->desNodeLen * sizeof(Commdes_t));
+            Commdes_t *pdataStreamDesInfo = StreamList->desNode;
+            Commdes_t *inpdataStreamDesInfo = pdataStreamInfo->desNode;
+            for (cm = 0; cm < pdataStreamInfo->desNodeLen; cm++)
+            {
+                memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
+                pdataStreamDesInfo->data = malloc(inpdataStreamDesInfo->dataLen * sizeof(unsigned char) );
+                memcpy(pdataStreamDesInfo->data, inpdataStreamDesInfo->data, inpdataStreamDesInfo->dataLen * sizeof(unsigned char));
+                pdataStreamDesInfo++;
+                inpdataStreamDesInfo++;
+            }
+        }else{//delete stream
+            DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
+            StreamList = malloc((outprg->pdataStreamListLen-1) * sizeof(DataStream_t));
+            for(j=0; j<outprg->pdataStreamListLen; j++){
+                if(outpdataStreamInfo->index != streamindex){
+                    memcpy(StreamList, outpdataStreamInfo, sizeof(DataStream_t));
+                    StreamList->desNode = malloc(outpdataStreamInfo->desNodeLen * sizeof(Commdes_t));
+                    Commdes_t *pdataStreamDesInfo = StreamList->desNode;
+                    Commdes_t *inpdataStreamDesInfo = outpdataStreamInfo->desNode;
+                    for (cm = 0; cm < outpdataStreamInfo->desNodeLen; cm++)
+                    {
+                        memcpy(pdataStreamDesInfo, inpdataStreamDesInfo, sizeof(Commdes_t) );
+                        pdataStreamDesInfo->data = malloc(inpdataStreamDesInfo->dataLen * sizeof(unsigned char) );
+                        memcpy(pdataStreamDesInfo->data, inpdataStreamDesInfo->data, inpdataStreamDesInfo->dataLen * sizeof(unsigned char));
+                        pdataStreamDesInfo++;
+                        inpdataStreamDesInfo++;
+                    }
+                }
+                outpdataStreamInfo++;
+                StreamList++;
+            }
+            streamlen = streamlen-2;
         }
-        hascontained = 1;
-        streamlen--;
-	}
-
-    if(hascontained == 0){
-        //not found
-        //TODO
-        printf("cpystream not found!\n");
-    }else{
         //释放原始内存空间
         if(outprg->pdataStreamListLen>0){
             for(i=0; i< outprg->pdataStreamListLen; i++){
@@ -127,10 +123,13 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
             free(outprg->pdataStreamList);
             outprg->pdataStreamList = NULL;
         }
+        //重新指向新数据流地址
+        outprg->pdataStreamListLen = streamlen;
+        outprg->pdataStreamList = StreamList;
+    }else{
+
     }
-	//重新指向新数据流地址
-	outprg->pdataStreamListLen = streamlen;
-	outprg->pdataStreamList = StreamList;
+
 }
 
 static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg){
@@ -194,41 +193,42 @@ static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInf
 
 static void cpyprg(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streamindex){
 	int k = 0;
-	outprg = malloc(sizeof(Dev_prgInfo_st));
-	memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));				
-	//pmt
-	outprg->pmtDesList = malloc(outprg->pmtDesListLen * sizeof(Commdes_t) );
-	Commdes_t *pmtDesInfo = outprg->pmtDesList;
-	Commdes_t *inpmtDesInfo = inprg->pmtDesList;
-	for (k = 0; k < outprg->pmtDesListLen; k++)
-	{  
-		memcpy(pmtDesInfo, inpmtDesInfo, sizeof(Commdes_t) );
-		pmtDesInfo->data = malloc(pmtDesInfo->dataLen * sizeof(unsigned char) );
-		memcpy(pmtDesInfo->data, inpmtDesInfo->data, pmtDesInfo->dataLen * sizeof(unsigned char));
-		pmtDesInfo++;
-		inpmtDesInfo++;
-	}
+    outprg = malloc(sizeof(Dev_prgInfo_st));
+    memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));
+    //pmt
+    outprg->pmtDesList = malloc(outprg->pmtDesListLen * sizeof(Commdes_t) );
+    Commdes_t *pmtDesInfo = outprg->pmtDesList;
+    Commdes_t *inpmtDesInfo = inprg->pmtDesList;
+    for (k = 0; k < outprg->pmtDesListLen; k++)
+    {
+        memcpy(pmtDesInfo, inpmtDesInfo, sizeof(Commdes_t) );
+        pmtDesInfo->data = malloc(pmtDesInfo->dataLen * sizeof(unsigned char) );
+        memcpy(pmtDesInfo->data, inpmtDesInfo->data, pmtDesInfo->dataLen * sizeof(unsigned char));
+        pmtDesInfo++;
+        inpmtDesInfo++;
+    }
+    //stream data
+    outprg->pdataStreamListLen = 0;
+    cpystream(outprg, inprg, streamindex, 1);
 
-	//stream data
-	cpystream(outprg, inprg, streamindex, 1);
-	//SDT 描述符
-	outprg->psdtDesList = malloc(outprg->psdtDesListLen * sizeof(Commdes_t));
-	Commdes_t *psdtDesInfo = outprg->psdtDesList;
-	Commdes_t *inpsdtDesInfo = inprg->psdtDesList;
-	for (k = 0; k < outprg->psdtDesListLen; k++)
-	{ 					
-		memcpy(psdtDesInfo, inpsdtDesInfo, sizeof(Commdes_t) );
-		psdtDesInfo->data = malloc(inpsdtDesInfo->dataLen);
-		memcpy(psdtDesInfo->data, inpsdtDesInfo->data, inpsdtDesInfo->dataLen);
-		psdtDesInfo++;
-		inpsdtDesInfo++;
-	}
-	outprg->prgName = malloc(inprg->prgNameLen);
-	memcpy(outprg->prgName, inprg->prgName, inprg->prgNameLen);
-	outprg->providerName = malloc(inprg->providerNameLen);
-	memcpy(outprg->providerName, inprg->providerName, inprg->providerNameLen);
-	
-	list_append(&(outpst->prgNodes), outprg);
+    //SDT 描述符
+    outprg->psdtDesList = malloc(outprg->psdtDesListLen * sizeof(Commdes_t));
+    Commdes_t *psdtDesInfo = outprg->psdtDesList;
+    Commdes_t *inpsdtDesInfo = inprg->psdtDesList;
+    for (k = 0; k < outprg->psdtDesListLen; k++)
+    {
+        memcpy(psdtDesInfo, inpsdtDesInfo, sizeof(Commdes_t) );
+        psdtDesInfo->data = malloc(inpsdtDesInfo->dataLen);
+        memcpy(psdtDesInfo->data, inpsdtDesInfo->data, inpsdtDesInfo->dataLen);
+        psdtDesInfo++;
+        inpsdtDesInfo++;
+    }
+    outprg->prgName = malloc(inprg->prgNameLen);
+    memcpy(outprg->prgName, inprg->prgName, inprg->prgNameLen);
+    outprg->providerName = malloc(inprg->providerNameLen);
+    memcpy(outprg->providerName, inprg->providerName, inprg->providerNameLen);
+
+    list_append(&(outpst->prgNodes), outprg);
 }
 
 static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAddedUseNewPidValue)
@@ -260,7 +260,6 @@ static void getprg(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[20480] = {0};
-	printf("-----------getinprg-----------------------\n");
     getprgsJson(ip, inCh, pProg);
 	render(pProg);
     
@@ -279,7 +278,6 @@ static void getoutprg(HttpConn *conn) {
 		getOutPrograms(ip, outChn);
 		LoadBitrateAndTableEnable(ip, outChn);
 	}
-	printf("-----------getoutprg-----------------------\n");
 	getoutprgsJson(ip, Chn - 1, outprg);
 	render(outprg);
     
@@ -324,14 +322,12 @@ static void selectprgs(HttpConn *conn) {
                 list_pop(&outpst->prgNodes, i);
                 outlen--;
                 i--;
-                printf("========i=====%d\n", i);
             }
         }
 
         if(selected){
             //拷贝inprgs to outprgs
             list_get(&(clsProgram.inPrgList), ch-1, &pst);
-            printf("========len=====%d\n", list_len(&pst->prgNodes));
             for(j=0; j<list_len(&pst->prgNodes); j++){
                 list_get(&(pst->prgNodes), j, &inprg);
                 if(inprg->chnId == ch){
@@ -384,8 +380,14 @@ static void selectprgs(HttpConn *conn) {
                 list_get(&(outpst->prgNodes), i, &outprg);
                 if((outprg->chnId == ch)&&(outprg->index == prgindex)){
                     hascontained = 1;
-                    cpystream(outprg, inprg, streamindex, selected);
-                    break;
+                    list_get(&(clsProgram.inPrgList), ch-1, &pst);
+                    for(j=0; j<list_len(&pst->prgNodes); j++){
+                        list_get(&(pst->prgNodes), j, &inprg);
+                        if((inprg->chnId == ch)&&(inprg->index == prgindex)){
+                            cpystream(outprg, inprg, streamindex, selected);
+                            break;
+                        }
+                    }
                 }
             }
             if(hascontained == 0){
@@ -395,6 +397,7 @@ static void selectprgs(HttpConn *conn) {
                     list_get(&(pst->prgNodes), j, &inprg);
                     if((inprg->chnId == ch)&&(inprg->index == prgindex)){
                         cpyprg(outpst, outprg, inprg, streamindex);
+                        break;
                     }
                 }
             }
@@ -403,8 +406,14 @@ static void selectprgs(HttpConn *conn) {
                 list_get(&(outpst->prgNodes), i, &outprg);
                 if((outprg->chnId == ch)&&(outprg->index == prgindex)){
                     hascontained = 1;
-                    cpystream(outprg, inprg, streamindex, selected);
-                    break;
+                    list_get(&(clsProgram.inPrgList), ch-1, &pst);
+                    for(j=0; j<list_len(&pst->prgNodes); j++){
+                        list_get(&(pst->prgNodes), j, &inprg);
+                        if((inprg->chnId == ch)&&(inprg->index == prgindex)){
+                            cpystream(outprg, inprg, streamindex, selected);
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -504,7 +513,7 @@ static void selectprgs(HttpConn *conn) {
 
 /*制表准备工作*/
 static void maketable(HttpConn *conn) { 
-	int pos = 0;
+	int pos = 0, flag = 0;
 	char outstring[30480] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -520,9 +529,10 @@ static void maketable(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	//制表
-	MakeTable(pos);	
+	flag = MakeTable(pos);
+	printf("=====flag=====%d\n", flag);
 	//获取制表后结果
-	getTableJson(pos, outstring);
+	getTableJson(pos, outstring, flag);
 	render(outstring);
     
 } 
@@ -734,6 +744,7 @@ static void setpidtransinfo(HttpConn *conn) {
 		sprintf(idstr, "p_oldpid%d", i);
 		tmpstr = mprGetJson(jsonparam, idstr);
 		sscanf(tmpstr, "%x", &val);
+		printf("===set pid====%x\n", val);
 		if(val>0xffff || val<1){
 			memset(idstr, 0, sizeof(idstr));
 			rendersts(idstr, 0);

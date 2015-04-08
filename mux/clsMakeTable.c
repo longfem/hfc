@@ -8,13 +8,15 @@ extern ClsParams_st *pdb;
 extern ClsProgram_st clsProgram;
 static int isTableInit=0;
 
+
+//return 
+//-1001:pid directly failed
+///return
 int MakeTable(int outChnId)
 {
 	ChannelProgramSt *outpst = NULL;
-	printf("============111\n");
-	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
-	buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
-
+	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);	
+	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
 }
 
 
@@ -31,7 +33,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	int rstPat;
 	int i;
 
-    printf("============222\n");
+
 	ClsMuxInit(2,2);
 	//ClsMuxInit(2,2);
 
@@ -44,10 +46,12 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char sdtTable[8 * 188];
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
-    printf("=============begin\n");
+
+    printf("buildTable========11\n");
 	if (AutoMakeNewPid(outChnId)==0)
 		return 0;
-    printf("=============end\n");
+
+    printf("buildTable========22\n");
 	//return 0;
 
   //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
@@ -190,13 +194,12 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 #endif
 
 #if 0
-
 	if (list_len(&caNode->caIdenList)>0)
 	{
 		// Cat
 		rstPat = CreateCat(caNode, catTable, version);
 		list_get(&pclsMux->table_cat,outChnIndex,&pbuff);
-		memcpy(pbuff->pbuf, catTable, sizeof(sdtTable));
+		memcpy(pbuff->pbuf, catTable, sizeof(catTable));
 		pbuff->bufLen=sizeof(catTable);
 
 		if (!rstPat)
@@ -217,6 +220,12 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}
 
 #endif
+
+
+
+	if (DirectlyTransmit_repeatePid_verify(outChnId)==0)
+		return -1001;
+
 	return 1;
 }
 
