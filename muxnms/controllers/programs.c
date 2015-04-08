@@ -37,6 +37,7 @@ static void rendersts(const char *str,int status)
 
 static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streamindex, int flag){
 	int cm = 0, i = 0, j = 0, hascontained = 0, streamlen = outprg->pdataStreamListLen;
+	DataStream_t *Newstream = NULL;
 	DataStream_t *StreamList = NULL;
 	//找到新添加的数据流添加到outprg
     DataStream_t *pdataStreamInfo = inprg->pdataStreamList;
@@ -52,7 +53,8 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
         //修改节目数据流信息
         if(flag == 1){//add stream
             DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
-            StreamList = malloc(streamlen * sizeof(DataStream_t));
+            Newstream = malloc(streamlen * sizeof(DataStream_t));
+            StreamList = Newstream;
             for(j=0; j<outprg->pdataStreamListLen; j++){
                 memcpy(StreamList, outpdataStreamInfo, sizeof(DataStream_t));
                 StreamList->desNode = malloc(outpdataStreamInfo->desNodeLen * sizeof(Commdes_t));
@@ -84,7 +86,8 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
             }
         }else{//delete stream
             DataStream_t *outpdataStreamInfo = outprg->pdataStreamList;
-            StreamList = malloc((outprg->pdataStreamListLen-1) * sizeof(DataStream_t));
+            Newstream = malloc((outprg->pdataStreamListLen-1) * sizeof(DataStream_t));
+            StreamList = Newstream;
             for(j=0; j<outprg->pdataStreamListLen; j++){
                 if(outpdataStreamInfo->index != streamindex){
                     memcpy(StreamList, outpdataStreamInfo, sizeof(DataStream_t));
@@ -125,7 +128,7 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
         }
         //重新指向新数据流地址
         outprg->pdataStreamListLen = streamlen;
-        outprg->pdataStreamList = StreamList;
+        outprg->pdataStreamList = Newstream;
     }else{
 
     }
@@ -807,7 +810,7 @@ static void getprginfo(HttpConn *conn) {
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);
-		//printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
+		printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
 		if((outprg->pmtPid == pmtPid)&&(outprg->chnId == chnid)){
 			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
 			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
@@ -843,7 +846,7 @@ static void getprginfo(HttpConn *conn) {
 } 
 
 static void setprginfo(HttpConn *conn) { 	
-	int i = 0, j = 0, k = 0, cm = 0, index = 0, matched = 0;
+	int i = 0, j = 0, k = 0, cm = 0, index = 0, matched = 0, val = 0;
 	char rsts[20] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -863,11 +866,15 @@ static void setprginfo(HttpConn *conn) {
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	cchar *prgname = mprGetJson(jsonparam, "prgname");
 	int prgNum = atoi(mprGetJson(jsonparam, "prgNum"));
-	int pmtPid = atoi(mprGetJson(jsonparam, "pmtpid"));
-	int oldpcrpid = atoi(mprGetJson(jsonparam, "oldpcrpid"));
-	int newpcrpid = atoi(mprGetJson(jsonparam, "newpcrpid"));
-	int streamcnt = atoi(mprGetJson(jsonparam, "streamcnt"));
-	int orgiralpmtPid = atoi(mprGetJson(jsonparam, "orgiralpmtpid"));
+	sscanf(mprGetJson(jsonparam, "pmtpid"), "%x", &val);
+    int pmtPid = val;
+    sscanf(mprGetJson(jsonparam, "oldpcrpid"), "%x", &val);
+    int oldpcrpid = val;
+    sscanf(mprGetJson(jsonparam, "newpcrpid"), "%x", &val);
+    int newpcrpid = val;
+	int streamcnt = atoi(mprGetJson(jsonparam, "streamcnt"));;
+	sscanf(mprGetJson(jsonparam, "orgiralpmtpid"), "%x", &val);
+    int orgiralpmtPid = val;
 	int chnid = atoi(mprGetJson(jsonparam, "chnid"));
 	int servicetype = atoi(mprGetJson(jsonparam, "servicetype"));
 	//查找编辑节目
@@ -919,10 +926,13 @@ static void setprginfo(HttpConn *conn) {
 				pdataStreamInfo->streamType = atoi(mprGetJson(jsonparam, rsts));
 				memset(rsts, 0, sizeof(rsts));
 				sprintf(rsts, "r_inpid%d", k);
-				pdataStreamInfo->inPid = atoi(mprGetJson(jsonparam, rsts));
+				sscanf(mprGetJson(jsonparam, rsts), "%x", &val);
+                pdataStreamInfo->inPid = val;
 				memset(rsts, 0, sizeof(rsts));
 				sprintf(rsts, "r_outpid%d", k);
-				pdataStreamInfo->outPid = atoi(mprGetJson(jsonparam, rsts));
+				sscanf(mprGetJson(jsonparam, rsts), "%x", &val);
+                pdataStreamInfo->outPid = val;
+				//pdataStreamInfo->outPid = atoi(mprGetJson(jsonparam, rsts));
 				if(matched == 0){
 					//新增加的流数据
 					pdataStreamInfo->index = index;

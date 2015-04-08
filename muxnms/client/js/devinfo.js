@@ -953,132 +953,135 @@ function devinfo_output(devType){
 			}
 		},
 		select: function(event, data) {
-            _channel = 1;
-            var tmpnode;
-			var channeltree =  $("#channel").fancytree("getTree");
-			//删除节目树节点
-			var prgnode = channeltree.getNodeByKey("id1.0");
+            if(data.targetType == "checkbox"){
+                _channel = 1;
+                var tmpnode;
+                var channeltree =  $("#channel").fancytree("getTree");
+                //删除节目树节点
+                var prgnode = channeltree.getNodeByKey("id1.0");
 
-			//添加至节目树
-            var selnode = data.tree.getNodeByKey(data.node.key);
-            var arr = data.node.key.match(/\./g);
-            if(data.node.selected){
-                switch(arr.length){
-                    case 1:	//通道节点
-                        if(data.node.key == "id1.0"){
-                            $.each(data.node.children, function(index,chnode){
-                                if(chnode.children != null){
-                                    $.each(chnode.children, function(index,prgnode){
-                                        if(channeltree.getNodeByKey(prgnode.key) != null){
-                                            channeltree.getNodeByKey(prgnode.key).remove();
-                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                            tmpnode.addNode(prgnode.toDict(true));
-                                        }else{
-                                            tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
-                                            tmpnode.addNode(prgnode.toDict(true));
-                                            _selectcount++;
-                                        }
-                                    });
-                                }
-                            });
+                //添加至节目树
+                var selnode = data.tree.getNodeByKey(data.node.key);
+                var arr = data.node.key.match(/\./g);
+                if(data.node.selected){
+                    switch(arr.length){
+                        case 1:	//通道节点
+                            if(data.node.key == "id1.0"){
+                                $.each(data.node.children, function(index,chnode){
+                                    if(chnode.children != null){
+                                        $.each(chnode.children, function(index,prgnode){
+                                            if(channeltree.getNodeByKey(prgnode.key) != null){
+                                                channeltree.getNodeByKey(prgnode.key).remove();
+                                                tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                                tmpnode.addNode(prgnode.toDict(true));
+                                            }else{
+                                                tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
+                                                tmpnode.addNode(prgnode.toDict(true));
+                                                _selectcount++;
+                                            }
+                                        });
+                                    }
+                                });
 
-                        }else{
-                            $.each(data.node.children, function(index,item){
-                                if(channeltree.getNodeByKey(item.key) != null){
-                                    channeltree.getNodeByKey(item.key).remove();
-                                    tmpnode = channeltree.getNodeByKey(item.parent.key);
-                                    tmpnode.addNode(item.toDict(true));
-                                }else{
-                                    tmpnode = channeltree.getNodeByKey(item.parent.key);
-                                    tmpnode.addNode(item.toDict(true));
-                                    _selectcount++;
-                                }
-                            });
-                        }
-                        break;
-                    case 2:	//节目节点
-                        if(channeltree.getNodeByKey(data.node.key) != null){
-                            channeltree.getNodeByKey(data.node.key).remove();
-                            tmpnode = channeltree.getNodeByKey(data.node.parent.key);
-                            tmpnode.addNode(selnode.toDict(true));
-                        }else{
-                            tmpnode = channeltree.getNodeByKey(data.node.parent.key);
-                            tmpnode.addNode(selnode.toDict(true));
-                            _selectcount++;
-                        }
-                        break;
-                    case 3: //流节点
-                        if(channeltree.getNodeByKey(data.node.parent.key) != null){				//	判断是否已存在节目节点
-                            channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
-                        }else{
-                            channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict());//添加节目节点
-                            channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
-                            _selectcount++;
-                        }
-                        break;
-                    case 4:
-                        if(channeltree.getNodeByKey(data.node.parent.parent.key) != null){					//	判断是否已存在节目节点
-                            if(channeltree.getNodeByKey(data.node.parent.key) != null){	//判断是否已存在节目子节点
+                            }else{
+                                $.each(data.node.children, function(index,item){
+                                    if(channeltree.getNodeByKey(item.key) != null){
+                                        channeltree.getNodeByKey(item.key).remove();
+                                        tmpnode = channeltree.getNodeByKey(item.parent.key);
+                                        tmpnode.addNode(item.toDict(true));
+                                    }else{
+                                        tmpnode = channeltree.getNodeByKey(item.parent.key);
+                                        tmpnode.addNode(item.toDict(true));
+                                        _selectcount++;
+                                    }
+                                });
+                            }
+                            break;
+                        case 2:	//节目节点
+                            if(channeltree.getNodeByKey(data.node.key) != null){
+                                channeltree.getNodeByKey(data.node.key).remove();
+                                tmpnode = channeltree.getNodeByKey(data.node.parent.key);
+                                tmpnode.addNode(selnode.toDict(true));
+                            }else{
+                                tmpnode = channeltree.getNodeByKey(data.node.parent.key);
+                                tmpnode.addNode(selnode.toDict(true));
+                                _selectcount++;
+                            }
+                            break;
+                        case 3: //流节点
+                            if(channeltree.getNodeByKey(data.node.parent.key) != null){				//	判断是否已存在节目节点
                                 channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
                             }else{
-                                channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict()); 	//添加节目子节点
-                                channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));	//添加目标子节点
+                                channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict());//添加节目节点
+                                channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
+                                _selectcount++;
                             }
-                        }else{
-                            channeltree.getNodeByKey(data.node.key.substring(0,5)).addNode(selnode.getParent().getParent().toDict());//添加节目节点
-                            _selectcount++;
-                            channeltree.getNodeByKey(selnode.getParent().getParent().key).addNode(selnode.getParent().toDict()); 	//添加节目子节点
-                            channeltree.getNodeByKey(selnode.getParent().key).addNode(selnode.toDict(true));	//添加目标子节点
-                        }
-                        //count++;
-                        break;
-                    default:
+                            break;
+                        case 4:
+                            if(channeltree.getNodeByKey(data.node.parent.parent.key) != null){					//	判断是否已存在节目节点
+                                if(channeltree.getNodeByKey(data.node.parent.key) != null){	//判断是否已存在节目子节点
+                                    channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
+                                }else{
+                                    channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict()); 	//添加节目子节点
+                                    channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));	//添加目标子节点
+                                }
+                            }else{
+                                channeltree.getNodeByKey(data.node.key.substring(0,5)).addNode(selnode.getParent().getParent().toDict());//添加节目节点
+                                _selectcount++;
+                                channeltree.getNodeByKey(selnode.getParent().getParent().key).addNode(selnode.getParent().toDict()); 	//添加节目子节点
+                                channeltree.getNodeByKey(selnode.getParent().key).addNode(selnode.toDict(true));	//添加目标子节点
+                            }
+                            //count++;
+                            break;
+                        default:
 
-                        break;
-                }
-            }else{
-                switch(arr.length){
-                    case 1:	//通道节点
-                        tmpnode = channeltree.getNodeByKey(data.node.key);
-                        if(tmpnode.key == "id1.0"){
-                            $.each(tmpnode.children, function(index,chnode){
-                                while( chnode.hasChildren() ) {
-                                    chnode.getFirstChild().remove();
+                            break;
+                    }
+                }else{
+                    switch(arr.length){
+                        case 1:	//通道节点
+                            tmpnode = channeltree.getNodeByKey(data.node.key);
+                            if(tmpnode.key == "id1.0"){
+                                $.each(tmpnode.children, function(index,chnode){
+                                    while( chnode.hasChildren() ) {
+                                        chnode.getFirstChild().remove();
+                                        _selectcount--;
+                                    }
+                                });
+
+                            }else{
+                                while( tmpnode.hasChildren() ) {
+                                    tmpnode.getFirstChild().remove();
                                     _selectcount--;
                                 }
-                            });
-
-                        }else{
-                            while( tmpnode.hasChildren() ) {
-                                tmpnode.getFirstChild().remove();
-                                _selectcount--;
                             }
-                        }
-                        break;
-                    case 2:	//节目节点
-                        tmpnode = channeltree.getNodeByKey(data.node.key);
-                        tmpnode.remove();
-                        _selectcount--;
-                        break;
-                    case 3:
-                    case 4:
-                        tmpnode = channeltree.getNodeByKey(data.node.key);
-                        tmpnode.remove();
-                        break;
-                    default:
+                            break;
+                        case 2:	//节目节点
+                            tmpnode = channeltree.getNodeByKey(data.node.key);
+                            tmpnode.remove();
+                            _selectcount--;
+                            break;
+                        case 3:
+                        case 4:
+                            tmpnode = channeltree.getNodeByKey(data.node.key);
+                            tmpnode.remove();
+                            break;
+                        default:
 
-                        break;
+                            break;
+                    }
+
                 }
-
+                prgnode.setTitle("节目: "+ _selectcount);
+                prgnode.render();
+                checkselectedprg(data);
             }
-			prgnode.setTitle("节目: "+ _selectcount);
-			prgnode.render();
-            checkselectedprg(data);
 		},
-		click: function(event, data) {			
+		click: function(event, data) {
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
-			  data.node.toggleSelected();
-			}			
+			    data.node.toggleSelected();
+			}
+
 		}
 	});
 	//节目树
@@ -1164,7 +1167,7 @@ function devinfo_output(devType){
 								$('#r_servicetype')[0].options[Number(data.serviceType) - 1].selected = true;
 								dataSet.length = 0;	
 								$.each(data.children, function(key, itemv) {
-									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid.toString(16),itemv.outpid.toString(16)];
 									dataSet[dataSet.length] = item;
 								});
 								_tbleditcount = dataSet.length;
@@ -1206,9 +1209,8 @@ function devinfo_output(devType){
 														+'<option value ="4">4-MPEG2 Audio</option>'												
 													+'</select>' );
 											}
-											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
-											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
-											
+                                            $('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+                                            $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
 										},		
 										"columns": [
 											{ "title": "序号" },
@@ -1731,7 +1733,7 @@ function devinfo_output(devType){
 								$('.prg_prc2').val(data.newPcrPid.toString(16));
 								dataSet.length = 0;	
 								$.each(data.children, function(key, itemv) {
-									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid,itemv.outpid];
+									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid.toString(16),itemv.outpid.toString(16)];
 									dataSet[dataSet.length] = item;
 								});
 								_tbleditcount = dataSet.length;
@@ -1773,8 +1775,8 @@ function devinfo_output(devType){
 														+'<option value ="4">4-MPEG2 Audio</option>'												
 													+'</select>' );
 											}
-											$('td:eq(3)', nRow).html( '<input type="text" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
-											$('td:eq(4)', nRow).html( '<input type="text" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
+											$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+											$('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
 											
 										},		
 										"columns": [
@@ -2062,7 +2064,7 @@ function devinfo_output(devType){
 					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + _channel + ',"chnid":' + $('.prg_prc').val() + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":' +  _pmtPid + ',"pmtpid":' +  parseInt($('.prg_pid').val(),16) + ',"oldpcrpid":' + parseInt($('.prg_prc1').val(),16) + ',"newpcrpid":' + parseInt($('.prg_prc2').val(),16)+ ',"streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, ',"').replace(/=/g, '":') + strindex + '}';
+				var jsonstr = '{"channel":' + _channel + ',"chnid":' + $('.prg_prc').val() + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":"' +  _pmtPid.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
