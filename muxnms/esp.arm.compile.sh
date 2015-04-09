@@ -9,4 +9,7 @@ cp -a cache/*.so ../build-arm/mux-arm/muxnms/cache/
 rm -rf ../build-arm/mux-arm/muxnms/client/*
 cp -a client/* ../build-arm/mux-arm/muxnms/client/
 
+rm -rf ../build-arm/mux-arm/muxnms/db/*
+cp -a db/* ../build-arm/mux-arm/muxnms/db/
+
 tar -jcvf mux-arm.tar.bz2 ../build-arm/mux-arm

@@ -23,10 +23,14 @@ function gbl_restart() {
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/globalopt/reboot",
-			 dataType: "text",
+			 dataType: "json",
 			 success: function(data){
-				$('p').empty();
-				$('p').append('设备重启命令已下发，请30秒后尝试重新连接');
+                 if(data.sts == 1){
+                     $('p').empty();
+                     $('p').append('设备重启命令已下发，请30秒后尝试重新连接');
+                 }else if(data.sts == 5){
+                     alert("权限不足，请与管理员联系");
+                 }
 			 },    
 			 error : function(err) {   
 				alert("异常！====="+err);    
@@ -59,10 +63,14 @@ function gbl_reset() {
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/globalopt/reset",
-			 dataType: "text",
+			 dataType: "json",
 			 success: function(data){
-				$('p').empty();
-				$('p').append('恢复出厂设置命令已下发，请30秒后尝试重新连接');
+                 if(data.sts == 1){
+                     $('p').empty();
+                     $('p').append('恢复出厂设置命令已下发，请30秒后尝试重新连接');
+                 }else if(data.sts == 5){
+                     alert("权限不足，请与管理员联系");
+                 }
 			 },    
 			 error : function(err) {   
 				alert("异常！====="+err);    
@@ -81,17 +89,17 @@ function gbl_setIp() {
 					+'<table class="nettable">'
 						+'<tr>'
 							+'<td><label>新IP地址：</label></td>'
-							+'<td><input type="text" value="" class="newip"></input></td>'
+							+'<td><input type="text" value="" class="newip" /></td>'
 							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="ipvalidate">非法的IP地址!!</label></td>'
 						+'</tr>'
 						+'<tr>'
 							+'<td><label>新网关地址：</label></td>'
-							+'<td><input type="text" value="" class="newgateway"></input></td>'
+							+'<td><input type="text" value="" class="newgateway" /></td>'
 							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="gatewayvalidate">非法的网关地址!!</label></td>'
 						+'</tr>'
 						+'<tr>'
 							+'<td><label>新子网掩码：</label></td>'
-							+'<td><input type="text" value="" class="newsubmask"></input></td>'
+							+'<td><input type="text" value="" class="newsubmask" /></td>'
 							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="submaskvalidate">非法的网关地址!!</label></td>'
 						+'</tr>'
 						+'<tr>'
@@ -152,14 +160,111 @@ function gbl_setIp() {
 			 type: "GET",
 			 async:false,
 			 url: "http://"+localip+":4000/do/globalopt/setDevip?"+$(".newip").val()+"&"+$(".newgateway").val()+"&"+$(".newsubmask").val(),
-			 dataType: "text",
+			 dataType: "json",
 			 success: function(data){
-				$('.settip').empty();
-				$('.settip').append('设置命令已下发，请尝试重新连接');
+                 if(data.sts == 1){
+                     $('.settip').empty();
+                     $('.settip').append('设置命令已下发，请尝试重新连接');
+                 }else if(data.sts == 5){
+                     alert("权限不足，请与管理员联系");
+                 }
 			 },    
 			 error : function(err) {   
 				alert("异常！====="+err);    
 			 }   
 		});
 	});
+}
+
+function gbl_password() {
+    $('.main-content').empty();
+    $('.main-content').append(
+        '<div class="src_content">'
+            +'<fieldset>'
+                +'<legend>修改密码</legend>'
+                +'<div class="register_form">'
+                    +'<div class="register_formrow">'
+                        +'<div class="register_item rlb"><label>原密码</label></div>'
+                        +'<div class="register_item rip"><input type="password" class="oldpassword" placeholder="password" /> </div>'
+                    +'</div>'
+                    +'<div class="register_formrow">'
+                        +'<div class="register_item rlb"><label>新密码</label></div>'
+                        +'<div class="register_item rip"><input type="password" class="newpassword" placeholder="Password" /> </div>'
+                    +'</div>'
+                    +'<div class="register_formrow">'
+                        +'<div class="register_item rlb"><label>密码确认</label></div>'
+                        +'<div class="register_item rip"><input type="password" class="cpassword" placeholder="Password" /> </div>'
+                    +'</div>'
+                +'</div>'
+                +'<div class="src_btn">'
+                    +'<button class="btn_submit">修改</button>'
+                    +'<p></p>'
+                +'</div>'
+            +'</fieldset>'
+        +'</div>'
+    );
+
+    $( ".btn_submit" ).button({
+        icons: {
+            primary: "ui-icon-gear"
+        }
+    }).click(function( event ) {
+        event.preventDefault();
+        if($(".newpassword").val() != $(".cpassword").val()){
+            alert("两次新密码输入不一致");
+            return;
+        }
+        var strjson = '{oldpassword:'+$(".oldpassword").val() + ',newpassword:'+ $(".newpassword").val()
+            +  '}';
+        $.ajax({
+            type: "GET",
+            async:false,
+            url: "http://"+localip+":4000/do/globalopt/setPassword",
+            data: strjson,
+            dataType: "json",
+            success: function(data){
+                if(data.sts == 1){
+                    $(".oldpassword").val("");
+                    $(".newpassword").val("");
+                    $(".cpassword").val("");
+                    alert("密码修改成功");
+                }else if(data.sts == 5){
+                    alert("权限不足，请与管理员联系");
+                }
+            },
+            error : function(err) {
+                alert("异常！====="+err);
+            }
+        });
+    });
+}
+
+function gbl_export() {
+    $.ajax({
+        type: "GET",
+        async:false,
+        url: "http://192.168.1.249:4000/do/programs/getprg?inch="+1,
+        // data: {ip:"192.168.1.134", inch:2},
+        dataType: "json",
+        success: function(data){
+            data = JSON.stringify(data).replace('\\','');
+            //alert("-----"+data);
+            var fso, tf;
+            try{
+                fso = new ActiveXObject("Scripting.FileSystemObject");
+                tf = fso.CreateTextFile("F:\\DB_USER.json", true);
+                tf.WriteLine(data);
+            }catch(err){
+                alert("=====>>>"+err);
+
+            }finally{
+                tf.Close();
+            }
+        },
+        error : function(err) {
+            // view("异常！");
+            var xxx = err;
+            alert("异常！====="+JSON.stringify(err));
+        }
+    });
 }

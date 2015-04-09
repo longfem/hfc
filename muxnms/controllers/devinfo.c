@@ -19,6 +19,8 @@ static void getDevinfo(HttpConn *conn) {
 	}
 	
     char ip[16] = "192.168.1.134";
+    //stan for write into device
+    //char ip[16] = "127.0.0.1";
 	char pProg[256] = {0}; 
     getbaseJson(ip, pProg);	
 	render(pProg);
