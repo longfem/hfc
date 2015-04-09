@@ -10,7 +10,7 @@ int freeProgramsMalloc(Dev_prgInfo_st * data)
 			free(data->pmtDesList[i].data);
 			data->pmtDesList[i].data = NULL;		
 	}
-	if(data->pmtDesList){
+	if(data->pmtDesListLen>0){
 		free(data->pmtDesList);
 		data->pmtDesList = NULL;
 	}

@@ -2,7 +2,7 @@
 #define _GET_PROGRAM_INFO_H_
 
 
-void getTableJson(int channel, char *outprg);
+void getTableJson(int channel, char *outprg, int flag);
 void getStreamJson(int channel, char *outprg);
 int OutPsiTable_inSdt_search_prgInfo(sdt_senction_st *p_sdt, int seriveid, char *prgName, int *isCrpto);
 

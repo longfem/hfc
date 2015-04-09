@@ -98,11 +98,12 @@
 			 success: function(data){
 				recdata = data;
 			 },    
-			 error : function(err) {    
+			 error : function(err,b,c) {
 				if(err.responseText == "login.esp"){
 					window.location = "/login.esp";
 				}
 				//alert("异常！====="+JSON.stringify(err));
+
 			 }   
 		});
 		$('.main-content').empty();
@@ -210,17 +211,19 @@
 				+'</table>'	
 			);
 		}
-		
-		$("#dev-name")[0].textContent = "T"+recdata.IP;
-		$("#dev-type")[0].textContent = recdata.devType;
-		$("#dev-valid")[0].textContent = "是";
-		$("#dev-connect")[0].textContent = "TCP";
-		$("#dev-ip")[0].textContent = recdata.IP;
-		$("#dev-port")[0].textContent = recdata.port;
-		$("#dev-biosversion")[0].textContent = recdata.HardVersion;
-		$("#dev-softversion")[0].textContent = recdata.SoftVersion;
-		$("#dev-firmware")[0].textContent = recdata.FpgaVersion;
+		try{
+            $("#dev-name")[0].textContent = "T"+recdata.IP;
+            $("#dev-type")[0].textContent = recdata.devType;
+            $("#dev-valid")[0].textContent = "是";
+            $("#dev-connect")[0].textContent = "TCP";
+            $("#dev-ip")[0].textContent = recdata.IP;
+            $("#dev-port")[0].textContent = recdata.port;
+            $("#dev-biosversion")[0].textContent = recdata.HardVersion;
+            $("#dev-softversion")[0].textContent = recdata.SoftVersion;
+            $("#dev-firmware")[0].textContent = recdata.FpgaVersion;
+        }catch(err){
 
+        }
 		function btn_close() {
 			var userAgent = navigator.userAgent;
 			//注销				

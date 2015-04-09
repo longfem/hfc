@@ -9,7 +9,7 @@
  */ 
 static void getDevinfo(HttpConn *conn) { 
 	if(session("isAuthed") != NULL){
-		if (strcmp(session("isAuthed"),"true") != 0) {			
+		if (strcmp(session("isAuthed"),"true") != 0) {
 			render("login.esp");
 			return;
 		}
@@ -22,7 +22,7 @@ static void getDevinfo(HttpConn *conn) {
     //stan for write into device
     //char ip[16] = "127.0.0.1";
 	char pProg[256] = {0}; 
-    getbaseJson(ip, pProg);	
+    getbaseJson(ip, pProg);
 	render(pProg);
 }
 
