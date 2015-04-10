@@ -24,8 +24,8 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-char ip[16] = "192.168.1.134";
-//char ip[16] = "127.0.0.1";
+//char ip[16] = "192.168.1.134";
+char ip[16] = "127.0.0.1";
 
 
 static void rendersts(const char *str,int status)
@@ -264,7 +264,7 @@ static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAdde
 
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
-    char ip[16] = "192.168.1.134";//param("ip"); 
+    
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[20480] = {0};
@@ -276,7 +276,7 @@ static void getprg(HttpConn *conn) {
 static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
 	int Chn = atoi(mprGetJson(jsonparam, "inch")); 
-    char ip[16] = "192.168.1.134";
+    //char ip[16] = "192.168.1.134";
 	char outprg[20480] = {0};
 	int outChn = 0;	
 	if(1){
@@ -605,7 +605,7 @@ static void writetable(HttpConn *conn) {
         render(rsts);
         return;
     }
-	if(!sendPrograms("192.168.1.134", inCh)){
+	if(!sendPrograms(ip, inCh)){
 		rendersts(rsts, 1);
 	}else{
 		rendersts(rsts, 0);
