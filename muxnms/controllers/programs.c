@@ -23,6 +23,8 @@
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
+char ip[16] = "192.168.1.134";//param("ip");
+
 static void rendersts(const char *str,int status)
 {
 	cJSON *result = cJSON_CreateObject();
@@ -259,7 +261,6 @@ static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAdde
 
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
-    char ip[16] = "192.168.1.134";//param("ip"); 
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[20480] = {0};
@@ -270,8 +271,7 @@ static void getprg(HttpConn *conn) {
 
 static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
-	int Chn = atoi(mprGetJson(jsonparam, "inch")); 
-    char ip[16] = "192.168.1.134";
+	int Chn = atoi(mprGetJson(jsonparam, "inch"));
 	char outprg[20480] = {0};
 	int outChn = 0;	
 	if(1){
@@ -573,16 +573,7 @@ static void streamtable(HttpConn *conn) {
 	free(streamjsonstring);
 	render(outstring);
     
-} 
-
-static void makestreamtable(HttpConn *conn) { 
-    char outstring[1024] = {0};
-	MprJson *jsonparam = httpGetParams(conn); 
-    cchar *inChn = mprGetJson(jsonparam, "channel"); 
-	int inCh = atoi(inChn);
-	getStreamJson(inCh, outstring);
-	render(outstring);    
-} 
+}
 
 static void writetable(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn); 
@@ -600,7 +591,7 @@ static void writetable(HttpConn *conn) {
         render(rsts);
         return;
     }
-	if(!sendPrograms("192.168.1.134", inCh)){
+	if(!sendPrograms(ip, inCh)){
 		rendersts(rsts, 1);
 	}else{
 		rendersts(rsts, 0);
@@ -989,7 +980,6 @@ static void getglobalinfo(HttpConn *conn) {
 }
 
 static void search(HttpConn *conn) {
-	char ip[16] = "192.168.1.134";
 	char str[64] = {0};
 	int i = 0, rst = 0;
     char* jsonstring;
@@ -1012,7 +1002,6 @@ static void search(HttpConn *conn) {
 }
 
 static void reprgnum(HttpConn *conn) {
-	char ip[16] = "192.168.1.134";
 	char str[64] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -1051,7 +1040,6 @@ static void reprgnum(HttpConn *conn) {
 }
 
 static void reprgpid(HttpConn *conn) {
-	char ip[16] = "192.168.1.134";
 	char str[64] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -1185,7 +1173,6 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-streamtable", streamtable);
 	espDefineAction(route, "programs-cmd-writetable", writetable);
 	espDefineAction(route, "programs-cmd-getglobalinfo", getglobalinfo);
-	espDefineAction(route, "programs-cmd-makestreamtable", makestreamtable);
     espDefineAction(route, "programs-cmd-getchanneloutinfo", getchanneloutinfo);
 	espDefineAction(route, "programs-cmd-setchanneloutinfo", setchanneloutinfo);
 	espDefineAction(route, "programs-cmd-getpidtransinfo", getpidtransinfo);

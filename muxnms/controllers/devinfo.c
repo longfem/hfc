@@ -6,7 +6,8 @@
 
 /*
     Get a resource
- */ 
+ */
+char ip[16] = "192.168.1.134";
 static void getDevinfo(HttpConn *conn) { 
 	if(session("isAuthed") != NULL){
 		if (strcmp(session("isAuthed"),"true") != 0) {
@@ -17,8 +18,6 @@ static void getDevinfo(HttpConn *conn) {
 		render("login.esp");
 		return;
 	}
-	
-    char ip[16] = "192.168.1.134";
 	char pProg[256] = {0}; 
     getbaseJson(ip, pProg);
 	render(pProg);

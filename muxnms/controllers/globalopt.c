@@ -10,7 +10,7 @@
 /*
     Create a new resource in the database
  */
- char ip[16] = "192.168.1.134";
+char ip[16] = "192.168.1.134";
 static void rendersts(const char *str,int status)
 {
 	cJSON *result = cJSON_CreateObject();
