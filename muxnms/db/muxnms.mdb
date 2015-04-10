@@ -29,31 +29,4 @@
         data: [
         ],
     },
-    '_EspMigrations': {
-        hints: {
-            ncols: 2
-        },
-        schema: {
-            'id': { type: 'int', autoinc: true, index: true, key: true },
-            'version': { type: 'string' },
-        },
-        data: [
-            [ 1,'201503311245060',],
-            [ 2,'201503311245250',],
-            [ 3,'201503311246130',],
-        ],
-    },
-    'user:string': {
-        hints: {
-            ncols: 4
-        },
-        schema: {
-            'id': { type: 'int', autoinc: true, index: true, key: true },
-            'desc': { type: 'string' },
-            'level': { type: 'int' },
-            'logtime': { type: 'date' },
-        },
-        data: [
-        ],
-    },
 }

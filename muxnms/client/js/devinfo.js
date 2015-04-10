@@ -1077,6 +1077,9 @@ function devinfo_output(devType){
                 checkselectedprg(data);
             }
 		},
+        //fixSelection3AfterClick: function(event, data){
+        //
+        //},
 		click: function(event, data) {
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
 			    data.node.toggleSelected();

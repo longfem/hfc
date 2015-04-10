@@ -397,18 +397,6 @@ void getTableJson(int channel, char *outprg, int flag){
 	free(prgjsonstring);
 }
 
-void getStreamJson(int channel, char *outprg){
-	char* jsonstring;
-	cJSON *streamjson;
-	
-	
-	
-	
-	//释放内存	
-	cJSON_Delete(streamjson);		
-	free(jsonstring);
-}
-
 int OutPsiTable_inSdt_search_prgInfo(sdt_senction_st *p_sdt, int seriveid, char *prgName, int *isCrpto)
 {
 	int i = 0, j = 0;
