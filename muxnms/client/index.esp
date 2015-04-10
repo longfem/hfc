@@ -102,7 +102,8 @@
 				if(err.responseText == "login.esp"){
 					window.location = "/login.esp";
 				}
-				//alert("异常！====="+c);
+				//alert("异常！====="+JSON.stringify(err));
+
 			 }   
 		});
 		$('.main-content').empty();

@@ -1,4 +1,34 @@
 {
+    'user': {
+        hints: {
+            ncols: 4
+        },
+        schema: {
+            'id': { type: 'int', autoinc: true, index: true, key: true },
+            'username': { type: 'string' },
+            'password': { type: 'string' },
+            'roles': { type: 'string' },
+        },
+        data: [
+            [ 1,'root','888888','root',],
+            [ 2,'admin','888888','admin',],
+            [ 3,'user','888888','user',],
+        ],
+    },
+    'optlog': {
+        hints: {
+            ncols: 5
+        },
+        schema: {
+            'id': { type: 'int', autoinc: true, index: true, key: true },
+            'user': { type: 'string' },
+            'desc': { type: 'string' },
+            'level': { type: 'int' },
+            'logtime': { type: 'date' },
+        },
+        data: [
+        ],
+    },
     '_EspMigrations': {
         hints: {
             ncols: 2
@@ -8,32 +38,22 @@
             'version': { type: 'string' },
         },
         data: [
-            [ 1,'201405262218530',],
+            [ 1,'201503311245060',],
+            [ 2,'201503311245250',],
+            [ 3,'201503311246130',],
         ],
     },
-    'post': {
+    'user:string': {
         hints: {
-            ncols: 3
+            ncols: 4
         },
         schema: {
             'id': { type: 'int', autoinc: true, index: true, key: true },
-            'title': { type: 'string' },
-            'body': { type: 'text' },
+            'desc': { type: 'string' },
+            'level': { type: 'int' },
+            'logtime': { type: 'date' },
         },
         data: [
-        ],
-    },
-    'User': {
-        hints: {
-            ncols: 3
-        },
-        schema: {
-            'id': { type: 'int', autoinc: true, index: true, key: true },
-            'username': { type: 'string' },
-            'password': { type: 'string' },
-        },
-        data: [
-            [ 1,'root','root',],
         ],
     },
 }

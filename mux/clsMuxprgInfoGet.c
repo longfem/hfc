@@ -1046,7 +1046,7 @@ ErrorTypeEm SendTable_psi_finish(char *ip, int outChannel)
 ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 {
 	 unsigned char buf[1024];
-    int i = 0, j=0;
+    int i = 0, j=0, k=0;
     unsigned char sendbuf[1024];
     int slen=0;
 
@@ -1075,6 +1075,13 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
         sendbuf[7]=0x00;
         sendbuf[8]=0x00;
 
+        printf("\nSendTable_PidMap first\n");
+
+        for(i=0; i< 9; i++){
+            printf("sendbuf[%d]=0x%x ", i, sendbuf[i]);
+        }
+        printf("\n");
+
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 9, buf, &slen);
         if( slen >=10 ){
@@ -1082,8 +1089,9 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
             if(0 == buf[10])
             return  ok;                        
         }
-        else{            
-            return error;          
+        else{      
+            printf("send pidmap should return but not return!!!\n");      
+            //return error;          
         }
         return ok;
     }
@@ -1130,10 +1138,17 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
     sendbuf[7]=(unsigned char) (pidMapListLen & 0xFF);
     sendbuf[8]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
 
+    printf("\n send counter SendTable_PidMap first\n");
+    for(i=0; i< 9; i++){
+            printf("sendbuf[%d]=0x%x |",i, sendbuf[i]);
+        }
+
+
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 9, buf, &slen);
     if( slen < 9 ){
-        return error;
+        printf("send pidmap count return but not return!!!\n"); 
+        //return error;
     }
 	
 
@@ -1169,6 +1184,12 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 			iSendedBytes += clsProgram.pidMap_eachTransmit_numberMax * 5;
 			iAddr += clsProgram.pidMap_eachTransmit_numberMax * 5;
 		}
+
+        printf("\n in sendCnt SendTable_PidMap first\n");
+        for(k=0; k< 9; k++){
+            printf("sendbuf[%d]=0x%x |", k, sendbuf[k]);
+        }
+
 
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, iAddr, buf, &slen);
