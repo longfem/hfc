@@ -43,9 +43,7 @@
 							<ul>               
 								<li id="l41"><a href="">设备升级</a></li>               
 								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
-								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
-								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
-								<!-- <li id="l45"><a href="javascript:gbl_export()">导出配置</a></li> -->
+								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>  
 							</ul>
 						</li>	
 						<li class="subs" id="l5">
@@ -98,12 +96,11 @@
 			 success: function(data){
 				recdata = data;
 			 },    
-			 error : function(err,b,c) {
+			 error : function(err) {    
 				if(err.responseText == "login.esp"){
 					window.location = "/login.esp";
 				}
-				//alert("异常！====="+JSON.stringify(err));
-
+				 //alert("异常！====="+JSON.stringify(err));    
 			 }   
 		});
 		$('.main-content').empty();
@@ -151,6 +148,7 @@
 		);		
 		
 		function toHome() {
+			//TODO
 			//获取设备基本信息				
 			$.ajax({
 				 type: "GET",
@@ -161,8 +159,8 @@
 					recdata = data;
 				 },    
 				 error : function(err) {    
-					//var xxx = err;
-					//alert("异常！====="+JSON.stringify(err));    
+					var xxx = err;
+					  alert("异常！====="+JSON.stringify(err));    
 				 }   
 			});
 			//
@@ -211,19 +209,17 @@
 				+'</table>'	
 			);
 		}
-		try{
-            $("#dev-name")[0].textContent = "T"+recdata.IP;
-            $("#dev-type")[0].textContent = recdata.devType;
-            $("#dev-valid")[0].textContent = "是";
-            $("#dev-connect")[0].textContent = "TCP";
-            $("#dev-ip")[0].textContent = recdata.IP;
-            $("#dev-port")[0].textContent = recdata.port;
-            $("#dev-biosversion")[0].textContent = recdata.HardVersion;
-            $("#dev-softversion")[0].textContent = recdata.SoftVersion;
-            $("#dev-firmware")[0].textContent = recdata.FpgaVersion;
-        }catch(err){
+		
+		$("#dev-name")[0].textContent = "T"+recdata.IP;
+		$("#dev-type")[0].textContent = recdata.devType;
+		$("#dev-valid")[0].textContent = "是";
+		$("#dev-connect")[0].textContent = "TCP";
+		$("#dev-ip")[0].textContent = recdata.IP;
+		$("#dev-port")[0].textContent = recdata.port;
+		$("#dev-biosversion")[0].textContent = recdata.HardVersion;
+		$("#dev-softversion")[0].textContent = recdata.SoftVersion;
+		$("#dev-firmware")[0].textContent = recdata.FpgaVersion;
 
-        }
 		function btn_close() {
 			var userAgent = navigator.userAgent;
 			//注销				
