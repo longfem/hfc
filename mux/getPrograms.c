@@ -106,7 +106,7 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
                 DataStream_t *pdataStreamInfo = ptmpPrgInfo->pdataStreamList;
 
                 
-                printf("====+++DataStream_t num =%d\n", dataStreamCnt);
+                //printf("====+++DataStream_t num =%d\n", dataStreamCnt);
 
                 for (i = 0; i < dataStreamCnt; i++)
                 {                    

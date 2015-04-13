@@ -24,7 +24,7 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-//char ip[16] = "192.168.1.134";
+//char ip[16] = "192.168.1.49";
 char ip[16] = "127.0.0.1";
 
 static void rendersts(const char *str,int status)
@@ -266,7 +266,7 @@ static void getprg(HttpConn *conn) {
 
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
-	char pProg[20480] = {0};
+	char pProg[204800] = {0};
     getprgsJson(ip, inCh, pProg);
 	render(pProg);
     
@@ -275,7 +275,7 @@ static void getprg(HttpConn *conn) {
 static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
 	int Chn = atoi(mprGetJson(jsonparam, "inch"));
-	char outprg[20480] = {0};
+	char outprg[40960] = {0};
 	int outChn = 0;	
 	if(1){
 		PrgMuxInfoGet(ip);
@@ -536,7 +536,6 @@ static void maketable(HttpConn *conn) {
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	//制表
 	flag = MakeTable(pos);
-	printf("=====flag=====%d\n", flag);
 	//获取制表后结果
 	getTableJson(pos, outstring, flag);
 	render(outstring);
@@ -804,7 +803,7 @@ static void getprginfo(HttpConn *conn) {
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);
-		printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
+		//printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
 		if((outprg->pmtPid == pmtPid)&&(outprg->chnId == chnid)){
 			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
 			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);

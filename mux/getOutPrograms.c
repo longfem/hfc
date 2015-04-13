@@ -27,26 +27,26 @@ int getOutPrograms(char *ip, int outChn)
 	unsigned int  tmpShort = 0;
 	if(GetOutChnTSID(ip, outChn + 1, &tmpShort) == ok){
 		pdb->pvalueTree->poutChnArray[outChn].streamId = tmpShort;
-		printf("GetOutChnTSID = %d |0x %x\n", tmpShort);
+		//printf("GetOutChnTSID = %d |0x %x\n", tmpShort);
 	}
 	if (GetOutChnNetID(ip, outChn + 1, &tmpShort) == ok){
 		pdb->pvalueTree->poutChnArray[outChn].networkId = tmpShort;
-		printf("GetOutChnNetID = %d |0x %x\n", tmpShort);
+		//printf("GetOutChnNetID = %d |0x %x\n", tmpShort);
 	}
 	if (GetOutChnOrgNetID(ip, outChn + 1, &tmpShort) == ok){
 		pdb->pvalueTree->poutChnArray[outChn].oringal_networkid = tmpShort;
-		printf("GetOutChnOrgNetID = %d |0x %x\n", tmpShort);
+		//printf("GetOutChnOrgNetID = %d |0x %x\n", tmpShort);
 	}
 	
 	unsigned char tmpByte = 0;
 	if (GetOutChnTableVer(ip, outChn + 1, &tmpByte) == ok){
 		pdb->pvalueTree->poutChnArray[outChn].version = tmpByte;
-		printf("GetOutChnTableVer = %d |0x %x\n", tmpByte);
+		//printf("GetOutChnTableVer = %d |0x %x\n", tmpByte);
 	}
 	
 	if (GetPidOffset(ip, outChn + 1, &tmpShort) == ok){
 		clsProgram.m_autoMuxStartPid[outChn] = tmpShort;
-		printf("GetPidOffset = %d |0x %x\n", tmpShort);
+		//printf("GetPidOffset = %d |0x %x\n", tmpShort);
 	}
 	
 	// ---- 获取表激活命令 ----
