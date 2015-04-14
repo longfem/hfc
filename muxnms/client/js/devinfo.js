@@ -46,88 +46,43 @@ var dataSet1 = [
 	['3','24']	
 ];
 
-function selAllprgs(chantree, snt){
-    var nodes;
-    if(_channel == 1){
-        nodes = chantree.getNodeByKey("id1.0").children;
-    }else if(_channel == 2){
-        nodes = chantree.getNodeByKey("id1.0").children;
-    }
-    var inCh = 1, flag = 0; //通道号
-    var jsondata = new Array();
-    var prgindex = new Array();
-    var jsonstr;
-    nodes.forEach(function(node) {
-        flag = 0;
-        prgindex = new Array();
-        var chstr = "flag:1,"+"inCh" + inCh;
-        if( node.hasChildren() ) {
-            var prgnodes = node.children;
-            prgnodes.forEach(function(prgnode) {
-                var tmpstr = '{id:' + prgnode.data.index;
-                var offset = 0;
-                prgnode.children.forEach(function(streamnode){
-                    if(streamnode.data.index){
-                        tmpstr += ',index'+offset+':'+streamnode.data.index;
-                        offset++;
-                    };
-                })
-                prgindex[flag] = 'id' + flag + ':' + tmpstr + '}';
-                flag++;
-            });
-        }
-        jsonstr = chstr+':{' + prgindex.toString() +'}';
-        jsondata[inCh-1] = jsonstr;
-        inCh++;
-    });
-    $.ajax({
-        type: "GET",
-        async:false,
-        url: "http://"+localip+":4000/do/programs/selectprgs",
-        data: '{' + jsondata.toString() + ',channel:'+_channel+',prgcnt:'+snt+'}',
-        dataType: "json",
-        success: function(data){
-
-        },
-        error : function(err) {
-            alert(err);
-        }
-    });
-}
-
-function checkselectedprg(data){
+function checkselectedprg(nodekey){
     var chantree;
+    var devtree;
     var snt;
     if(_channel == 1){
         chantree = $("#channel").fancytree("getTree");
+        devtree = $("#devlist").fancytree("getTree");
         snt = _selectcount;
     }else if(_channel == 2){
         chantree = $("#channel2").fancytree("getTree");
+        devtree = $("#devlist2").fancytree("getTree");
         snt = _selectcount2;
     }
     var prgnode;
     var jsondata = new Array();
-    var arr = data.node.key.match(/\./g);
-    if(data.node.selected){
+    var arr = nodekey.match(/\./g);
+    if(devtree.getNodeByKey(nodekey).selected){
         switch(arr.length){
             case 1:	//通道节点
-                if(data.node.key == "id1.0"){
+                if(nodekey == "id1.0"){
                     var chstr = "flag:1,"+"selected:1";
                     jsondata[0] = chstr;
                 }else{
-                    var chstr = "flag:2,"+"selected:1,ch:"+ data.node.key.substr(data.node.key.indexOf('.')+1);
+                    var chstr = "flag:2,"+"selected:1,ch:"+ nodekey.substr(nodekey.indexOf('.')+1);
                     jsondata[0] = chstr;
                 }
                 break;
             case 2:	//节目节点
-                var chstr = "flag:3,"+"selected:1,ch:"+ data.node.data.chnid + ",index:"+ data.node.data.index;
+                prgnode = devtree.getNodeByKey(nodekey);
+                var chstr = "flag:3,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
                 jsondata[0] = chstr;
                 break;
             case 3: //流节点
             case 4:
-                prgnode = chantree.getNodeByKey(data.node.getParent().key);
+                prgnode = devtree.getNodeByKey(devtree.getNodeByKey(nodekey).getParent().key);
                 var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                + ",streamindex:"+ data.node.data.index;
+                + ",streamindex:"+ devtree.getNodeByKey(nodekey).data.index;
                 jsondata[0] = chstr;
                 break;
 
@@ -144,23 +99,24 @@ function checkselectedprg(data){
     }else{
         switch(arr.length){
             case 1:	//通道节点
-                if(data.node.key == "id1.0"){
+                if(nodekey == "id1.0"){
                     var chstr = "flag:1,"+"selected:0";
                     jsondata[0] = chstr;
                 }else{
-                    var chstr = "flag:2,"+"selected:0,ch:"+ data.node.key.substr(data.node.key.indexOf('.')+1);
+                    var chstr = "flag:2,"+"selected:0,ch:"+ nodekey.substr(nodekey.indexOf('.')+1);
                     jsondata[0] = chstr;
                 }
                 break;
             case 2:	//节目节点
-                var chstr = "flag:3,"+"selected:0,ch:"+ data.node.data.chnid + ",index:"+ data.node.data.index;
+                prgnode = devtree.getNodeByKey(nodekey);
+                var chstr = "flag:3,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
                 jsondata[0] = chstr;
                 break;
             case 3:
             case 4:
-                prgnode = chantree.getNodeByKey(data.node.getParent().key);
+                prgnode = devtree.getNodeByKey(devtree.getNodeByKey(nodekey).getParent().key);
                 var chstr = "flag:4,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                    + ",streamindex:"+ data.node.data.index;
+                    + ",streamindex:"+ devtree.getNodeByKey(nodekey).data.index;
                 jsondata[0] = chstr;
                 break;
 
@@ -447,10 +403,15 @@ function devinfo_output(devType){
 			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
 			
 			+'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
+            +'<li class="menu_chndelete" style="display:none"><a href="#chndelete"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+            +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus"><span class="ui-icon ui-icon-closethick"></span>删除所有自增节目</a></li>'
+            +'<li>---</li>'
 			+'<li class="menu_prgitems" style="display:none"><a href="#itmes"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'			
 			+'<li class="menu_re_prg" style="display:none"><a href="#re_prg"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'			
 			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
+            +'<li class="menu_cus_add" style="display:none"><a href="#cus_add"><span class="ui-icon ui-icon-add"></span>添加自增节目</a></li>'
 			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
+
 		+'</ul>'
 		+'<ul id="inputprg_menu" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
@@ -459,20 +420,25 @@ function devinfo_output(devType){
 			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
 		+'</ul>'
 		+'<ul id="program_menu2" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-			+'<li>---</li>'
-			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除这个节目</a></li>'
-			+'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑这个节目</a></li>'			
-			+'<li class="menu_deleteall"><a href="#deleteall"><span class="ui-icon ui-icon-closethick"></span>删除下一级所有自增描述符</a></li>'			
-			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
-			
-			+'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
-			+'<li class="menu_prgitems" style="display:none"><a href="#itmes"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'			
-			+'<li class="menu_re_prg" style="display:none"><a href="#re_prg"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'			
-			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
-			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
-		+'</ul>'
+        +'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+        +'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+        +'<li>---</li>'
+        +'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除这个节目</a></li>'
+        +'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑这个节目</a></li>'
+        +'<li class="menu_deleteall"><a href="#deleteall"><span class="ui-icon ui-icon-closethick"></span>删除下一级所有自增描述符</a></li>'
+        +'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
+
+        +'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
+        +'<li class="menu_chndelete" style="display:none"><a href="#chndelete"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+        +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus"><span class="ui-icon ui-icon-closethick"></span>删除所有自增节目</a></li>'
+        +'<li>---</li>'
+        +'<li class="menu_prgitems" style="display:none"><a href="#itmes"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'
+        +'<li class="menu_re_prg" style="display:none"><a href="#re_prg"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'
+        +'<li class="menu_re_pid" style="display:none"><a href="#re_pid"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
+        +'<li class="menu_cus_add" style="display:none"><a href="#cus_add"><span class="ui-icon ui-icon-add"></span>添加自增节目</a></li>'
+        +'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
+
+        +'</ul>'
 		+'<ul id="inputprg_menu2" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
 			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
@@ -671,10 +637,10 @@ function devinfo_output(devType){
 		var jsondata = new Array();
 		var prgindex = new Array();
 		var jsonstr;
-		if(_selectcount == 0){
-			alert("请选择节目!");
-			return;
-		}
+		//if(_selectcount == 0){
+		//	alert("请选择节目!");
+		//	return;
+		//}
 		nodes.forEach(function(node) {
 			flag = 0;
 			prgindex = new Array();
@@ -1081,7 +1047,7 @@ function devinfo_output(devType){
                 }
                 prgnode.setTitle("节目: "+ _selectcount);
                 prgnode.render();
-                checkselectedprg(data);
+                checkselectedprg(data.node.key);
                 data.node.toggleSelected();
             }
 
@@ -1100,15 +1066,29 @@ function devinfo_output(devType){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
 				var arr = data.node.key.match(/\./g);
 				if(arr.length == 1){
-					$(".menu_add").css("display", "none");
-					$(".menu_deleteall").css("display", "none");
-					$(".menu_edit").css("display", "none");
-					$(".menu_delete").css("display", "none");
-					$(".menu_prgdeleteall").css("display", "block");
-					$(".menu_prgitems").css("display", "block");
-					$(".menu_re_prg").css("display", "block");
-					$(".menu_re_pid").css("display", "block");
-					$(".menu_pidtrans").css("display", "block");
+                    $(".menu_pidtrans").css("display", "block");
+                    $(".menu_add").css("display", "none");
+                    $(".menu_delete").css("display", "none");
+                    $(".menu_edit").css("display", "none");
+                    if(data.node.key == "id1.0"){
+                        $(".menu_re_prg").css("display", "block");
+                        $(".menu_re_pid").css("display", "block");
+                        $(".menu_deleteall").css("display", "block");
+                        $(".menu_prgdeleteall").css("display", "block");
+                        $(".menu_prgitems").css("display", "block");
+                        $(".menu_chndelete").css("display", "none");
+                        $(".menu_prgdeletecus").css("display", "none");
+                        $(".menu_cus_add").css("display", "none");
+                    }else{
+                        $(".menu_deleteall").css("display", "none");
+                        $(".menu_prgdeleteall").css("display", "none");
+                        $(".menu_re_prg").css("display", "none");
+                        $(".menu_re_pid").css("display", "none");
+                        $(".menu_chndelete").css("display", "block");
+                        $(".menu_prgdeletecus").css("display", "block");
+                        $(".menu_cus_add").css("display", "block");
+                    }
+
 				}else if(arr.length == 2){
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
@@ -1119,6 +1099,9 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "block");
 					$(".menu_delete").css("display", "block");
+                    $(".menu_chndelete").css("display", "none");
+                    $(".menu_prgdeletecus").css("display", "none");
+                    $(".menu_cus_add").css("display", "none");
 				}else{
 					$(".menu_prgdeleteall").css("display", "none");
 					$(".menu_prgitems").css("display", "none");
@@ -1129,11 +1112,14 @@ function devinfo_output(devType){
 					$(".menu_deleteall").css("display", "block");
 					$(".menu_edit").css("display", "none");
 					$(".menu_delete").css("display", "none");
+                    $(".menu_chndelete").css("display", "none");
+                    $(".menu_prgdeletecus").css("display", "none");
+                    $(".menu_cus_add").css("display", "none");
 				}
-			    
 			},
 			select: function(event, data){	
 				_channel = 1;
+                var channeltree =  $("#channel").fancytree("getTree");
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -1146,10 +1132,15 @@ function devinfo_output(devType){
 					} case '#collasp': {
 						data.node.setExpanded(false);
 						break;
-					} case '#delete': {
+					} case '#delete': { //删除这个节目
 						var nodekey = data.node.key;
-						//data.node.remove();
-						$("#devlist").fancytree("getTree").getNodeByKey(nodekey).toggleSelected();
+						data.node.remove();
+                         _selectcount--;
+                        $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                        var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.render();
+                        checkselectedprg(nodekey);
 						break;
 					} case '#edit': {
 						//获取编辑节目信息
@@ -1241,25 +1232,52 @@ function devinfo_output(devType){
 						dialog_edit.dialog( "open" );
 						_editnodekey = data.node.key;
 						break;
-					} case '#deleteall': {
-						
+					} case '#deleteall': {//删除下一级所有自增描述符
+
 						break;
-					} case '#add': {
-						dialog_desc.dialog( "open" );
-						break;
-					} case '#prgdeleteall': {
-                        var nodekey;
+					} case '#chndelete': {//删除此通道下所有节目
+                        var nodekey = data.node.key;
                         while( data.node.hasChildren() ) {
                             nodekey = data.node.getFirstChild().key;
                             $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                            data.node.getFirstChild().remove();
+                            _selectcount--;
                         }
+                        var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.render();
+                        checkselectedprg(data.node.key);
+                        break;
+                    } case '#add': {
+						dialog_desc.dialog( "open" );
+						break;
+					} case '#cus_add': {//添加自增节目
+
+                        break;
+                    } case '#prgdeletecus': {//删除自增节目
+
+                        break;
+                    } case '#prgdeleteall': {//删除所有节目
+                        $.each(data.node.children, function(index,chnode){
+                            if(chnode.children != null){
+                                while(chnode.hasChildren()){
+                                    $("#devlist").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
+                                    chnode.getFirstChild().remove();
+                                    _selectcount--;
+                                }
+                            }
+                        });
+                        var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.render();
+                        checkselectedprg(data.node.key);
 						break;
 					} case '#itmes': {
 						//获取输出通道设置信息
 						$.ajax({
 							 type: "GET",
 							 async:false,
-							 url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel=1",
+							 url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel="+_channel,
 							 dataType: "json",
 							 success: function(data){
 								//JSON.parse(data);
@@ -1319,12 +1337,11 @@ function devinfo_output(devType){
                         $.ajax({
                             type: "GET",
                             async:false,
-                            url: "http://"+localip+":4000/do/programs/reprgnum?inch=1",
+                            url: "http://"+localip+":4000/do/programs/reprgnum?inch="+_channel,
                             dataType: "json",
                             success: function(data){
                                 if(data.sts == 1){
                                     //获取输出通道信息
-                                    var channeltree =  $("#channel").fancytree("getTree");
                                     readoutprgs(channeltree, _selectcount);
                                 }else if(data.sts == 5){
                                     alert("权限不足，请与管理员联系");
@@ -1340,12 +1357,11 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgpid?inch=1",
+                        url: "http://"+localip+":4000/do/programs/reprgpid?inch="+_channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                var channeltree =  $("#channel").fancytree("getTree");
                                 readoutprgs(channeltree, _selectcount);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");
@@ -1362,7 +1378,7 @@ function devinfo_output(devType){
 						$.ajax({
 							 type: "GET",
 							 async:false,
-							 url: "http://"+localip+":4000/do/programs/getpidtransinfo?channel=1",
+							 url: "http://"+localip+":4000/do/programs/getpidtransinfo?channel="+_channel,
 							 dataType: "json",
 							 success: function(data){
 								var pidData = [];
@@ -1511,7 +1527,7 @@ function devinfo_output(devType){
 					} case '#collasp': {
 						data.node.setExpanded(false);
 						break;
-					} case '#delete': {
+					} case '#delete': { //删除此通道下所有节目
 						while( data.node.hasChildren() ) {
                             if(data.node.getFirstChild().isSelected()){
                                 data.node.getFirstChild().setSelected(false);
@@ -1527,7 +1543,9 @@ function devinfo_output(devType){
 			}
 		},
 		select: function(event, data) {
-
+            var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+            prgnode.setTitle("节目: "+ _selectcount2);
+            prgnode.render();
 		},
 		click: function(event, data) {			
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
@@ -1672,41 +1690,61 @@ function devinfo_output(devType){
 			beforeOpen: function(event, data){
 			    $.ui.fancytree.debug("Menu beforeOpen ", data.$menu, data.node);
 				var arr = data.node.key.match(/\./g);
-				if(arr.length == 1){
-					$(".menu_add").css("display", "none");
-					$(".menu_deleteall").css("display", "none");
-					$(".menu_edit").css("display", "none");
-					$(".menu_delete").css("display", "none");
-					$(".menu_prgdeleteall").css("display", "block");
-					$(".menu_prgitems").css("display", "block");
-					$(".menu_re_prg").css("display", "block");
-					$(".menu_re_pid").css("display", "block");
-					$(".menu_pidtrans").css("display", "block");
-				}else if(arr.length == 2){
-					$(".menu_prgdeleteall").css("display", "none");
-					$(".menu_prgitems").css("display", "none");
-					$(".menu_re_prg").css("display", "none");
-					$(".menu_re_pid").css("display", "none");
-					$(".menu_pidtrans").css("display", "none");
-					$(".menu_add").css("display", "block");
-					$(".menu_deleteall").css("display", "block");
-					$(".menu_edit").css("display", "block");
-					$(".menu_delete").css("display", "block");
-				}else{
-					$(".menu_prgdeleteall").css("display", "none");
-					$(".menu_prgitems").css("display", "none");
-					$(".menu_re_prg").css("display", "none");
-					$(".menu_re_pid").css("display", "none");
-					$(".menu_pidtrans").css("display", "none");
-					$(".menu_add").css("display", "block");
-					$(".menu_deleteall").css("display", "block");
-					$(".menu_edit").css("display", "none");
-					$(".menu_delete").css("display", "none");
-				}
+                if(arr.length == 1){
+                    $(".menu_pidtrans").css("display", "block");
+                    $(".menu_add").css("display", "none");
+                    $(".menu_delete").css("display", "none");
+                    $(".menu_edit").css("display", "none");
+                    if(data.node.key == "id1.0"){
+                        $(".menu_re_prg").css("display", "block");
+                        $(".menu_re_pid").css("display", "block");
+                        $(".menu_deleteall").css("display", "block");
+                        $(".menu_prgitems").css("display", "block");
+                        $(".menu_prgdeleteall").css("display", "block");
+                        $(".menu_chndelete").css("display", "none");
+                        $(".menu_prgdeletecus").css("display", "none");
+                        $(".menu_cus_add").css("display", "none");
+                    }else{
+                        $(".menu_deleteall").css("display", "none");
+                        $(".menu_prgdeleteall").css("display", "none");
+                        $(".menu_re_prg").css("display", "none");
+                        $(".menu_re_pid").css("display", "none");
+                        $(".menu_chndelete").css("display", "block");
+                        $(".menu_prgdeletecus").css("display", "block");
+                        $(".menu_cus_add").css("display", "block");
+                    }
+                }else if(arr.length == 2){
+                    $(".menu_prgdeleteall").css("display", "none");
+                    $(".menu_prgitems").css("display", "none");
+                    $(".menu_re_prg").css("display", "none");
+                    $(".menu_re_pid").css("display", "none");
+                    $(".menu_pidtrans").css("display", "none");
+                    $(".menu_add").css("display", "block");
+                    $(".menu_deleteall").css("display", "block");
+                    $(".menu_edit").css("display", "block");
+                    $(".menu_delete").css("display", "block");
+                    $(".menu_chndelete").css("display", "none");
+                    $(".menu_prgdeletecus").css("display", "none");
+                    $(".menu_cus_add").css("display", "none");
+                }else{
+                    $(".menu_prgdeleteall").css("display", "none");
+                    $(".menu_prgitems").css("display", "none");
+                    $(".menu_re_prg").css("display", "none");
+                    $(".menu_re_pid").css("display", "none");
+                    $(".menu_pidtrans").css("display", "none");
+                    $(".menu_add").css("display", "block");
+                    $(".menu_deleteall").css("display", "block");
+                    $(".menu_edit").css("display", "none");
+                    $(".menu_delete").css("display", "none");
+                    $(".menu_chndelete").css("display", "none");
+                    $(".menu_prgdeletecus").css("display", "none");
+                    $(".menu_cus_add").css("display", "none");
+                }
 			    
 			},
 			select: function(event, data){
                 _channel = 2;
+                var channeltree =  $("#channel2").fancytree("getTree");
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -1721,8 +1759,13 @@ function devinfo_output(devType){
 						break;
 					} case '#delete': {
 						var nodekey = data.node.key;
-						//data.node.remove();
-						$("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                        data.node.remove();
+                        _selectcount2--;
+                        $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                        var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.render();
+                        checkselectedprg(nodekey);
 						break;
 					} case '#edit': {
 						//获取编辑节目信息
@@ -1817,22 +1860,49 @@ function devinfo_output(devType){
 					} case '#deleteall': {
 						
 						break;
-					} case '#add': {
-						dialog_desc.dialog( "open" );
-						break;
-					} case '#prgdeleteall': {
-						var nodekey;
+					} case '#chndelete': {
+                        var nodekey = data.node.key;
                         while( data.node.hasChildren() ) {
                             nodekey = data.node.getFirstChild().key;
                             $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                            data.node.getFirstChild().remove();
+                            _selectcount2--;
                         }
+                        var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.render();
+                        checkselectedprg(data.node.key);
+                        break;
+                    } case '#add': {
+						dialog_desc.dialog( "open" );
+						break;
+					} case '#cus_add': {//添加自增节目
+
+                        break;
+                    } case '#prgdeletecus': {//删除自增节目
+
+                        break;
+                    }  case '#prgdeleteall': {
+                        $.each(data.node.children, function(index,chnode){
+                            if(chnode.children != null){
+                                while(chnode.hasChildren()){
+                                    $("#devlist2").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
+                                    chnode.getFirstChild().remove();
+                                    _selectcount2--;
+                                }
+                            }
+                        });
+                        var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.render();
+                        checkselectedprg(data.node.key);
 						break;
 					} case '#itmes': {
                         //获取输出通道设置信息
                         $.ajax({
                             type: "GET",
                             async:false,
-                            url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel=2",
+                            url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel="+_channel,
                             dataType: "json",
                             success: function(data){
                                 //JSON.parse(data);
@@ -1887,12 +1957,11 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgnum?inch=2",
+                        url: "http://"+localip+":4000/do/programs/reprgnum?inch="+_channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                var channeltree =  $("#channel2").fancytree("getTree");
                                 readoutprgs(channeltree, _selectcount2);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");
@@ -1908,12 +1977,11 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgpid?inch=2",
+                        url: "http://"+localip+":4000/do/programs/reprgpid?inch="+_channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                var channeltree =  $("#channel2").fancytree("getTree");
                                 readoutprgs(channeltree, _selectcount2);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");

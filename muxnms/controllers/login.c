@@ -2,39 +2,49 @@
     login Controller for esp-html-mvc (esp-html-mvc) 
  */  
 #include "esp.h"
+#include "cJSON.h"
 
-static void checkLogin() {  
-    cchar *name = param("username");  
+static void checkLogin() {
+    cchar *name = param("username");
     cchar *pwd = param("password");
-    Edi *db = ediOpen("muxnms.mdb", "mdb", EDI_CREATE);
-
-    //MprJson *mjson = mprParseJson("{level: 3,user: 'root',desc: 'test log',logtime: '19.99'}");
-//    EdiRec *user2 = ediCreateRec(db, "user");
-//    EdiRec *optlog = ediCreateRec(db, "optlog");
-//    ediSetField(optlog, "title", "test");
-//    ediSetField(optlog, "body", "test");
-//    printf("==========user2=======rec->nfields====%d\n", user2->nfields);
-//    printf("==========optlog=======rec->nfields====%d\n", optlog->nfields);
-    //int res = updateRec(optlog);
-    //printf("==========%d========555\n", res);
-
+    cJSON *result = cJSON_CreateObject();
+    char* jsonstring;
+    char str[16] = {0};
 	//读取用户认证信息
 	EdiRec *user = readRecWhere("user", "username", "==", name);
 	if(user == NULL){
-	    redirect("/login.esp");
+	    cJSON_AddNumberToObject(result,"sts", 1);
+        jsonstring = cJSON_PrintUnformatted(result);
+        memcpy(str, jsonstring, strlen(jsonstring));
+	    render(jsonstring);
+	    //释放内存
+        cJSON_Delete(result);
+        free(jsonstring);
 	    return;
 	}
-	MprJson *jsonparam = mprParseJson(ediRecAsJson(user, 0));
+	MprJson *userjson = mprParseJson(ediRecAsJson(user, 0));
 
-    if(strcmp(mprGetJson(jsonparam, "password"),pwd) == 0 )
+    if(strcmp(mprGetJson(userjson, "password"),pwd) == 0 )
     {
         setSessionVar("isAuthed", "true");
         setSessionVar("userName", name);
-        setSessionVar("role", mprGetJson(jsonparam, "roles"));
-        redirect("/index.esp");
+        setSessionVar("role", mprGetJson(userjson, "roles"));
+        cJSON_AddNumberToObject(result,"sts", 0);
+        jsonstring = cJSON_PrintUnformatted(result);
+        memcpy(str, jsonstring, strlen(jsonstring));
+        render(jsonstring);
+        //释放内存
+        cJSON_Delete(result);
+        free(jsonstring);
 
-    }else{  
-		redirect("/login.esp");
+    }else{
+		cJSON_AddNumberToObject(result,"sts", 2);
+        jsonstring = cJSON_PrintUnformatted(result);
+        memcpy(str, jsonstring, strlen(jsonstring));
+        render(jsonstring);
+        //释放内存
+        cJSON_Delete(result);
+        free(jsonstring);
     }        
 }  
 

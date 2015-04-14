@@ -802,3 +802,20 @@ p.signin.button{
     border: 0.1rem solid #00bcd4;
 }
 
+#progressbar {
+    margin-top: 20px;
+}
+
+.progress-label {
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+.ui-dialog-titlebar-close {
+    display: none;
+}
+
+.inputerror {
+    border: 0.2rem solid red!important;
+}
+
