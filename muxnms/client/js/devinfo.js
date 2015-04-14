@@ -2,7 +2,7 @@ var _selectcount = 0;//节目计数
 var _selectcount2 = 0;
 var _intChannelCntMax = 0;//设备输入通道数
 var _tbleditcount = 0;//edit表stream计数
-var _pmtPid = 0;//编辑节目pid
+var _index = 0;//编辑节目index
 var _editnodekey = ""; //编辑节目节点key
 var _channel = 1; //操作中的通道
 var _tbl_edit;
@@ -19,15 +19,15 @@ var table_root = [
 var programData = [
 	{title: "节目", folder: true, key: "id1.0", expanded: true, "icon": "img/book.ico",
 	  children: [
-		{title: "通道1 (ASI-1)", folder: true, key: "id1.1", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道2 (ASI-2)", folder: true, key: "id1.2", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道3 (ASI-3)", folder: true, key: "id1.3", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道4 (ASI-4)", folder: true, key: "id1.4", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道5 (ASI-5)", folder: true, key: "id1.5", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道6 (ASI-6)", folder: true, key: "id1.6", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道7 (ASI-7)", folder: true, key: "id1.7", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "通道8 (ASI-8)", folder: true, key: "id1.8", expanded: true, "icon": "img/channel_out.ico"},
-		{title: "用户自定义", folder: true, key: "id1.9", expanded: true, "icon": "img/book.ico"}
+		{title: "通道1 (ASI-1)", folder: true, chnid:1, key: "id1.1", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道2 (ASI-2)", folder: true, chnid:2, key: "id1.2", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道3 (ASI-3)", folder: true, chnid:3, key: "id1.3", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道4 (ASI-4)", folder: true, chnid:4, key: "id1.4", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道5 (ASI-5)", folder: true, chnid:5, key: "id1.5", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道6 (ASI-6)", folder: true, chnid:6, key: "id1.6", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道7 (ASI-7)", folder: true, chnid:7, key: "id1.7", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "通道8 (ASI-8)", folder: true, chnid:8, key: "id1.8", expanded: true, "icon": "img/channel_out.ico"},
+		{title: "用户自定义", folder: true, chnid:9, key: "id1.9", expanded: true, "icon": "img/book.ico"}
 	  ]
 	}	
 ];
@@ -681,6 +681,9 @@ function devinfo_output(devType){
                      data: '{channel:'+1+',prgnum:'+_selectcount+'}',
                      dataType: "json",
                      success: function(data){
+                         if(data.sts == 5){
+                             return;
+                         }
                          var StreamData = [];
                          $.each(data, function(key, itemv) {
                              var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
@@ -1148,10 +1151,10 @@ function devinfo_output(devType){
 							type: "GET",
 							async:false,
 							url: "http://"+localip+":4000/do/programs/getprginfo",
-							data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',pmtPid:' + data.node.data.pmtPid + '}',
+							data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
 							dataType: "json",
 							success: function(data){
-								_pmtPid = data.pmtPid;
+								_index = data.index;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -1252,7 +1255,69 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#cus_add': {//添加自增节目
-
+                        $('.prg_name').val("");
+                        $('.prg_no').val("1");
+                        $('.prg_pid').val("1ff");
+                        $('.prg_prc').val(data.node.data.chnid.toString());
+                        $('.prg_prc1').val("1ffe");
+                        $('.prg_prc2').val("1ffe");
+                        //编辑节目对话框表
+                        if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+                            $('#tbl_editprg').dataTable().fnClearTable();
+                        }else{
+                            _tbl_edit = $('#tbl_editprg').dataTable( {
+                                "order": [[ 0, "asc" ]],
+                                "paging":   false,
+                                "info":     false,
+                                "searching":   false,
+                                "scrollCollapse": true,
+                                "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+                                    switch(aData[2]){
+                                        case 2:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex+ '" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1">1-MPEG1 Video</option>'
+                                            +'<option value ="2" selected="selected">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                            break;
+                                        case 4:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1">1-MPEG1 Video</option>'
+                                            +'<option value ="2">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4" selected="selected">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                            break;
+                                        default:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1" class="selected">1-MPEG1 Video</option>'
+                                            +'<option value ="2">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                    }
+                                    $('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+                                    $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
+                                },
+                                "columns": [
+                                    { "title": "序号" },
+                                    { "title": "输入通道", "width": "70px"},
+                                    { "title": "流类型"},
+                                    { "title": "输入PID(Hex)"},
+                                    { "title": "输出PID(Hex)" }
+                                ]
+                            });
+                            $('#tbl_editprg tbody').on( 'click', 'tr', function () {
+                                if ( $(this).hasClass('selected') ) {
+                                    $(this).removeClass('selected');
+                                }else {
+                                    $('#tbl_editprg').DataTable().$('tr.selected').removeClass('selected');
+                                    $(this).addClass('selected');
+                                }
+                            } );
+                        }
+                        dialog_edit.dialog( "open" );
                         break;
                     } case '#prgdeletecus': {//删除自增节目
 
@@ -1773,10 +1838,10 @@ function devinfo_output(devType){
 							type: "GET",
 							async:false,
 							url: "http://"+localip+":4000/do/programs/getprginfo",
-                            data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',pmtPid:' + data.node.data.pmtPid + '}',
+                            data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
 							dataType: "json",
 							success: function(data){
-								_pmtPid = data.pmtPid;
+								_index = data.index;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -1877,7 +1942,7 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#cus_add': {//添加自增节目
-
+                        dialog_edit.dialog( "open" );
                         break;
                     } case '#prgdeletecus': {//删除自增节目
 
@@ -2160,8 +2225,12 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {
 			"添加":function() {
+                var tblindex = Number(_tbl_edit[0].rows[_tbl_edit[0].rows.length - 1].firstChild.textContent);
+                if(isNaN(tblindex)){
+                    tblindex = 2;
+                }
 				$('#tbl_editprg').DataTable().row.add( [
-					Number(_tbl_edit[0].rows[_tbl_edit[0].rows.length - 1].firstChild.textContent) + 1,
+                    tblindex + 1,
 					Number($('.prg_prc').val()),
 					'MPEG2 Audio',
 					200,
@@ -2173,11 +2242,15 @@ function devinfo_output(devType){
 			},
 			"确定": function() {
 				var strindex = "";
+                if($('.prg_name')[0].value == ""){
+                    alert("节目名称不能为空!");
+                    return false;
+                }
 				for(var i=1;i<_tbl_edit[0].rows.length;i++){
 					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + _channel + ',"chnid":' + $('.prg_prc').val() + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralpmtpid":"' +  _pmtPid.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
+				var jsonstr = '{"channel":' + _channel + ',"chnid":' + $('.prg_prc').val() + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  _index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",

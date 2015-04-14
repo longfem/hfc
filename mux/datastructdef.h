@@ -182,6 +182,31 @@ typedef struct Chn_ca_t
 	list_t caIdenList; // CA_descriptor
 }Chn_ca_st;
 
+typedef struct User_prgInfo_st
+{
+    int prgNum;
+    int streamId;
+    int newworkId;
+    int pmtPid;
+    int pcrPidInChn; // 指示pcrPid的来处
+    int oldPcrPid;		//2字节
+    int newPcrPid;		//2字节
+    int prgNameLen;
+    char *prgName;
+    int providerNameLen;
+    char *providerName;
+    int serviceType;
+    int pmtDesListLen;
+    Commdes_t *pmtDesList; // Commdes_st
+    int dataStreamListLen;
+    DataStream_t *dataStreamList; // User_DataStream_st
+    //13.	CA标志
+    int isCrypto;
+    //14.	SDT表描述子个数
+    int sdtDesListLen;
+    Commdes_t *sdtDesList; // Commdes_st
+}User_prgInfo_t;
+
 typedef struct ChannelProgramt
 {
 	int channelId;

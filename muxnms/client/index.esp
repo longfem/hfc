@@ -28,8 +28,8 @@
 							<ul>               
 								<li id="l21"><a href="javascript:devinfo_output(recdata.devType)">输出通道</a></li> 							              
 								<li id="l23"><a href="">监测</a></li>    
-								<li id="l24"><a href="javascript:dev_srcset()">源设置</a></li> 
-								<li id="l25"><a href="javascript:dev_outset()">输出设置</a></li> 
+							<!--	<li id="l24"><a href="javascript:dev_srcset()">源设置</a></li>
+								<li id="l25"><a href="javascript:dev_outset()">输出设置</a></li> -->
 							</ul>
 						</li>
 						<li class="subs" id="l3">

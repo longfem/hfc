@@ -234,7 +234,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			list_get(&pst->prgNodes, i, &ptmpPrgInfo);	
 			cJSON_AddItemToArray(basearry,basejson = cJSON_CreateObject());
 			cJSON_AddNumberToObject(basejson, "ch", ptmpPrgInfo->chnId);	
-			cJSON_AddNumberToObject(basejson, "pmtPid", ptmpPrgInfo->pmtPid);
+			cJSON_AddNumberToObject(basejson, "index", ptmpPrgInfo->index);
 			cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
