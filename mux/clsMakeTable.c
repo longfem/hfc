@@ -15,7 +15,7 @@ static int isTableInit=0;
 int MakeTable(int outChnId)
 {
 	ChannelProgramSt *outpst = NULL;
-	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);	
+	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
 	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
 }
 
@@ -37,7 +37,6 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	ClsMuxInit(2,2);
 	//ClsMuxInit(2,2);
 
-
 	//int streamId = 1;
 	//int netWorkId = 16;
 	//int version = 2;
@@ -47,11 +46,8 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
 
-    printf("buildTable========11\n");
 	if (AutoMakeNewPid(outChnId)==0)
 		return 0;
-
-    printf("buildTable========22\n");
 	//return 0;
 
   //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);

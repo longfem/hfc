@@ -554,6 +554,11 @@ static void streamtable(HttpConn *conn) {
 	if(list_len(&clsProgram.PrgAVMuxList)>0)
 	{
 		list_t *AVMuxList = clsProgram.PrgAVMuxList[pos - 1];
+		if(AVMuxList == NULL){
+		    rendersts(outstring, 5);
+		    render(outstring);
+		    return;
+		}
 		for ( i = 0; i < list_len(AVMuxList); i++)
 		{
 			MuxPidInfo_st *pidMapTmp;
@@ -798,15 +803,16 @@ static void getprginfo(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn)); 
 	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
-	int pmtPid = atoi(mprGetJson(jsonparam, "pmtPid"));
+	int index = atoi(mprGetJson(jsonparam, "index"));
 	int chnid = atoi(mprGetJson(jsonparam, "chnid"));
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);
 		//printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
-		if((outprg->pmtPid == pmtPid)&&(outprg->chnId == chnid)){
+		if((outprg->index == index)&&(outprg->chnId == chnid)){
 			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
 			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
+			cJSON_AddNumberToObject(result,"index", outprg->index);
 			cJSON_AddNumberToObject(result,"serviceType", outprg->serviceType);
 			cJSON_AddNumberToObject(result,"networkId", outprg->networkId);
 			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
@@ -855,7 +861,7 @@ static void setprginfo(HttpConn *conn) {
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	MprJson *jsonparam = httpGetParams(conn); 
-	//printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	cchar *prgname = mprGetJson(jsonparam, "prgname");
 	int prgNum = atoi(mprGetJson(jsonparam, "prgNum"));
@@ -866,15 +872,15 @@ static void setprginfo(HttpConn *conn) {
     sscanf(mprGetJson(jsonparam, "newpcrpid"), "%x", &val);
     int newpcrpid = val;
 	int streamcnt = atoi(mprGetJson(jsonparam, "streamcnt"));;
-	sscanf(mprGetJson(jsonparam, "orgiralpmtpid"), "%x", &val);
-    int orgiralpmtPid = val;
+	sscanf(mprGetJson(jsonparam, "orgiralindex"), "%x", &val);
+    int orgiralindex = val;
 	int chnid = atoi(mprGetJson(jsonparam, "chnid"));
 	int servicetype = atoi(mprGetJson(jsonparam, "servicetype"));
 	//查找编辑节目
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);	
 	for(i=0; i<list_len(&outpst->prgNodes); i++){
 		list_get(&outpst->prgNodes, i, &outprg);	
-		if((outprg->pmtPid == orgiralpmtPid)&&(outprg->chnId == chnid)){
+		if((outprg->index == orgiralindex)&&(outprg->chnId == chnid)){
 		    //printf("============pmtpid===%d", pmtPid);
 			outprg->prgNum = prgNum;
 			outprg->pmtPid = pmtPid;
