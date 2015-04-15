@@ -1,13 +1,20 @@
-var _selectcount = 0;//节目计数
-var _selectcount2 = 0;
-var _intChannelCntMax = 0;//设备输入通道数
-var _tbleditcount = 0;//edit表stream计数
-var _index = 0;//编辑节目index
-var _editnodekey = ""; //编辑节目节点key
-var _channel = 1; //操作中的通道
-var _tbl_edit;
-var _tbl_pid;
-var localip;
+var globalObj = {
+    _selectcount: 0,    //节目计数
+    _selectcount2: 0,
+    _intChannelCntMax: 0,//设备输入通道数
+    _tbleditcount: 0,   //edit表stream计数
+    _index: 0,          //编辑节目index
+    _editnodekey: "",   //编辑节目节点key
+    _channel: 1,        //操作中的通道
+    _tbl_edit: null,
+    _tbl_pid: null,
+    _prgoptflag: 0,     //节目操场判断: 0--编辑, 1--添加
+    _isuserprg: 1,     //节目类型判断: 0--userprg, 1--devprg
+    localip: window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7)
+
+
+}
+
 var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
 ];
@@ -50,14 +57,14 @@ function checkselectedprg(nodekey){
     var chantree;
     var devtree;
     var snt;
-    if(_channel == 1){
+    if(globalObj._channel == 1){
         chantree = $("#channel").fancytree("getTree");
         devtree = $("#devlist").fancytree("getTree");
-        snt = _selectcount;
-    }else if(_channel == 2){
+        snt = globalObj._selectcount;
+    }else if(globalObj._channel == 2){
         chantree = $("#channel2").fancytree("getTree");
         devtree = $("#devlist2").fancytree("getTree");
-        snt = _selectcount2;
+        snt = globalObj._selectcount2;
     }
     var prgnode;
     var jsondata = new Array();
@@ -132,8 +139,8 @@ function checkselectedprg(nodekey){
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+localip+":4000/do/programs/selectprgs",
-        data: '{' + jsondata.toString() + ',channel:'+_channel+',prgcnt:'+snt+'}',
+        url: "http://"+globalObj.localip+":4000/do/programs/selectprgs",
+        data: '{' + jsondata.toString() + ',channel:'+globalObj._channel+',prgcnt:'+snt+'}',
         dataType: "json",
         success: function(data){
 
@@ -148,40 +155,40 @@ function readprgs(){
     var node;
     var channeltree;
     var devlisttree;
-    if(_channel == 1){
+    if(globalObj._channel == 1){
         channeltree =  $("#channel").fancytree("getTree");
         devlisttree = $("#devlist").fancytree("getTree");
-        _selectcount = 0;
-    }else if(_channel == 2){
+        globalObj._selectcount = 0;
+    }else if(globalObj._channel == 2){
         channeltree =  $("#channel2").fancytree("getTree");
         devlisttree = $("#devlist2").fancytree("getTree");
-        _selectcount2 = 0;
+        globalObj._selectcount2 = 0;
     }
     channeltree.reload();
     devlisttree.reload();
     node = devlisttree.getNodeByKey("id1.0");
-    localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+    globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
     //获取全局初始化信息
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+localip+":4000/do/programs/getglobalinfo?channel="+_channel,
+        url: "http://"+globalObj.localip+":4000/do/programs/getglobalinfo?channel="+globalObj._channel,
         // data: {ip:"192.168.1.134", inch:2},
         dataType: "json",
         success: function(data){
-            _intChannelCntMax = data._intChannelCntMax;
+            globalObj._intChannelCntMax = data._intChannelCntMax;
         },
         error : function(err) {
 
         }
     });
 
-    if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
-        for(var i=1;i<_intChannelCntMax+1; i++){
+    if(globalObj._intChannelCntMax != 0 || globalObj._intChannelCntMax != ""){
+        for(var i=1;i<globalObj._intChannelCntMax+1; i++){
             $.ajax({
                 type: "GET",
                 async:false,
-                url: "http://"+localip+":4000/do/programs/getprg?inch="+i,
+                url: "http://"+globalObj.localip+":4000/do/programs/getprg?inch="+i,
                 // data: {ip:"192.168.1.134", inch:2},
                 dataType: "json",
                 success: function(data){
@@ -202,7 +209,7 @@ function readprgs(){
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+localip+":4000/do/programs/getoutprg?inch="+ _channel,
+        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel,
         // data: {ip:"192.168.1.134", inch:2},
         dataType: "json",
         success: function(data){
@@ -215,19 +222,19 @@ function readprgs(){
                     node.addChildren(prg.children);
                     var prgkey = "id1." + prg.ch +"."+prg.children.index;
                     node = devlisttree.getNodeByKey(prgkey);
-                    if(_channel == 1){
-                        _selectcount++;
-                    }else if(_channel == 2){
-                        _selectcount2++;
+                    if(globalObj._channel == 1){
+                        globalObj._selectcount++;
+                    }else if(globalObj._channel == 2){
+                        globalObj._selectcount2++;
                     }
                     node.setSelected(true);
                 });
 
                 var prgnode = channeltree.getNodeByKey("id1.0");
-                if(_channel == 1){
-                    prgnode.setTitle("节目: "+ _selectcount);
-                }else if(_channel == 2){
-                    prgnode.setTitle("节目: "+ _selectcount2);
+                if(globalObj._channel == 1){
+                    prgnode.setTitle("节目: "+ globalObj._selectcount);
+                }else if(globalObj._channel == 2){
+                    prgnode.setTitle("节目: "+ globalObj._selectcount2);
                 }
                 prgnode.render();
             }
@@ -250,7 +257,7 @@ function readoutprgs(channeltree, snt){
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+localip+":4000/do/programs/getoutprg?inch="+ _channel,
+        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel,
         // data: {ip:"192.168.1.134", inch:2},
         dataType: "json",
         success: function(data){
@@ -564,30 +571,30 @@ function devinfo_output(devType){
         }
     }).click(function( event ) {
         event.preventDefault();
-        localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
-        if(_intChannelCntMax == 0){
+        globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+        if(globalObj._intChannelCntMax == 0){
             $.ajax({
                 type: "GET",
                 async:false,
-                url: "http://"+localip+":4000/do/programs/getglobalinfo?channel="+_channel,
+                url: "http://"+globalObj.localip+":4000/do/programs/getglobalinfo?channel="+globalObj._channel,
                 // data: {ip:"192.168.1.134", inch:2},
                 dataType: "json",
                 success: function(data){
-                    _intChannelCntMax = data._intChannelCntMax;
+                    globalObj._intChannelCntMax = data._intChannelCntMax;
                 },
                 error : function(err) {
 
                 }
             });
         }
-        if(_intChannelCntMax != 0 || _intChannelCntMax != ""){
+        if(globalObj._intChannelCntMax != 0 || globalObj._intChannelCntMax != ""){
             progress_dialog.dialog( "open" );
             progressbar.progressbar( "value", 0 );
-            for(var i=1;i<_intChannelCntMax+1; i++){
+            for(var i=1;i<globalObj._intChannelCntMax+1; i++){
                 $.ajax({
                     type: "GET",
                     async:false,
-                    url: "http://"+localip+":4000/do/programs/search?inch="+i,
+                    url: "http://"+globalObj.localip+":4000/do/programs/search?inch="+i,
                     // data: {ip:"192.168.1.134", inch:2},
                     dataType: "json",
                     success: function(data){
@@ -596,10 +603,10 @@ function devinfo_output(devType){
                             alert("搜索出现异常!!");
                             return;
                         }
-                        if(_intChannelCntMax == data.process){
+                        if(globalObj._intChannelCntMax == data.process){
                             progressbar.progressbar( "value", 10 * 10 );
                         }else{
-                            progressbar.progressbar( "value", Math.round(data.process*100/_intChannelCntMax ));
+                            progressbar.progressbar( "value", Math.round(data.process*100/globalObj._intChannelCntMax ));
                             $('.progress-label')[0].dataset.ch = data.process + 1;
                         }
 
@@ -620,7 +627,7 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
-        _channel = 1;
+        globalObj._channel = 1;
 		readprgs();
     });
 	
@@ -630,8 +637,12 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
+        if(globalObj._selectcount > 29){
+            alert("制表节目数已溢出!");
+            return;
+        }
 		$("#out_tree").fancytree("getTree").reload();
-        localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+        globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
 		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
 		var inCh = 1, flag = 0; //通道号	
 		var jsondata = new Array();
@@ -660,8 +671,8 @@ function devinfo_output(devType){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/maketable",
-			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+_selectcount+'}',
+			 url: "http://"+globalObj.localip+":4000/do/programs/maketable",
+			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+globalObj._selectcount+'}',
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 5){
@@ -677,8 +688,8 @@ function devinfo_output(devType){
                  $.ajax({
                      type: "GET",
                      async:false,
-                     url: "http://"+localip+":4000/do/programs/streamtable",
-                     data: '{channel:'+1+',prgnum:'+_selectcount+'}',
+                     url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
+                     data: '{channel:'+1+',prgnum:'+globalObj._selectcount+'}',
                      dataType: "json",
                      success: function(data){
                          if(data.sts == 5){
@@ -735,7 +746,7 @@ function devinfo_output(devType){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/writetable?channel=" + 1,
+			 url: "http://"+globalObj.localip+":4000/do/programs/writetable?channel=" + 1,
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 5){
@@ -757,7 +768,7 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
-        _channel = 2;
+        globalObj._channel = 2;
         readprgs();
     });
 	
@@ -767,13 +778,17 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
-        localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
+        if(globalObj._selectcount2 > 29){
+            alert("制表节目数已溢出!");
+            return;
+        }
+        globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
 		var nodes = $("#channel2").fancytree("getTree").getNodeByKey("id1.0").children;
 		var inCh = 1, flag = 0; //通道号	
 		var jsondata = new Array();
 		var prgindex = new Array();
 		var jsonstr;
-		if(_selectcount2 == 0){
+		if(globalObj._selectcount2 == 0){
 			alert("请选择节目!");
 			return;
 		}
@@ -796,8 +811,8 @@ function devinfo_output(devType){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/maketable",
-			data: '{' + jsondata.toString() + ',channel:'+2+',prgnum:'+_selectcount2+'}',
+			 url: "http://"+globalObj.localip+":4000/do/programs/maketable",
+			data: '{' + jsondata.toString() + ',channel:'+2+',prgnum:'+globalObj._selectcount2+'}',
 			 dataType: "json",
 			 success: function(data){
 				var tablenode = $("#out_tree2").fancytree("getTree").getNodeByKey("id1.0");
@@ -813,8 +828,8 @@ function devinfo_output(devType){
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/programs/streamtable",
-			 data: '{channel:'+2+',prgnum:'+_selectcount2+'}',
+			 url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
+			 data: '{channel:'+2+',prgnum:'+globalObj._selectcount2+'}',
 			 dataType: "json",
 			 success: function(data){
 				var StreamData = [];	
@@ -860,7 +875,7 @@ function devinfo_output(devType){
         $.ajax({
             type: "GET",
             async:false,
-            url: "http://"+localip+":4000/do/programs/writetable?channel=" + 2,
+            url: "http://"+globalObj.localip+":4000/do/programs/writetable?channel=" + 2,
             dataType: "json",
             success: function(data){
                 if(data.sts == 5){
@@ -930,7 +945,7 @@ function devinfo_output(devType){
 			}
             if(data.targetType == "checkbox"){
                 data.node.toggleSelected();
-                _channel = 1;
+                globalObj._channel = 1;
                 var tmpnode;
                 var channeltree =  $("#channel").fancytree("getTree");
                 //删除节目树节点
@@ -953,7 +968,7 @@ function devinfo_output(devType){
                                             }else{
                                                 tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
                                                 tmpnode.addNode(prgnode.toDict(true));
-                                                _selectcount++;
+                                                globalObj._selectcount++;
                                             }
                                         });
                                     }
@@ -968,7 +983,7 @@ function devinfo_output(devType){
                                     }else{
                                         tmpnode = channeltree.getNodeByKey(item.parent.key);
                                         tmpnode.addNode(item.toDict(true));
-                                        _selectcount++;
+                                        globalObj._selectcount++;
                                     }
                                 });
                             }
@@ -981,7 +996,7 @@ function devinfo_output(devType){
                             }else{
                                 tmpnode = channeltree.getNodeByKey(data.node.parent.key);
                                 tmpnode.addNode(selnode.toDict(true));
-                                _selectcount++;
+                                globalObj._selectcount++;
                             }
                             break;
                         case 3: //流节点
@@ -990,7 +1005,7 @@ function devinfo_output(devType){
                             }else{
                                 channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict());//添加节目节点
                                 channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
-                                _selectcount++;
+                                globalObj._selectcount++;
                             }
                             break;
                         case 4:
@@ -1021,21 +1036,21 @@ function devinfo_output(devType){
                                 $.each(tmpnode.children, function(index,chnode){
                                     while( chnode.hasChildren() ) {
                                         chnode.getFirstChild().remove();
-                                        _selectcount--;
+                                        globalObj._selectcount--;
                                     }
                                 });
 
                             }else{
                                 while( tmpnode.hasChildren() ) {
                                     tmpnode.getFirstChild().remove();
-                                    _selectcount--;
+                                    globalObj._selectcount--;
                                 }
                             }
                             break;
                         case 2:	//节目节点
                             tmpnode = channeltree.getNodeByKey(data.node.key);
                             tmpnode.remove();
-                            _selectcount--;
+                            globalObj._selectcount--;
                             break;
                         case 3:
                             tmpnode = channeltree.getNodeByKey(data.node.key);
@@ -1048,7 +1063,7 @@ function devinfo_output(devType){
                     }
 
                 }
-                prgnode.setTitle("节目: "+ _selectcount);
+                prgnode.setTitle("节目: "+ globalObj._selectcount);
                 prgnode.render();
                 checkselectedprg(data.node.key);
                 data.node.toggleSelected();
@@ -1120,8 +1135,8 @@ function devinfo_output(devType){
                     $(".menu_cus_add").css("display", "none");
 				}
 			},
-			select: function(event, data){	
-				_channel = 1;
+			select: function(event, data){
+                globalObj._channel = 1;
                 var channeltree =  $("#channel").fancytree("getTree");
 				switch(data.menuId){
 					case '#expandall' :{
@@ -1138,10 +1153,10 @@ function devinfo_output(devType){
 					} case '#delete': { //删除这个节目
 						var nodekey = data.node.key;
 						data.node.remove();
-                         _selectcount--;
+                        globalObj._selectcount--;
                         $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(nodekey);
 						break;
@@ -1150,11 +1165,11 @@ function devinfo_output(devType){
 						$.ajax({
 							type: "GET",
 							async:false,
-							url: "http://"+localip+":4000/do/programs/getprginfo",
-							data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
+							url: "http://"+globalObj.localip+":4000/do/programs/getprginfo",
+							data:'{channel:' + globalObj._channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
 							dataType: "json",
 							success: function(data){
-								_index = data.index;
+                                globalObj._index = data.index;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -1167,13 +1182,13 @@ function devinfo_output(devType){
 									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid.toString(16),itemv.outpid.toString(16)];
 									dataSet[dataSet.length] = item;
 								});
-								_tbleditcount = dataSet.length;
+                                globalObj._tbleditcount = dataSet.length;
 								//编辑节目对话框表
 								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
 									$('#tbl_editprg').dataTable().fnClearTable();
 									$('#tbl_editprg').dataTable().fnAddData(dataSet);
 								}else{
-									_tbl_edit = $('#tbl_editprg').dataTable( {
+                                    globalObj._tbl_edit = $('#tbl_editprg').dataTable( {
 										"data": dataSet,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
@@ -1232,8 +1247,9 @@ function devinfo_output(devType){
 								alert("异常！====="+JSON.stringify(err));    
 							}   
 						});
+                        globalObj._prgoptflag = 0;
 						dialog_edit.dialog( "open" );
-						_editnodekey = data.node.key;
+                        globalObj._editnodekey = data.node.key;
 						break;
 					} case '#deleteall': {//删除下一级所有自增描述符
 
@@ -1244,10 +1260,10 @@ function devinfo_output(devType){
                             nodekey = data.node.getFirstChild().key;
                             $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
                             data.node.getFirstChild().remove();
-                            _selectcount--;
+                            globalObj._selectcount--;
                         }
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(data.node.key);
                         break;
@@ -1265,7 +1281,7 @@ function devinfo_output(devType){
                         if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
                             $('#tbl_editprg').dataTable().fnClearTable();
                         }else{
-                            _tbl_edit = $('#tbl_editprg').dataTable( {
+                            globalObj._tbl_edit = $('#tbl_editprg').dataTable( {
                                 "order": [[ 0, "asc" ]],
                                 "paging":   false,
                                 "info":     false,
@@ -1317,6 +1333,7 @@ function devinfo_output(devType){
                                 }
                             } );
                         }
+                        globalObj._prgoptflag = 1;
                         dialog_edit.dialog( "open" );
                         break;
                     } case '#prgdeletecus': {//删除自增节目
@@ -1328,12 +1345,12 @@ function devinfo_output(devType){
                                 while(chnode.hasChildren()){
                                     $("#devlist").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
                                     chnode.getFirstChild().remove();
-                                    _selectcount--;
+                                    globalObj._selectcount--;
                                 }
                             }
                         });
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(data.node.key);
 						break;
@@ -1342,7 +1359,7 @@ function devinfo_output(devType){
 						$.ajax({
 							 type: "GET",
 							 async:false,
-							 url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel="+_channel,
+							 url: "http://"+globalObj.localip+":4000/do/programs/getchanneloutinfo?channel="+globalObj._channel,
 							 dataType: "json",
 							 success: function(data){
 								//JSON.parse(data);
@@ -1402,12 +1419,12 @@ function devinfo_output(devType){
                         $.ajax({
                             type: "GET",
                             async:false,
-                            url: "http://"+localip+":4000/do/programs/reprgnum?inch="+_channel,
+                            url: "http://"+globalObj.localip+":4000/do/programs/reprgnum?inch="+globalObj._channel,
                             dataType: "json",
                             success: function(data){
                                 if(data.sts == 1){
                                     //获取输出通道信息
-                                    readoutprgs(channeltree, _selectcount);
+                                    readoutprgs(channeltree, globalObj._selectcount);
                                 }else if(data.sts == 5){
                                     alert("权限不足，请与管理员联系");
                                     return;
@@ -1422,12 +1439,12 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgpid?inch="+_channel,
+                        url: "http://"+globalObj.localip+":4000/do/programs/reprgpid?inch="+globalObj._channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                readoutprgs(channeltree, _selectcount);
+                                readoutprgs(channeltree, globalObj._selectcount);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");
                                 return;
@@ -1443,7 +1460,7 @@ function devinfo_output(devType){
 						$.ajax({
 							 type: "GET",
 							 async:false,
-							 url: "http://"+localip+":4000/do/programs/getpidtransinfo?channel="+_channel,
+							 url: "http://"+globalObj.localip+":4000/do/programs/getpidtransinfo?channel="+globalObj._channel,
 							 dataType: "json",
 							 success: function(data){
 								var pidData = [];
@@ -1462,7 +1479,7 @@ function devinfo_output(devType){
 									}
 								}else{
 									//PID表
-									_tbl_pid = $('#tbl_pid').dataTable( {
+                                    globalObj._tbl_pid = $('#tbl_pid').dataTable( {
 										"data": pidData,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
@@ -1609,7 +1626,7 @@ function devinfo_output(devType){
 		},
 		select: function(event, data) {
             var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-            prgnode.setTitle("节目: "+ _selectcount2);
+            prgnode.setTitle("节目: "+ globalObj._selectcount2);
             prgnode.render();
 		},
 		click: function(event, data) {			
@@ -1618,7 +1635,7 @@ function devinfo_output(devType){
 			}
             if(data.targetType == "checkbox"){
                 data.node.toggleSelected();
-                _channel = 2;
+                globalObj._channel = 2;
                 var tmpnode;
                 var channeltree =  $("#channel2").fancytree("getTree");
                 //删除节目树节点
@@ -1641,7 +1658,7 @@ function devinfo_output(devType){
                                             }else{
                                                 tmpnode = channeltree.getNodeByKey(prgnode.parent.key);
                                                 tmpnode.addNode(prgnode.toDict(true));
-                                                _selectcount2++;
+                                                globalObj._selectcount2++;
                                             }
                                         });
                                     }
@@ -1655,7 +1672,7 @@ function devinfo_output(devType){
                                     }else{
                                         tmpnode = channeltree.getNodeByKey(item.parent.key);
                                         tmpnode.addNode(item.toDict(true));
-                                        _selectcount2++;
+                                        globalObj._selectcount2++;
                                     }
                                 });
                             }
@@ -1668,7 +1685,7 @@ function devinfo_output(devType){
                             }else{
                                 tmpnode = channeltree.getNodeByKey(data.node.parent.key);
                                 tmpnode.addNode(selnode.toDict(true));
-                                _selectcount2++;
+                                globalObj._selectcount2++;
                             }
                             break;
                         case 3: //流节点
@@ -1677,7 +1694,7 @@ function devinfo_output(devType){
                             }else{
                                 channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict());//添加节目节点
                                 channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
-                                _selectcount2++;
+                                globalObj._selectcount2++;
                             }
                             break;
                         case 4:
@@ -1708,21 +1725,21 @@ function devinfo_output(devType){
                                 $.each(tmpnode.children, function(index,chnode){
                                     while( chnode.hasChildren() ) {
                                         chnode.getFirstChild().remove();
-                                        _selectcount2--;
+                                        globalObj._selectcount2--;
                                     }
                                 });
 
                             }else{
                                 while( tmpnode.hasChildren() ) {
                                     tmpnode.getFirstChild().remove();
-                                    _selectcount2--;
+                                    globalObj._selectcount2--;
                                 }
                             }
                             break;
                         case 2:	//节目节点
                             tmpnode = channeltree.getNodeByKey(data.node.key);
                             tmpnode.remove();
-                            _selectcount2--;
+                            globalObj._selectcount2--;
                             break;
                         case 3:
                             tmpnode = channeltree.getNodeByKey(data.node.key);
@@ -1736,7 +1753,7 @@ function devinfo_output(devType){
                     }
 
                 }
-                prgnode.setTitle("节目: "+ _selectcount2);
+                prgnode.setTitle("节目: "+ globalObj._selectcount2);
                 prgnode.render();
                 checkselectedprg(data);
                 data.node.toggleSelected();
@@ -1808,7 +1825,7 @@ function devinfo_output(devType){
 			    
 			},
 			select: function(event, data){
-                _channel = 2;
+                globalObj._channel = 2;
                 var channeltree =  $("#channel2").fancytree("getTree");
 				switch(data.menuId){
 					case '#expandall' :{
@@ -1825,10 +1842,10 @@ function devinfo_output(devType){
 					} case '#delete': {
 						var nodekey = data.node.key;
                         data.node.remove();
-                        _selectcount2--;
+                        globalObj._selectcount2--;
                         $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(nodekey);
 						break;
@@ -1837,11 +1854,11 @@ function devinfo_output(devType){
 						$.ajax({
 							type: "GET",
 							async:false,
-							url: "http://"+localip+":4000/do/programs/getprginfo",
-                            data:'{channel:' + _channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
+							url: "http://"+globalObj.localip+":4000/do/programs/getprginfo",
+                            data:'{channel:' + globalObj._channel + ',chnid:' + data.node.data.chnid + ',index:' + data.node.data.index + '}',
 							dataType: "json",
 							success: function(data){
-								_index = data.index;
+                                globalObj._index = data.index;
 								$('.prg_name').val(data.prgName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
@@ -1853,13 +1870,13 @@ function devinfo_output(devType){
 									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid.toString(16),itemv.outpid.toString(16)];
 									dataSet[dataSet.length] = item;
 								});
-								_tbleditcount = dataSet.length;
+                                globalObj._tbleditcount = dataSet.length;
 								//编辑节目对话框表
 								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
 									$('#tbl_editprg').dataTable().fnClearTable();
 									$('#tbl_editprg').dataTable().fnAddData(dataSet);
 								}else{
-									_tbl_edit = $('#tbl_editprg').dataTable( {
+                                    globalObj._tbl_edit = $('#tbl_editprg').dataTable( {
 										"data": dataSet,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
@@ -1919,8 +1936,9 @@ function devinfo_output(devType){
 								alert("异常！====="+JSON.stringify(err));    
 							}   
 						});
+                        globalObj._prgoptflag = 0;
 						dialog_edit.dialog( "open" );
-						_editnodekey = data.node.key;
+                        globalObj._editnodekey = data.node.key;
 						break;
 					} case '#deleteall': {
 						
@@ -1931,10 +1949,10 @@ function devinfo_output(devType){
                             nodekey = data.node.getFirstChild().key;
                             $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
                             data.node.getFirstChild().remove();
-                            _selectcount2--;
+                            globalObj._selectcount2--;
                         }
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(data.node.key);
                         break;
@@ -1942,6 +1960,7 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#cus_add': {//添加自增节目
+                        globalObj._prgoptflag = 1;
                         dialog_edit.dialog( "open" );
                         break;
                     } case '#prgdeletecus': {//删除自增节目
@@ -1953,12 +1972,12 @@ function devinfo_output(devType){
                                 while(chnode.hasChildren()){
                                     $("#devlist2").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
                                     chnode.getFirstChild().remove();
-                                    _selectcount2--;
+                                    globalObj._selectcount2--;
                                 }
                             }
                         });
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ _selectcount2);
+                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(data.node.key);
 						break;
@@ -1967,7 +1986,7 @@ function devinfo_output(devType){
                         $.ajax({
                             type: "GET",
                             async:false,
-                            url: "http://"+localip+":4000/do/programs/getchanneloutinfo?channel="+_channel,
+                            url: "http://"+globalObj.localip+":4000/do/programs/getchanneloutinfo?channel="+globalObj._channel,
                             dataType: "json",
                             success: function(data){
                                 //JSON.parse(data);
@@ -2022,12 +2041,12 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgnum?inch="+_channel,
+                        url: "http://"+globalObj.localip+":4000/do/programs/reprgnum?inch="+globalObj._channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                readoutprgs(channeltree, _selectcount2);
+                                readoutprgs(channeltree, globalObj._selectcount2);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");
                                 return;
@@ -2042,12 +2061,12 @@ function devinfo_output(devType){
                     $.ajax({
                         type: "GET",
                         async:false,
-                        url: "http://"+localip+":4000/do/programs/reprgpid?inch="+_channel,
+                        url: "http://"+globalObj.localip+":4000/do/programs/reprgpid?inch="+globalObj._channel,
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 1){
                                 //获取输出通道信息
-                                readoutprgs(channeltree, _selectcount2);
+                                readoutprgs(channeltree, globalObj._selectcount2);
                             }else if(data.sts == 5){
                                 alert("权限不足，请与管理员联系");
                                 return;
@@ -2150,7 +2169,7 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {
 			"添加": function() {
-				var index = Number(_tbl_pid[0].rows[_tbl_pid[0].rows.length - 1].firstChild.textContent);
+				var index = Number(globalObj._tbl_pid[0].rows[globalObj._tbl_pid[0].rows.length - 1].firstChild.textContent);
 				if( index || (index == 0)){
 					index++;
 				}else{
@@ -2170,15 +2189,15 @@ function devinfo_output(devType){
 				var jsonstr;
 				var data = $('#tbl_pid').DataTable().$('input').serialize();
 				if(data == ""){
-					jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + '}';
+					jsonstr = '{"channel":' + globalObj._channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + '}';
 				}else{
-					jsonstr = '{"channel":' + _channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') +  '"}';
+					jsonstr = '{"channel":' + globalObj._channel + ',"pidcnt":'+$('#tbl_pid').DataTable().$('tr').length + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') +  '"}';
 				}				
 				//下发配置
 				$.ajax({
 					 type: "GET",
 					 async:false,
-					 url: "http://"+localip+":4000/do/programs/setpidtransinfo",
+					 url: "http://"+globalObj.localip+":4000/do/programs/setpidtransinfo",
 					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
@@ -2225,7 +2244,7 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {
 			"添加":function() {
-                var tblindex = Number(_tbl_edit[0].rows[_tbl_edit[0].rows.length - 1].firstChild.textContent);
+                var tblindex = Number(globalObj._tbl_edit[0].rows[globalObj._tbl_edit[0].rows.length - 1].firstChild.textContent);
                 if(isNaN(tblindex)){
                     tblindex = 2;
                 }
@@ -2246,28 +2265,28 @@ function devinfo_output(devType){
                     alert("节目名称不能为空!");
                     return false;
                 }
-				for(var i=1;i<_tbl_edit[0].rows.length;i++){
-					strindex += ',"index'+(i-1)+'":' + _tbl_edit[0].rows[i].firstChild.textContent;
+				for(var i=1;i<globalObj._tbl_edit[0].rows.length;i++){
+					strindex += ',"index'+(i-1)+'":' + globalObj._tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + _channel + ',"chnid":' + $('.prg_prc').val() + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  _index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
+				var jsonstr = '{"channel":' + globalObj._channel + ',"chnid":' + $('.prg_prc').val() + ',"prgoptflag":' + globalObj._prgoptflag + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  globalObj._index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
 				//下发配置
 				$.ajax({
 					 type: "GET",
 					 async:false,
-					 url: "http://"+localip+":4000/do/programs/setprginfo",
+					 url: "http://"+globalObj.localip+":4000/do/programs/setprginfo",
 					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
 						if(data.sts == 1){
                             var snt;
                             var tmptree;
-                            if(_channel == 1){
+                            if(globalObj._channel == 1){
                                 tmptree = $("#channel").fancytree("getTree");
-                                snt = _selectcount;
-                            }else if(_channel == 2){
+                                snt = globalObj._selectcount;
+                            }else if(globalObj._channel == 2){
                                 tmptree = $("#channel2").fancytree("getTree");
-                                snt = _selectcount2;
+                                snt = globalObj._selectcount2;
                             }
                             //获取输出通道信息
                             readoutprgs(tmptree, snt);
@@ -2296,7 +2315,7 @@ function devinfo_output(devType){
 				$.ajax({
 					 type: "GET",
 					 async:false,
-					 url: "http://"+localip+":4000/do/programs/setchanneloutinfo",
+					 url: "http://"+globalObj.localip+":4000/do/programs/setchanneloutinfo",
 					 data: JSON.parse(jsonstr),
 					 dataType: "json",
 					 success: function(data){
@@ -2318,7 +2337,7 @@ function devinfo_output(devType){
                 $.ajax({
                     type: "GET",
                     async:false,
-                    url: "http://"+localip+":4000/do/programs/setchanneloutinfo",
+                    url: "http://"+globalObj.localip+":4000/do/programs/setchanneloutinfo",
                     data: JSON.parse(jsonstr),
                     dataType: "json",
                     success: function(data){
