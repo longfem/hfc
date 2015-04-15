@@ -27,8 +27,7 @@ int SendTable(char *ip, int outChnId)
 	list_get(&pclsMux->table_pat, iChn, &pbuff); 
 
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
-	{
-		printf("send_pat begin\n");
+	{	
 //	    for(i=0;i<pbuff->bufLen;i++){
 //	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
 //	    }
@@ -37,8 +36,7 @@ int SendTable(char *ip, int outChnId)
 			rslt = 0;
 	}
 	else
-	{
-		printf("send_pat null\n");
+	{		
 		psiType = pat;
 		if (SendTable_psi(ip, outChnId, pat, NULL, 0) != ok)
 			rslt = 0;
@@ -62,15 +60,13 @@ int SendTable(char *ip, int outChnId)
 		table_pmt != NULL
 		&& table_pmtLen > 0
 		)
-	{
-		printf("send_pmt begin\n");
+	{		
 		if (SendTable_pmt(ip, outChnId, table_pmt) != ok)
            rslt = 0;
 
 	}
 	else
-	{
-		printf("send_pmt null\n");
+	{	
 	    if (SendTable_pmt(ip, outChnId, NULL) != ok)
         		rslt = 0;
 	}
@@ -80,15 +76,13 @@ int SendTable(char *ip, int outChnId)
 
 	psiType = sdt;
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
-	{
-		printf("send_sdt begin\n");
+	{		
 		if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 
 	}
 	else
-	{
-		printf("send_sdt null\n");
+	{	
 		if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
 			rslt = 0;
 	}
