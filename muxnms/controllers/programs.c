@@ -545,9 +545,10 @@ static void maketable(HttpConn *conn) {
 /*制表后获取输出流表*/
 static void streamtable(HttpConn *conn) { 
 	int pos = 0, i = 0;
-	char outstring[4096] = {0};
+	char outstring[8192] = {0};
 	cJSON *streamsarray,*streamjson;
 	char* streamjsonstring;
+    printf("---streamtable--->>>111\n");
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	streamsarray = cJSON_CreateArray();
@@ -574,7 +575,7 @@ static void streamtable(HttpConn *conn) {
 	streamjsonstring = cJSON_PrintUnformatted(streamsarray);
 		
 	memcpy(outstring, streamjsonstring, strlen(streamjsonstring));
-	//printf("---len--->>>%d\n",strlen(streamjsonstring));
+	printf("---streamtable--->>>%d\n",strlen(streamjsonstring));
 	//释放内存	
 	cJSON_Delete(streamsarray);		
 	free(streamjsonstring);
