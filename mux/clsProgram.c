@@ -96,11 +96,10 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 											
 				}
 
-				printf("===oooooooo=====fuck jjjjj=%d\n",j );
+				
 				ErrorTypeEm rslt = SendOutPrgMuxMap(ip, i + 1, &sendList);
-				printf("===oooooooo=====fuck jjjjj after\n");
-				if (rslt != ok){
-				 	printf("===oooooooo====return 0\n" );
+				
+				if (rslt != ok){				
 				 	return 0;
 				 }
 				 	
@@ -108,8 +107,7 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 
 		}
 	}
-
-	printf("===oooooooo==okkkkkkkk==return 1\n" );
+	
 	return 1;
 
 

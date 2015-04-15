@@ -17,8 +17,7 @@ int SendTable(char *ip, int outChnId)
 	int i=0;
 	int iChn = outChnId - 1;
 	enum PsiTableType psiType;
-
-	printf("SendTable fuck 0\n");
+	
 
 	BufferUn_st  *pbuff = NULL;
 	if(NULL == pclsMux || NULL == pdb){
@@ -26,12 +25,11 @@ int SendTable(char *ip, int outChnId)
 		return 0;
 	}
 
-	printf("SendTable fuck 1\n");
+
 	list_get(&pclsMux->table_pat, iChn, &pbuff); 
 
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
 	{	
-		printf("SendTable fuck 2\n");
 //	    for(i=0;i<pbuff->bufLen;i++){
 //	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
 //	    }
@@ -41,14 +39,12 @@ int SendTable(char *ip, int outChnId)
 	}
 	else
 	{		
-		printf("SendTable fuck 3\n");
 		psiType = pat;
 		if (SendTable_psi(ip, outChnId, pat, NULL, 0) != ok)
 			rslt = 0;
 	}
 
 	
-	printf("SendTable fuck 4\n");
 	list_t *table_pmt=NULL;
 	int table_pmtListLen = list_len(&pclsMux->table_pmtList);
 	list_get(&pclsMux->table_pmtList, iChn, &table_pmt);
@@ -60,7 +56,6 @@ int SendTable(char *ip, int outChnId)
 	}
 
 
-	printf("SendTable fuck 5\n");
 	if (pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt &&
 		table_pmt != NULL
 		&& table_pmtLen > 0
@@ -76,25 +71,22 @@ int SendTable(char *ip, int outChnId)
         		rslt = 0;
 	}
 
-	printf("SendTable fuck 6\n");
 	pbuff = NULL;
 	list_get(&pclsMux->table_sdt, iChn, &pbuff);
 
 	psiType = sdt;
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
 	{		
-		printf("SendTable fuck sdt 611\n");
 		if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 
 	}
 	else
 	{	
-		printf("SendTable fuck sdt null\n");
 		if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
 			rslt = 0;
 	}
-	printf("SendTable fuck 7\n");
+
 	///////////////////////////////////////////////////////////////////////////////////////
 	// pbuff = NULL;	
 	// list_get(&pclsMux->table_cat, iChn, &pbuff); 
@@ -140,17 +132,16 @@ int SendTable(char *ip, int outChnId)
 int SendPidMap(char *ip, int outChnId)
 {
 	int rslt = 1;
-	printf("call SendPidMap----------------\n");
+
 	if (SendTable_PidMap(ip, outChnId, clsProgram.PrgAVMuxList) != ok)
 		rslt = 0;
 	// if (DirectlyTransmit_sendMap(ip, outChnId, clsProgram.outPrgList[outChnId - 1].dtPidList) != ok)
 	// 	rslt = 0;
 
-	printf("call SendPidMap 2 after send tabli pidmap ----------------\n");
+	
 	if (SendEnableMuxTable(ip, outChnId) != ok)
 		rslt = 0;
-
-	printf("call SendPidMap 3 after send SendEnableMuxTable----------------\n");
+	
 	return rslt;
 }
 
@@ -188,7 +179,6 @@ void SendMux(char *ip, int outChnId)
 {
 	unsigned char isNeedDesInfoSend = 1;
 
-	printf("sendMux 1 outChnId=%d\n", outChnId);
 
     int selCnt = CountSelectedPrgCnt(outChnId);
 	//MuxPrgNumMax
@@ -198,7 +188,6 @@ void SendMux(char *ip, int outChnId)
 		return;
 	}
 	
-	printf("XXXXXX=======XXXX=== sendMux fuck 1\n");
     unsigned char sendRslt = AutoMux_makeMuxInfoAndSend(ip, outChnId, !pdb->pvalueTree->poutChnArray[outChnId - 1].isManualMapMode);
     if (!sendRslt)
     {	    
@@ -207,18 +196,17 @@ void SendMux(char *ip, int outChnId)
 	    return;
     }
     
-    printf("XXXXXX=======XXXX=== sendMux fuck 2\n");
+    
 	
 	 SendTable(ip, outChnId);
-
-	printf("XXXXXX=======XXXX=== sendMux fuck 3\n");
+	
 
 	//if (isNeedDesInfoSend)
 	{
-		//MakeOutputBytesAndSend(ip, outChnId);
+		MakeOutputBytesAndSend(ip, outChnId);
 	}
 
-	printf("XXXXXX=======XXXX=== sendMux fuck 4\n");
+	
 		
 	// RecordInputChnUseStatus(outChnId);
 

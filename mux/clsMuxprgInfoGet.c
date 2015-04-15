@@ -442,9 +442,9 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
 {
 
 /////////////////////////////send count/////////////
-	unsigned char buf[50];
+	unsigned char buf[150];
     int i = 0, j=0;
-    unsigned char sendbuf[50];
+    unsigned char sendbuf[1024];
     int slen=0;
 
     int dataAddr, iAddr;
@@ -482,7 +482,6 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
 /////////////////////////////send count end/////////////	
 /////////////////////////////// -------- send muxed prg info ---------
     
-
     memset(sendbuf,0,sizeof(sendbuf));
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
@@ -520,17 +519,22 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
 		sendbuf[dataAddr++] = (unsigned char)((i + 1)&0xFF);
 		
 		sendbuf[dataAddr++] = (unsigned char)thisNeedSend;
+        
+        //printf("thisNeedSend=%d\n", thisNeedSend );
+
 		for (j = 0; j < thisNeedSend; j++)
 		{         
 
 			list_get(pmuxPrgInfoList, j + sendedCnt, &pcurPrg);
-
+            
 			if(pcurPrg){
-				sendbuf[dataAddr++] = (unsigned char)pcurPrg->inChannel & 0xFF;
+				sendbuf[dataAddr++] = (unsigned char)pcurPrg->inChannel & 0xFF;                
 				sendbuf[dataAddr++] = (unsigned char)pcurPrg->prgIndex & 0xFF;	
 			}
+            
 			
 		}
+        
         
 		memset(buf,0,sizeof(buf));
     	communicate(ip, sendbuf, dataAddr, buf, &slen);
@@ -550,7 +554,7 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
 		sendedCnt += thisNeedSend;
 	}
 
-    printf("===pppppppp=====fuck okkkkkkkkkkkk\n");
+    
 	return ok;
 }
 
@@ -697,8 +701,7 @@ list_t * MaketPaketSection(unsigned char *table, int length)
     
     unsigned char *tmpBytes = NULL; 
     int iAdded = 0, i=0;
-
-    printf("now will make bytes to list len=%d\n", length);
+    
     if (length <= 188)
     {
         pPacket = (BufferUn_st *)malloc(sizeof(BufferUn_st));
@@ -721,8 +724,7 @@ list_t * MaketPaketSection(unsigned char *table, int length)
         pPacket = (BufferUn_st *)malloc(sizeof(BufferUn_st));
         pPacket->pbuf = malloc(188);
         tmpBytes = pPacket->pbuf;
-
-        printf("MaketPaketSection 003\n");
+        
         memcpy(tmpBytes, table , 188);
         pPacket->bufLen = 188;
         list_append(outList, pPacket);        
@@ -731,32 +733,22 @@ list_t * MaketPaketSection(unsigned char *table, int length)
      
         while (length > 0)
         {
-
-            printf("===ooooofuck ---01\n");
-
                         
             pPacket = (BufferUn_st *)malloc(sizeof(BufferUn_st));
-            printf("===ooooofuck ---03\n");
+           
             pPacket->pbuf = malloc(188);
-            printf("===ooooofuck ---04\n");
             tmpBytes = pPacket->pbuf;
                         
-
-            printf("MaketPaketSection 004\n");
                         
             memcpy(tmpBytes, table , 4);            
             tmpBytes[1] = (unsigned char)(tmpBytes[1] & 0xbf); // 清除起始包标志
             tmpBytes[3] = (unsigned char)((tmpBytes[3] & 0xf0) | ((tmpBytes[3]++) & 0x0f)); // 连续计数器加1
 
             if (length <= 184)
-            {
-                printf("len < 184 len=%d\n", length );
+            {                
                 pPacket->bufLen = length;
-                printf("fuck ---01\n");
                 memcpy(tmpBytes+4, table+iAdded, length);
 
-            
-                printf("MaketPaketSection 005\n");
                 for (i = length; i < 184; i++)
                 {
                     tmpBytes[i + 4] = 0xff;
@@ -767,22 +759,17 @@ list_t * MaketPaketSection(unsigned char *table, int length)
             }
             else
             {       
-                printf("MaketPaketSection 006\n");
                 pPacket->bufLen = 188;
                 memcpy(tmpBytes+4, table+iAdded, 184);
                 iAdded += 184;
                 length -= 184;
             }
-            
-            printf("MaketPaketSection 007\n");
-            list_append(outList, tmpBytes);        
-            printf("MaketPaketSection 008 len=%d\n", length);
+                        
+            list_append(outList, tmpBytes);                    
         }
-
-        printf("break while length=%d\n", length);
+        
     }
-    
-    printf("MaketPaketSection okkkk\n");
+        
     return outList;
 }
 
@@ -821,7 +808,7 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 7, buf, &slen);
 
-        printf("pmtList = NULL will return\n");
+        
         if( slen < 7 ){
               // for(i=0;i<slen;i++)
               //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
@@ -845,7 +832,7 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
     int paketListLen = 0;
     ////////////////////////////////////////////////////////////////////////
 	unsigned char iPmtCnt = 1;
-    printf("pmtListLen =%d\n", pmtListLen );
+    
 
 	for (i = 0; i < pmtListLen; i++)
 	{
@@ -966,8 +953,7 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
     //get call channal signal status
     enum ErrorTypeEm res;
 
-    printf("XXXX=====X0001\n");
-
+  
     if (ptableBytes == NULL || length < 0)
     {
         memset(sendbuf, 0 , sizeof(sendbuf));
@@ -1001,20 +987,18 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
         return ok;
     }
     /////////////////////////////////////////////////////////send first
-    printf("XXXX=====X0002\n");
+    
 	list_t *paketList = NULL;
 
 
 	paketList = MaketPaketSection(ptableBytes, length);
 
-     printf("XXXX=====X0003\n");
     
     int paketListLen =0 ;
 
     if(paketList)
         paketListLen = list_len(paketList); 
-
-    printf("paketlistlen=%d", paketListLen);
+    
 	if (paketListLen == 0){
 	    printf("send paketListLen=0 \n");
 	    return 0;
@@ -1047,8 +1031,7 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 			sendbuf[6] = (unsigned char)paketListLen;
 			sendbuf[7] = (unsigned char)(i + 1);
 		}
-
-        printf("XXXX=====X0004\n");
+        
 
         pPacket = NULL;
         list_get(paketList, i, &pPacket);
@@ -1148,15 +1131,12 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 
         printf("\nSendTable_PidMap first\n");
 
-        for(i=0; i< 9; i++){
-            printf("sendbuf[%d]=0x%x ", i, sendbuf[i]);
-        }
-        printf("\n");
+        
 
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 9, buf, &slen);
         if( slen >=10 ){
-            printf("resul= %d\n", buf[10]);
+           // printf("resul= %d\n", buf[10]);
             if(0 == buf[10])
             return  ok;                        
         }
@@ -1209,10 +1189,6 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
     sendbuf[7]=(unsigned char) (pidMapListLen & 0xFF);
     sendbuf[8]=(unsigned char) (pidMapListLen & 0xFF00)>>8;
 
-    printf("\n send counter SendTable_PidMap first\n");
-    for(i=0; i< 9; i++){
-            printf("sendbuf[%d]=0x%x |",i, sendbuf[i]);
-        }
 
 
     memset(buf,0,sizeof(buf));
@@ -1255,11 +1231,6 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
 			iSendedBytes += clsProgram.pidMap_eachTransmit_numberMax * 5;
 			iAddr += clsProgram.pidMap_eachTransmit_numberMax * 5;
 		}
-
-        printf("\n in sendCnt SendTable_PidMap first\n");
-        for(k=0; k< 9; k++){
-            printf("sendbuf[%d]=0x%x |", k, sendbuf[k]);
-        }
 
 
         memset(buf,0,sizeof(buf));
@@ -1423,7 +1394,7 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
     int sendCnt = length / eachSendLeng + ((length % eachSendLeng) > 0 ? 1 : 0);
     int sendedInfoAddr = 0;
     
-	printf(" length=%x  sendCnt=%d\n", length, sendCnt);	
+	
 	
     unsigned  int crcRslt = CrcBytes(muxInfoBytes, 0, length - 4);
 		
