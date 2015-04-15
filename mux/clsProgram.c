@@ -59,19 +59,20 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 	MuxPrgInfoGet_st *pmtPrg;
 	ChannelProgramSt *eachChn = NULL;
 	Dev_prgInfo_st *prgInfo = NULL;
+
 	int outPrgListLen = list_len(&clsProgram.outPrgList);
 	int prgNodesLen = 0;
 	int i=0, j=0;
-
+	
 	list_init(&sendList);
+	
 	if (outPrgListLen > 0 )
 	{
 		for (i = 0; i < outPrgListLen; i++)
 		{
 			//sendList.Clear();
 
-			//removeall list
-
+			//removeall list			
 			if (outChannel != 0 && outChannel != i + 1)
 				continue;
 
@@ -81,7 +82,7 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 			if(eachChn !=NULL){
 				prgNodesLen = list_len(&eachChn->prgNodes);
 				for (j = 0; j < prgNodesLen; j++)
-				{
+				{					
 					list_get(&eachChn->prgNodes, i, &prgInfo);
 					if(prgInfo){
 						pmtPrg = malloc(sizeof(MuxPrgInfoGet_st));
@@ -95,13 +96,20 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 											
 				}
 
-				 ErrorTypeEm rslt = SendOutPrgMuxMap(ip, i + 1, &sendList);
-				 if (rslt != ok)
+				printf("===oooooooo=====fuck jjjjj=%d\n",j );
+				ErrorTypeEm rslt = SendOutPrgMuxMap(ip, i + 1, &sendList);
+				printf("===oooooooo=====fuck jjjjj after\n");
+				if (rslt != ok){
+				 	printf("===oooooooo====return 0\n" );
 				 	return 0;
+				 }
+				 	
 			}
 
 		}
 	}
+
+	printf("===oooooooo==okkkkkkkk==return 1\n" );
 	return 1;
 
 
