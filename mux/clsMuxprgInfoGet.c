@@ -767,7 +767,11 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 
 
 
-    unsigned int pmtListLen = list_len(pmtList);
+    unsigned int pmtListLen = 0;
+
+    if(pmtList)
+        pmtListLen = list_len(pmtList);
+
 
 
     if(pmtList==NULL || pmtListLen ==0){
@@ -802,7 +806,7 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 
 	list_t *paketList = NULL;
 	
-	printf("\n####Recive SendTable_pmt cccc receive nums pmtListLen=[%d]\n", pmtListLen );
+	//printf("\n####Recive SendTable_pmt cccc receive nums pmtListLen=[%d]\n", pmtListLen );
     table_pmtList_st  *pmt_tablelist = NULL;
     BufferUn_st *pbuff = NULL;
     int paketListLen = 0;
@@ -879,14 +883,14 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
             sendbuf[7]=(unsigned char)(paketListLen & 0xFF);
             sendbuf[8]=(unsigned char)(j + 1);
 
-			printf("\n####Recive SendTable_pmt 1\n" );
+			//printf("\n####Recive SendTable_pmt 1\n" );
 			 
             pbuff = NULL;
             list_get(paketList, j, &pbuff);
             memcpy(sendbuf+9, pbuff->pbuf, pbuff->bufLen);
 
             communicate(ip, sendbuf, 9 + pbuff->bufLen, buf, &slen);
-			printf("send paketlist slen=%d\n", slen);
+			//printf("send paketlist slen=%d\n", slen);
             if( slen < 7 ){
               // for(i=0;i<slen;i++)
               //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
