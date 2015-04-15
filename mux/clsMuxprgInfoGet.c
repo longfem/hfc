@@ -767,7 +767,11 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 
 
 
-    unsigned int pmtListLen = list_len(pmtList);
+    unsigned int pmtListLen = 0;
+
+    if(pmtList)
+        pmtListLen = list_len(pmtList);
+    
 
 
     if(pmtList==NULL || pmtListLen ==0){
