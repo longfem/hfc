@@ -444,95 +444,6 @@ static void selectprgs(HttpConn *conn) {
             }
         }
 	}
-	/*if(list_len(&outpst->prgNodes) == 0){
-		list_init(&(outpst->prgNodes));
-		//提取要制表的节目信息
-		for(i=0; i<clsProgram._intChannelCntMax; i++){
-			sprintf(str, "inCh%d", i+1);				
-			if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){				
-				//获取输入通道信息
-				list_get(&(clsProgram.inPrgList), i, &pst);
-				//加入输出通道列表
-				outpst->channelId = i+1;
-				//加入输出节目信息
-				for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
-					sprintf(idstr, "id%d", j);
-					MprJson *streamjson = mprGetJsonObj(mprGetJsonObj(jsonparam, str ), idstr);
-					prgindex = atoi(mprGetJson(streamjson, "id"));
-					list_get(&(pst->prgNodes), prgindex-1, &inprg);	
-					cpyprg(outpst, outprg, inprg, streamjson);												
-				}		
-			}
-		}
-	}else{
-		//判断选择的节目是增加还是减少
-		if(prgcnt >= list_len(&outpst->prgNodes)){
-			//add
-			for(i=0; i<clsProgram._intChannelCntMax; i++){
-				sprintf(str, "inCh%d", i+1);				
-				if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){					
-					//获取输入通道信息
-					list_get(&(clsProgram.inPrgList), i, &pst);
-					//加入输出通道列表
-					outpst->channelId = i+1;
-					//加入输出节目信息
-					for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
-						hascontained = 0;
-						sprintf(idstr, "id%d", j);
-						MprJson *streamjson = mprGetJsonObj(mprGetJsonObj(jsonparam, str ), idstr);
-						prgindex = atoi(mprGetJson(streamjson, "id"));
-						list_get(&(pst->prgNodes), prgindex-1, &inprg);	
-						for(k=0;k<list_len(&outpst->prgNodes);k++){	
-							list_get(&(outpst->prgNodes), k, &outprg);	
-							if((outprg->index == prgindex)&&(outprg->chnId == inprg->chnId)){
-								hascontained = 1;
-								//stream data
-								cpystream(outprg, inprg, streamjson);
-								break;
-							}
-						}						
-						if(hascontained == 0){
-							cpyprg(outpst, outprg, inprg, streamjson);													
-						}
-					}
-				}
-			}			
-		}else{
-			//delete
-			list_t newpst;
-			list_init(&newpst);
-			for(k=0;k<list_len(&outpst->prgNodes);k++){
-				list_get(&outpst->prgNodes, k, &outprg);
-				for(i=0; i<clsProgram._intChannelCntMax; i++){
-					sprintf(str, "inCh%d", i+1);				
-					if( 0 != mprGetJsonLength(mprGetJsonObj(jsonparam, str ))){
-						//获取输入通道信息
-						list_get(&(clsProgram.inPrgList), i, &pst);
-						//加入输出通道列表
-						outpst->channelId = i+1;
-						//加入输出节目信息
-						for(j=0;j< mprGetJsonLength(mprGetJsonObj(jsonparam, str )); j++){
-							sprintf(idstr, "id%d", j);
-							MprJson *streamjson = mprGetJsonObj(mprGetJsonObj(jsonparam, str ), idstr);
-							prgindex = atoi(mprGetJson(streamjson, "id"));
-							list_get(&(pst->prgNodes), prgindex-1, &inprg);	
-							if((outprg->index == prgindex)&&(outprg->chnId == i+1)){
-								list_append(&newpst, outprg);
-								break;
-							}
-						}
-					}
-				}
-			}
-			//释放内存
-            while(list_len(&outpst->prgNodes)>0){
-                list_pop_tail(&outpst->prgNodes);
-            }
-			memcpy(&outpst->prgNodes, &newpst, sizeof(newpst));
-
-		}
-		
-	}*/
 	rendersts(result, 1);
 	render(result);
 }
@@ -594,7 +505,7 @@ static void streamtable(HttpConn *conn) {
 	streamjsonstring = cJSON_PrintUnformatted(streamsarray);
 		
 	memcpy(outstring, streamjsonstring, strlen(streamjsonstring));
-	//printf("---len--->>>%d\n",strlen(streamjsonstring));
+	printf("---streamtable--->>>%d\n",strlen(streamjsonstring));
 	//释放内存	
 	cJSON_Delete(streamsarray);		
 	free(streamjsonstring);
