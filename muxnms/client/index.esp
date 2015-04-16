@@ -89,6 +89,20 @@
     <script type="text/javascript">		
 		var localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
 		var recdata;
+		var os = getOS();
+		function getOS(){
+		    var ua = navigator.userAgent.toLowerCase();
+                    if (window.ActiveXObject)
+                        return "ie";
+                    else if (document.getBoxObjectFor)
+                        return "firefox";
+                    else if (window.MessageEvent && !document.getBoxObjectFor)
+                        return "chrome";
+                    else if (window.opera)
+                        return "opera";
+                    else if (window.openDatabase)
+                        return "safari";
+		}
 		//获取设备基本信息				
 		$.ajax({
 			 type: "GET",

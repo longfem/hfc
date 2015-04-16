@@ -1543,7 +1543,7 @@ ErrorTypeEm Search(char *ip, int inChn)
         return cmd;
 }
 
-int GetNewFreeUserPrgIndex(int inChn, int outChnId)
+int GetNewFreePrgIndex(int inChn, int outChnId)
 {
     int i = 0;
     int addedIndexArray[1024] = {0};
@@ -1557,6 +1557,30 @@ int GetNewFreeUserPrgIndex(int inChn, int outChnId)
         {
             addedIndexArray[outprg->index] = 1;
         }
+    }
+    for (i = 1; i < 1024; i++)
+    {
+        if (addedIndexArray[i] == 0)
+        {
+            return i;
+        }
+    }
+}
+
+int GetNewFreeUserPrgIndex(int inChn, int outChnId)
+{
+    int i = 0;
+    int addedIndexArray[1024] = {0};
+    ChannelProgramSt *outpst = NULL;
+    list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
+    User_prgInfo_t *usrprg = NULL;
+
+    if(&outpst->userPrgNodes == NULL){
+        return 1;
+    }
+    for(i=0; i< list_len(&outpst->userPrgNodes); i++){
+        list_get(&outpst->userPrgNodes, i, &usrprg);
+        addedIndexArray[usrprg->index] = 1;
     }
     for (i = 1; i < 1024; i++)
     {

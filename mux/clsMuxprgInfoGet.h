@@ -23,6 +23,7 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray);
 ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapList);
 unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoBytes, int length);
 void LoadBitrateAndTableEnable(char *ip, int iChn);
+int GetNewFreePrgIndex(int inChn, int outChnId);
 int GetNewFreeUserPrgIndex(int inChn, int outChnId);
 //SearchingStatus GetSearchingStatus(char *ip, int inChn);
 //ErrorTypeEm Search(char *ip, int inChn);

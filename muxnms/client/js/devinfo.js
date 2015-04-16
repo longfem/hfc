@@ -53,7 +53,7 @@ var dataSet1 = [
 	['3','24']	
 ];
 
-function checkselectedprg(nodekey){
+function checkselectedprg(nodekey, selected, snode){
     var chantree;
     var devtree;
     var snt;
@@ -69,7 +69,7 @@ function checkselectedprg(nodekey){
     var prgnode;
     var jsondata = new Array();
     var arr = nodekey.match(/\./g);
-    if(devtree.getNodeByKey(nodekey).selected){
+    if(selected){
         switch(arr.length){
             case 1:	//通道节点
                 if(nodekey == "id1.0"){
@@ -81,24 +81,24 @@ function checkselectedprg(nodekey){
                 }
                 break;
             case 2:	//节目节点
-                prgnode = devtree.getNodeByKey(nodekey);
-                var chstr = "flag:3,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
+                prgnode = chantree.getNodeByKey(nodekey);
+                var chstr = "flag:3,"+"selected:1,ch:"+ snode.data.chnid + ",index:"+ snode.data.index;
                 jsondata[0] = chstr;
                 break;
             case 3: //流节点
             case 4:
-                prgnode = devtree.getNodeByKey(devtree.getNodeByKey(nodekey).getParent().key);
+                prgnode = chantree.getNodeByKey(snode.getParent().key);
                 var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                + ",streamindex:"+ devtree.getNodeByKey(nodekey).data.index;
+                    + ",streamindex:"+ snode.data.index;
                 jsondata[0] = chstr;
                 break;
 
-                //prgnode = chantree.getNodeByKey(data.node.getParent().getParent().key);
-                //var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                //    + ",streamindex:"+ data.node.data.index + ",descindex:" + data.node.data.index;
-                //jsondata[0] = chstr;
-                //count++;
-                //break;
+            //prgnode = chantree.getNodeByKey(data.node.getParent().getParent().key);
+            //var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
+            //    + ",streamindex:"+ data.node.data.index + ",descindex:" + data.node.data.index;
+            //jsondata[0] = chstr;
+            //count++;
+            //break;
             default:
 
                 break;
@@ -115,27 +115,25 @@ function checkselectedprg(nodekey){
                 }
                 break;
             case 2:	//节目节点
-                prgnode = devtree.getNodeByKey(nodekey);
-                var chstr = "flag:3,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
+                var chstr = "flag:3,"+"selected:0,ch:"+ snode.data.chnid + ",index:"+ snode.data.index;
                 jsondata[0] = chstr;
                 break;
             case 3:
             case 4:
-                prgnode = devtree.getNodeByKey(devtree.getNodeByKey(nodekey).getParent().key);
+                prgnode = chantree.getNodeByKey(snode.getParent().key);
                 var chstr = "flag:4,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                    + ",streamindex:"+ devtree.getNodeByKey(nodekey).data.index;
+                    + ",streamindex:"+ snode.data.index;
                 jsondata[0] = chstr;
                 break;
 
 
-                //break;
+            //break;
             default:
 
                 break;
         }
 
     }
-
     $.ajax({
         type: "GET",
         async:false,
@@ -227,7 +225,9 @@ function readprgs(){
                     }else if(globalObj._channel == 2){
                         globalObj._selectcount2++;
                     }
-                    node.setSelected(true);
+                    if(node != null){
+                        node.setSelected(true);
+                    }
                 });
 
                 var prgnode = channeltree.getNodeByKey("id1.0");
@@ -1065,7 +1065,7 @@ function devinfo_output(devType){
                 }
                 prgnode.setTitle("节目: "+ globalObj._selectcount);
                 prgnode.render();
-                checkselectedprg(data.node.key);
+                checkselectedprg(data.node.key, data.node.selected, selnode);
                 data.node.toggleSelected();
             }
 
@@ -1103,7 +1103,7 @@ function devinfo_output(devType){
                         $(".menu_re_prg").css("display", "none");
                         $(".menu_re_pid").css("display", "none");
                         $(".menu_chndelete").css("display", "block");
-                        $(".menu_prgdeletecus").css("display", "block");
+                        $(".menu_prgdeletecus").css("display", "none");
                         $(".menu_cus_add").css("display", "block");
                     }
 
@@ -1138,6 +1138,11 @@ function devinfo_output(devType){
 			select: function(event, data){
                 globalObj._channel = 1;
                 var channeltree =  $("#channel").fancytree("getTree");
+                if(data.node.data.chnid == 9){
+                    globalObj._isuserprg = 0;   //user custom prg
+                }else{
+                    globalObj._isuserprg = 1;
+                }
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -1152,13 +1157,13 @@ function devinfo_output(devType){
 						break;
 					} case '#delete': { //删除这个节目
 						var nodekey = data.node.key;
+                        var snode = data.node;
 						data.node.remove();
                         globalObj._selectcount--;
-                        $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
-                        checkselectedprg(nodekey);
+                        checkselectedprg(nodekey, false, snode);
 						break;
 					} case '#edit': {
 						//获取编辑节目信息
@@ -1171,6 +1176,7 @@ function devinfo_output(devType){
 							success: function(data){
                                 globalObj._index = data.index;
 								$('.prg_name').val(data.prgName);
+                                $('.prg_merchant').val(data.providerName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
 								$('.prg_prc').val(data.chnId.toString());
@@ -1255,23 +1261,29 @@ function devinfo_output(devType){
 
 						break;
 					} case '#chndelete': {//删除此通道下所有节目
-                        var nodekey = data.node.key;
+                        var nodekey;
+                        var snode = data.node;
+                        var tmpnode;
                         while( data.node.hasChildren() ) {
                             nodekey = data.node.getFirstChild().key;
-                            $("#devlist").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                            tmpnode = $("#devlist").fancytree("getTree").getNodeByKey(nodekey);
+                            if(tmpnode != null){
+                                tmpnode.setSelected(false);
+                            }
                             data.node.getFirstChild().remove();
                             globalObj._selectcount--;
                         }
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
-                        checkselectedprg(data.node.key);
+                        checkselectedprg(data.node.key, false, snode);
                         break;
                     } case '#add': {
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#cus_add': {//添加自增节目
                         $('.prg_name').val("");
+                        $('.prg_merchant').val("");
                         $('.prg_no').val("1");
                         $('.prg_pid').val("1ff");
                         $('.prg_prc').val(data.node.data.chnid.toString());
@@ -1336,14 +1348,35 @@ function devinfo_output(devType){
                         globalObj._prgoptflag = 1;
                         dialog_edit.dialog( "open" );
                         break;
-                    } case '#prgdeletecus': {//删除自增节目
-
+                    } case '#prgdeletecus': {//删除所有自增节目
+                        var snode = data.node;
+                        var tmpnode;
+                        $.each(data.node.children, function(index,chnode){
+                            if(chnode.children != null){
+                                var tmpnodes = chnode.children;
+                                $.each(tmpnodes.children, function(ig,prgnode){
+                                    if(prgnode.extraClasses == "userprg" ){
+                                        chnode.children[ig].remove();
+                                        globalObj._selectcount--;
+                                    }
+                                });
+                            }
+                        });
+                        var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ globalObj._selectcount);
+                        prgnode.render();
+                        checkselectedprg(data.node.key, false, snode);
                         break;
                     } case '#prgdeleteall': {//删除所有节目
+                        var snode = data.node;
+                        var tmpnode;
                         $.each(data.node.children, function(index,chnode){
                             if(chnode.children != null){
                                 while(chnode.hasChildren()){
-                                    $("#devlist").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
+                                    tmpnode = $("#devlist").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key);
+                                    if(tmpnode != null){
+                                        tmpnode.setSelected(false);
+                                    }
                                     chnode.getFirstChild().remove();
                                     globalObj._selectcount--;
                                 }
@@ -1352,7 +1385,7 @@ function devinfo_output(devType){
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
-                        checkselectedprg(data.node.key);
+                        checkselectedprg(data.node.key, false, snode);
 						break;
 					} case '#itmes': {
 						//获取输出通道设置信息
@@ -1625,9 +1658,7 @@ function devinfo_output(devType){
 			}
 		},
 		select: function(event, data) {
-            var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-            prgnode.setTitle("节目: "+ globalObj._selectcount2);
-            prgnode.render();
+
 		},
 		click: function(event, data) {			
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
@@ -1755,7 +1786,7 @@ function devinfo_output(devType){
                 }
                 prgnode.setTitle("节目: "+ globalObj._selectcount2);
                 prgnode.render();
-                checkselectedprg(data);
+                checkselectedprg(data.node.key, data.node.selected, data.node);
                 data.node.toggleSelected();
             }
 		}
@@ -1792,7 +1823,7 @@ function devinfo_output(devType){
                         $(".menu_re_prg").css("display", "none");
                         $(".menu_re_pid").css("display", "none");
                         $(".menu_chndelete").css("display", "block");
-                        $(".menu_prgdeletecus").css("display", "block");
+                        $(".menu_prgdeletecus").css("display", "none");
                         $(".menu_cus_add").css("display", "block");
                     }
                 }else if(arr.length == 2){
@@ -1826,6 +1857,11 @@ function devinfo_output(devType){
 			},
 			select: function(event, data){
                 globalObj._channel = 2;
+                if(data.node.data.chnid == 9){
+                    globalObj._isuserprg = 0;   //user custom prg
+                }else{
+                    globalObj._isuserprg = 1;
+                }
                 var channeltree =  $("#channel2").fancytree("getTree");
 				switch(data.menuId){
 					case '#expandall' :{
@@ -1841,13 +1877,13 @@ function devinfo_output(devType){
 						break;
 					} case '#delete': {
 						var nodekey = data.node.key;
+                        var snode = data.node;
                         data.node.remove();
                         globalObj._selectcount2--;
-                        $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
-                        var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
+                    var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
-                        checkselectedprg(nodekey);
+                        checkselectedprg(nodekey, false, snode);
 						break;
 					} case '#edit': {
 						//获取编辑节目信息
@@ -1860,6 +1896,7 @@ function devinfo_output(devType){
 							success: function(data){
                                 globalObj._index = data.index;
 								$('.prg_name').val(data.prgName);
+                                $('.prg_merchant').val(data.providerName);
 								$('.prg_no').val(data.prgNum.toString());
 								$('.prg_pid').val(data.pmtPid.toString(16));
 								$('.prg_prc').val(data.chnId.toString());
@@ -1944,17 +1981,22 @@ function devinfo_output(devType){
 						
 						break;
 					} case '#chndelete': {
-                        var nodekey = data.node.key;
+                        var nodekey;
+                        var snode = data.node;
+                        var tmpnode;
                         while( data.node.hasChildren() ) {
                             nodekey = data.node.getFirstChild().key;
-                            $("#devlist2").fancytree("getTree").getNodeByKey(nodekey).setSelected(false);
+                            tmpnode = $("#devlist").fancytree("getTree").getNodeByKey(nodekey);
+                            if(tmpnode != null){
+                                tmpnode.setSelected(false);
+                            }
                             data.node.getFirstChild().remove();
                             globalObj._selectcount2--;
                         }
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
-                        checkselectedprg(data.node.key);
+                        checkselectedprg(data.node.key, false, snode);
                         break;
                     } case '#add': {
 						dialog_desc.dialog( "open" );
@@ -1964,13 +2006,34 @@ function devinfo_output(devType){
                         dialog_edit.dialog( "open" );
                         break;
                     } case '#prgdeletecus': {//删除自增节目
-
+                        var snode = data.node;
+                        var tmpnode;
+                        $.each(data.node.children, function(index,chnode){
+                            if(chnode.children != null){
+                                var tmpnodes = chnode.children;
+                                $.each(tmpnodes.children, function(ig,prgnode){
+                                    if(prgnode.extraClasses == "userprg" ){
+                                        chnode.children[ig].remove();
+                                        globalObj._selectcount2--;
+                                    }
+                                });
+                            }
+                        });
+                        var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
+                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                        prgnode.render();
+                        checkselectedprg(data.node.key, false, snode);
                         break;
                     }  case '#prgdeleteall': {
+                        var snode = data.node;
+                        var tmpnode;
                         $.each(data.node.children, function(index,chnode){
                             if(chnode.children != null){
                                 while(chnode.hasChildren()){
-                                    $("#devlist2").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key).setSelected(false);
+                                    tmpnode = $("#devlist").fancytree("getTree").getNodeByKey(chnode.getFirstChild().key);
+                                    if(tmpnode != null){
+                                        tmpnode.setSelected(false);
+                                    }
                                     chnode.getFirstChild().remove();
                                     globalObj._selectcount2--;
                                 }
@@ -1979,7 +2042,7 @@ function devinfo_output(devType){
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount2);
                         prgnode.render();
-                        checkselectedprg(data.node.key);
+                        checkselectedprg(data.node.key, false, snode);
 						break;
 					} case '#itmes': {
                         //获取输出通道设置信息
@@ -2246,7 +2309,7 @@ function devinfo_output(devType){
 			"添加":function() {
                 var tblindex = Number(globalObj._tbl_edit[0].rows[globalObj._tbl_edit[0].rows.length - 1].firstChild.textContent);
                 if(isNaN(tblindex)){
-                    tblindex = 2;
+                    tblindex = 0;
                 }
 				$('#tbl_editprg').DataTable().row.add( [
                     tblindex + 1,
@@ -2269,7 +2332,12 @@ function devinfo_output(devType){
 					strindex += ',"index'+(i-1)+'":' + globalObj._tbl_edit[0].rows[i].firstChild.textContent;
 				}
 				var data = $('#tbl_editprg').DataTable().$('input, select').serialize();
-				var jsonstr = '{"channel":' + globalObj._channel + ',"chnid":' + $('.prg_prc').val() + ',"prgoptflag":' + globalObj._prgoptflag + ',"servicetype":' + $('#r_servicetype').val() + ',"prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  globalObj._index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
+                if($('#tbl_editprg').DataTable().$('tr').length >0){
+                    var jsonstr = '{"channel":' + globalObj._channel + ',"chnid":' + $('.prg_prc').val() + ',"isuserprg":' + globalObj._isuserprg + ',"prgoptflag":' + globalObj._prgoptflag + ',"servicetype":' + $('#r_servicetype').val() + ',"providername":"' + $('.prg_merchant').val() + '","prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  globalObj._index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+',"' +data.replace(/&/g, '","').replace(/=/g, '":"') + '"' + strindex + '}';
+                }else{
+                    var jsonstr = '{"channel":' + globalObj._channel + ',"chnid":' + $('.prg_prc').val() + ',"isuserprg":' + globalObj._isuserprg + ',"prgoptflag":' + globalObj._prgoptflag + ',"servicetype":' + $('#r_servicetype').val() + ',"providername":"' + $('.prg_merchant').val() + '","prgname":"' + $('.prg_name').val() + '","prgNum":' + Number($('.prg_no').val()) + ',"orgiralindex":"' +  globalObj._index.toString(16) + '","pmtpid":"' +  $('.prg_pid').val() + '","oldpcrpid":"' + $('.prg_prc1').val() + '","newpcrpid":"' + $('.prg_prc2').val()+ '","streamcnt":'+$('#tbl_editprg').DataTable().$('tr').length+ '}';
+                }
+
 				//下发配置
 				$.ajax({
 					 type: "GET",

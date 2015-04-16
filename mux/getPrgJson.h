@@ -5,5 +5,6 @@
 #include "list.h"
 
 void getPrgsJson(char *ip, int inChn, char *outprg);
+void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst);
 void getoutprgsJson(char *ip, int inChn, char *outprg);
 #endif 

@@ -819,3 +819,8 @@ p.signin.button{
     border: 0.2rem solid red!important;
 }
 
+span.fancytree-node.userprg > span.fancytree-title {
+    color: red;
+    font-family: "Audiowide";
+}
+

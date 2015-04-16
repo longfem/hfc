@@ -95,6 +95,7 @@ typedef struct Dev_prgInfo_t
 
 typedef struct User_prgInfo_st
 {
+    int index;
     int prgNum;
     int streamId;
     int newworkId;
@@ -109,13 +110,13 @@ typedef struct User_prgInfo_st
     int serviceType;
     int pmtDesListLen;
     Commdes_t *pmtDesList; // Commdes_st
-    int dataStreamListLen;
-    DataStream_t *dataStreamList; // User_DataStream_st
+    int pdataStreamListLen;
+    DataStream_t *pdataStreamList; // User_DataStream_st
     //13.	CA标志
     int isCrypto;
     //14.	SDT表描述子个数
-    int sdtDesListLen;
-    Commdes_t *sdtDesList; // Commdes_st
+    int psdtDesListLen;
+    Commdes_t *psdtDesList; // Commdes_st
 }User_prgInfo_t;
 
 
@@ -175,12 +176,6 @@ typedef struct Database_t
 	//bool isServerMode;
 
 }Database_st;
-
-// #define cdr_int16_to(from) \
-// 	( (((from) & (0xffu << 8)) >> 8)  \
-// 	| (((from) & 0xffu) << 8) )
-		
-// #endif		
 
 typedef struct MuxPrgInfoGet_t
 {
