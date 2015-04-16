@@ -19,7 +19,7 @@ list_t * MaketPaketSection(unsigned char *table, int length);
 ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList);
 ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsigned char *ptableBytes, int length);
 ErrorTypeEm SendTable_psi_finish(char *ip, int outChannel);
-ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray);
+ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray);
 ErrorTypeEm DirectlyTransmit_sendMap(char *ip, int outChannel, list_t *pidMapList);
 unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoBytes, int length);
 void LoadBitrateAndTableEnable(char *ip, int iChn);
