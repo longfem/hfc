@@ -1097,7 +1097,7 @@ ErrorTypeEm SendTable_psi_finish(char *ip, int outChannel)
    
 }
 
-ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
+ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray)
 {
 	 unsigned char buf[1024];
     int i = 0, j=0, k=0;
@@ -1107,13 +1107,26 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
     int dataAddr, iAddr=0;
     list_t *pidMapList = NULL;
     int pidMapListLen = 0;
-    int pidMapListArrayLen = 0;
+   
+
     if(pidMapListArray != NULL) {
-        pidMapListArrayLen = list_len(pidMapListArray);
-        list_get(&pidMapListArray, outChannel - 1, &pidMapList);
+        printf("======11111\n");
+        
+        pidMapList = pidMapListArray[outChannel - 1];
+
+        
         if(pidMapList)
             pidMapListLen = list_len(pidMapList);
+        else{
+            printf("======XXXXXXXXXX====PID MAP LIST ERROR4\n");
+            return error;
+        }
+
+        printf("======4222244\n");
     }
+
+    printf("pidmaplist len=%d\n", pidMapListLen);
+    
     if (pidMapListArray ==NULL || pidMapList == NULL || pidMapListLen == 0)
     {
         // 发送个数
@@ -1151,6 +1164,9 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t *pidMapListArray)
     int readLen;
     ErrorTypeEm res;
     iAddr = 0;    
+
+
+    
 
 
     MuxPidInfo_st * pidMapTmp = NULL;

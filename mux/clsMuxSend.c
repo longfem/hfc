@@ -123,7 +123,9 @@ int SendTable(char *ip, int outChnId)
 		
 	}
 	else{
+		printf("=====XXX===SendPidMap 1\n");
 		rslt = SendPidMap(ip, outChnId);
+		printf("=====XXX===SendPidMap 2\n");
 	}
 
 	return rslt;
@@ -133,8 +135,10 @@ int SendPidMap(char *ip, int outChnId)
 {
 	int rslt = 1;
 
-	if (SendTable_PidMap(ip, outChnId, clsProgram.PrgAVMuxList) != ok)
-		rslt = 0;
+	 if (SendTable_PidMap(ip, outChnId, clsProgram.PrgAVMuxList) != ok)
+	 	rslt = 0;
+
+
 	// if (DirectlyTransmit_sendMap(ip, outChnId, clsProgram.outPrgList[outChnId - 1].dtPidList) != ok)
 	// 	rslt = 0;
 
