@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "esp.h" 
+#include "esp.h"
+#include "http.h"
 #include "cJSON.h"
 #include "communicate.h"
 #include "getPrograms.h"
@@ -264,7 +265,6 @@ static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAdde
 
 static void getprg(HttpConn *conn) { 
 	MprJson *jsonparam = httpGetParams(conn);
-
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
@@ -676,7 +676,6 @@ static void setpidtransinfo(HttpConn *conn) {
 		sprintf(idstr, "p_oldpid%d", i);
 		tmpstr = mprGetJson(jsonparam, idstr);
 		sscanf(tmpstr, "%x", &val);
-		printf("===set pid====%x\n", val);
 		if(val>0xffff || val<1){
 			memset(idstr, 0, sizeof(idstr));
 			rendersts(idstr, 0);
@@ -1143,10 +1142,17 @@ static void common(HttpConn *conn) {
 
 static void getglobalinfo(HttpConn *conn) { 
 	char str[64] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
     ChannelProgramSt *pst = NULL;
 	cJSON *result = cJSON_CreateObject();
 	char* jsonstring;
 	cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
+	cJSON_AddNumberToObject(result, "sts", 0);
 	jsonstring = cJSON_PrintUnformatted(result);
 	memcpy(str, jsonstring, strlen(jsonstring));
 	//释放内存	
@@ -1193,6 +1199,7 @@ static void reprgnum(HttpConn *conn) {
 	int i = 0,j = 0, prgNumCnt = 0;
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
+	User_prgInfo_t *userprg = NULL;
     MprJson *jsonparam = httpGetParams(conn);
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
@@ -1206,10 +1213,17 @@ static void reprgnum(HttpConn *conn) {
                     prgNumCnt++;
                 }
             }
+            //clsProgram.userPrgNodes
+            if((&outpst->userPrgNodes != NULL) && (list_len(&outpst->userPrgNodes)>0)){
+                for(j=0; j<list_len(&outpst->userPrgNodes); j++){
+                    list_get(&outpst->userPrgNodes, j, &userprg);
+                    memcpy(&userprg->prgNum, &prgNumCnt, sizeof(int));
+                    prgNumCnt++;
+                }
+            }
         }
     }
-    //TODO
-    //clsProgram.userPrgNodes
+
 
     rendersts(str, 1);
     render(str);
@@ -1233,6 +1247,7 @@ static void reprgpid(HttpConn *conn) {
 	list_init(usingPidList);
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
+	User_prgInfo_t *userprg = NULL;
     MprJson *jsonparam = httpGetParams(conn);
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
@@ -1280,8 +1295,46 @@ static void reprgpid(HttpConn *conn) {
                 }
             }
 
-            //TODO
             //clsProgram.userPrgNodes
+            if((&outpst->userPrgNodes != NULL) && (list_len(&outpst->userPrgNodes)>0)){
+                for(j=0; j<list_len(&outpst->userPrgNodes); j++){
+                    list_get(&outpst->userPrgNodes, j, &userprg);
+                    int newPid = SeekReplacedPid(usingPidList, 9, userprg->pmtPid, pidPrgStart);
+                    if (newPid != userprg->pmtPid || pidPrgStart == userprg->pmtPid)
+                    {
+                        memcpy(&userprg->pmtPid, &newPid, sizeof(int));
+                        pidPrgStart++;
+                    }
+                    if (userprg->newPcrPid != 0x1fff)
+                    {
+                        newPid = SeekReplacedPid(usingPidList, userprg->pcrPidInChn , userprg->oldPcrPid, pidAvStart);
+                        if (newPid != userprg->oldPcrPid || pidAvStart == userprg->oldPcrPid)
+                        {
+                            memcpy(&userprg->newPcrPid, &newPid, sizeof(int));
+                            pidAvStart++;
+                        }
+                    }
+                    pidAvStart = DesPidRefresh2(9, userprg->index, -1, userprg->pmtDesList, userprg->pmtDesListLen, pidAvStart, NULL);
+                    if(userprg->pdataStreamList != NULL && userprg->pdataStreamListLen>0){
+                        DataStream_t *dst = userprg->pdataStreamList;
+                        for(k=0;k<userprg->pdataStreamListLen;k++){
+                            newPid = SeekReplacedPid(usingPidList, dst->inChn, dst->inPid, pidAvStart);
+                            if (newPid != dst->inPid)
+                            {
+                                memcpy(&dst->outPid, &newPid, sizeof(int));
+                                pidAvStart++;
+                            }
+                            else if (pidAvStart == dst->inPid)
+                            {
+                                pidAvStart++;
+                            }
+                            pidAvStart = DesPidRefresh2(9, userprg->index, dst->index,
+                                        dst->desNode, dst->desNodeLen, pidAvStart, NULL);
+                            dst++;
+                        }
+                    }
+                }
+            }
         }
     }
 
