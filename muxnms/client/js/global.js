@@ -7,7 +7,7 @@ function gbl_restart() {
 				
 				+'<div class="src_btn">'
 					+'<button class="btn_restart">重启设备</button>'
-					+'<p></p>'
+					+'<p class="gbltips"></p>'
 				+'</div>'
 			+'</fieldset>'
 		+'</div>'
@@ -26,8 +26,8 @@ function gbl_restart() {
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 1){
-                     $('p').empty();
-                     $('p').append('设备重启命令已下发，请30秒后尝试重新连接');
+                     $('.gbltips').empty();
+                     $('.gbltips').append('设备重启命令已下发，请30秒后尝试重新连接');
                  }else if(data.sts == 5){
                      alert("权限不足，请与管理员联系");
                  }
@@ -47,7 +47,7 @@ function gbl_reset() {
 				+'<legend>恢复出厂设置</legend>'
 				+'<div class="src_btn">'
 					+'<button class="btn_reset">恢复出厂设置</button>'
-					+'<p></p>'
+					+'<p class="gbltips"></p>'
 				+'</div>'
 			+'</fieldset>'
 		+'</div>'
@@ -66,8 +66,8 @@ function gbl_reset() {
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 1){
-                     $('p').empty();
-                     $('p').append('恢复出厂设置命令已下发，请30秒后尝试重新连接');
+                     $('.gbltips').empty();
+                     $('.gbltips').append('恢复出厂设置命令已下发，请30秒后尝试重新连接');
                  }else if(data.sts == 5){
                      alert("权限不足，请与管理员联系");
                  }
@@ -169,8 +169,9 @@ function gbl_setIp() {
                      alert("权限不足，请与管理员联系");
                  }
 			 },    
-			 error : function(err) {   
-				alert("异常！====="+err);    
+			 error : function(err) {
+                 $('.settip').empty();
+                 $('.settip').append('下发失败，未知错误!');
 			 }   
 		});
 	});

@@ -567,7 +567,7 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
                     int lastReplacePid = -1;
                     int inPid = 0x1fff;
                     int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
-                    if (inChn > 0)
+                    if ((inChn > 0) && (inChn != 9))
                     {
                         inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
                         if (inPid < 0x1fff)

@@ -174,6 +174,10 @@ function readprgs(){
         // data: {ip:"192.168.1.134", inch:2},
         dataType: "json",
         success: function(data){
+            if(data.sts == 9){
+                window.location = "/login.esp";
+                return;
+            }
             globalObj._intChannelCntMax = data._intChannelCntMax;
         },
         error : function(err) {
@@ -546,7 +550,7 @@ function devinfo_output(devType){
             +'<div id="progressbar"></div>'
         +'</div>'
         +'<div id="progress-notification" title="通知">'
-        +'<p>正在应用设置...</p>'
+            +'<p>正在应用设置...</p>'
         +'</div>'
 	);
 	
@@ -590,10 +594,11 @@ function devinfo_output(devType){
         if(globalObj._intChannelCntMax != 0 || globalObj._intChannelCntMax != ""){
             progress_dialog.dialog( "open" );
             progressbar.progressbar( "value", 0 );
+            var pro = 1;
             for(var i=1;i<globalObj._intChannelCntMax+1; i++){
                 $.ajax({
                     type: "GET",
-                    async:false,
+                    async:true,
                     url: "http://"+globalObj.localip+":4000/do/programs/search?inch="+i,
                     // data: {ip:"192.168.1.134", inch:2},
                     dataType: "json",
@@ -603,11 +608,12 @@ function devinfo_output(devType){
                             alert("搜索出现异常!!");
                             return;
                         }
-                        if(globalObj._intChannelCntMax == data.process){
+                        pro++;
+                        if(globalObj._intChannelCntMax == pro){
                             progressbar.progressbar( "value", 10 * 10 );
                         }else{
-                            progressbar.progressbar( "value", Math.round(data.process*100/globalObj._intChannelCntMax ));
-                            $('.progress-label')[0].dataset.ch = data.process + 1;
+                            progressbar.progressbar( "value", Math.round(pro*100/globalObj._intChannelCntMax ));
+                            $('.progress-label')[0].dataset.ch = pro;
                         }
 
                     },
@@ -626,7 +632,7 @@ function devinfo_output(devType){
         primary: "ui-icon-comment"
       }
     }).click(function( event ) {
-        event.preventDefault();
+        //event.preventDefault();
         globalObj._channel = 1;
 		readprgs();
     });
@@ -677,6 +683,10 @@ function devinfo_output(devType){
 			 success: function(data){
                  if(data.sts == 5){
                      alert("权限不足，请与管理员联系");
+                     return;
+                 }
+                 if(data.sts == 9){
+                     window.location = "/login.esp";
                      return;
                  }
                  if(data[0].sts == -1001){
@@ -741,23 +751,28 @@ function devinfo_output(devType){
         primary: "ui-icon-pencil"
       }
     }).click(function( event ) {
-        event.preventDefault();
-        dig_notification.dialog("open");
+        //event.preventDefault();
+        if(globalObj._selectcount > 29){
+            alert("制表节目已溢出!");
+            return;
+        }
+        dig_notification.dialog( "open" );
 		$.ajax({
 			 type: "GET",
-			 async:false,
+			 async:true,
 			 url: "http://"+globalObj.localip+":4000/do/programs/writetable?channel=" + 1,
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 5){
                      alert("权限不足，请与管理员联系");
+                 }else if(data.sts == 9){
+                     window.location = "/login.esp";
                  }
-                 dig_notification.dialog("close");
-			 },    
-			 error : function(err) { 
-				//alert(err);
-                 dig_notification.dialog("close");
-			 }   
+                 dig_notification.dialog( "close" );
+			 },
+			 error : function(err) {
+                 dig_notification.dialog( "close" );
+			 }
 		});
 		//alert('------------------!!!');
     });
@@ -871,21 +886,28 @@ function devinfo_output(devType){
         primary: "ui-icon-pencil"
       }
     }).click(function( event ) {
-        dig_notification.dialog("open");
+        //event.preventDefault();
+        if(globalObj._selectcount2 > 29){
+            alert("制表节目已溢出!");
+            return;
+        }
+        dig_notification.dialog( "open" );
         $.ajax({
             type: "GET",
-            async:false,
+            async:true,
             url: "http://"+globalObj.localip+":4000/do/programs/writetable?channel=" + 2,
             dataType: "json",
             success: function(data){
                 if(data.sts == 5){
                     alert("权限不足，请与管理员联系");
+                }else if(data.sts == 9){
+                    window.location = "/login.esp";
                 }
-                dig_notification.dialog("close");
+                dig_notification.dialog( "close" );
             },
             error : function(err) {
                 //alert(err);
-                dig_notification.dialog("close");
+                dig_notification.dialog( "close" );
             }
         });
     });
@@ -2420,11 +2442,18 @@ function devinfo_output(devType){
 		}
 	});
 
+    var dig_notification = $( "#progress-notification" ).dialog({
+        autoOpen: false,
+        modal: true,
+        width: 300
+    });
+
     var progressbar = $( "#progressbar" ),
         progressLabel = $( ".progress-label" );
     var progress_dialog = $( "#progress-dialog" ).dialog({
         autoOpen: false,
         closeOnEscape: false,
+        modal: true,
         resizable: false
     });
     progressbar.progressbar({
@@ -2438,11 +2467,6 @@ function devinfo_output(devType){
             progress_dialog.dialog( "close" );
             readprgs();
         }
-    });
-
-    var dig_notification = $( "#progress-notification" ).dialog({
-        autoOpen: false,
-        width: 300
     });
 }
 
