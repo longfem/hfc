@@ -122,10 +122,8 @@ int SendTable(char *ip, int outChnId)
 		rslt = 0;
 		
 	}
-	else{
-		printf("=====XXX===SendPidMap 1\n");
-		rslt = SendPidMap(ip, outChnId);
-		printf("=====XXX===SendPidMap 2\n");
+	else{		
+		rslt = SendPidMap(ip, outChnId);		
 	}
 
 	return rslt;

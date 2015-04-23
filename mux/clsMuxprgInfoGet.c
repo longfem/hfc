@@ -1109,23 +1109,20 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray)
     int pidMapListLen = 0;
    
 
-    if(pidMapListArray != NULL) {
-        printf("======11111\n");
+    if(pidMapListArray != NULL) {        
         
         pidMapList = pidMapListArray[outChannel - 1];
 
         
         if(pidMapList)
             pidMapListLen = list_len(pidMapList);
-        else{
-            printf("======XXXXXXXXXX====PID MAP LIST ERROR4\n");
+        else{            
             return error;
         }
-
-        printf("======4222244\n");
+        
     }
 
-    printf("pidmaplist len=%d\n", pidMapListLen);
+    
     
     if (pidMapListArray ==NULL || pidMapList == NULL || pidMapListLen == 0)
     {
@@ -1142,9 +1139,7 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray)
         sendbuf[7]=0x00;
         sendbuf[8]=0x00;
 
-        printf("\nSendTable_PidMap first\n");
-
-        
+    
 
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 9, buf, &slen);
