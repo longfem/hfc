@@ -7,8 +7,8 @@
 /*
     Get a resource
  */
-char ip[16] = "192.168.1.49";
-//char ip[16] = "127.0.0.1";
+//char ip[16] = "192.168.1.49";
+char ip[16] = "127.0.0.1";
 
 static void getDevinfo(HttpConn *conn) { 
 	if(session("isAuthed") != NULL){
