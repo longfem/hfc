@@ -265,11 +265,11 @@ static void getmonitorinfo(HttpConn *conn) {
     cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus2", outstatus);
 
-    int errRslt = FlagInputSignal(ip, &inputStatus);
-    ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
+    //int errRslt = FlagInputSignal(ip, &inputStatus);
+    //ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
 
     jsonstring = cJSON_PrintUnformatted(result);
-    //printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
+    printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
     memcpy(str, jsonstring, strlen(jsonstring));
     //释放内存
     cJSON_Delete(result);
