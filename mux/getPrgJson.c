@@ -574,7 +574,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 		prgjsonstring = cJSON_PrintUnformatted(basearry);
 		
 		memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
-		printf("--outprgjsonlen---->>>%d\n",strlen(prgjsonstring));
+		//printf("--outprgjsonlen---->>>%d\n",strlen(prgjsonstring));
 		//释放内存	
 		cJSON_Delete(basearry);		
 		free(prgjsonstring);

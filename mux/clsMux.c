@@ -128,7 +128,6 @@ int sendOutPutOption(char *ip, int outChnId)
 void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
 {
     cJSON_AddNumberToObject(chjson, "ch", inChnId);
-    printf("--InputMissShow--\n");
     if (validStatus == 2)   //error
     {
         cJSON_AddNumberToObject(chjson, "sts", 2);
@@ -182,10 +181,8 @@ void ShowNeedChnDataButNoInputWarning(int isValidInputStatus, int inputStatus, c
         cJSON_AddItemToArray(jsonarray,chjson = cJSON_CreateObject());
         if (isValidInputStatus == 0)
         {
-            printf("--warning inputStatus-->>>%d----\n", inputStatus);
             if ((inputStatus & (1 << i)) == 0) // 报警
             {
-                printf("--warning ch-->>>%d----\n", i);
                 InputMissShow(i + 1, 1, chjson);
                 continue;
             }

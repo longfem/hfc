@@ -266,7 +266,6 @@ static void getmonitorinfo(HttpConn *conn) {
     cJSON_AddNumberToObject(result,"outstatus2", outstatus);
 
     int errRslt = FlagInputSignal(ip, &inputStatus);
-    printf("--errRslt--inputStatus-->>>%d----%d\n", errRslt, inputStatus);
     ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
 
     jsonstring = cJSON_PrintUnformatted(result);
