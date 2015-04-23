@@ -253,7 +253,7 @@ function gbl_password() {
 }
 
 function gbl_monitor() {
-    /*if(globalObj.timerID != undefined){
+    if(globalObj.timerID != undefined){
         clearInterval(globalObj.timerID);
     }
     $('.main-content').empty();
@@ -303,32 +303,11 @@ function gbl_monitor() {
             +'</table>'
         +'</div>'
     );
-    var flow = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-    var flow2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var flow = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var flow2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     //创建随机数据源
     var create = function (){
         //获取最新输出比特率
-        //$.ajax({
-        //    type: "GET",
-        //    async:false,
-        //    url: "http://"+localip+":4000/do/globalopt/getvalidBitrate?channel=1",
-        //    dataType: "json",
-        //    success: function(data){
-        //        if((data.outValidBitrate != null) && (data.outValidBitrate != undefined)){
-        //            var nd = data.outValidBitrate/1000 + '.' + data.outValidBitrate%1000;
-        //            flow.shift();
-        //            flow.push(parseFloat(nd).toFixed(2));
-        //        }
-        //        if((data.outValidBitrate2 != null) && (data.outValidBitrate2 != undefined)){
-        //            var nd = data.outValidBitrate2/1000 + '.' + data.outValidBitrate2%1000;
-        //            flow2.shift();
-        //            flow2.push(parseFloat(nd).toFixed(2));
-        //        }
-        //
-        //    },
-        //    error : function(err) {
-        //    }
-        //});
         var data = [
             {
                 name : '',
@@ -510,7 +489,7 @@ function gbl_monitor() {
 
     //创建定时器定时获取输出比特率
     globalObj.timerID = setInterval(reloadchart,2000);
-    */
+
 }
 
 function gbl_export() {

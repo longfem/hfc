@@ -92,13 +92,6 @@ function checkselectedprg(nodekey, selected, snode){
                     + ",streamindex:"+ snode.data.index;
                 jsondata[0] = chstr;
                 break;
-
-            //prgnode = chantree.getNodeByKey(data.node.getParent().getParent().key);
-            //var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-            //    + ",streamindex:"+ data.node.data.index + ",descindex:" + data.node.data.index;
-            //jsondata[0] = chstr;
-            //count++;
-            //break;
             default:
 
                 break;
@@ -1629,8 +1622,6 @@ function devinfo_output(devType){
 			}
 		},
 		click: function(event, data) {
-			// We should not toggle, if target was "checkbox", because this
-			// would result in double-toggle (i.e. no toggle)
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
 			  data.node.toggleSelected();
 			}
@@ -2176,8 +2167,6 @@ function devinfo_output(devType){
 			}
 		},
 		click: function(event, data) {
-			// We should not toggle, if target was "checkbox", because this
-			// would result in double-toggle (i.e. no toggle)
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
 			  data.node.toggleSelected();
 			}

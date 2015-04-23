@@ -11,11 +11,11 @@
 		<div id="login" class="animate form">
 				<h1>用户登录</h1> 
 				<p> 
-					<label class="uname" data-icon="u" > 用户名 </label>
+					<label class="uname" > 用户名 </label>
 					<input class="username" required="required" type="text" autocomplete="off" value='' placeholder="请输入用户名"/>
 				</p>
 				<p> 
-					<label for="password" class="youpasswd" data-icon="p"> 密码 </label>
+					<label for="password" class="youpasswd"> 密码 </label>
 					<input class="password" required="required" type="password" autocomplete="off" value='' placeholder="请输入密码" />
 				</p>
 				<p class="keeplogin"> 
