@@ -6,7 +6,6 @@
 #include "list.h"
 #include "EnumDef.h"
 #include "clsMux.h"
-
 #include "clsMakeTable.h"
 #include "clsMuxOutCh.h"
 
@@ -125,3 +124,76 @@ int sendOutPutOption(char *ip, int outChnId)
 // 		}
 // 	}
 // }
+
+void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
+{
+    cJSON_AddNumberToObject(chjson, "ch", inChnId);
+    printf("--InputMissShow--\n");
+    if (validStatus == 2)   //error
+    {
+        cJSON_AddNumberToObject(chjson, "sts", 2);
+//        if (!m_alarmDisconnect)
+//        {
+//            m_alarmDisconnect = true;
+//            inputFlagPannel.BackgroundImage = il_warning.Images[0];
+//            WarningNotice(DevNoticeCmdEm.disconnect, lang.Get("连接中断"));
+//            StatusNotice();
+//        }
+    }
+    else
+    {
+//        if (m_alarmDisconnect)
+//        {
+//            m_alarmDisconnect = false;
+//            WarningNotice(DevNoticeCmdEm.reconnect, lang.Get("连接恢复"));
+//            StatusNotice();
+//        }
+        if (validStatus == 1)//warning
+        {
+            cJSON_AddNumberToObject(chjson, "sts", 1);
+//            if (!m_alarmInputLoss[inChnId - 1])
+//            {
+//                m_alarmInputLoss[inChnId - 1] = true;
+//                WarningNotice(DevNoticeCmdEm.warning, inChnId.ToString() + lang.Get("通道输入丢失"));
+//                inputFlagPannel.BackgroundImage = il_warning.Images[1];
+//            }
+        }
+        else
+        {
+            cJSON_AddNumberToObject(chjson, "sts", 0);
+//            if (m_alarmInputLoss[inChnId - 1])
+//            {
+//                m_alarmInputLoss[inChnId - 1] = false;
+//                WarningNotice(DevNoticeCmdEm.good, inChnId.ToString() + lang.Get("通道输入正常"));
+//            }
+//            inputFlagPannel.BackgroundImage = il_warning.Images[2];
+        }
+    }
+}
+
+// 当选择某个通道，但通道码率丢失时报警，isValidInputStatus=指示有一个参数是有效的标示
+void ShowNeedChnDataButNoInputWarning(int isValidInputStatus, int inputStatus, cJSON *result)
+{
+    int i = 0;
+    cJSON *jsonarray, *chjson;
+    cJSON_AddItemToObject(result, "children", jsonarray = cJSON_CreateArray());
+    for (i = 0; i < clsProgram._intChannelCntMax; i++)
+    {
+        cJSON_AddItemToArray(jsonarray,chjson = cJSON_CreateObject());
+        if (isValidInputStatus == 0)
+        {
+            printf("--warning inputStatus-->>>%d----\n", inputStatus);
+            if ((inputStatus & (1 << i)) == 0) // 报警
+            {
+                printf("--warning ch-->>>%d----\n", i);
+                InputMissShow(i + 1, 1, chjson);
+                continue;
+            }
+            InputMissShow(i + 1, 0, chjson);
+        }
+        else
+        {
+            InputMissShow(i + 1, 2, chjson);
+        }
+    }
+}

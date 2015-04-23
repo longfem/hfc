@@ -1,4 +1,7 @@
 function gbl_restart() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	$('.main-content').append(
 		'<div class="src_content">'
@@ -40,6 +43,9 @@ function gbl_restart() {
 }
 
 function gbl_reset() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	$('.main-content').append(
 		'<div class="src_content">'
@@ -80,6 +86,9 @@ function gbl_reset() {
 }
 
 function gbl_setIp() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	$('.main-content').append(
 		'<div class="src_content">'
@@ -178,6 +187,9 @@ function gbl_setIp() {
 }
 
 function gbl_password() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
     $('.main-content').empty();
     $('.main-content').append(
         '<div class="src_content">'
@@ -238,6 +250,266 @@ function gbl_password() {
             }
         });
     });
+}
+
+function gbl_monitor() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
+    $('.main-content').empty();
+    $('.main-content').append(
+        '<div class="src_content">'
+            +'<fieldset>'
+                +'<legend>输出通道[1] 比特率</legend>'
+                +'<div id="canvasDiv">'
+                +'</div>'
+            +'</fieldset>'
+            +'<div class="outsts">'
+                +'<lable class="outch1">输出通道[CHN-1]溢出</lable>'
+                +'<img class="outch1stsimg stsimg" />'
+            +'</div>'
+            +'<fieldset>'
+                +'<legend>输出通道[2] 比特率</legend>'
+                    +'<div id="canvasDiv2">'
+                +'</div>'
+            +'</fieldset>'
+            +'<div class="outsts">'
+                +'<lable class="outch2">输出通道[CHN-2]溢出</lable>'
+                +'<img class="outch2stsimg stsimg" />'
+            +'</div>'
+            +'<table class="monitortable">'
+                +'<tr>'
+                    +'<td><label>有效输入数据丢失</label></td>'
+                    +'<td><img class="inchsts1img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts2img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts3img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts4img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts5img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts6img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts7img stsimg" src="img/circle16_green.ico" /></td>'
+                    +'<td><img class="inchsts8img stsimg" src="img/circle16_green.ico" /></td>'
+                +'</tr>'
+                +'<tr>'
+                    +'<td class="tbl_right"><label>通道</label></td>'
+                    +'<td class="tbl_center"><label>[1]</label></td>'
+                    +'<td class="tbl_center"><label>[2]</label></td>'
+                    +'<td class="tbl_center"><label>[3]</label></td>'
+                    +'<td class="tbl_center"><label>[4]</label></td>'
+                    +'<td class="tbl_center"><label>[5]</label></td>'
+                    +'<td class="tbl_center"><label>[6]</label></td>'
+                    +'<td class="tbl_center"><label>[7]</label></td>'
+                    +'<td class="tbl_center"><label>[8]</label></td>'
+                +'</tr>'
+            +'</table>'
+        +'</div>'
+    );
+    var flow = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var flow2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    //创建随机数据源
+    var create = function (){
+        //获取最新输出比特率
+        //$.ajax({
+        //    type: "GET",
+        //    async:false,
+        //    url: "http://"+localip+":4000/do/globalopt/getvalidBitrate?channel=1",
+        //    dataType: "json",
+        //    success: function(data){
+        //        if((data.outValidBitrate != null) && (data.outValidBitrate != undefined)){
+        //            var nd = data.outValidBitrate/1000 + '.' + data.outValidBitrate%1000;
+        //            flow.shift();
+        //            flow.push(parseFloat(nd).toFixed(2));
+        //        }
+        //        if((data.outValidBitrate2 != null) && (data.outValidBitrate2 != undefined)){
+        //            var nd = data.outValidBitrate2/1000 + '.' + data.outValidBitrate2%1000;
+        //            flow2.shift();
+        //            flow2.push(parseFloat(nd).toFixed(2));
+        //        }
+        //
+        //    },
+        //    error : function(err) {
+        //    }
+        //});
+        var data = [
+            {
+                name : '',
+                value:flow,
+                color:'#0d8ecf',
+                line_width:2
+            }
+        ];
+        return function(){
+            return data;
+        }
+    }();
+
+    var line = new iChart.LineBasic2D({
+        render : 'canvasDiv',
+        data: create(),
+        align:'center',
+        width : 800,
+        height : 150,
+        footnote : {
+            text:'单位：Mb',
+            color:'#black'
+        },
+        sub_option:{
+            smooth : true,//平滑曲线
+            point_size:10
+        },
+        tip:{
+            enable:false,
+            shadow:false
+        },
+        legend : {
+            enable : false
+        },
+        crosshair:{
+            enable:true,
+            line_color:'#62bce9'
+        },
+        coordinate:{
+            width:600,
+            height:260,
+            axis:{
+                color:'#9f9f9f',
+                width:[0,0,2,2]
+            },
+            grids:{
+                vertical:{
+                    way:'share_alike',
+                    value:5
+                }
+            },
+            scale:[{
+                position:'left',
+                start_scale:0,
+                end_scale:50,
+                scale_space:5,
+                scale_size:2,
+                scale_color:'#9f9f9f'
+            }]
+        }
+    });
+    //开始画图
+    line.draw();
+
+    var line2 = new iChart.LineBasic2D({
+        render : 'canvasDiv2',
+        data: create(),
+        align:'center',
+        width : 800,
+        height : 150,
+        footnote : {
+            text:'单位：Mb',
+            color:'#black'
+        },
+        sub_option:{
+            smooth : true,//平滑曲线
+            point_size:10
+        },
+        tip:{
+            enable:false,
+            shadow:false
+        },
+        legend : {
+            enable : false
+        },
+        crosshair:{
+            enable:true,
+            line_color:'#62bce9'
+        },
+        coordinate:{
+            width:600,
+            height:260,
+            axis:{
+                color:'#9f9f9f',
+                width:[0,0,2,2]
+            },
+            grids:{
+                vertical:{
+                    way:'share_alike',
+                    value:5
+                }
+            },
+            scale:[{
+                position:'left',
+                start_scale:0,
+                end_scale:50,
+                scale_space:5,
+                scale_size:2,
+                scale_color:'#9f9f9f'
+            }]
+        }
+    });
+    //开始画图
+    line2.draw();
+
+    var reloadchart = function (){
+        //获取最新输出比特率
+        $.ajax({
+            type: "GET",
+            async:false,
+            url: "http://"+localip+":4000/do/globalopt/getmonitorinfo",
+            dataType: "json",
+            success: function(data){
+                if((data.outValidBitrate != null) && (data.outValidBitrate != undefined)){
+                    var nd = data.outValidBitrate/1000 + '.' + data.outValidBitrate%1000;
+                    flow.shift();
+                    flow.push(parseFloat(nd).toFixed(2));
+                }
+                switch(data.outstatus) {
+                    case 0:
+                        $('.outch1stsimg')[0].src = "img/circle16_green.ico";
+                        break;
+                    case 1:
+                        $('.outch1stsimg')[0].src = "img/circle16_error.ico";
+                        break;
+                    case 2:
+                        $('.outch1stsimg')[0].src = "img/circle16_error.ico";
+                        break;
+                }
+                if((data.outValidBitrate2 != null) && (data.outValidBitrate2 != undefined)){
+                    var nd = data.outValidBitrate2/1000 + '.' + data.outValidBitrate2%1000;
+                    flow2.shift();
+                    flow2.push(parseFloat(nd).toFixed(2));
+                }
+                switch(data.outstatus2) {
+                    case 0:
+                        $('.outch2stsimg')[0].src = "img/circle16_green.ico";
+                        break;
+                    case 1:
+                        $('.outch2stsimg')[0].src = "img/circle16_error.ico";
+                        break;
+                    case 2:
+                        $('.outch2stsimg')[0].src = "img/circle16_error.ico";
+                        break;
+                }
+            },
+            error : function(err) {
+            }
+        });
+        var data = [
+            {
+                name : '',
+                value:flow,
+                color:'#0d8ecf',
+                line_width:2
+            }
+        ];
+        var data2 = [
+            {
+                name : '',
+                value:flow2,
+                color:'#0d8ecf',
+                line_width:2
+            }
+        ];
+        line.load(data);//载入新数据
+        line2.load(data2);//载入新数据
+    }
+
+    //创建定时器定时获取输出比特率
+    globalObj.timerID = setInterval(reloadchart,2000);
 }
 
 function gbl_export() {

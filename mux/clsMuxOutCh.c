@@ -6,32 +6,31 @@
 
 
 // 获取输出有效码率
-ErrorTypeEm OutChn_validBitrateGet(char *ip, int outChn, unsigned int *outValidBitrate)
+ErrorTypeEm OutChn_validBitrateGet(char *ip, int outChn, int *outValidBitrate)
 {
     unsigned char buf[20];
     int i = 0;
     unsigned char sendbuf[12];
     int slen=0;
-  
-    //get call channal signal status
     enum ErrorTypeEm res;
-
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x21;
     sendbuf[3]=(unsigned char)outChn;
     sendbuf[4]=0x03;
-    
 
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 5, buf, &slen);
     
     //printf("\n####Recive GetOutChnTSID receive nums=[%d]\n", slen );
     if( 9 == slen ){
-         // for(i=0;i<slen;i++)
-         //   printf("Recive GetOutChnTSID buf[%d]=0x[%02x]\n",i, buf[i]);    
-              
-        *outValidBitrate =  buf[5]<<24| buf[6]<<16| buf[7] << 8 | buf[8];  
+          //for(i=0;i<slen;i++)
+          //  printf("Recive OutChn_validBitrateGet buf[%d]=0x[%02x]\n",i, buf[i]);
+        int offset = 5;
+        for (i = 0; i < 4; i++)
+        {
+            *outValidBitrate += buf[offset++] << (i * 8);
+        }
          res = ok;
 
     }else 

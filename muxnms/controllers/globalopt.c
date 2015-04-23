@@ -7,6 +7,10 @@
 #include "esp.h"
 #include "devinfo.h"
 #include "cJSON.h"
+#include "clsMuxOutCh.h"
+#include "clsMuxprgInfoGet.h"
+#include "clsMux.h"
+
 /*
     Create a new resource in the database
  */
@@ -243,6 +247,37 @@ static void getoptlogs() {
     render(ediGridAsJson(logs, MPR_JSON_PRETTY));
 }
 
+static void getmonitorinfo(HttpConn *conn) {
+    char str[256] = {0};
+    int inputStatus = 0;
+    cJSON *result = cJSON_CreateObject();
+    char* jsonstring;
+    int outValidBitrate = 0;
+    unsigned int outstatus = 0;
+    OutChn_validBitrateGet(ip, 1, &outValidBitrate);
+    GetOutChannelStatus(ip, 1, &outstatus);
+    cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
+    cJSON_AddNumberToObject(result,"outstatus", outstatus);
+    outValidBitrate = 0;
+    outstatus = 0;
+    OutChn_validBitrateGet(ip, 2, &outValidBitrate);
+    GetOutChannelStatus(ip, 2, &outstatus);
+    cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
+    cJSON_AddNumberToObject(result,"outstatus2", outstatus);
+
+    int errRslt = FlagInputSignal(ip, &inputStatus);
+    printf("--errRslt--inputStatus-->>>%d----%d\n", errRslt, inputStatus);
+    ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
+
+    jsonstring = cJSON_PrintUnformatted(result);
+    //printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
+    memcpy(str, jsonstring, strlen(jsonstring));
+    //释放内存
+    cJSON_Delete(result);
+    free(jsonstring);
+    render(str);
+}
+
 
 static void common(HttpConn *conn) {
 }
@@ -257,6 +292,7 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
 	espDefineAction(route, "globalopt-cmd-setDevip", setDevip);
 	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
 	espDefineAction(route, "globalopt-cmd-getoptlogs", getoptlogs);
+	espDefineAction(route, "globalopt-cmd-getmonitorinfo", getmonitorinfo);
     
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

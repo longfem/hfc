@@ -824,3 +824,27 @@ span.fancytree-node.userprg > span.fancytree-title {
     font-family: "Audiowide";
 }
 
+.stsimg {
+    width: 32px;
+    height: 32px;
+    margin-left: 10px;
+}
+
+.outsts {
+    margin: 5px 0px;
+    height: 4em;
+    line-height: 4em;
+}
+
+.monitortable {
+    margin: 0px!important;
+}
+
+.tbl_right {
+    text-align: right;
+}
+
+.tbl_center {
+    text-align: center;
+}
+

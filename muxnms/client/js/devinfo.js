@@ -10,8 +10,8 @@ var globalObj = {
     _tbl_pid: null,
     _prgoptflag: 0,     //节目操场判断: 0--编辑, 1--添加
     _isuserprg: 1,     //节目类型判断: 0--userprg, 1--devprg
-    localip: window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7)
-
+    localip: window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7),
+    timerID: undefined
 
 }
 
@@ -284,6 +284,9 @@ function readoutprgs(channeltree, snt){
 }
 	
 function devinfo_output(devType){
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	if(devType == "8合1复用器"){
 		$('.main-content').append(
@@ -2472,6 +2475,9 @@ function devinfo_output(devType){
 
 
 function dev_srcset() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	$('.main-content').append(
 		'<div class="src_content">'
@@ -2525,6 +2531,9 @@ function dev_srcset() {
 }
 
 function dev_outset() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
 	$('.main-content').empty();
 	$('.main-content').append(
 		'<div class="src_content">'
