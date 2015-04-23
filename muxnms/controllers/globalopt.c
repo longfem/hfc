@@ -248,7 +248,7 @@ static void getoptlogs() {
 }
 
 static void getmonitorinfo(HttpConn *conn) {
-    char str[256] = {0};
+    /*char str[256] = {0};
     int inputStatus = 0;
     cJSON *result = cJSON_CreateObject();
     char* jsonstring;
@@ -269,12 +269,12 @@ static void getmonitorinfo(HttpConn *conn) {
     //ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
 
     jsonstring = cJSON_PrintUnformatted(result);
-    printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
+    //printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
     memcpy(str, jsonstring, strlen(jsonstring));
     //释放内存
     cJSON_Delete(result);
     free(jsonstring);
-    render(str);
+    render(str);*/
 }
 
 
