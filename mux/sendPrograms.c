@@ -15,29 +15,30 @@ extern ClsProgram_st clsProgram;
 
 int ChnBypass_write(int outChnId)
 {
-// 	if (clsProgram.chnBypass2 == NULL || clsProgram.chnBypassEnable == NULL)
-// 		return 0;
-// 	for (unsigned char  iOutChn = 1; iOutChn <= _outMaxNum; iOutChn++)
-// 	{
-// 		if (outChnId == 0 || outChnId == iOutChn)
-// 		{
-// 			if (!clsProgram.chnBypassEnable[iOutChn - 1])
-// 				continue;
-// 			int iAddr = 0;
-// 			char buf[256];
-// 		    int i = 0;
-// 		    char sendbuf[256];
-// 		    int rlen=0;
+  /*  int iOutChn = 0;
+ 	if (clsProgram.chnBypass2 == NULL || clsProgram.chnBypassEnable == NULL)
+ 		return 0;
+ 	for (iOutChn = 1; iOutChn <= clsProgram._outChannelCntMax; iOutChn++)
+ 	{
+ 		if (outChnId == 0 || outChnId == iOutChn)
+ 		{
+ 			if (!clsProgram.chnBypassEnable[iOutChn - 1])
+ 				continue;
+ 			int iAddr = 0;
+			char buf[256];
+		    int i = 0;
+		    char sendbuf[256];
+		    int rlen=0;
 		  
 		 
 // 		    //get call channal signal status
-// 		    sendbuf[0]=0x77;
-// 		    sendbuf[1]=0x6C;
-// 		    sendbuf[2]=0x22;
-// 		    sendbuf[3]=(unsigned char)iOutChn;
-// 		    sendbuf[4]=0x0f;
-// 		    sendbuf[5]=0x2;
-// 		    sendbuf[6]=(unsigned char)clsProgram.chnBypass2[iOutChn - 1];
+		    sendbuf[0]=0x77;
+		    sendbuf[1]=0x6C;
+		    sendbuf[2]=0x22;
+		    sendbuf[3]=iOutChn;
+		    sendbuf[4]=0x0f;
+		    sendbuf[5]=0x2;
+		    sendbuf[6]=clsProgram.chnBypass2[iOutChn - 1];
 		    
 		    
 
@@ -61,14 +62,14 @@ int ChnBypass_write(int outChnId)
 // 			Array.Copy(cmdBytes, _buf, iAddr);
 // 			int readLen = netConn.WriteAndRead(_buf, iAddr);
 // 			ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, CmdStringAddr, _buf, readLen);
-// 			if (checkRslt != ErrorTypeEm.ok || _buf[CmdStringAddr] != 0)
-// 			{
-// 				clsProgram.chnBypass2 = null;
-// 				return 0;
-// 			}
-// 		}
-// 	}
-	return 1;
+ 			if (checkRslt != ErrorTypeEm.ok || _buf[CmdStringAddr] != 0)
+ 			{
+ 				clsProgram.chnBypass2 = null;
+ 				return 0;
+ 			}
+ 		}
+ 	}
+	return 1;*/
 }
 
 
