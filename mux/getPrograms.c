@@ -8,7 +8,6 @@
 #include "datastructdef.h"
 #include "communicate.h"
 #include "getPrograms.h"
-#include "getPrgJson.h"
   
 
 int getPrograms(char *ip, int inChn, list_t *prginfolist)
@@ -150,22 +149,19 @@ int getPrograms(char *ip, int inChn, list_t *prginfolist)
 			
                 // --- 节目和提供商名字 ---
                 int prgNameLen = buf[iAddr];
-                iAddr += 1;  
-				ptmpPrgInfo->prgNameLen = prgNameLen;				
+                iAddr += 1;
+                ptmpPrgInfo->prgNameLen = prgNameLen;
                 //stan bug bug
                 ptmpPrgInfo->prgName = (unsigned char *)malloc(prgNameLen);
-				memset(ptmpPrgInfo->prgName, 0,  prgNameLen);
-				u2g((unsigned char *)(buf+iAddr),prgNameLen,idstr,32);
-                memcpy(ptmpPrgInfo->prgName, idstr, prgNameLen);
-                iAddr += prgNameLen;                           
+                memset(ptmpPrgInfo->prgName, 0,  prgNameLen);
+                memcpy(ptmpPrgInfo->prgName, (unsigned char *)(buf+iAddr),  prgNameLen);
+
+                iAddr += prgNameLen;
                 int providerNameLen = buf[iAddr];
-                iAddr += 1;     
-				ptmpPrgInfo->providerNameLen = providerNameLen;
+                iAddr += 1;
+                ptmpPrgInfo->providerNameLen = providerNameLen;
                 ptmpPrgInfo->providerName = (unsigned char *)malloc(ptmpPrgInfo->providerNameLen);
-                memset(idstr, 0, 32);
-                u2g((unsigned char *)buf+iAddr,providerNameLen,idstr,32);
-                memcpy(ptmpPrgInfo->providerName, idstr, providerNameLen);
-                //memcpy(ptmpPrgInfo->providerName, buf+iAddr, providerNameLen);
+                memcpy(ptmpPrgInfo->providerName, buf+iAddr, providerNameLen);
                 
                 iAddr += providerNameLen;
                 ptmpPrgInfo->isCrypto = buf[iAddr] > 0 ? 1 : 0;    
