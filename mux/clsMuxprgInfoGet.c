@@ -1669,3 +1669,19 @@ int FlagInputSignal(char *ip, int *inputStatus)
     }
     return 0;
 }
+
+int CheckReturnBytes(char *cmdHeadBytes, int headLen, char *rtnBytes, int rtnBytesLen)
+{
+    int j = 0;
+    if (rtnBytesLen <= headLen)
+        return 2;
+    for ( j = 0; j < headLen; j++)
+    {
+        if (cmdHeadBytes[j] != rtnBytes[j])
+        {
+            return 3;
+        }
+    }
+    return 0;
+}
+

@@ -26,6 +26,7 @@ void LoadBitrateAndTableEnable(char *ip, int iChn);
 int GetNewFreePrgIndex(int inChn, int outChnId);
 int GetNewFreeUserPrgIndex(int inChn, int outChnId);
 int FlagInputSignal(char *ip, int *inputStatus);
+int CheckReturnBytes(char *cmdHeadBytes, int headLen, char *rtnBytes, int rtnBytesLen);
 //SearchingStatus GetSearchingStatus(char *ip, int inChn);
 //ErrorTypeEm Search(char *ip, int inChn);
 

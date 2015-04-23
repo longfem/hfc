@@ -253,7 +253,7 @@ function gbl_password() {
 }
 
 function gbl_monitor() {
-    if(globalObj.timerID != undefined){
+    /*if(globalObj.timerID != undefined){
         clearInterval(globalObj.timerID);
     }
     $('.main-content').empty();
@@ -510,6 +510,7 @@ function gbl_monitor() {
 
     //创建定时器定时获取输出比特率
     globalObj.timerID = setInterval(reloadchart,2000);
+    */
 }
 
 function gbl_export() {
