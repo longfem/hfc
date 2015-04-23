@@ -1121,6 +1121,8 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray)
         }
         
     }
+
+    
     
     if (pidMapListArray ==NULL || pidMapList == NULL || pidMapListLen == 0)
     {
@@ -1136,7 +1138,8 @@ ErrorTypeEm SendTable_PidMap(char *ip, int outChannel, list_t **pidMapListArray)
 
         sendbuf[7]=0x00;
         sendbuf[8]=0x00;
-        
+
+    
 
         memset(buf,0,sizeof(buf));
         communicate(ip, sendbuf, 9, buf, &slen);
