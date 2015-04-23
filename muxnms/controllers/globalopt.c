@@ -7,11 +7,17 @@
 #include "esp.h"
 #include "devinfo.h"
 #include "cJSON.h"
+#include "clsMuxOutCh.h"
+#include "clsMuxprgInfoGet.h"
+#include "clsMux.h"
+
 /*
     Create a new resource in the database
  */
  char ip[16] = "192.168.1.49";
  //char ip[16] = "127.0.0.1";
+ char optstr[256] = {0};
+
 static void rendersts(const char *str,int status)
 {
 	cJSON *result = cJSON_CreateObject();
@@ -48,6 +54,25 @@ static void reboot() {
 	rebootDevice(ip);
 	rendersts(str, 1);
 	render(str);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    //struct tm *ts;
+    time(&curTime);
+    //ts = localtime(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '设备重启.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void reset() {
@@ -67,6 +92,23 @@ static void reset() {
 	restoreFactory(ip);
 	rendersts(str, 1);
 	render(str);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '恢复出厂设置.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void setDevip(HttpConn *conn) {
@@ -103,6 +145,23 @@ static void setDevip(HttpConn *conn) {
 	}
 	rendersts(str, 1);
 	render(str);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '设备修改IP【IP:%s】.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"),newip, curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void setPassword(HttpConn *conn) {
@@ -136,6 +195,87 @@ static void setPassword(HttpConn *conn) {
     }
     //ediClose(db);
     render(str);
+    //add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '用户修改了密码.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
+}
+
+static void getoptlogs() {
+    char str[16] = {0};
+    int len = 0;
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
+	//find optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+//    //删除7天前的日志
+    time_t curTime;
+    time(&curTime);
+    //EdiGrid *oldlogs = ediReadWhere(db, "optlog", "logtime", "<", curTime - 7*24*3600);
+    EdiGrid *oldlogs = ediReadTable(db, "optlog");
+    //printf("========logs========>>>%s\n", ediGridAsJson(oldlogs, MPR_JSON_PRETTY));
+    for(len=0; len < oldlogs->nrecords; len++){
+        EdiRec *log = oldlogs->records[len];
+        if(atoi(mprGetJson(mprParseJson(ediRecAsJson(log, MPR_JSON_PRETTY)), "logtime")) < (curTime - 7*24*3600)){
+            ediRemoveRec(db, "optlog", log->id);
+        }
+    }
+
+    EdiGrid *logs = ediReadTable(db, "optlog");
+    render(ediGridAsJson(logs, MPR_JSON_PRETTY));
+}
+
+static void getmonitorinfo(HttpConn *conn) {
+    char str[256] = {0};
+    int inputStatus = 0;
+    cJSON *result = cJSON_CreateObject();
+    char* jsonstring;
+    int outValidBitrate = 0;
+    unsigned int outstatus = 0;
+    OutChn_validBitrateGet(ip, 1, &outValidBitrate);
+    GetOutChannelStatus(ip, 1, &outstatus);
+    cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
+    cJSON_AddNumberToObject(result,"outstatus", outstatus);
+    outValidBitrate = 0;
+    outstatus = 0;
+    OutChn_validBitrateGet(ip, 2, &outValidBitrate);
+    GetOutChannelStatus(ip, 2, &outstatus);
+    cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
+    cJSON_AddNumberToObject(result,"outstatus2", outstatus);
+
+    int errRslt = FlagInputSignal(ip, &inputStatus);
+    printf("--errRslt--inputStatus-->>>%d----%d\n", errRslt, inputStatus);
+    ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
+
+    jsonstring = cJSON_PrintUnformatted(result);
+    //printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));
+    memcpy(str, jsonstring, strlen(jsonstring));
+    //释放内存
+    cJSON_Delete(result);
+    free(jsonstring);
+    render(str);
 }
 
 
@@ -151,6 +291,8 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
 	espDefineAction(route, "globalopt-cmd-reset", reset);
 	espDefineAction(route, "globalopt-cmd-setDevip", setDevip);
 	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
+	espDefineAction(route, "globalopt-cmd-getoptlogs", getoptlogs);
+	espDefineAction(route, "globalopt-cmd-getmonitorinfo", getmonitorinfo);
     
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

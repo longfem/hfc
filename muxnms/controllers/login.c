@@ -10,6 +10,9 @@ static void checkLogin() {
     cJSON *result = cJSON_CreateObject();
     char* jsonstring;
     char str[16] = {0};
+    char optstr[256] = {0};
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+
 	//读取用户认证信息
 	EdiRec *user = readRecWhere("user", "username", "==", name);
 	if(user == NULL){
@@ -36,6 +39,23 @@ static void checkLogin() {
         //释放内存
         cJSON_Delete(result);
         free(jsonstring);
+        //add optlog
+         EdiRec *optlog = ediCreateRec(db, "optlog");
+         if(optlog == NULL){
+            printf("================>>>optlog is NULL!!\n");
+         }
+
+         time_t curTime;
+         //struct tm *ts;
+         time(&curTime);
+         //ts = localtime(&curTime);
+         sprintf(optstr, "{'user': '%s', 'desc': '用户登录', 'level': '1', 'logtime':'%d'}", name, curTime);
+         MprJson  *row = mprParseJson(optstr);
+         if(ediSetFields(optlog, row) == 0){
+            printf("================>>>ediSetFields Failed!!\n");
+         }
+         ediUpdateRec(db, optlog);
+         //ediClose(db);
 
     }else{
 		cJSON_AddNumberToObject(result,"sts", 2);

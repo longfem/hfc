@@ -1,10 +1,37 @@
 #include <string.h>
+#include <iconv.h>
 
 #include "datastructdef.h"
 #include "getPrograms.h"
 #include "cJSON.h"
 
 ClsProgram_st clsProgram;
+
+int code_convert(char *from_charset,char *to_charset,char *inbuf,int inlen,char *outbuf,int outlen)
+{
+    iconv_t cd;
+    int rc;
+    char **pin = &inbuf;
+    char **pout = &outbuf;
+
+    cd = iconv_open(to_charset,from_charset);
+    if (cd==0) return -1;
+    memset(outbuf,0,outlen);
+    if (iconv(cd,pin,&inlen,pout,&outlen)==-1) return -1;
+    iconv_close(cd);
+    return 0;
+}
+//UNICODE码转为GB2312码
+int u2g(char *inbuf,int inlen,char *outbuf,int outlen)
+{
+    return code_convert("utf-8","gb2312",inbuf,inlen,outbuf,outlen);
+}
+//GB2312码转为UNICODE码
+int g2u(char *inbuf,size_t inlen,char *outbuf,size_t outlen)
+{
+    return code_convert("gb2312","utf-8",inbuf,inlen,outbuf,outlen);
+}
+
 void getprgsJson(char *ip, int inChn, char *outprg){
 	int i = 0, j = 0, res = 0;	
 	char str[200] = {0};
@@ -40,7 +67,8 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			list_append(&pst->prgNodes, ptmpPrgInfo);	
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
-			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			//memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			u2g(ptmpPrgInfo->prgName,strlen(ptmpPrgInfo->prgName),idstr,20);
 			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
@@ -233,8 +261,8 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
         //添加节目节点TITLE
         memset(idstr, 0, sizeof(idstr));
-        memcpy(idstr, userprg->prgName, userprg->prgNameLen);
-
+        //memcpy(idstr, userprg->prgName, userprg->prgNameLen);
+        u2g(userprg->prgName,strlen(userprg->prgName),idstr,20);
         sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",userprg->prgNum, userprg->prgNum, userprg->pmtPid, userprg->newPcrPid, idstr );
         memset(idstr, 0, sizeof(idstr));
         cJSON_AddStringToObject(prgjson,"title", str);
@@ -396,7 +424,8 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
-			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			//memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
+			u2g(ptmpPrgInfo->prgName,strlen(ptmpPrgInfo->prgName),idstr,20);
 			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);

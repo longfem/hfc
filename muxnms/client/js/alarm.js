@@ -1,112 +1,107 @@
-	var dataSet = [
-				['Trident','Internet Explorer 4.0','Win 95+','4','X'],
-				['Trident','Internet Explorer 5.0','Win 95+','5','C'],
-				['Trident','Internet Explorer 5.5','Win 95+','5.5','A'],
-				['Trident','Internet Explorer 6','Win 98+','6','A'],
-				['Trident','Internet Explorer 7','Win XP SP2+','7','A'],
-				['Trident','AOL browser (AOL desktop)','Win XP','6','A'],
-				['Gecko','Firefox 1.0','Win 98+ / OSX.2+','1.7','A'],
-				['Gecko','Firefox 1.5','Win 98+ / OSX.2+','1.8','A'],
-				['Gecko','Firefox 2.0','Win 98+ / OSX.2+','1.8','A'],
-				['Gecko','Firefox 3.0','Win 2k+ / OSX.3+','1.9','A'],
-				['Gecko','Camino 1.0','OSX.2+','1.8','A'],
-				['Gecko','Camino 1.5','OSX.3+','1.8','A'],
-				['Gecko','Netscape 7.2','Win 95+ / Mac OS 8.6-9.2','1.7','A'],
-				['Gecko','Netscape Browser 8','Win 98SE+','1.7','A'],
-				['Gecko','Netscape Navigator 9','Win 98+ / OSX.2+','1.8','A'],
-				['Gecko','Mozilla 1.0','Win 95+ / OSX.1+',1,'A'],
-				['Gecko','Mozilla 1.1','Win 95+ / OSX.1+',1.1,'A'],
-				['Gecko','Mozilla 1.2','Win 95+ / OSX.1+',1.2,'A'],
-				['Gecko','Mozilla 1.3','Win 95+ / OSX.1+',1.3,'A'],
-				['Gecko','Mozilla 1.4','Win 95+ / OSX.1+',1.4,'A'],
-				['Gecko','Mozilla 1.5','Win 95+ / OSX.1+',1.5,'A'],
-				['Gecko','Mozilla 1.6','Win 95+ / OSX.1+',1.6,'A'],
-				['Gecko','Mozilla 1.7','Win 98+ / OSX.1+',1.7,'A'],
-				['Gecko','Mozilla 1.8','Win 98+ / OSX.1+',1.8,'A'],
-				['Gecko','Seamonkey 1.1','Win 98+ / OSX.2+','1.8','A'],
-				['Gecko','Epiphany 2.20','Gnome','1.8','A'],
-				['Webkit','Safari 1.2','OSX.3','125.5','A'],
-				['Webkit','Safari 1.3','OSX.3','312.8','A'],
-				['Webkit','Safari 2.0','OSX.4+','419.3','A'],
-				['Webkit','Safari 3.0','OSX.4+','522.1','A'],
-				['Webkit','OmniWeb 5.5','OSX.4+','420','A'],
-				['Webkit','iPod Touch / iPhone','iPod','420.1','A'],
-				['Webkit','S60','S60','413','A'],
-				['Presto','Opera 7.0','Win 95+ / OSX.1+','-','A'],
-				['Presto','Opera 7.5','Win 95+ / OSX.2+','-','A'],
-				['Presto','Opera 8.0','Win 95+ / OSX.2+','-','A'],
-				['Presto','Opera 8.5','Win 95+ / OSX.2+','-','A'],
-				['Presto','Opera 9.0','Win 95+ / OSX.3+','-','A'],
-				['Presto','Opera 9.2','Win 88+ / OSX.3+','-','A'],
-				['Presto','Opera 9.5','Win 88+ / OSX.3+','-','A'],
-				['Presto','Opera for Wii','Wii','-','A'],
-				['Presto','Nokia N800','N800','-','A'],
-				['Presto','Nintendo DS browser','Nintendo DS','8.5','C/A<sup>1</sup>'],
-				['KHTML','Konqureror 3.1','KDE 3.1','3.1','C'],
-				['KHTML','Konqureror 3.3','KDE 3.3','3.3','A'],
-				['KHTML','Konqureror 3.5','KDE 3.5','3.5','A'],
-				['Tasman','Internet Explorer 4.5','Mac OS 8-9','-','X'],
-				['Tasman','Internet Explorer 5.1','Mac OS 7.6-9','1','C'],
-				['Tasman','Internet Explorer 5.2','Mac OS 8-X','1','C'],
-				['Misc','NetFront 3.1','Embedded devices','-','C'],
-				['Misc','NetFront 3.4','Embedded devices','-','A'],
-				['Misc','Dillo 0.8','Embedded devices','-','X'],
-				['Misc','Links','Text only','-','X'],
-				['Misc','Lynx','Text only','-','X'],
-				['Misc','IE Mobile','Windows Mobile 6','-','C'],
-				['Misc','PSP browser','PSP','-','C'],
-				['Other browsers','All others','-','-','U']
-			];
-	function alarm_output(flag){
+	//var dataSet = [];
+
+    function alarm_output(flag){
 		if(flag == 1){
 			//告警日志
 			//TODO
 			//获取告警信息
-			
-			
+
+            dataSet.length = 0;
 			$('.main-content').empty();
 			$('.main-content').append('<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="alarm"></table>');
 			
 			$('#alarm').dataTable( {
 				"data": dataSet,
-				"order": [[ 0, "asc" ]],
-				"paging":   false,
+				"order": [[ 0, "desc" ]],
+				"paging":   true,
 				"info":     false,
-				"searching":   false,
+                "bLengthChange": false,					//用户不可改变每页显示数量
+                "iDisplayLength": 10,					//每页显示8条数据
+                "searching":   true,
 				"scrollY":  "368px",
 				"scrollCollapse": true,
 				"columns": [
 					{ "title": "序号", "width":"10%" },
-					{ "title": "组" , "width":"10%"},
-					{ "title": "设备" , "width":"20%"},
-					{ "title": "连接类型", "class": "center", "width":"15%" },
-					{ "title": "连接状态", "class": "center" }
-				]
+					{ "title": "等级" , "width":"10%"},
+					{ "title": "用户" , "width":"10%"},
+					{ "title": "详细信息", "class": "center", "width":"20%" },
+					{ "title": "时间", "class": "center" }
+				],
+                "oLanguage": {							//汉化
+                    "sLengthMenu": "每页显示 _MENU_ 条记录",
+                    "sZeroRecords": "没有检索到数据",
+                    "sInfo": "当前数据为从第 _START_ 到第 _END_ 条数据；总共有 _TOTAL_ 条记录",
+                    "sInfoEmtpy": "没有数据",
+                    "sProcessing": "正在加载数据...",
+                    "sSearch": "搜索",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "前页",
+                        "sNext": "后页",
+                        "sLast": "尾页"
+                    }
+                }
 			});    
 		}else if(flag == 2){
 			//日志信息
-			//TODO
-			//获取日志信息
-			
+            dataSet.length = 0;
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "http://"+globalObj.localip+":4000/do/globalopt/getoptlogs",
+                // data: {ip:"192.168.1.134", inch:2},
+                dataType: "json",
+                success: function(data){
+                    if(data.sts == 9){
+                        window.location = "/login.esp";
+                        return;
+                    }
+                    $.each(data, function(key, itemv) {
+                        var logtime = new Date(parseInt(itemv.logtime) * 1000);
+                        var datetime = logtime.toLocaleString().replace(/年|月/g, "-").replace(/日/g, " ");
+                        var item = [itemv.id,itemv.user, itemv.desc, datetime];
+                        dataSet[dataSet.length] = item;
+                    });
+
+                },
+                error : function(err) {
+
+                }
+            });
 			
 			$('.main-content').empty();
 			$('.main-content').append('<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="optlog"></table>');
 			
 			$('#optlog').dataTable( {
 				"data": dataSet,
-				"order": [[ 0, "asc" ]],
-				"paging":   false,
+				"order": [[ 0, "desc" ]],
+				"paging":   true,
 				"info":     false,
-				"searching":   false,
+                "bLengthChange": false,					//用户不可改变每页显示数量
+                "iDisplayLength": 10,					//每页显示8条数据
+				"searching":   true,
 				"scrollY":  "368px",
 				"scrollCollapse": true,
-				"columns": [
+                "columns": [
 					{ "title": "序号", "width":"10%" },
-					{ "title": "组" , "width":"10%"},
-					{ "title": "设备" , "width":"20%"},
-					{ "title": "连接类型", "class": "center", "width":"15%" },
-					{ "title": "连接状态", "class": "center" }
-				]
+					{ "title": "用户" , "width":"10%"},
+					{ "title": "详细信息" , "width":"20%"},
+					{ "title": "时间", "class": "center" }
+				],
+                "oLanguage": {							//汉化
+                    "sLengthMenu": "每页显示 _MENU_ 条记录",
+                    "sZeroRecords": "没有检索到数据",
+                    "sInfo": "当前数据为从第 _START_ 到第 _END_ 条数据；总共有 _TOTAL_ 条记录",
+                    "sInfoEmtpy": "没有数据",
+                    "sProcessing": "正在加载数据...",
+                    "sSearch": "搜索",
+                    "oPaginate": {
+                        "sFirst": "首页",
+                        "sPrevious": "前页",
+                        "sNext": "后页",
+                        "sLast": "尾页"
+                    }
+                }
 			});    
 		}
 		

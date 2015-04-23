@@ -1639,3 +1639,33 @@ int GetNewFreeUserPrgIndex(int inChn, int outChnId)
         }
     }
 }
+
+int FlagInputSignal(char *ip, int *inputStatus)
+{
+    unsigned char buf[32];
+    int i = 0;
+    unsigned char sendbuf[20];
+    int iAddr = 0;
+    int rlen=0;
+    //byte[] cmdBytes = new byte[20];
+    sendbuf[iAddr++] = 0x77;
+    sendbuf[iAddr++] = 0x6C;
+    sendbuf[iAddr++] = 0x11;
+    sendbuf[iAddr++] = 4;
+
+    communicate(ip, sendbuf, iAddr, buf, &rlen);
+    if(rlen <= iAddr){
+        //搜索失败
+        return 3;
+    }
+    rlen -= 4;
+    if (0 < rlen && rlen <= 4){
+        for (i = 0; i < rlen; i++)
+        {
+            *inputStatus += buf[iAddr++] << (i * 8);
+        }
+    }else{
+        *inputStatus = buf[iAddr];
+    }
+    return 0;
+}

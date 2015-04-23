@@ -8,6 +8,7 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <iconv.h>
 
 #include "esp.h"
 #include "http.h"
@@ -28,6 +29,32 @@ extern ClsParams_st *pdb;
 
 char ip[16] = "192.168.1.49";
 //char ip[16] = "127.0.0.1";
+char optstr[256] = {0};
+
+int code_convert(char *from_charset,char *to_charset,char *inbuf,int inlen,char *outbuf,int outlen)
+{
+    iconv_t cd;
+    int rc;
+    char **pin = &inbuf;
+    char **pout = &outbuf;
+
+    cd = iconv_open(to_charset,from_charset);
+    if (cd==0) return -1;
+    memset(outbuf,0,outlen);
+    if (iconv(cd,pin,&inlen,pout,&outlen)==-1) return -1;
+    iconv_close(cd);
+    return 0;
+}
+//UNICODE码转为GB2312码
+int u2g(char *inbuf,int inlen,char *outbuf,int outlen)
+{
+    return code_convert("utf-8","gb2312",inbuf,inlen,outbuf,outlen);
+}
+//GB2312码转为UNICODE码
+int g2u(char *inbuf,size_t inlen,char *outbuf,size_t outlen)
+{
+    return code_convert("gb2312","utf-8",inbuf,inlen,outbuf,outlen);
+}
 
 static void rendersts(char *str,int status)
 {
@@ -535,6 +562,23 @@ static void writetable(HttpConn *conn) {
 		rendersts(rsts, 0);
 	}
 	render(rsts);
+	//add optlog
+	Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '用户下发配置.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 } 
 
 static void getchanneloutinfo(HttpConn *conn) { 
@@ -602,7 +646,24 @@ static void setchanneloutinfo(HttpConn *conn) {
 	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_sdt"));
 	//printf(":::%d:::%d:::%d\n", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion, pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT,pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
 	rendersts(rsts, 1);
-	render(rsts); 
+	render(rsts);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '用户配置选项信息.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 } 
 
 static void getpidtransinfo(HttpConn *conn) { 
@@ -718,7 +779,24 @@ static void setpidtransinfo(HttpConn *conn) {
 	}
 	memset(idstr, 0, sizeof(idstr));
 	rendersts(idstr, 1);
-	render(idstr); 
+	render(idstr);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '用户修改PID透传表.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void getprginfo(HttpConn *conn) {
@@ -748,10 +826,12 @@ static void getprginfo(HttpConn *conn) {
 			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
 			cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
 			cJSON_AddNumberToObject(result,"newPcrPid", outprg->newPcrPid);
-			memcpy(prgname, outprg->prgName, outprg->prgNameLen);			
+			//memcpy(prgname, outprg->prgName, outprg->prgNameLen);
+			j = u2g(outprg->prgName,strlen(outprg->prgName),prgname,32);
 			cJSON_AddStringToObject(result,"prgName", prgname);
 			memset(prgname, 0, 32);
-			memcpy(prgname, outprg->providerName, outprg->providerNameLen);
+			//memcpy(prgname, outprg->providerName, outprg->providerNameLen);
+			u2g(outprg->providerName,strlen(outprg->providerName),prgname,32);
 			cJSON_AddStringToObject(result,"providerName", prgname);
 			cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
 			DataStream_t *streaminfo = outprg->pdataStreamList;
@@ -769,12 +849,12 @@ static void getprginfo(HttpConn *conn) {
 		}
 	}
 	jsonstring = cJSON_PrintUnformatted(result);
+	//printf("==========jsonstring===========%d\n", strlen(jsonstring));
 	memcpy(str, jsonstring, strlen(jsonstring));
-	//printf("==========jsonstring===========%s\n", jsonstring);
 	//释放内存	
-	cJSON_Delete(result);		
+	cJSON_Delete(result);
 	free(jsonstring);
-	render(str); 
+	render(str);
 } 
 
 static void setprginfo(HttpConn *conn) { 	
@@ -813,6 +893,8 @@ static void setprginfo(HttpConn *conn) {
 	int prgoptflag = atoi(mprGetJson(jsonparam, "prgoptflag"));
 	int isuserprg = atoi(mprGetJson(jsonparam, "isuserprg"));
     list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
+    time_t curTime;
+    time(&curTime);
     if(isuserprg == 0){
         //user prg
         User_prgInfo_t *userinfo = NULL;
@@ -905,6 +987,8 @@ static void setprginfo(HttpConn *conn) {
                         userinfo->pdataStreamList = StreamList;
                     }
                 }
+                memset(optstr, 0, 256);
+                sprintf(optstr, "{'user': '%s', 'desc': '用户修改了自定义节目【pmtPid:%d】信息.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"),pmtPid, curTime);
             }
         }else{ //add
             userinfo = malloc(sizeof(User_prgInfo_t));
@@ -965,6 +1049,8 @@ static void setprginfo(HttpConn *conn) {
             userinfo->pdataStreamListLen = streamcnt;
             userinfo->pdataStreamList = StreamList;
             list_append(&outpst->userPrgNodes, userinfo);
+            memset(optstr, 0, 256);
+            sprintf(optstr, "{'user': '%s', 'desc': '用户添加了自定义节目【pmtPid:%d】信息.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"),pmtPid, curTime);
         }
     }else{
         //dev prg
@@ -1057,9 +1143,10 @@ static void setprginfo(HttpConn *conn) {
                     outprg->pdataStreamListLen = streamcnt;
                     outprg->pdataStreamList = StreamList;
                 }
+                memset(optstr, 0, 256);
+                sprintf(optstr, "{'user': '%s', 'desc': '用户修改了节目【pmtPid:%d】信息.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"),pmtPid, curTime);
             }
         }else if(prgoptflag == 1){
-            printf("-------------------add2\n");
             Dev_prgInfo_st *newprg = malloc(sizeof(Dev_prgInfo_st));
             newprg->index = GetNewFreePrgIndex(chnid, inCh);
             newprg->userNew = 1;
@@ -1127,12 +1214,25 @@ static void setprginfo(HttpConn *conn) {
 //            sdtDes->userNew = 1;
             newprg->pmtDesListLen = 0;
             list_append(&outpst->prgNodes, newprg);
+            memset(optstr, 0, 256);
+            sprintf(optstr, "{'user': '%s', 'desc': '用户添加了自定义节目【pmtPid:%d】信息.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"),pmtPid, curTime);
         }
     }
-
-
 	rendersts(rsts, 1);
-	render(rsts); 
+	render(rsts);
+	//add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void common(HttpConn *conn) {
@@ -1148,7 +1248,6 @@ static void getglobalinfo(HttpConn *conn) {
         render(str);
         return;
     }
-    ChannelProgramSt *pst = NULL;
 	cJSON *result = cJSON_CreateObject();
 	char* jsonstring;
 	cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
@@ -1181,6 +1280,25 @@ static void search(HttpConn *conn) {
     //释放内存
     cJSON_Delete(result);
     free(jsonstring);
+    //add optlog
+    if(inCh == 1){
+        Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+        EdiRec *optlog = ediCreateRec(db, "optlog");
+        if(optlog == NULL){
+           printf("================>>>optlog is NULL!!\n");
+           return;
+        }
+        time_t curTime;
+        time(&curTime);
+        memset(optstr, 0, 256);
+        sprintf(optstr, "{'user': '%s', 'desc': '用户节目搜索.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+        MprJson  *row = mprParseJson(optstr);
+        if(ediSetFields(optlog, row) == 0){
+           printf("================>>>ediSetFields Failed!!\n");
+        }
+        ediUpdateRec(db, optlog);
+        //ediClose(db);
+    }
 }
 
 static void reprgnum(HttpConn *conn) {
@@ -1223,10 +1341,25 @@ static void reprgnum(HttpConn *conn) {
             }
         }
     }
-
-
     rendersts(str, 1);
     render(str);
+    //add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '重新分配节目号.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void reprgpid(HttpConn *conn) {
@@ -1347,6 +1480,23 @@ static void reprgpid(HttpConn *conn) {
     }
     rendersts(str, 1);
     render(str);
+    //add optlog
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+       return;
+    }
+    time_t curTime;
+    time(&curTime);
+    memset(optstr, 0, 256);
+    sprintf(optstr, "{'user': '%s', 'desc': '重新分配PID.', 'level': '2', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);
+    //ediClose(db);
 }
 
 static void espinit() {	

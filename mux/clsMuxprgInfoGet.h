@@ -25,6 +25,7 @@ unsigned char SendOutputPrgInfo(char *ip, int outChn, unsigned char *muxInfoByte
 void LoadBitrateAndTableEnable(char *ip, int iChn);
 int GetNewFreePrgIndex(int inChn, int outChnId);
 int GetNewFreeUserPrgIndex(int inChn, int outChnId);
+int FlagInputSignal(char *ip, int *inputStatus);
 //SearchingStatus GetSearchingStatus(char *ip, int inChn);
 //ErrorTypeEm Search(char *ip, int inChn);
 

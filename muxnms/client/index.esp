@@ -27,7 +27,7 @@
 							<a class="flag STRING_DETAIL" href="javascript:void(0)"><strong>详细信息</strong></a>
 							<ul>               
 								<li id="l21"><a href="javascript:devinfo_output(recdata.devType)">输出通道</a></li> 							              
-								<li id="l23"><a href="">监测</a></li>    
+								<li id="l23"><a href="javascript:gbl_monitor()">监测</a></li>
 							<!--	<li id="l24"><a href="javascript:dev_srcset()">源设置</a></li>
 								<li id="l25"><a href="javascript:dev_outset()">输出设置</a></li> -->
 							</ul>
@@ -79,7 +79,8 @@
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/jquery-ui.min.js"></script>
     <script type="text/javascript" src="lib/jquery.fancytree.min.js"></script>    
-    <script type="text/javascript" src="lib/jquery.dataTables.min.js"></script>  
+    <script type="text/javascript" src="lib/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="lib/ichart.1.2.min.js"></script>
 	<!--<script type="text/javascript" src="lib/jquery.i18n.properties.js"></script> -->
 	<script type="text/javascript" src="js/global.js"></script> 
 	<script type="text/javascript" src="js/alarm.js"></script> 
@@ -165,6 +166,9 @@
 		);		
 		
 		function toHome() {
+            if(globalObj.timerID != undefined){
+                clearInterval(globalObj.timerID);
+            }
 			//获取设备基本信息				
 			$.ajax({
 				 type: "GET",
@@ -239,6 +243,9 @@
 
         }
 		function btn_close() {
+            if(globalObj.timerID != undefined){
+                clearInterval(globalObj.timerID);
+            }
 			var userAgent = navigator.userAgent;
 			//注销				
 			$.ajax({
