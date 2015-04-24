@@ -27,8 +27,8 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-char ip[16] = "192.168.1.49";
-//char ip[16] = "127.0.0.1";
+//char ip[16] = "192.168.1.49";
+char ip[16] = "127.0.0.1";
 char optstr[256] = {0};
 
 static void rendersts(char *str,int status)
