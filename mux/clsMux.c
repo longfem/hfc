@@ -51,9 +51,11 @@ unsigned int CreateTable(int outChnId)
 int sendOutPutMuxInfo(char *ip, int outChnId){
 	//------ 设置输出通道信息 -----		
 		int outChnIndexTmp = outChnId - 1;        
-
+        printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
 		ChnBypass_write(ip, outChnId); // 发送直传标志
-		printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
+		printf("===RecordInputChnUseStatus  start===\n");
+        RecordInputChnUseStatus(outChnId);
+        printf("===RecordInputChnUseStatus  end===\n");
 
 		SendMux(ip, outChnId); // 发送表复用信息
 		
@@ -100,30 +102,44 @@ int sendOutPutOption(char *ip, int outChnId)
 
 
 // 记录某个输入通道是否有数据要求
-// void RecordInputChnUseStatus(int outChnId)
-// {
-// 	int outChannelIndex = outChnId - 1;
-// 	for (int iInput = 0; iInput < _inMaxNum; iInput++)
-// 	{
-// 		clsProgram.needInputData[outChannelIndex, iInput] = false;
-// 	}
-// 	if (clsProgram.PrgAVMuxList != null && clsProgram.PrgAVMuxList[outChannelIndex] != null)
-// 	{
-// 		foreach (MuxPidInfo_st tmpPidInfo in clsProgram.PrgAVMuxList[outChannelIndex])
-// 		{
-// 			if (tmpPidInfo.inChannel > 0 && tmpPidInfo.inChannel <= clsProgram.needInputData.Length)
-// 				clsProgram.needInputData[outChannelIndex, tmpPidInfo.inChannel - 1] = true;
-// 		}
-// 	}
-// 	if (clsProgram.outPrgList[outChannelIndex].dtPidList != null)
-// 	{
-// 		foreach (MuxPidInfo_st tmpPidInfo in clsProgram.outPrgList[outChannelIndex].dtPidList)
-// 		{
-// 			if (tmpPidInfo.inChannel > 0 && tmpPidInfo.inChannel <= clsProgram.needInputData.Length)
-// 				clsProgram.needInputData[outChannelIndex, tmpPidInfo.inChannel - 1] = true;
-// 		}
-// 	}
-// }
+void RecordInputChnUseStatus(int outChnId)
+{
+    int i = 0;
+	int outChannelIndex = outChnId - 1;
+	MuxPidInfo_st *tmpPidInfo = NULL;
+	for (i = 0; i < clsProgram._intChannelCntMax; i++)
+	{
+	    printf("--------->>>>xxx\n");
+		clsProgram.needInputData[outChannelIndex][i] = 0;
+		printf("--------->>>>yyy\n");
+	}
+	printf("--------->>>>000\n");
+//	if (clsProgram.PrgAVMuxList != NULL && clsProgram.PrgAVMuxList[outChannelIndex] != NULL)
+//	{
+//	    for(i = 0;i < list_len(clsProgram.PrgAVMuxList[outChannelIndex]); i++){
+//	        printf("--------->>>>111\n");
+//            list_get(clsProgram.PrgAVMuxList[outChnId - 1], i, &tmpPidInfo);
+//            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 2){
+//                printf("--------->>>>222\n");
+//                clsProgram.needInputData[outChannelIndex][tmpPidInfo->inChannel - 1] = 1;
+//            }
+//
+//	    }
+//	}
+//	printf("--------->>>>333\n");
+//	ChannelProgramSt *outpst = NULL;
+//    list_get(&(clsProgram.outPrgList), outChannelIndex, &outpst);
+//	if (&outpst->dtPidList != NULL)
+//	{
+//	    for(i = 0;i < list_len(&outpst->dtPidList); i++){
+//            list_get(&outpst->dtPidList, i, &tmpPidInfo);
+//            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 2){
+//                clsProgram.needInputData[outChannelIndex][tmpPidInfo->inChannel - 1] = 1;
+//            }
+//
+//        }
+//	}
+}
 
 void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
 {
@@ -173,7 +189,7 @@ void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
 // 当选择某个通道，但通道码率丢失时报警，isValidInputStatus=指示有一个参数是有效的标示
 void ShowNeedChnDataButNoInputWarning(int isValidInputStatus, int inputStatus, cJSON *result)
 {
-    int i = 0;
+    int i = 0, j = 0, iOutChn = 0;
     cJSON *jsonarray, *chjson;
     cJSON_AddItemToObject(result, "children", jsonarray = cJSON_CreateArray());
     for (i = 0; i < clsProgram._intChannelCntMax; i++)
@@ -181,10 +197,31 @@ void ShowNeedChnDataButNoInputWarning(int isValidInputStatus, int inputStatus, c
         cJSON_AddItemToArray(jsonarray,chjson = cJSON_CreateObject());
         if (isValidInputStatus == 0)
         {
-            if ((inputStatus & (1 << i)) == 0) // 报警
+            int isNeedInputdata = 0;
+            if (clsProgram.chnBypassEnable != NULL && clsProgram.chnBypass2 != NULL)
             {
-                InputMissShow(i + 1, 1, chjson);
-                continue;
+                for(j = 0; j < sizeof(clsProgram.chnBypass2)/sizeof(clsProgram.chnBypass2[0]); j++)
+                {
+                    if (clsProgram.chnBypassEnable[j] && clsProgram.chnBypass2[j] == i + 1)
+                    {
+                        isNeedInputdata = 1;
+                    }
+                }
+            }
+            if (!isNeedInputdata)
+            {
+                for (iOutChn = 0; iOutChn < clsProgram._outChannelCntMax; iOutChn++)
+                {
+                    if (clsProgram.needInputData[iOutChn, i])
+                        isNeedInputdata = 1;
+                }
+            }
+            if(isNeedInputdata){
+                if ((inputStatus & (1 << i)) == 0) // 报警
+                {
+                    InputMissShow(i + 1, 1, chjson);
+                    continue;
+                }
             }
             InputMissShow(i + 1, 0, chjson);
         }

@@ -14,7 +14,7 @@
 /*
     Create a new resource in the database
  */
- char ip[16] = "192.168.1.49";
+ char ip[16] = "192.168.1.144";
  //char ip[16] = "127.0.0.1";
  char optstr[256] = {0};
 
@@ -265,8 +265,8 @@ static void getmonitorinfo(HttpConn *conn) {
     cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus2", outstatus);
 
-    //int errRslt = FlagInputSignal(ip, &inputStatus);
-    //ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
+    int errRslt = FlagInputSignal(ip, &inputStatus);
+    ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
 
     jsonstring = cJSON_PrintUnformatted(result);
     //printf("--getmonitorinfo---->>>%d\n",strlen(jsonstring));

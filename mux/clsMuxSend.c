@@ -197,9 +197,7 @@ void SendMux(char *ip, int outChnId)
 	    isNeedDesInfoSend = 0;
 	    return;
     }
-    
-    
-	
+
 	 SendTable(ip, outChnId);
 	
 

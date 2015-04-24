@@ -314,11 +314,11 @@ typedef struct  ClsProgram_t
 	int _pmtMaxCnt; // = 29;
 	list_t  inPrgList;  //ChannelProgramSt  8 input
 	list_t outPrgList;  // 2 output
-	int chnBypass2[2]; // 通道直通, 0=禁用，other=输出直通某个输出
-	unsigned char chnBypassEnable[2]; // 通道直通功能激活
+	int *chnBypass2; // 通道直通, 0=禁用，other=输出直通某个输出
+	int *chnBypassEnable; // 通道直通功能激活
 	// List<ScramblePrgSt> scramblePrgList;
 	// List<ScramblePrgSt_v2> scramblePrgListV2;
-	// bool[,] needInputData; // 标志需要用到输入通道的数据，当数据丢失时报警
+	int needInputData[2][8]; // 标志需要用到输入通道的数据，当数据丢失时报警
 	 int prgNum_min; // = 1;
 	 int prgPid_min; // = 0x100;
 	 int prgPid_max; // = 0xfff;

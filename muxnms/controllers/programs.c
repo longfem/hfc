@@ -8,7 +8,6 @@
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <iconv.h>
 
 #include "esp.h"
 #include "http.h"
@@ -27,7 +26,7 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-char ip[16] = "192.168.1.49";
+char ip[16] = "192.168.1.144";
 //char ip[16] = "127.0.0.1";
 char optstr[256] = {0};
 
@@ -286,6 +285,10 @@ static void getoutprg(HttpConn *conn) {
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(ip, outChn);
 		LoadBitrateAndTableEnable(ip, outChn);
+		ChnBypass_read(ip, outChn);
+		printf("=====RecordInputChnUseStatus===start\n");
+		RecordInputChnUseStatus(outChn);
+		printf("=====RecordInputChnUseStatus===end\n");
 	}
 	getoutprgsJson(ip, Chn - 1, outprg);
 	render(outprg);
@@ -1472,50 +1475,11 @@ static void reprgpid(HttpConn *conn) {
     //ediClose(db);
 }
 
-static void espinit() {	
-	int i=0;
-	ChannelProgramSt *pst = NULL;
-	//全局变量初始化
-	clsProgram._outChannelCntMax = 2;
-	clsProgram._intChannelCntMax = 8;
-	clsProgram._pmtMaxCnt = 29;
-	clsProgram.prgNum_min = 1;
-	clsProgram.prgPid_min = 0x100;
-	clsProgram.prgPid_max = 0xfff;
-	clsProgram.subPrgPid_min = 0x1000;
-	clsProgram.subPrgPid_max = 0x1ff0;
-	//给全局变量申请内存
-	for(i=0; i<clsProgram._intChannelCntMax; i++){
-		pst = malloc(sizeof(ChannelProgramSt));
-		memset(pst, 0, sizeof(ChannelProgramSt));
-		pst->channelId = i + 1;		
-		list_append(&(clsProgram.inPrgList), pst);
-	}	
-	for(i=0; i<clsProgram._outChannelCntMax; i++){
-		pst = malloc(sizeof(ChannelProgramSt));
-		memset(pst, 0, sizeof(ChannelProgramSt));
-		pst->channelId = i + 1;
-		list_append(&(clsProgram.outPrgList), pst);
-	}	
-	
-	clsProgram.m_autoMuxStartPid = malloc(clsProgram._outChannelCntMax);
-	for (i = 0; i < clsProgram._outChannelCntMax; i++)
-	{
-		clsProgram.m_autoMuxStartPid[i] = 0x100;
-	}
-
-	Init(clsProgram._outChannelCntMax);
-
-	
-	printf("======>>>>esp init!!!!!!!\n");
-}
-
 /*
     Dynamic module initialization
  */
 ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *module) {
     espDefineBase(route, common);
-	espinit();	
     espDefineAction(route, "programs-cmd-getprg", getprg);
 	espDefineAction(route, "programs-cmd-getprginfo", getprginfo);//menu-edit
 	espDefineAction(route, "programs-cmd-setprginfo", setprginfo);//menu-edit
