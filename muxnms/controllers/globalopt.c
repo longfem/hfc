@@ -14,8 +14,9 @@
 /*
     Create a new resource in the database
  */
+ static char *globalip = NULL;   
  //char ip[16] = "192.168.1.49";
- char ip[16] = "127.0.0.1";
+ //char ip[16] = "127.0.0.1";
  char optstr[256] = {0};
 
 static void rendersts(const char *str,int status)
@@ -51,7 +52,7 @@ static void reboot() {
         return;
     }
     
-	rebootDevice(ip);
+	rebootDevice(globalip);
 	rendersts(str, 1);
 	render(str);
 	//add optlog
@@ -89,7 +90,7 @@ static void reset() {
         return;
     }
     
-	restoreFactory(ip);
+	restoreFactory(globalip);
 	rendersts(str, 1);
 	render(str);
 	//add optlog
@@ -139,9 +140,9 @@ static void setDevip(HttpConn *conn) {
 	unsigned int tmpip = ntohl( inet_addr( newip ) );
 	unsigned int tmpgatway = ntohl( inet_addr( newgatway ) );
 	unsigned int tmpsubmask = ntohl( inet_addr( submask ) );
-	if(0 == setIp(ip, tmpip)){
-		setGateway(ip, tmpgatway);
-		getSubMask(ip, tmpsubmask);
+	if(0 == setIp(globalip, tmpip)){
+		setGateway(globalip, tmpgatway);
+		getSubMask(globalip, tmpsubmask);
 	}
 	rendersts(str, 1);
 	render(str);
@@ -254,14 +255,14 @@ static void getmonitorinfo(HttpConn *conn) {
     char* jsonstring;
     int outValidBitrate = 0;
     unsigned int outstatus = 0;
-    OutChn_validBitrateGet(ip, 1, &outValidBitrate);
-    GetOutChannelStatus(ip, 1, &outstatus);
+    OutChn_validBitrateGet(globalip, 1, &outValidBitrate);
+    GetOutChannelStatus(globalip, 1, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus", outstatus);
     outValidBitrate = 0;
     outstatus = 0;
-    OutChn_validBitrateGet(ip, 2, &outValidBitrate);
-    GetOutChannelStatus(ip, 2, &outstatus);
+    OutChn_validBitrateGet(globalip, 2, &outValidBitrate);
+    GetOutChannelStatus(globalip, 2, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus2", outstatus);
 

@@ -7,10 +7,12 @@
 /*
     Get a resource
  */
+
 //char ip[16] = "192.168.1.49";
-char ip[16] = "127.0.0.1";
+//char ip[16] = "127.0.0.1";
 
 static void getDevinfo(HttpConn *conn) { 
+	char *globalip = NULL;
 	if(session("isAuthed") != NULL){
 		if (strcmp(session("isAuthed"),"true") != 0) {
 			render("login.esp");
@@ -20,8 +22,11 @@ static void getDevinfo(HttpConn *conn) {
 		render("login.esp");
 		return;
 	}
+	MprJson *jsonparam = httpGetParams(conn);
+    globalip = mprGetJson(jsonparam, "ip");
+    printf("=======ip===>>>%s\n", globalip);
 	char pProg[256] = {0}; 
-    getbaseJson(ip, pProg);
+    getbaseJson(globalip, pProg);
 	render(pProg);
 }
 

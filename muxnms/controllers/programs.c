@@ -27,8 +27,8 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-//char ip[16] = "192.168.1.49";
-char ip[16] = "127.0.0.1";
+static char *globalip = NULL;
+//char ip[16] = "127.0.0.1";
 char optstr[256] = {0};
 
 static void rendersts(char *str,int status)
@@ -270,7 +270,8 @@ static void getprg(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
-    getprgsJson(ip, inCh, pProg);
+    printf("=======getprg=ip==>>>%s\n", globalip);
+    getprgsJson(globalip, inCh, pProg);
 	render(pProg);
     
 } 
@@ -281,13 +282,13 @@ static void getoutprg(HttpConn *conn) {
 	char outprg[81920] = {0};
 	int outChn = 0;	
 	if(1){
-		PrgMuxInfoGet(ip);
+		PrgMuxInfoGet(globalip);
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
-		getOutPrograms(ip, outChn);
-		LoadBitrateAndTableEnable(ip, outChn);
+		getOutPrograms(globalip, outChn);
+		LoadBitrateAndTableEnable(globalip, outChn);
 	}
-	getoutprgsJson(ip, Chn - 1, outprg);
+	getoutprgsJson(globalip, Chn - 1, outprg);
 	render(outprg);
     
 } 
@@ -531,7 +532,7 @@ static void writetable(HttpConn *conn) {
         render(rsts);
         return;
     }
-	if(!sendPrograms(ip, inCh)){
+	if(!sendPrograms(globalip, inCh)){
 		rendersts(rsts, 1);
 	}else{
 		rendersts(rsts, 0);
@@ -1240,7 +1241,7 @@ static void search(HttpConn *conn) {
     MprJson *jsonparam = httpGetParams(conn);
     //printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
-    rst = Search(ip, inCh);
+    rst = Search(globalip, inCh);
 
     cJSON *result = cJSON_CreateObject();
     cJSON_AddNumberToObject(result, "sts", rst);
