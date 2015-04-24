@@ -955,7 +955,8 @@ function devinfo_output(devType){
 			}
 		},
 		select: function(event, data) {
-
+            var xxx = data;
+            var yyy = event;
 		},
 		click: function(event, data) {
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
@@ -1178,9 +1179,13 @@ function devinfo_output(devType){
                         var snode = data.node;
 						data.node.remove();
                         globalObj._selectcount--;
-                        var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
+                        var prgnode = channeltree.getNodeByKey("id1.0");
                         prgnode.setTitle("节目: "+ globalObj._selectcount);
                         prgnode.render();
+                        var devnode = $("#devlist").fancytree("getTree").getNodeByKey(nodekey);
+                        if(devnode != null){
+                            devnode.setSelected(false);
+                        }
                         checkselectedprg(nodekey, false, snode);
 						break;
 					} case '#edit': {

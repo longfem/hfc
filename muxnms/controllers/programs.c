@@ -27,34 +27,9 @@ extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
 
-//char ip[16] = "192.168.1.49";
-char ip[16] = "127.0.0.1";
+char ip[16] = "192.168.1.49";
+//char ip[16] = "127.0.0.1";
 char optstr[256] = {0};
-
-int code_convert(char *from_charset,char *to_charset,char *inbuf,int inlen,char *outbuf,int outlen)
-{
-    iconv_t cd;
-    int rc;
-    char **pin = &inbuf;
-    char **pout = &outbuf;
-
-    cd = iconv_open(to_charset,from_charset);
-    if (cd==0) return -1;
-    memset(outbuf,0,outlen);
-    if (iconv(cd,pin,&inlen,pout,&outlen)==-1) return -1;
-    iconv_close(cd);
-    return 0;
-}
-//UNICODE码转为GB2312码
-int u2g(char *inbuf,int inlen,char *outbuf,int outlen)
-{
-    return code_convert("utf-8","gb2312",inbuf,inlen,outbuf,outlen);
-}
-//GB2312码转为UNICODE码
-int g2u(char *inbuf,size_t inlen,char *outbuf,size_t outlen)
-{
-    return code_convert("gb2312","utf-8",inbuf,inlen,outbuf,outlen);
-}
 
 static void rendersts(char *str,int status)
 {
@@ -826,12 +801,10 @@ static void getprginfo(HttpConn *conn) {
 			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
 			cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
 			cJSON_AddNumberToObject(result,"newPcrPid", outprg->newPcrPid);
-			//memcpy(prgname, outprg->prgName, outprg->prgNameLen);
-			j = u2g(outprg->prgName,strlen(outprg->prgName),prgname,32);
+			memcpy(prgname, outprg->prgName, outprg->prgNameLen);
 			cJSON_AddStringToObject(result,"prgName", prgname);
 			memset(prgname, 0, 32);
-			//memcpy(prgname, outprg->providerName, outprg->providerNameLen);
-			u2g(outprg->providerName,strlen(outprg->providerName),prgname,32);
+			memcpy(prgname, outprg->providerName, outprg->providerNameLen);
 			cJSON_AddStringToObject(result,"providerName", prgname);
 			cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
 			DataStream_t *streaminfo = outprg->pdataStreamList;
