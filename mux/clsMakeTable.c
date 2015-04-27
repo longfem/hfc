@@ -15,7 +15,7 @@ static int isTableInit=0;
 int MakeTable(int outChnId)
 {
 	ChannelProgramSt *outpst = NULL;
-	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
+	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);	
 	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
 }
 
@@ -37,6 +37,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	ClsMuxInit(2,2);
 	//ClsMuxInit(2,2);
 
+
 	//int streamId = 1;
 	//int netWorkId = 16;
 	//int version = 2;
@@ -46,17 +47,18 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
 
-	if (AutoMakeNewPid(outChnId)==0)
-		return 0;
-	//return 0;
+	
 
-  //	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
-  	MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
+	if (AutoMakeNewPid(outChnId)==0)
+		return 0;	
+
+ 	 //MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
+  	MakePidMapTable(outChnId);
 
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
 	{
-		printf("��Ŀ���� ���*** \n");
+		printf("out channel  prg number out of range\n");
 		return 0;
 	}
 
@@ -70,7 +72,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	// PAT
 
 
-	if (outChnArray[outChnIndex].isAutoRaiseVersion==1) // �Զ����Ӱ汾��
+	if (outChnArray[outChnIndex].isAutoRaiseVersion==1) 
 	{
 		version++;
 		if (version > 31)
@@ -108,6 +110,8 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 
 #endif
 
+
+	//PMT
 
 	list_t *tablePmt;
 	list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
@@ -156,7 +160,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}	
 
 
-
+	//SDT
 	rstPat=CreateSdt(prginfolist,sdtTable, streamId, oringinalNetworkId, version);		
 
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
@@ -189,10 +193,11 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}
 #endif
 
+
+	//CAT
 #if 0
 	if (list_len(&caNode->caIdenList)>0)
 	{
-		// Cat
 		rstPat = CreateCat(caNode, catTable, version);
 		list_get(&pclsMux->table_cat,outChnIndex,&pbuff);
 		memcpy(pbuff->pbuf, catTable, sizeof(catTable));
@@ -422,6 +427,80 @@ void printSDT(sdt_senction_st* SDTS)
 	}
 }
 
+
+
+
+
+
+void printCAT(cat_senction_st *SDTS)
+{
+
+	int i;
+	int j;
+
+#if 0
+	printf("crc32----%d\n",SDTS->crc32);
+	printf("current_next_indicator----%d\n",SDTS->current_next_indicator);
+	printf("last_section_number----%d\n",SDTS->last_section_number);
+	printf("original_network_id----%d\n",SDTS->original_network_id);
+	printf("reserved_future_use1----%d\n",SDTS->reserved_future_use1);
+	printf("reserved_future_use1----%d\n",SDTS->reserved_future_use2);
+
+
+	printf("reserved0----%d\n",SDTS->reserved0);
+	printf("reserved1----%d\n",SDTS->reserved1);
+
+	printf("section_length----%d\n",SDTS->section_length);
+	printf("section_number----%d\n",SDTS->section_number);
+	printf("section_syntax_indicator----%d\n",SDTS->section_syntax_indicator);
+
+	printf("table_id----%d\n",SDTS->table_id);
+	printf("transport_stream_id----%d\n",SDTS->transport_stream_id);
+	printf("version_number----%d\n",SDTS->version_number);
+
+	int k;
+
+
+	sdtPrgName_st* p_last_sdtPrgName_t = SDTS->nameList;
+	//printf("SDTS->nameListLen----%d\n",SDTS->nameListLen);
+
+	for (i = 0; i < SDTS->nameListLen; i++)
+	{	
+
+		printf("descriptors_loop_length ----%d\n",p_last_sdtPrgName_t->descriptors_loop_length);
+		printf("EIT_present_following_flag----%d\n",p_last_sdtPrgName_t->EIT_present_following_flag);
+		printf("EIT_schedule_flag----%d\n",p_last_sdtPrgName_t->EIT_schedule_flag);
+		printf("free_CA_mode----%d\n",p_last_sdtPrgName_t->free_CA_mode);
+		printf("DataStream_st streamType----%d\n",p_last_sdtPrgName_t->reserved_future_use);
+
+		printf("runing_status ----%d\n",p_last_sdtPrgName_t->runing_status);	
+
+		printf("service_id----%d\n",p_last_sdtPrgName_t->service_id);
+
+
+		Commdes_t* p_command_st = p_last_sdtPrgName_t->desList;
+		for (j = 0; j< p_last_sdtPrgName_t->desListLen; j++)
+		{
+			printf("Commdes_st index----%d\n",p_command_st->index);
+			printf("Commdes_st tag ----%d\n",p_command_st->tag);
+			printf("Commdes_st userNew----%d\n",p_command_st->userNew);
+			printf("Commdes_st dataLen is :%d  vList: \n",p_command_st->dataLen);
+			printf("Commdes_st dataLen is :%d  vList: ",p_command_st->dataLen);
+
+			unsigned char *ptmp=p_command_st->data;
+			for (k = 0; k < p_command_st->dataLen; k++)
+			{
+				printf(" %d  ",*ptmp++);			
+
+			}
+
+			p_command_st++;
+		}
+
+		p_last_sdtPrgName_t++;
+	}
+	#endif
+}
 
 
 int CleanOutputTable(int outChannel)

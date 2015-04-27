@@ -59,55 +59,49 @@ unsigned char AutoMux_makeMuxInfoAndSend(char *ip, int outChannel, unsigned char
 	MuxPrgInfoGet_st *pmtPrg;
 	ChannelProgramSt *eachChn = NULL;
 	Dev_prgInfo_st *prgInfo = NULL;
-
 	int outPrgListLen = list_len(&clsProgram.outPrgList);
 	int prgNodesLen = 0;
 	int i=0, j=0;
-	
+
 	list_init(&sendList);
-	
 	if (outPrgListLen > 0 )
 	{
 		for (i = 0; i < outPrgListLen; i++)
 		{
 			//sendList.Clear();
 
-			//removeall list			
+			//removeall list
+
 			if (outChannel != 0 && outChannel != i + 1)
 				continue;
 
-			
+
 			list_get(&clsProgram.outPrgList, i, &eachChn);
-			
+
 			if(eachChn !=NULL){
 				prgNodesLen = list_len(&eachChn->prgNodes);
 				for (j = 0; j < prgNodesLen; j++)
-				{					
+				{
 					list_get(&eachChn->prgNodes, i, &prgInfo);
 					if(prgInfo){
 						pmtPrg = malloc(sizeof(MuxPrgInfoGet_st));
 
 						pmtPrg->inChannel = prgInfo->chnId;
 						pmtPrg->prgIndex = prgInfo->index;
-											
+
 						list_append(&sendList, pmtPrg);
-				
+
 					}
-											
+
 				}
 
-				
 				ErrorTypeEm rslt = SendOutPrgMuxMap(ip, i + 1, &sendList);
-				
-				if (rslt != ok){				
-				 	return 0;
-				 }
-				 	
+				if (rslt != ok)
+					return 0;
 			}
 
 		}
 	}
-	
 	return 1;
 
 
@@ -139,7 +133,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		list_get(&poutList->prgNodes, k, &proginfo);
 		bufLen += sizeof(Dev_prgInfo_st); // struct sizeof(Dev_prgInfo_st) 	
 		bufLen += proginfo->pmtDesListLen;   //pmtDesListLen
-		
+
 
 		pPmrDes = proginfo->pmtDesList;
 		for(i=0; i< proginfo->pmtDesListLen; i++){
@@ -167,15 +161,15 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		bufLen+= proginfo->prgNameLen; //
 		bufLen+= proginfo->providerNameLen; //
 
-	
+
 	}
 
 	bufLen +=4; // Crc 32;
-	
+
 	//malloc now
 	pBuf = malloc(bufLen);
 
-	
+
 	//copy now	
 	//copy pmt
 	pTemp = pBuf;
@@ -186,7 +180,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 	memcpy(pTemp, (unsigned char *)&listlen, 4 );
 	pTemp +=4;
 
-	
+
 	for(k=0; k < listlen; k ++){
 		list_get(&poutList->prgNodes, k, &proginfo);
 		memcpy(pTemp, proginfo, sizeof(Dev_prgInfo_st));
@@ -194,7 +188,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		memcpy(pTemp, (unsigned char *)&proginfo->pmtDesListLen, 4 );
 		pTemp +=4;
 
-		
+
 		pPmrDes = proginfo->pmtDesList;
 		for(i=0; i< proginfo->pmtDesListLen; i++){
 			memcpy(pTemp, pPmrDes, sizeof(Commdes_t));
@@ -209,34 +203,34 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		memcpy(pTemp, (unsigned char *)&proginfo->pdataStreamListLen, 4 );
 		pTemp +=4;
 
-		
+
 		pdataStreamInfo = proginfo->pdataStreamList;
-		
+
 		for(i=0 ; i < proginfo->pdataStreamListLen; i++){
 			memcpy(pTemp, pdataStreamInfo, sizeof(DataStream_t));
 			pTemp += sizeof(DataStream_t);
-			
-			
+
+
 			pPmrDes = pdataStreamInfo->desNode;
 			for(j=0; j< pdataStreamInfo->desNodeLen; j++){
 				memcpy(pTemp, pPmrDes, sizeof(Commdes_t));
 				pTemp += sizeof(Commdes_t);
 				memcpy(pTemp, pPmrDes->data, pPmrDes->dataLen);
 				pTemp += pPmrDes->dataLen;
-				
+
 				pPmrDes++;
 			}
-			
+
 			pdataStreamInfo++;
 		}	
-		
-		
+
+
 		//prgName
 		if(proginfo->prgNameLen > 0){
 			memcpy(pTemp, proginfo->prgName, proginfo->prgNameLen);
 			pTemp += 4;	
 		}
-		
+
 		//providerName    
 		if(proginfo->providerNameLen > 0){
 			memcpy(pTemp, proginfo->providerName, proginfo->providerNameLen);
@@ -254,7 +248,7 @@ void cSerialize(ChannelProgramSt *poutList, unsigned char **pOutbuf, int *outLen
 		printf(" serial okkkk  \n");
 		*pOutbuf = pBuf;
 		*outLen = bufLen;
-		
+
 	} 
 	else{
 		*pOutbuf = NULL;
@@ -283,9 +277,9 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 	pTemp +=4;
 
 	pBuf->pmtDesList = malloc(sizeof(Commdes_t) * pmtDesListLen);
-	
+
 	Commdes_t *pPmrDes = pBuf->pmtDesList;
-	
+
 	for(i=0; i< pBuf->pmtDesListLen; i++){
 		memcpy(pPmrDes, pTemp, sizeof(Commdes_t));		
 		pTemp += sizeof(Commdes_t);
@@ -301,21 +295,21 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 	pTemp +=4;
 
 	if(pdataStreamListLen > 0){
-		
+
 		pBuf->pdataStreamList = malloc( sizeof(DataStream_t) * pdataStreamListLen);
 		DataStream_t *pdataStreamInfo = pBuf->pdataStreamList;
-		
+
 		for(i=0 ; i < pBuf->pdataStreamListLen; i++){
 			memcpy(pdataStreamInfo, pTemp, sizeof(DataStream_t));
 			pTemp += sizeof(DataStream_t);
-			
+
 			pPmrDes = pdataStreamInfo->desNode;
 			for(j=0; j< pdataStreamInfo->desNodeLen; j++){
 				memcpy(pPmrDes, pTemp, sizeof(Commdes_t));
 				pTemp += sizeof(Commdes_t);
 				memcpy(pPmrDes->data, pTemp, pPmrDes->dataLen);
 				pTemp += pPmrDes->dataLen;
-				
+
 				pPmrDes++;
 			}
 			pdataStreamInfo++;
@@ -324,7 +318,7 @@ int  cDeSerialize(unsigned char * pInbuf, int inLen, Dev_prgInfo_st *proginfo)
 		pBuf->pdataStreamListLen = 0;
 		pBuf->pdataStreamList = NULL;
 	}
-		
+
 	if(pBuf->prgNameLen > 0){	
 		memcpy(pBuf->prgName, pTemp, pBuf->prgNameLen);
 		pTemp += 4;
@@ -351,7 +345,7 @@ int MakeOutPutBytes(int outChn, unsigned char **outBytes, int *outLen)
 	list_get(&clsProgram.outPrgList, outChn - 1, &pOutList);
 
 	cSerialize(pOutList, &ptemp, outLen);
-	
+
 	*outBytes =ptemp;
 
 	return *outLen;
@@ -365,7 +359,7 @@ unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 	unsigned int tmpBytesLen=0;
 
 	int i=0;
-	
+
 	int sendLen = MakeOutPutBytes(outChn,  &tmpBytes, &tmpBytesLen);
 
 	if (sendLen > 0)
@@ -376,7 +370,7 @@ unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 			return 1;
 		}
 	}
-	
+
 	free(tmpBytes);
 	return 0;
 }
@@ -392,14 +386,14 @@ unsigned char PrgMuxInfoGet(char *ip)
 	//PrgAVMuxList
 
 	ErrorTypeEm res;
-  
-  	list_t *PrgPmtMux = NULL;
-  	list_t   *prgAVMux = NULL;
+
+	list_t *PrgPmtMux = NULL;
+	list_t   *prgAVMux = NULL;
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{	
 		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList[i]) != ok)
 			return 0;
-		
+
 		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList[i]) != ok)
 			return 0;
 	}
@@ -446,172 +440,179 @@ unsigned char PrgMuxInfoGet(char *ip)
 	return 1;
 }
 
-int SeekPrgPmtDes_inChn(int inChannel, int prgId, int pmtDesId, Commdes_t *desInfo)
+int SeekPrgPmtDes_inChn(int inChannel, int prgId, int pmtDesId, Commdes_t **desInfo)
 {
-    int i = 0, j = 0;
-    ChannelProgramSt *pst = NULL;
-    Dev_prgInfo_st *prg = NULL;
-    Commdes_t *cmt = NULL;
-    list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
-    if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)>0))
-        return 0;
+	int i = 0, j = 0;
+	ChannelProgramSt *pst = NULL;
+	Dev_prgInfo_st *prg = NULL;
+	Commdes_t *cmt = NULL;
+	list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
+	if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)==0))
+		return 0;
 
-    for(i=0;i<list_len(&pst->prgNodes);i++){
-        list_get(&pst->prgNodes, i, &prg);
-        if(prg->chnId == inChannel){
-            if(prg->index == prgId){
-                if(prg->pmtDesListLen > 0){
-                    cmt = prg->pmtDesList;
-                    for(j=0;j<prg->pmtDesListLen;j++){
-                        if(cmt->index == pmtDesId){
-                            desInfo = cmt;
-                            return 1;
-                        }
-                    }
-                    break;
-                }
-                break;
-            }
-        }
-    }
-    return 0;
+	for(i=0;i<list_len(&pst->prgNodes);i++){
+		list_get(&pst->prgNodes, i, &prg);
+		if(prg->chnId == inChannel){
+			if(prg->index == prgId){
+				if(prg->pmtDesListLen > 0){
+
+					cmt = prg->pmtDesList;
+					for(j=0;j<prg->pmtDesListLen;j++){
+						if(cmt->index == pmtDesId)
+						{
+							*desInfo = cmt;
+							return 1;
+						}
+						cmt++;
+
+					}
+					break;
+				}
+				break;
+			}
+		}
+	}
+	return 0;
 }
 
-int SeekPrgAvDes_inChn(int inChannel, int prgId, int avId, int desId, Commdes_t *desInfo)
+int SeekPrgAvDes_inChn(int inChannel, int prgId, int avId, int desId, Commdes_t **desInfo)
 {
-    int i = 0, j = 0, k = 0;
-    ChannelProgramSt *pst = NULL;
-    Dev_prgInfo_st *prg = NULL;
-    DataStream_t *dst = NULL;
-    Commdes_t *cmt = NULL;
-    list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
-    if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)>0))
-        return 0;
+	int i = 0, j = 0, k = 0;
+	ChannelProgramSt *pst = NULL;
+	Dev_prgInfo_st *prg = NULL;
+	DataStream_t *dst = NULL;
+	Commdes_t *cmt = NULL;
+	list_get(&clsProgram.inPrgList, inChannel - 1, &pst);
+	if ((list_len(&clsProgram.inPrgList)<1) || (inChannel > list_len(&clsProgram.inPrgList)) || (list_len(&pst->prgNodes)==0))
+		return 0;
 
-    for(i=0;i<list_len(&pst->prgNodes);i++){
-        list_get(&pst->prgNodes, i, &prg);
-        if(prg->chnId == inChannel){
-            if(prg->index == prgId){
-                if(prg->pdataStreamListLen>0){
-                    dst = prg->pdataStreamList;
-                    for(j=0;j<prg->pdataStreamListLen;j++){
-                        if(dst->index == avId){
-                            if(dst->desNodeLen > 0){
-                                cmt = dst->desNode;
-                                for(k=0;k<dst->desNodeLen;k++){
-                                    if(cmt->index == desId){
-                                        desInfo = cmt;
-                                        return 1;
-                                    }
-                                }
-                                break;
-                            }
-                            break;
-                        }
-                    }
-                    break;
-                }
-                break;
-            }
-        }
-    }
-    return 0;
+	for(i=0;i<list_len(&pst->prgNodes);i++){
+		list_get(&pst->prgNodes, i, &prg);
+		if(prg->chnId == inChannel){
+			if(prg->index == prgId){
+				if(prg->pdataStreamListLen>0){
+					dst = prg->pdataStreamList;
+					for(j=0;j<prg->pdataStreamListLen;j++){
+						if(dst->index == avId){
+							if(dst->desNodeLen > 0){
+								cmt = dst->desNode;
+								for(k=0;k<dst->desNodeLen;k++){
+									if(cmt->index == desId){
+										*desInfo = cmt;
+										return 1;
+									}
+									cmt++;
+								}
+								break;
+							}
+							break;
+						}
+						dst++;
+					}
+					break;
+				}
+				break;
+			}
+		}
+	}
+	return 0;
 }
 
 int DesPid_getInPid(int inChn, int prgIndex, int avIndex, int desIndex)
 {
-    int pid = 0x1fff;
-    Commdes_t *desInfoTmp = NULL;
-    //enum DesTypeEnum dte;
-    if (inChn > 0 && prgIndex >= 0)
-    {
-        if (avIndex == -1)
-        { // PMT的DES
-            if (SeekPrgPmtDes_inChn(inChn, prgIndex, desIndex, desInfoTmp))
-            {
-                if (desInfoTmp->tag == 9)//CA
-                {
-                    pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
-                }
-            }
-        }
-        else
-        { // AV的DES
-            if(SeekPrgAvDes_inChn(inChn, prgIndex, avIndex, desIndex, desInfoTmp))
-            {
-                if (desInfoTmp->tag == 9)//CA
-                {
-                    pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
-                }
-            }
-        }
-    }
-    return pid;
+	int pid = 0x1fff;
+	Commdes_t *desInfoTmp = NULL;
+	//enum DesTypeEnum dte;
+	if (inChn > 0 && prgIndex >= 0)
+	{
+		if (avIndex == -1)
+		{ // PMT的DES
+			if (SeekPrgPmtDes_inChn(inChn, prgIndex, desIndex, &desInfoTmp))
+			{
+				if (desInfoTmp->tag == 9)//CA
+				{
+					pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
+				}
+			}
+		}
+		else
+		{ // AV的DES
+
+			if(SeekPrgAvDes_inChn(inChn, prgIndex, avIndex, desIndex, &desInfoTmp))
+			{
+				if (desInfoTmp->tag == 9)//CA
+				{
+					pid = (((desInfoTmp->data[2] << 8) | desInfoTmp->data[3]) & 0x1fff);
+				}
+			}
+		}
+	}
+	return pid;
 }
 
 int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
-			Commdes_t *desList, int desListLen, int pidOffset, list_t *usingPidList)
+				   Commdes_t *desList, int desListLen, int pidOffset, list_t *usingPidList)
 {
-    int i = 0, j = 0;
-    //enum DesTypeEnum dte;
-    if (desList != NULL && desListLen > 0)
-    {
-        //int newPid = 0x1fff;
-        //bool isNeedSeekBefore = true;
-        for (i = 0; i < desListLen; i++)
-        {
-            if (desList->tag == 9)//CA
-            {
-                if (desList->data != NULL && desList->dataLen >= 4)
-                {
-                    int lastReplacePid = -1;
-                    int inPid = 0x1fff;
-                    int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
+	int i = 0, j = 0;
+	//enum DesTypeEnum dte;
+	if (desList != NULL && desListLen > 0)
+	{
+		//int newPid = 0x1fff;
+		//bool isNeedSeekBefore = true;
+		for (i = 0; i < desListLen; i++)
+		{
+			if (desList->tag == 9)//CA
+			{
+				if (desList->data != NULL && desList->dataLen >= 4)
+				{
+					int lastReplacePid = -1;
+					int inPid = 0x1fff;
+					int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
                     if ((inChn > 0) && (inChn != 9))
-                    {
-                        inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
-                        if (inPid < 0x1fff)
-                        {
-                            MuxPidInfo_st *mp = NULL;
-                            for (j = 0; j < list_len(usingPidList); j++)
-                            {
-                                list_get(usingPidList, j, &mp);
-                                if (mp->inChannel == inChn && mp->oldPid == inPid)
-                                {
-                                    lastReplacePid = mp->newPid;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (lastReplacePid != -1)
-                    {
-                        caPid = lastReplacePid;
-                        desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((lastReplacePid >> 8) & 0x1f));
-                        desList->data[3] = (unsigned char)lastReplacePid;
-                    }
-                    else
-                    {
-                        if (caPid != pidOffset)
-                        {
-                            caPid = pidOffset;
-                            desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((pidOffset >> 8) & 0x1f));
-                            desList->data[3] = (unsigned char)pidOffset;
+					{
+						inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
+						if (inPid < 0x1fff)
+						{
+							MuxPidInfo_st *mp = NULL;
+							for (j = 0; j < list_len(usingPidList); j++)
+							{
+								list_get(usingPidList, j, &mp);
+								if (mp->inChannel == inChn && mp->oldPid == inPid)
+								{
+									lastReplacePid = mp->newPid;
+									break;
+								}
+							}
+						}
+					}
+					if (lastReplacePid != -1)
+					{
+						caPid = lastReplacePid;
+						desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((lastReplacePid >> 8) & 0x1f));
+						desList->data[3] = (unsigned char)lastReplacePid;
+					}
+					else
+					{
+						if (caPid != pidOffset)
+						{
+							caPid = pidOffset;
+							desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((pidOffset >> 8) & 0x1f));
+							desList->data[3] = (unsigned char)pidOffset;
 
-                            MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));;
-                            muxPidInfo->inChannel = inChn;
-                            muxPidInfo->oldPid = inPid;
-                            muxPidInfo->newPid = caPid;
-                            list_append(usingPidList, muxPidInfo);
-                        }
-                        pidOffset++;
-                    }
-                }
-            }
-            desList++;
-        }
-    }
-    return pidOffset;
+							MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));;
+							muxPidInfo->inChannel = inChn;
+							muxPidInfo->oldPid = inPid;
+							muxPidInfo->newPid = caPid;
+							list_append(usingPidList, muxPidInfo);
+						}
+						pidOffset++;
+					}
+				}
+			}
+			desList++;
+		}
+	}
+	return pidOffset;
 }
 
 int NewProgramNum(int curNum, list_t *prgNumList)
@@ -739,7 +740,7 @@ int NewPid(int inChn, int oldPid, int curPid, int pidOffset, list_t usedPidTree,
 	return newPid;
 }
 
-int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int desListLen,int pidOffset, unsigned char isUsedPid[],list_t usedPidTree)
+int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int desListLen,int pidOffset, unsigned char isUsedPid[],int isUsedPidLenth, list_t usedPidTree)
 {
 #if 1
 	int i;
@@ -748,6 +749,28 @@ int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int de
 	Commdes_t *desInfoTmp=desList;
 	for (i = 0; i < desListLen; i++)
 	{
+
+		if (desInfoTmp->tag == 0x09)//CA��زŻ��ȥ
+		{
+			if (desInfoTmp->dataLen>=4)
+			{
+
+
+				unsigned char *data=desInfoTmp->data;			
+				int caPid = (((*(data+2) << 8) | *(data+3) ) & 0x1fff);
+				int inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desInfoTmp->index);
+				newPid = NewPid(inChn, inPid, caPid, pidOffset, usedPidTree, isUsedPid,isUsedPidLenth, 1);
+				if (newPid != caPid)
+				{
+					data+=2;
+					*data = (unsigned char)(*data & 0xe0 | ((newPid >> 8) & 0x1f));
+					data+=1;
+					*data= (unsigned char)newPid;
+
+				}
+			}
+		}
+		desInfoTmp++;
 
 	}
 #endif
@@ -784,8 +807,6 @@ int AutoMakeNewPid(int outChannel)
 		list_append(&newUsedPidList,tmpList);
 	}
 
-	//for (i = 0; i < 1; i++)//for test
-	
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{
 
@@ -820,8 +841,7 @@ int AutoMakeNewPid(int outChannel)
 				list_pop_tail(&prgNumList);
 			}
 			ChannelProgramSt *outpst;
-		    list_get(&clsProgram.outPrgList, i, &outpst);
-
+			list_get(&clsProgram.outPrgList, i, &outpst);
 
 			if (list_len(&outpst->prgNodes)>0)
 			{
@@ -830,7 +850,7 @@ int AutoMakeNewPid(int outChannel)
 					unsigned char  isNewPrgPid = 0;
 					Dev_prgInfo_st *prgInfoTmp;
 					list_get(&outpst->prgNodes,j,&prgInfoTmp);
-					printf("program number: %d\n",j);
+					//printf("program number: %d\n",j);
 					//printPRG(prgInfoTmp);
 					int newPid;
 
@@ -854,10 +874,8 @@ int AutoMakeNewPid(int outChannel)
 							}
 						}
 
-
-						//DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, -1,
-						//prgInfoTmp->pmtDesList,prgInfoTmp->psdtDesListLen, pidAvStart, isUsedPid, newUsedPidList);
-
+						DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, -1,
+							prgInfoTmp->pmtDesList,prgInfoTmp->psdtDesListLen, pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
 
 						int newPrgNum = NewProgramNum(prgInfoTmp->prgNum, &prgNumList);
 						if (newPrgNum < 0)
@@ -871,21 +889,21 @@ int AutoMakeNewPid(int outChannel)
 						DataStream_t *dsInfoTmp = prgInfoTmp->pdataStreamList;
 						for (iDs = 0; iDs < prgInfoTmp->pdataStreamListLen; iDs++)
 						{	
-							//printf("com in now\n");
 							newPid = NewPid(prgInfoTmp->chnId, dsInfoTmp->inPid, dsInfoTmp->outPid, pidAvStart, newUsedPidList, isUsedPid,isUsedPidLenth, 1);
-
-							//printf("get out now\n");
 
 							if (dsInfoTmp->outPid != newPid)
 							{
 								isNewPrgPid = 1;
 								dsInfoTmp->outPid = newPid;								
 							}
+							DesPidRefresh(prgInfoTmp->chnId, prgInfoTmp->index, dsInfoTmp->index,
+								dsInfoTmp->desNode,dsInfoTmp->desNodeLen,pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
+
 							dsInfoTmp++;
 						}
-					
+
 #endif
-			//printPRG(prgInfoTmp);
+						//printPRG(prgInfoTmp);
 					}
 
 				}
@@ -894,7 +912,7 @@ int AutoMakeNewPid(int outChannel)
 	}
 
 
-		//	printf("aaaaaaaaaaaaaaa\n");
+
 	//free all
 	for (iTmp = 0; iTmp < newUsedPidListLen; iTmp++)
 	{
@@ -909,7 +927,7 @@ int AutoMakeNewPid(int outChannel)
 			list_pop_tail(tmpList);
 		}
 	}
-				//printf("bbbbbbbbbbbbb\n");
+
 	while(list_len(&newUsedPidList)>0)
 	{
 		list_t *tmpList;
@@ -918,7 +936,6 @@ int AutoMakeNewPid(int outChannel)
 		list_pop_tail(&newUsedPidList);
 	}
 	//	free(&newUsedPidList);
-		//printf("cccccccccccccccccccc\n");
 	while(list_len(&prgNumList)>0)
 	{
 		int *piNewPrgNum;
@@ -930,7 +947,7 @@ int AutoMakeNewPid(int outChannel)
 	return 1;
 }
 
-int MakePidMapTable(int outChannel,list_t  prginfolist)
+int MakePidMapTable(int outChannel)
 {
 	int i;
 	int j;
@@ -952,27 +969,29 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 	Dev_prgInfo_st *inPrgInfoTmp;
 	for ( i = 0; i <clsProgram._outChannelCntMax; i++)
 	{
-		if (outChannel != 0 && (outChannel != i + 1))
+		if (outChannel != 0 && (outChannel != i + 1))//when outChannel=1 or 2,all through		
 			continue;
 		int  isNoticeSamePid = 1;
 		MuxPidInfo_st *pidMapTmp;
-	
+
 		list_t *PrgAVMuxListI = (list_t*)malloc(sizeof(list_t));
 		list_init(PrgAVMuxListI); 
+
 
 		freeMuxPrgInfoList(clsProgram.PrgAVMuxList[i]);	
 		clsProgram.PrgAVMuxList[i] = NULL;
 
-		//printPrgAVMuxList();
-		// ChannelProgramSt *outpst = NULL;
-		//list_get(&(clsProgram.outPrgList), i, &outpst);
-		//for (j = 0; j < list_len(&outpst->prgNodes); j++)
-		//for test
-		for (j = 0; j <  list_len(&prginfolist); j++)
+
+		ChannelProgramSt *outpst = NULL;
+		list_get(&(clsProgram.outPrgList), i, &outpst);
+
+
+		for (j = 0; j < list_len(&outpst->prgNodes); j++)
 		{
+
 			Dev_prgInfo_st *outPrgInfoTmp;
-			//list_get(&outpst->prgNodes,j,&outPrgInfoTmp);
-			list_get(&prginfolist,j,&outPrgInfoTmp);
+			list_get(&outpst->prgNodes,j,&outPrgInfoTmp);
+			//list_get(&prginfolist,j,&outPrgInfoTmp);
 			//printf(" outPrgInfoTmp->newPcrPid %d\n",outPrgInfoTmp->newPcrPid);
 			if (outPrgInfoTmp->newPcrPid != 0x1fff)
 			{
@@ -986,32 +1005,44 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					pidMapTmp->oldPid = outPrgInfoTmp->oldPcrPid;
 					pidMapTmp->newPid = outPrgInfoTmp->newPcrPid;
 					list_append(PrgAVMuxListI,pidMapTmp);
+					//printf("prg level  %d\n",pidMapTmp->newPid);
 				}
-			}
-			//printPrgAVMuxList();
+			}		
+
+			//Commdes_st list foreach
 			if (outPrgInfoTmp->pmtDesListLen>0)
 			{
 				Commdes_t *outDesInfoTmp = outPrgInfoTmp->pmtDesList;
 				for (k = 0; k < outPrgInfoTmp->pmtDesListLen; k++)
 				{
-					if (outDesInfoTmp->tag == 0x9 && (outDesInfoTmp->userNew!=0))
+					//	printf("outDesInfoTmp->pmtDesListLen           %d\n",outPrgInfoTmp->pmtDesListLen);
+					//printf("outDesInfoTmp->tag           %d\n",outDesInfoTmp->tag);
+					//printf("outDesInfoTmp->userNew           %d\n",	outDesInfoTmp->userNew);
+
+
+					if (outDesInfoTmp->tag == 0x9 && (outDesInfoTmp->userNew==0))
 					{
-					#if 0
-	
+#if 1	
+
 						int oldPid = 0x1fff;
 						int isBreakDesSeek = 0;
+
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
-						for (k = 0; k < list_len(&inpst->prgNodes); k++)
+						//printf("list_len(&inpst->prgNodes) %d\n",list_len(&inpst->prgNodes));
+
+						for (l = 0; l < list_len(&inpst->prgNodes); l++)
 						{
-							list_get(&prginfolist,k,&inPrgInfoTmp);//这里我先直接从输出中取，测试for
+							list_get(&inpst->prgNodes,l,&inPrgInfoTmp);
 							if (inPrgInfoTmp->index != outPrgInfoTmp->index)
 								continue;
-
 							Commdes_t *inDesInfoTmp=inPrgInfoTmp->pmtDesList;
-							for (l = 0; l < inPrgInfoTmp->pmtDesListLen; l++)
+							for (m = 0; m < inPrgInfoTmp->pmtDesListLen; m++)
 							{
 								if (inDesInfoTmp->index != outDesInfoTmp->index)
+								{
+									inDesInfoTmp++;
 									continue;
+								}
 								unsigned char *data=inDesInfoTmp->data;
 								data+=2;
 								oldPid = (*data << 8) & 0x1f00;
@@ -1024,7 +1055,10 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 								break;
 						}
 						if (oldPid == 0x1fff)
+						{
+							outDesInfoTmp++;	
 							continue;
+						}
 
 						unsigned char *outdata=outDesInfoTmp->data;
 						outdata+=2;
@@ -1032,13 +1066,13 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 						outdata+=1;
 						pid |= *outdata;
 
-						// 查找是否有替换过此PID
+
 						lastThisPidMapToNewPid = -1;
-						for (k= 0; k < list_len(&PrgAVMuxListI); k++)
+						for (l= 0; l < list_len(&PrgAVMuxListI); l++)
 						{
 
 							MuxPidInfo_st *lastPidInfoTmp;
-							list_get(&PrgAVMuxListI,k,&lastPidInfoTmp);
+							list_get(&PrgAVMuxListI,l,&lastPidInfoTmp);
 
 							if (lastPidInfoTmp->oldPid == oldPid && lastPidInfoTmp->inChannel == outPrgInfoTmp->chnId)
 							{
@@ -1051,7 +1085,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							{
 								if (isNoticeSamePid)
 								{
-									//这里我直接终歿
+									printf("MessageBox Show  repeat map error : pid :%d\n",pid);
 									return 0;
 								}
 								outdata=outDesInfoTmp->data;
@@ -1071,15 +1105,21 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							pidMapTmp->oldPid = oldPid;
 							pidMapTmp->newPid = pid;
 							list_append(PrgAVMuxListI,pidMapTmp);
+							//	printf("prg->dest level  %d\n",pidMapTmp->newPid);
 						}
-					#endif 
+#endif 				
 					}
+
 					outDesInfoTmp++;					
 				}
 			}
-			//	printPrgAVMuxList();
+
+
+#if 1
+
+			//DataStream_st list foreach			
 			DataStream_t *DataStream_stTmp = outPrgInfoTmp->pdataStreamList;
-			for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)
+			for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)//for (k = 0; k < 3; k++)		
 			{
 				lastThisPidMapToNewPid = -1;
 				for (  l= 0; l < list_len(PrgAVMuxListI); l++)
@@ -1112,18 +1152,19 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 					pidMapTmp->oldPid = DataStream_stTmp->inPid;
 					pidMapTmp->newPid = DataStream_stTmp->outPid;
 					list_append(PrgAVMuxListI,pidMapTmp);
+					//printf("prg->DataStream_stTmp level  %d\n",pidMapTmp->newPid);
 				}
-
 				int isBreakDesSeek = 0;
+				//Commdes_st of DataStream_st foreach
 				Commdes_t *outDesInfoTmp = DataStream_stTmp->desNode;
 				for (l = 0; l < DataStream_stTmp->desNodeLen; l++)//
 				{
 					if (outDesInfoTmp->tag == 0x9 && !outDesInfoTmp->userNew)
 					{
-					#if 0
+
 						int oldPid = 0x1fff;
 						list_get(&(clsProgram.inPrgList), outPrgInfoTmp->chnId - 1, &inpst);
-						for (m = 0; m < 1; m++)//list inprg list
+						for (m = 0; m < list_len(&inpst->prgNodes); m++)//list inprg list
 						{
 							list_get(&inpst->prgNodes,m,&inPrgInfoTmp);	
 							if (inPrgInfoTmp->index != outPrgInfoTmp->index)
@@ -1133,13 +1174,20 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 
 							for (n = 0; n < inPrgInfoTmp->pdataStreamListLen; n++)//list datastreamlist of inprglist
 							{
-								if (DataStream_stTmpTmp->index != DataStream_stTmp->index)
+								if (DataStream_stTmpTmp->index != DataStream_stTmp->index)									
+								{
+									DataStream_stTmpTmp++;
 									continue;
+								}
+
 								Commdes_t *inDesInfoTmp=DataStream_stTmpTmp->desNode;
 								for (o = 0; o < DataStream_stTmpTmp->desNodeLen; o++)//list datastreamlist of inprglist
 								{
 									if (inDesInfoTmp->index != outDesInfoTmp->index)
+									{
+										inDesInfoTmp++;
 										continue;
+									}
 									unsigned char *outdata=inDesInfoTmp->data;
 									outdata+=2;
 									oldPid= (*outdata<< 8) & 0x1f00;
@@ -1153,7 +1201,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 
 							}
 
-							if (isBreakDesSeek)
+							if (isBreakDesSeek==1)
 								break;
 						}
 						if (oldPid == 0x1fff)
@@ -1182,6 +1230,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							{
 								if (isNoticeSamePid)
 								{
+									printf("MessageBox Show  repeat map error : pid :%d\n",pid);
 									return 0;
 								}
 								outdata=outDesInfoTmp->data;
@@ -1201,18 +1250,23 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 							pidMapTmp->oldPid = oldPid;
 							pidMapTmp->newPid = pid;
 							list_append(PrgAVMuxListI, pidMapTmp);
+							//printf("prg->DataStream_stTmp->dest level  %d\n",pidMapTmp->newPid);
+
 						}
-					#endif
+
 					}
+					outDesInfoTmp++;
 				}
 				DataStream_stTmp++;
 			}
-			//printPrgAVMuxList();
+#endif
 		}
+
 		if(list_len(PrgAVMuxListI)>0)
 		{
 			clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
-			//printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
+		//	printf("printPrgAVMuxList   out channel:%d ",i);
+		//	printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
 		}
 	}
 	return 1;
@@ -1222,7 +1276,7 @@ int MakePidMapTable(int outChannel,list_t  prginfolist)
 
 int DirectlyTransmit_repeatePid_verify(int outChn)
 {
-    int i,j;
+	int i,j;
 	if (clsProgram.PrgAVMuxList[outChn - 1] == NULL)
 		return 1;
 
@@ -1230,19 +1284,19 @@ int DirectlyTransmit_repeatePid_verify(int outChn)
 	list_get(&(clsProgram.outPrgList), outChn-1, &outpst);
 	if (list_len(&outpst->dtPidList) == 0)
 		return 1;
-	
+
 	MuxPidInfo_st *pidTmp;
 	MuxPidInfo_st *avPidTmp;
 
 	for (i = 0; i < list_len(&outpst->dtPidList); i++)
-		{
-			 list_get(&outpst->dtPidList, i, &pidTmp);
-			 //printf("outpst->dtPidList %d\n",pidTmp->oldPid);
+	{
+		list_get(&outpst->dtPidList, i, &pidTmp);
+		//printf("outpst->dtPidList %d\n",pidTmp->oldPid);
 
 		for (j = 0; j < list_len(clsProgram.PrgAVMuxList[outChn - 1]); j++)
 		{
 			list_get(clsProgram.PrgAVMuxList[outChn - 1], j, &avPidTmp);
-			
+
 			//printf("PrgAVMuxList %d\n",avPidTmp->oldPid);
 			if (avPidTmp->inChannel == pidTmp->inChannel)
 			{
@@ -1254,7 +1308,7 @@ int DirectlyTransmit_repeatePid_verify(int outChn)
 			}		
 		}
 
-		}
+	}
 
 	return 1;
 }
@@ -1278,17 +1332,64 @@ void printPRG(Dev_prgInfo_st* SDTS)
 {
 	int i;
 	int j;
-	printf("********\n");
+	int k;
+	printf("********gogogogogog\n");
 	printf("SDTS->chnId----%d\n",SDTS->chnId);
 	printf("newPcrPid----%d\n",SDTS->newPcrPid);
 	printf("oldPcrPid----%d\n",SDTS->oldPcrPid);
 	printf("pmtPid----%d\n",SDTS->pmtPid);
 	printf("prgNum----%d\n",SDTS->prgNum);
 
+
+#if 1
+	Commdes_t* p_command_st = SDTS->pmtDesList;
+	for (j = 0; j< SDTS->pmtDesListLen; j++)
+	{
+		printf("prg dst  index----%d\n",p_command_st->index);
+		printf("prg dst  tag ----%d\n",p_command_st->tag);
+		printf("prg dst  userNew----%d\n",p_command_st->userNew);
+		printf("prg dst  dataLen is :%d  vList: ",p_command_st->dataLen);
+
+		unsigned char *ptmp=p_command_st->data;
+		for (k = 0; k < p_command_st->dataLen; k++)
+		{
+			printf(" %d  ",*ptmp++);			
+
+		}
+		printf("\n");
+
+		p_command_st++;
+	}	
+#endif 
 	DataStream_t* dsInfoTmp = SDTS->pdataStreamList;
 	for (i = 0; i < SDTS->pdataStreamListLen; i++)
 	{
-		printf("dsInfoTmp->outPid----%d\n",dsInfoTmp->outPid);
+		printf("dsInfoTmp_DataStream_t->outPid----%d\n",dsInfoTmp->outPid);
+
+		Commdes_t* p_command_st = dsInfoTmp->desNode;
+		for (j = 0; j< dsInfoTmp->desNodeLen; j++)
+		{
+			printf("stream dst index----%d\n",p_command_st->index);
+			printf("stream dst  tag ----%d\n",p_command_st->tag);
+			printf("stream dst  userNew----%d\n",p_command_st->userNew);
+			printf("stream dst  dataLen is :%d  vList: ",p_command_st->dataLen);
+
+			unsigned char *ptmp=p_command_st->data;
+			for (k = 0; k < p_command_st->dataLen; k++)
+			{
+				printf(" %d  ",*ptmp++);			
+
+			}
+			printf("\n");
+
+			p_command_st++;
+		}	
+
 		dsInfoTmp++;
 	}
+
+
+
+
+
 }
