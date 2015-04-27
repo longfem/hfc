@@ -116,6 +116,18 @@ static int BigFormat_uintToBytes(unsigned long intValue, unsigned char outBytes[
 	return bytesLen;
 }
 
+static int BigFormat_fromBytes(int offset, int length, unsigned char inBytes[])
+{
+	int rtnInt = 0;
+	int i;
+	for (i = 0; i < length; i++)
+	{
+		rtnInt <<= 8;
+		rtnInt += inBytes[offset++];
+	}
+	return rtnInt;
+}
+
 int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int networkId, int verisonNumber)
 {
 
@@ -304,7 +316,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 	iAddr += 2;
 
 
-	
+
 	//int indexL1 = 1;
 
 
@@ -374,9 +386,9 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 		for (i = 0; i < outPrgInfo->pdataStreamListLen; i++)
 		{
 
-		//p_DataStream_st->streamType = dataStreamInfoTmp->streamType;
+			//p_DataStream_st->streamType = dataStreamInfoTmp->streamType;
 			sescLen++;
-		//p_DataStream_st->outPid = dataStreamInfoTmp->outPid;
+			//p_DataStream_st->outPid = dataStreamInfoTmp->outPid;
 			sescLen += 2;
 
 
@@ -423,7 +435,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 
 					desInfoTmp++;
-				//	p_Commdes_st++;
+					//	p_Commdes_st++;
 
 				}
 			}
@@ -448,14 +460,14 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
-//for git
-	#if 0
+	//for git
+#if 0
 	for(i=0; i<iAddr; i++)
-	printf("  %d          offset:%d  \n",tmpBytes[i],i);
+		printf("  %d          offset:%d  \n",tmpBytes[i],i);
 
 	printf("length is %d\n",iAddr);
 
-	#endif
+#endif
 	if (iAddr <= 188)
 	{
 		for (i = 0; i < iAddr; i++)
@@ -550,22 +562,28 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 		free(prgNameTmp);		
 		free(providerNameTmp);
 		iAddr += ptmpPrgInfo->prgNameLen;
-		
+
 #if 1
 
 		int j;
+		Commdes_t* desInfoTmp = ptmpPrgInfo->psdtDesList;
+
 		for (j = 0; j < ptmpPrgInfo->psdtDesListLen; j++)
 		{
-			Commdes_t* desInfoTmp = ptmpPrgInfo->psdtDesList;
+
 
 			if (desInfoTmp->tag == 0x48) // service_tag
+				{
+				desInfoTmp++;
 				continue;
+				}
 			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
 			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
 
 
 			memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
 			iAddr += desInfoTmp->dataLen;
+			desInfoTmp++;
 
 
 		}
@@ -596,21 +614,20 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
-
-#if 0
-
-	for(i=0; i<iAddr; i++)
-		printf("  %d		  offset:%d  \n",tmpBytes[i],i);
-
-	printf("sdt table length is %d\n",iAddr);
-#endif
-
-
-
 	if (iAddr < 1021) // 1108
 	{
 		for (i = 0; i < iAddr; i++)
 			sdtTable[i] = tmpBytes[i];
+
+
+		
+#if 0
+				
+			for(i=0; i<iAddr; i++)
+				printf("  %d		  offset:%d  \n",sdtTable[i],i);
+		
+			printf("sdt table length is %d\n",iAddr);
+#endif
 		return iAddr;
 	}
 	return 0;
@@ -649,8 +666,9 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 		| (1 << 0)); // current_next_indicator
 	tmpBytes[iAddr++] = 0; // section number
 	tmpBytes[iAddr++] = 0; // last_section_number
-	CA_descriptor *catInfoTmp;
 
+
+	CA_descriptor *catInfoTmp;
 	for (i = 0; i <list_len(&caNode->caIdenList); i++)
 	{
 		list_get(&caNode->caIdenList, i, &catInfoTmp);
@@ -676,6 +694,16 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
 
+#if 0
+	
+		for(i=0; i<iAddr; i++)
+			printf("  %d		  offset:%d  \n",tmpBytes[i],i);
+	
+		printf("cat table length is %d\n",iAddr);
+#endif
+
+
+
 	if (iAddr <= 188)
 	{
 		for (i = 0; i < iAddr; i++)
@@ -692,13 +720,9 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, int verisonNumber)
 {
 
-
-#if 0
-	//nitTable = new byte[188];
 	unsigned char tmpBytes[8 * 188];
 	int iAddr = 0;
-	int i;
-	int j;
+	int i,j;
 	// head
 	tmpBytes[iAddr++] = 0x47;
 	tmpBytes[iAddr++] = 0x40;
@@ -724,7 +748,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 		for (i = 0; i <nitInfo->nameListLen; i++)
 		{
 			tmpBytes[iAddr++] = (unsigned char)nameDesTmp->tag;
-			if (nameDesTmp.data != null)
+			if (nameDesTmp->dataLen>0)
 			{
 				memcpy(tmpBytes+iAddr, nameDesTmp->data,nameDesTmp->dataLen);
 				iAddr += nameDesTmp->dataLen;
@@ -754,28 +778,16 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			tmpBytes[iAddr++] = (unsigned char)(tsLoopTmp->original_network_id >> 8);
 			tmpBytes[iAddr++] = (unsigned char)(tsLoopTmp->original_network_id);
 			int tsLoopDesLenAddr = iAddr;
-			iAddr += 2; // 跳过描述符长度字节
-			if (tsLoopTmp->desListLen>0)
+			iAddr += 2;  
+			if (tsLoopTmp->BufferUn_stLen>0)
 			{
-				unsigned char **tsDesBytesTmp=tsLoopTmp->desList;
-				int *tsDesBytesTmpLen=tsLoopTmp->byteLen;
-				for (j = 0; j <tsLoopTmp->desList; j++)
+				BufferUn_st *tsDesBytesTmp=tsLoopTmp->desList;
+				for (j = 0; j <tsLoopTmp->BufferUn_stLen; j++)
 				{
-					//tmpBytes[iAddr++] = (byte)tsDesTmp.tag;
-					//if (tsDesTmp.data != null)
-					//{
-					//	  tmpBytes[iAddr++] = (byte)tsDesTmp.data.Length;
-					//	  Array.Copy(tsDesTmp.data, 0, tmpBytes, iAddr, tsDesTmp.data.Length);
-					//	  iAddr += tsDesTmp.data.Length;
-					//}
-					//else
-					//{
-					//	  tmpBytes[iAddr++] = 0;
-					//}
-					if (tsDesBytesTmpLen > 0)
+					if (tsDesBytesTmp->bufLen>0)
 					{
-						memcpy(tmpBytes+iAddr, *tsDesBytesTmp,*tsDesBytesTmpLen);
-						iAddr +=(unsigned char)*tsDesBytesTmpLen;
+						memcpy(tmpBytes+iAddr, tsDesBytesTmp->pbuf,tsDesBytesTmp->bufLen);
+						iAddr +=tsDesBytesTmp->bufLen;
 					}
 					tsDesBytesTmp++;
 				}
@@ -783,6 +795,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			int tsDesLen = iAddr - tsLoopDesLenAddr - 2;
 			tmpBytes[tsLoopDesLenAddr] = (unsigned char)(0xf0 | (tsDesLen >> 8));
 			tmpBytes[tsLoopDesLenAddr + 1] = (unsigned char)tsDesLen;
+			tsLoopTmp++;
 		}
 	}
 	int tsLoopLen = iAddr - tsLoopLenAddr - 2;
@@ -793,7 +806,6 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	// -- crc --
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
-
 
 #if 0
 
@@ -809,8 +821,12 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			nitTable[i] = tmpBytes[i];
 		return 1;
 	}
-	#endif
-	return 0;
+	else
+	{
+		return 0;
+	}
+
+
 
 }
 
@@ -1164,6 +1180,7 @@ int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
 		nameNode->desListLen=cLen[q];
 		nameNode->desList=(Commdes_t*)malloc(sizeof(Commdes_t)*cLen[q]);
 		Commdes_t* desNode= nameNode->desList;
+		
 		while (ppStart + 2 <= ppEnd)
 		{
 
@@ -1173,8 +1190,7 @@ int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
 
 			if (ppStart + desNodeLen <= ppEnd)
 			{
-
-				//这里	有可能不进去，但是外面	desNode++仍然执行，有待改进
+		
 				desNode->data  = malloc(desNodeLen);
 				memcpy(desNode->data, buf+ppStart, desNodeLen);
 				desNode->dataLen=desNodeLen;
@@ -1194,7 +1210,7 @@ int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
 			}
 			ppStart += desNodeLen;
 			pStart += 2 + desNodeLen;
-			desNode++;
+			desNode++;//for desnode always ++;desNode->data   is possiblely be NULL
 
 		}
 
@@ -1292,5 +1308,97 @@ int  ParseCat(unsigned char buf[], int offset, cat_senction_st *catSec)
 	return 1;
 }
 
+int  ParseNit(unsigned char buf[], int offset, Nit_section_t *nitSec)
+{
+	int i;
+	int iAddr = offset;
+	if (buf[iAddr++] != 0x40)//
+		return 0;
+	int secLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
+	iAddr += 2;
+	nitSec->networkId = BigFormat_fromBytes(iAddr, 2, buf); iAddr += 2;
+	nitSec->version = (buf[iAddr++] >> 1) & 0x1f;
+	int secNum = buf[iAddr++];
+	int lastSecNum = buf[iAddr++];
+	int nameDesLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
+	iAddr += 2;
 
+
+	int tmpLen=0;
+	int tmpiAddr=iAddr;
+	for (i = 0; i < nameDesLen; )
+	{
+		tmpiAddr++;
+		int desDataLen = buf[tmpiAddr++];
+		tmpiAddr += desDataLen;
+		i += 2 + desDataLen;
+
+		tmpLen++;			 
+	}
+	nitSec->nameListLen=tmpLen;
+	nitSec->nameList=(Commdes_t*)malloc(sizeof(Commdes_t)*tmpLen);
+	Commdes_t *nameDesTmp= nitSec->nameList;
+
+	for (i = 0; i < nameDesLen; )
+	{
+		nameDesTmp->tag = buf[iAddr++];
+		int desDataLen = buf[iAddr++];
+
+		nameDesTmp->data= malloc(desDataLen);
+		memcpy(nameDesTmp->data, buf+iAddr, desDataLen);
+		nameDesTmp->dataLen=desDataLen;
+
+		iAddr += desDataLen;
+		nameDesTmp++;
+		i += 2 + desDataLen;
+	}
+
+	int tsLoopLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
+	iAddr += 2;
+
+
+	//reset  count
+	tmpLen=0;
+	tmpiAddr=iAddr;
+	for (i = 0; i < nameDesLen; )
+	{
+		tmpiAddr+=2;
+		tmpiAddr+=2;
+		int tsDesLen = ((buf[tmpiAddr] & 0x0f) << 8) | buf[tmpiAddr + 1];
+		tmpiAddr+=2;
+
+		tmpiAddr += tsDesLen;
+		i += 6 + tsDesLen;
+
+		tmpLen++;			 
+	}
+
+
+	nitSec->streamLoopLen=tmpLen;
+	nitSec->streamLoop=(Nit_streamLoop_t*)malloc(sizeof(Nit_streamLoop_t)*tmpLen);
+	Nit_streamLoop_t *tsLoopTmp= nitSec->streamLoop;
+
+
+	for (i = 0; i < tsLoopLen; )
+	{
+		tsLoopTmp->desList = (BufferUn_st*)malloc(sizeof(BufferUn_st));
+		BufferUn_st *desBytes=tsLoopTmp->desList;
+		tsLoopTmp->streamId = BigFormat_fromBytes(iAddr, 2, buf);
+		iAddr += 2;
+		tsLoopTmp->original_network_id = BigFormat_fromBytes(iAddr, 2, buf);
+		iAddr += 2;
+		int tsDesLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
+		iAddr += 2;
+
+		desBytes->pbuf= malloc(tsDesLen);
+		memcpy(desBytes->pbuf, buf+iAddr, tsDesLen);
+		desBytes->bufLen=tsDesLen;
+
+		iAddr += tsDesLen;
+		desBytes++;//no mean ,always 1 time
+		tsLoopTmp++;
+		i += 6 + tsDesLen;
+	}
+	return 1;
+}
 

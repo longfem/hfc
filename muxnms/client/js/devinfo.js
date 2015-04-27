@@ -1206,24 +1206,24 @@ function devinfo_output(devType){
 								$('.prg_prc1').val(data.oldPcrPid.toString(16));
 								$('.prg_prc2').val(data.newPcrPid.toString(16));
 								$('#r_servicetype')[0].options[Number(data.serviceType) - 1].selected = true;
-								dataSet.length = 0;	
+								dataSet.length = 0;
 								$.each(data.children, function(key, itemv) {
 									var item = [itemv.index,itemv.inChn, itemv.streamtype,itemv.inpid.toString(16),itemv.outpid.toString(16)];
 									dataSet[dataSet.length] = item;
 								});
                                 globalObj._tbleditcount = dataSet.length;
 								//编辑节目对话框表
-								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {									
-									$('#tbl_editprg').dataTable().fnClearTable();
-									$('#tbl_editprg').dataTable().fnAddData(dataSet);
-								}else{
+                                var xxxx = $('#tbl_editprg').dataTable();
+								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+                                    $('#tbl_editprg').dataTable().fnClearTable();
+                                    $('#tbl_editprg').dataTable().fnAddData(dataSet);
+                                }else{
                                     globalObj._tbl_edit = $('#tbl_editprg').dataTable( {
 										"data": dataSet,
 										"order": [[ 0, "asc" ]],
 										"paging":   false,
 										"info":     false,
 										"searching":   false,
-										"scrollCollapse": true,										
 										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
 											switch(aData[2]){
 												case 2:
@@ -1260,7 +1260,8 @@ function devinfo_output(devType){
 											{ "title": "输入PID(Hex)"},
 											{ "title": "输出PID(Hex)" }
 										]
-									});   
+									});
+                                    globalObj._tbl_edit.fnDraw();
 									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
 										if ( $(this).hasClass('selected') ) {
 											$(this).removeClass('selected');
@@ -1269,7 +1270,7 @@ function devinfo_output(devType){
 											$(this).addClass('selected');
 										}
 									} );
-								}							
+								}
 							},    
 							error : function(err) {    
 								var xxx = err;
@@ -2023,6 +2024,69 @@ function devinfo_output(devType){
 						dialog_desc.dialog( "open" );
 						break;
 					} case '#cus_add': {//添加自增节目
+                        $('.prg_name').val("");
+                        $('.prg_merchant').val("");
+                        $('.prg_no').val("1");
+                        $('.prg_pid').val("1ff");
+                        $('.prg_prc').val(data.node.data.chnid.toString());
+                        $('.prg_prc1').val("1ffe");
+                        $('.prg_prc2').val("1ffe");
+                        //编辑节目对话框表
+                        if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
+                            $('#tbl_editprg').dataTable().fnClearTable();
+                        }else{
+                            globalObj._tbl_edit = $('#tbl_editprg').dataTable( {
+                                "order": [[ 0, "asc" ]],
+                                "paging":   false,
+                                "info":     false,
+                                "searching":   false,
+                                "scrollCollapse": true,
+                                "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+                                    switch(aData[2]){
+                                        case 2:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex+ '" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1">1-MPEG1 Video</option>'
+                                            +'<option value ="2" selected="selected">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                            break;
+                                        case 4:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1">1-MPEG1 Video</option>'
+                                            +'<option value ="2">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4" selected="selected">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                            break;
+                                        default:
+                                            $('td:eq(2)', nRow).html( '<select id="r_streamtype'+iDisplayIndex +'" name="r_streamtype'+iDisplayIndex +'">'
+                                            +'<option value ="1" class="selected">1-MPEG1 Video</option>'
+                                            +'<option value ="2">2-MPEG2 Video</option>'
+                                            +'<option value ="3">3-MPEG1 Audio</option>'
+                                            +'<option value ="4">4-MPEG2 Audio</option>'
+                                            +'</select>' );
+                                    }
+                                    $('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_inpid'+iDisplayIndex+ '" name="r_inpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+                                    $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
+                                },
+                                "columns": [
+                                    { "title": "序号" },
+                                    { "title": "输入通道", "width": "70px"},
+                                    { "title": "流类型"},
+                                    { "title": "输入PID(Hex)"},
+                                    { "title": "输出PID(Hex)" }
+                                ]
+                            });
+                            $('#tbl_editprg tbody').on( 'click', 'tr', function () {
+                                if ( $(this).hasClass('selected') ) {
+                                    $(this).removeClass('selected');
+                                }else {
+                                    $('#tbl_editprg').DataTable().$('tr.selected').removeClass('selected');
+                                    $(this).addClass('selected');
+                                }
+                            } );
+                        }
                         globalObj._prgoptflag = 1;
                         dialog_edit.dialog( "open" );
                         break;
@@ -2370,10 +2434,19 @@ function devinfo_output(devType){
                             var tmptree;
                             if(globalObj._channel == 1){
                                 tmptree = $("#channel").fancytree("getTree");
-                                snt = globalObj._selectcount;
+                                if(globalObj._prgoptflag == 1){
+                                    snt = globalObj._selectcount + 1;
+                                }else{
+                                    snt = globalObj._selectcount;
+                                }
+
                             }else if(globalObj._channel == 2){
                                 tmptree = $("#channel2").fancytree("getTree");
-                                snt = globalObj._selectcount2;
+                                if(globalObj._prgoptflag == 1){
+                                    snt = globalObj._selectcount2 + 1;
+                                }else{
+                                    snt = globalObj._selectcount2;
+                                }
                             }
                             //获取输出通道信息
                             readoutprgs(tmptree, snt);
@@ -2383,10 +2456,11 @@ function devinfo_output(devType){
 					 }
 				});
 				dialog_edit.dialog( "close" );
-
+                $('#tbl_editprg').DataTable().destroy();
 			},
 			"取消": function() {
-			  dialog_edit.dialog( "close" );
+			    dialog_edit.dialog( "close" );
+                $('#tbl_editprg').DataTable().destroy();
 			}
 		}
 	});

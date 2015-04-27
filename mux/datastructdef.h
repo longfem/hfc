@@ -377,11 +377,11 @@ typedef struct Nit_streamLoop_st
 {
 	 int streamId;
 	 int original_network_id;
-	 unsigned char **desList; // Commdes_st
-	 int *byteLen;
-	 int desListLen;
+	 BufferUn_st *desList; // Commdes_st//in fact is byte[]
+	 int BufferUn_stLen;
 
 }Nit_streamLoop_t;
+
 
 typedef struct Nit_section_st
 {

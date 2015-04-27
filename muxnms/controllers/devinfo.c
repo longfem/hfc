@@ -11,6 +11,8 @@
 
 extern ClsProgram_st clsProgram;
 
+char *tmpip = "192.168.1.49";
+//conn->rx->parsedUri->host
 static void getDevinfo(HttpConn *conn) { \
 	if(session("isAuthed") != NULL){
 		if (strcmp(session("isAuthed"),"true") != 0) {
@@ -22,9 +24,8 @@ static void getDevinfo(HttpConn *conn) { \
 		return;
 	}
 	MprJson *jsonparam = httpGetParams(conn);
-    printf("=======ip===>>>%s\n", conn->rx->parsedUri->host);
 	char pProg[256] = {0}; 
-    getbaseJson(conn->rx->parsedUri->host, pProg);
+    getbaseJson(tmpip, pProg);
 	render(pProg);
 }
 
