@@ -77,12 +77,14 @@ int SendTable(char *ip, int outChnId)
 	psiType = sdt;
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
 	{		
+		printf("======XXXXX==== send sdt not null len=%d\n", pbuff->bufLen);
 		if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 
 	}
 	else
 	{	
+		printf("======XXXXX==== send SDT NULL NULL=========!!!!=====\n");
 		if (SendTable_psi(ip, outChnId, sdt, NULL, 0) != ok)
 			rslt = 0;
 	}
