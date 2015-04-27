@@ -108,7 +108,7 @@
 		$.ajax({
 			 type: "GET",
 			 async:false,
-			 url: "http://"+localip+":4000/do/devinfo/getDevinfo",
+			 url: "http://"+localip+":4000/do/devinfo/getDevinfo?ip="+ localip,
 			 dataType: "json",
 			 success: function(data){
 				recdata = data;
@@ -173,7 +173,7 @@
 			$.ajax({
 				 type: "GET",
 				 async:false,
-				 url: "http://"+localip+":4000/do/devinfo/getDevinfo",
+				 url: "http://"+localip+":4000/do/devinfo/getDevinfo?ip="+ localip,
 				 dataType: "json",
 				 success: function(data){
 					recdata = data;

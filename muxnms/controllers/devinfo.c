@@ -8,11 +8,10 @@
 /*
     Get a resource
  */
-char ip[16] = "192.168.1.144";
-//char ip[16] = "127.0.0.1";
+
 extern ClsProgram_st clsProgram;
 
-static void getDevinfo(HttpConn *conn) { 
+static void getDevinfo(HttpConn *conn) { \
 	if(session("isAuthed") != NULL){
 		if (strcmp(session("isAuthed"),"true") != 0) {
 			render("login.esp");
@@ -22,8 +21,10 @@ static void getDevinfo(HttpConn *conn) {
 		render("login.esp");
 		return;
 	}
+	MprJson *jsonparam = httpGetParams(conn);
+    printf("=======ip===>>>%s\n", conn->rx->parsedUri->host);
 	char pProg[256] = {0}; 
-    getbaseJson(ip, pProg);
+    getbaseJson(conn->rx->parsedUri->host, pProg);
 	render(pProg);
 }
 
@@ -69,7 +70,7 @@ static void espinit() {
 
 
 static void common(HttpConn *conn) {
-	
+
 }
 
 /*

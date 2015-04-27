@@ -51,11 +51,11 @@ unsigned int CreateTable(int outChnId)
 int sendOutPutMuxInfo(char *ip, int outChnId){
 	//------ 设置输出通道信息 -----		
 		int outChnIndexTmp = outChnId - 1;        
-        printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
-		ChnBypass_write(ip, outChnId); // 发送直传标志
-		printf("===RecordInputChnUseStatus  start===\n");
-        RecordInputChnUseStatus(outChnId);
-        printf("===RecordInputChnUseStatus  end===\n");
+        //printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
+		//ChnBypass_write(ip, outChnId); // 发送直传标志
+		//printf("===RecordInputChnUseStatus  start===\n");
+        ///RecordInputChnUseStatus(outChnId);
+        //printf("===RecordInputChnUseStatus  end===\n");
 
 		SendMux(ip, outChnId); // 发送表复用信息
 		
