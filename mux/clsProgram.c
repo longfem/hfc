@@ -364,8 +364,7 @@ unsigned char MakeOutputBytesAndSend(char *ip, int outChn)
 
 	if (sendLen > 0)
 	{
-		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen)){
-			printf("bytes 31\n");
+		if (SendOutputPrgInfo(ip, outChn, tmpBytes, sendLen)){			
 			free(tmpBytes);
 			return 1;
 		}

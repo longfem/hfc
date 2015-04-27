@@ -15,7 +15,7 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList);
 ErrorTypeEm SendOutPrgMuxMap_finish(char *ip, int outChannel);
 ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel);
 ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList);
-list_t * MaketPaketSection(unsigned char *table, int length);
+void MaketPaketSection(unsigned char *table, int length, list_t **retlist);
 ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList);
 ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsigned char *ptableBytes, int length);
 ErrorTypeEm SendTable_psi_finish(char *ip, int outChannel);
