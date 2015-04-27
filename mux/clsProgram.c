@@ -750,7 +750,7 @@ int DesPidRefresh(int inChn, int prgIndex, int avIndex,Commdes_t *desList,int de
 	for (i = 0; i < desListLen; i++)
 	{
 
-		if (desInfoTmp->tag == 0x09)//CA相关才会进去
+		if (desInfoTmp->tag == 0x09)//CA锟斤拷夭呕锟斤拷去
 		{
 			if (desInfoTmp->dataLen>=4)
 			{
@@ -954,7 +954,6 @@ int MakePidMapTable(int outChannel)
 	int k;
 	int l;
 	int m,n,o,oprgPidInfo;
-
 	int isAddedPidLenth=0x2000;
 	unsigned char isAddedPid[isAddedPidLenth];
 	for ( i = 0; i < isAddedPidLenth; i++)
@@ -963,8 +962,6 @@ int MakePidMapTable(int outChannel)
 	}
 
 	int lastThisPidMapToNewPid = -1;
-
-
 	ChannelProgramSt *inpst;
 	Dev_prgInfo_st *inPrgInfoTmp;
 	for ( i = 0; i <clsProgram._outChannelCntMax; i++)
@@ -984,8 +981,6 @@ int MakePidMapTable(int outChannel)
 
 		ChannelProgramSt *outpst = NULL;
 		list_get(&(clsProgram.outPrgList), i, &outpst);
-
-
 		for (j = 0; j < list_len(&outpst->prgNodes); j++)
 		{
 
@@ -1007,8 +1002,7 @@ int MakePidMapTable(int outChannel)
 					list_append(PrgAVMuxListI,pidMapTmp);
 					//printf("prg level  %d\n",pidMapTmp->newPid);
 				}
-			}		
-
+			}
 			//Commdes_st list foreach
 			if (outPrgInfoTmp->pmtDesListLen>0)
 			{
@@ -1059,20 +1053,17 @@ int MakePidMapTable(int outChannel)
 							outDesInfoTmp++;	
 							continue;
 						}
-
 						unsigned char *outdata=outDesInfoTmp->data;
 						outdata+=2;
 						int pid = (*outdata<< 8) & 0x1f00;
 						outdata+=1;
 						pid |= *outdata;
 
-
 						lastThisPidMapToNewPid = -1;
-						for (l= 0; l < list_len(&PrgAVMuxListI); l++)
+						for (l= 0; l < list_len(PrgAVMuxListI); l++)
 						{
-
 							MuxPidInfo_st *lastPidInfoTmp;
-							list_get(&PrgAVMuxListI,l,&lastPidInfoTmp);
+							list_get(PrgAVMuxListI,l,&lastPidInfoTmp);
 
 							if (lastPidInfoTmp->oldPid == oldPid && lastPidInfoTmp->inChannel == outPrgInfoTmp->chnId)
 							{
@@ -1109,14 +1100,12 @@ int MakePidMapTable(int outChannel)
 						}
 #endif 				
 					}
-
 					outDesInfoTmp++;					
 				}
 			}
 
 
 #if 1
-
 			//DataStream_st list foreach			
 			DataStream_t *DataStream_stTmp = outPrgInfoTmp->pdataStreamList;
 			for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)//for (k = 0; k < 3; k++)		
@@ -1213,10 +1202,10 @@ int MakePidMapTable(int outChannel)
 						outdata+=1;
 						pid |= *outdata;
 						lastThisPidMapToNewPid = -1;
-						for (oprgPidInfo= 0; oprgPidInfo < list_len(&PrgAVMuxListI); oprgPidInfo++)
+						for (oprgPidInfo= 0; oprgPidInfo < list_len(PrgAVMuxListI); oprgPidInfo++)
 						{
 							MuxPidInfo_st *lastPidInfoTmp;
-							list_get(&PrgAVMuxListI,oprgPidInfo,&lastPidInfoTmp);
+							list_get(PrgAVMuxListI,oprgPidInfo,&lastPidInfoTmp);
 
 							if (lastPidInfoTmp->oldPid == oldPid && lastPidInfoTmp->inChannel == outPrgInfoTmp->chnId)
 							{

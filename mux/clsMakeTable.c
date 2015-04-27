@@ -49,12 +49,11 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 
 	
 
-	if (AutoMakeNewPid(outChnId)==0)
-		return 0;	
-
+	//if (AutoMakeNewPid(outChnId)==0)
+	//	return 0;
  	 //MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId);
-
+  	printf("------------->>>end\n");
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
 	{
@@ -62,15 +61,12 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 		return 0;
 	}
 
-
-
 	int streamId = outChnArray[outChnIndex].streamId;
 	int netWorkId = outChnArray[outChnIndex].networkId;
 	int oringinalNetworkId = outChnArray[outChnIndex].oringal_networkid;
 	int version = outChnArray[outChnIndex].version;
 
 	// PAT
-
 
 	if (outChnArray[outChnIndex].isAutoRaiseVersion==1) 
 	{
