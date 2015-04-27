@@ -691,7 +691,7 @@ ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
     return ok;
 }
 
-list_t * MaketPaketSection(unsigned char *table, int length)
+void MaketPaketSection(unsigned char *table, int length, list_t **retlist)
 {
     list_t *outList = malloc(sizeof(list_t));
 
@@ -716,8 +716,10 @@ list_t * MaketPaketSection(unsigned char *table, int length)
        
 
         pPacket->bufLen = length;
-        list_append(outList, pPacket);        
-        return outList;
+        list_append(outList, pPacket);  
+
+        *retlist = outList;      
+        return ;
     }
     else
     {   
@@ -765,12 +767,12 @@ list_t * MaketPaketSection(unsigned char *table, int length)
                 length -= 184;
             }
                         
-            list_append(outList, tmpBytes);                    
+            list_append(outList, pPacket);                    
         }
         
     }
-        
-    return outList;
+    
+    *retlist = outList;
 }
 
 ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
@@ -824,7 +826,7 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 	
     res = ok;
 
-	list_t *paketList = NULL;
+	
 	
 	//printf("\n####Recive SendTable_pmt cccc receive nums pmtListLen=[%d]\n", pmtListLen );
     table_pmtList_st  *pmt_tablelist = NULL;
@@ -833,6 +835,7 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
     ////////////////////////////////////////////////////////////////////////
 	unsigned char iPmtCnt = 1;
     
+    list_t * paketlist= NULL;
 
 	for (i = 0; i < pmtListLen; i++)
 	{
@@ -842,9 +845,9 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 		 
         if(pbuff== NULL) continue;
 
+		list_t *paketList = NULL;
 		
-		
-		paketList = MaketPaketSection(pbuff->pbuf, pbuff->bufLen);
+		MaketPaketSection(pbuff->pbuf, pbuff->bufLen, &paketlist);
 
 		
 		 
@@ -943,10 +946,12 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
 
 ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsigned char *ptableBytes, int length)
 {
-    unsigned char buf[256];
+    unsigned char buf[1024];
     int i = 0, j=0;
-    unsigned char sendbuf[256];
+    unsigned char sendbuf[2048];
     int slen=0;
+
+    int k=0;
 
     int dataAddr, iAddr;
       
@@ -991,7 +996,7 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 	list_t *paketList = NULL;
 
 
-	paketList = MaketPaketSection(ptableBytes, length);
+	MaketPaketSection(ptableBytes, length, &paketList);
 
     
     int paketListLen =0 ;
@@ -1005,13 +1010,11 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 	}
 
 
-   
-
     BufferUn_st *pPacket = NULL;
 	for (i = 0; i < paketListLen; i++)
 	{
 		iAddr = 0;
-
+        
         memset(sendbuf, 0 , sizeof(sendbuf));
         sendbuf[0]=0x77;
         sendbuf[1]=0x6C;
@@ -1032,30 +1035,45 @@ ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsi
 			sendbuf[7] = (unsigned char)(i + 1);
 		}
         
-
+      
         pPacket = NULL;
         list_get(paketList, i, &pPacket);
-
+      
         memcpy(sendbuf + 8, (unsigned char *)pPacket->pbuf, pPacket->bufLen);
 
-        memset(buf,0,sizeof(buf));
+
+        memset(buf,0,sizeof(buf));        
         communicate(ip, sendbuf, 8 + pPacket->bufLen, buf, &slen);
 
 
-        free(pPacket);
-        pPacket = NULL;
-		
-		if( slen > 8 ){
+		if( 0 == slen  ){
               res = ok;
         }
         else{            
-            break ;          
+            for(i= paketListLen -1 ;i>-1;i--){    
+                pPacket = NULL;
+                list_get(paketList, i, &pPacket); 
+                if(pPacket != NULL){
+                    free(pPacket);
+                    pPacket = NULL;    
+                } 
+
+                list_pop(paketList,i);        
+            }
+            return error ;          
         } 
 
 	}
-    
+        
     //free ptemp
-    for(i= paketListLen -1 ;i>-1;i--){               
+    for(i= paketListLen -1 ;i>-1;i--){    
+        pPacket = NULL;
+        list_get(paketList, i, &pPacket); 
+        if(pPacket != NULL){
+            free(pPacket);
+            pPacket = NULL;    
+        } 
+
         list_pop(paketList,i);        
     }
 
