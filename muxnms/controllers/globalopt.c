@@ -14,7 +14,7 @@
 /*
     Create a new resource in the database
  */
-char *tmpip = "192.168.1.49";
+//char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 char optstr[256] = {0};
 
@@ -51,7 +51,7 @@ static void reboot(HttpConn *conn) {
         return;
     }
     
-	rebootDevice(tmpip);
+	rebootDevice(conn->rx->parsedUri->host);
 	rendersts(str, 1);
 	render(str);
 	//add optlog
@@ -89,7 +89,7 @@ static void reset(HttpConn *conn) {
         return;
     }
     
-	restoreFactory(tmpip);
+	restoreFactory(conn->rx->parsedUri->host);
 	rendersts(str, 1);
 	render(str);
 	//add optlog
@@ -136,12 +136,12 @@ static void setDevip(HttpConn *conn) {
 	int flag = ptr1 - param;
 	substr(param, pos + 1, flag, newgatway);
 	substr(param, flag + 1, strlen(param), submask);
-	unsigned int tmpip = ntohl( inet_addr( newip ) );
+	unsigned int vip = ntohl( inet_addr( newip ) );
 	unsigned int tmpgatway = ntohl( inet_addr( newgatway ) );
 	unsigned int tmpsubmask = ntohl( inet_addr( submask ) );
-	if(0 == setIp(tmpip, tmpip)){
-		setGateway(tmpip, tmpgatway);
-		getSubMask(tmpip, tmpsubmask);
+	if(0 == setIp(conn->rx->parsedUri->host, vip)){
+		setGateway(conn->rx->parsedUri->host, tmpgatway);
+		getSubMask(conn->rx->parsedUri->host, tmpsubmask);
 	}
 	rendersts(str, 1);
 	render(str);
@@ -254,18 +254,18 @@ static void getmonitorinfo(HttpConn *conn) {
     char* jsonstring;
     int outValidBitrate = 0;
     unsigned int outstatus = 0;
-    OutChn_validBitrateGet(tmpip, 1, &outValidBitrate);
-    GetOutChannelStatus(tmpip, 1, &outstatus);
+    OutChn_validBitrateGet(conn->rx->parsedUri->host, 1, &outValidBitrate);
+    GetOutChannelStatus(conn->rx->parsedUri->host, 1, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus", outstatus);
     outValidBitrate = 0;
     outstatus = 0;
-    OutChn_validBitrateGet(tmpip, 2, &outValidBitrate);
-    GetOutChannelStatus(tmpip, 2, &outstatus);
+    OutChn_validBitrateGet(conn->rx->parsedUri->host, 2, &outValidBitrate);
+    GetOutChannelStatus(conn->rx->parsedUri->host, 2, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate2", outValidBitrate);
     cJSON_AddNumberToObject(result,"outstatus2", outstatus);
 
-    int errRslt = FlagInputSignal(tmpip, &inputStatus);
+    int errRslt = FlagInputSignal(conn->rx->parsedUri->host, &inputStatus);
     ShowNeedChnDataButNoInputWarning(errRslt, inputStatus, result);
 
     jsonstring = cJSON_PrintUnformatted(result);

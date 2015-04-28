@@ -1213,7 +1213,7 @@ function devinfo_output(devType){
 								});
                                 globalObj._tbleditcount = dataSet.length;
 								//编辑节目对话框表
-                                var xxxx = $('#tbl_editprg').dataTable();
+                                //var xxxx = $('#tbl_editprg').dataTable();
 								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
                                     $('#tbl_editprg').dataTable().fnClearTable();
                                     $('#tbl_editprg').dataTable().fnAddData(dataSet);
