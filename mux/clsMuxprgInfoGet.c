@@ -877,6 +877,10 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
         sendbuf[5]=0x02;
         sendbuf[6]=(unsigned char)(pmtListLen & 0xFF);
 
+           for(k=0;i<7;i++)
+                printf("send pmt  buf[%d]=0x[%02x]\n",k, buf[k]);
+           
+
         communicate(ip, sendbuf, 7, buf, &slen);
     
        // printf("\n####Recive SendTable_pmt now send data nums=[%d]\n", slen );
