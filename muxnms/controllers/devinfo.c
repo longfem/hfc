@@ -41,6 +41,7 @@ static void espinit() {
 	clsProgram.prgPid_max = 0xfff;
 	clsProgram.subPrgPid_min = 0x1000;
 	clsProgram.subPrgPid_max = 0x1ff0;
+	clsProgram.pidMap_eachTransmit_numberMax = 200;
 	//给全局变量申请内存
 	for(i=0; i<clsProgram._intChannelCntMax; i++){
 		pst = malloc(sizeof(ChannelProgramSt));

@@ -6,11 +6,12 @@
 #ifndef _CLSMUX_PRGINFO_GET_H_
 #define _CLSMUX_PRGINFO_GET_H_
 
+int LittleFormat_fromBytes(int offset, int length, char *inBytes);
 ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate);
 ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid);
 int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate);
-ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList); // MuxPrgInfo_st;
-ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList); // MuxPidInfo_st;
+ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t **muxPrgList); // MuxPrgInfo_st;
+ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t **muxPidList); // MuxPidInfo_st;
 ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList);
 ErrorTypeEm SendOutPrgMuxMap_finish(char *ip, int outChannel);
 ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel);

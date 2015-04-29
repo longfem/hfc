@@ -12,76 +12,15 @@ extern ClsParams_st *pdb;
 extern ClsProgram_st clsProgram;
 
 
-//SearchingStatus GetSearchingStatus(int inChn)
-//{
-//    int iAddr = 0;
-//    byte[] cmdBytes = new byte[20];
-//    cmdBytes[iAddr++] = _startBytes[0];
-//    cmdBytes[iAddr++] = _startBytes[1];
-//    cmdBytes[iAddr++] = 0x11;
-//    cmdBytes[iAddr++] = 0;
-//    cmdBytes[iAddr++] = (byte)inChn;
-//
-//    Array.Copy(cmdBytes, _buf, iAddr);
-//    int readLen = netConn.WriteAndRead(_buf, iAddr);
-//    ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
-//    if (checkRslt != ErrorTypeEm.ok)
-//        return SearchingStatus.Error;
-//    SearchingStatus rtnValue = (SearchingStatus)_buf[iAddr];
-//    return rtnValue;
-//}
-//
-//
-//ErrorTypeEm Search(int inChn)
-//{
-//    isSearchingContinue = true;
-//
-//    int iAddr = 0;
-//    byte[] cmdBytes = new byte[20];
-//    cmdBytes[iAddr++] = _startBytes[0];
-//    cmdBytes[iAddr++] = _startBytes[1];
-//    cmdBytes[iAddr++] = 0x11;
-//    cmdBytes[iAddr++] = 1;
-//    cmdBytes[iAddr++] = (byte)inChn;
-//
-//    Array.Copy(cmdBytes, _buf, iAddr);
-//    int readLen = netConn.WriteAndRead(_buf, iAddr);
-//    ErrorTypeEm checkRslt = CheckReturnBytes(cmdBytes, iAddr, _buf, readLen);
-//    if (checkRslt != ErrorTypeEm.ok)
-//    {
-//        ShowInChannelStatus(false, 0);
-//        return ErrorTypeEm.cmd;
-//    }
-//    int rtnValue = _buf[iAddr];
-//    if (rtnValue != 0)
-//        return ErrorTypeEm.cmd;
-//
-//    SearchingStatus searchStatus = SearchingStatus.Error;
-//
-//    //DateTime startTime = DateTime.Now;
-//    int startTimeMinute = DateTime.Now.Minute;
-//    while (isSearchingContinue)
-//    {
-//        Thread.Sleep(200);
-//        searchStatus = GetSearchingStatus(inChn);
-//        if (searchStatus != SearchingStatus.searching)
-//        {
-//            break;
-//        }
-//        int endTimeMinute = DateTime.Now.Minute;
-//        if (endTimeMinute < startTimeMinute)
-//            endTimeMinute += 60;
-//        if (endTimeMinute - startTimeMinute > 3)
-//        {
-//            break;
-//        }
-//    }
-//
-//    if (searchStatus == SearchingStatus.ok)
-//        return ErrorTypeEm.ok;
-//    else
-//        return ErrorTypeEm.cmd;
-//}
+int LittleFormat_fromBytes(int offset, int length, char *inBytes)
+{
+    int rtnInt = 0, i = 0;
+    for (i = 0; i < length; i++)
+    {
+        rtnInt += inBytes[offset++] << (i * 8);
+    }
+    return rtnInt;
+}
 
 
 
@@ -237,43 +176,42 @@ void freeMuxPrgInfoList(list_t *muxPrgInfoList){
 }
 
 //MuxPrgInfoGet_st
-ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList) // MuxPrgInfo_st
+ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t **muxPrgList) // MuxPrgInfo_st
 {
    
-    int i = 0,j =0;
-
+    int i = 0,j =0, iAddr = 0;
     unsigned char buf[256];
-    
-    unsigned char sendbuf[256];
+    unsigned char sendbuf[20];
     int rlen=0;
     int prgCnt =0;
-
     ErrorTypeEm res;
-   
-   //free
-   if(muxPrgInfoList){
-        freeMuxPrgInfoList(muxPrgInfoList);     
-   }
-
-    
+    list_t *muxPrgInfoList = NULL;
+    if(muxPrgList != NULL) {
+            muxPrgInfoList = muxPrgList[outChannel - 1];
+    }
+    //free
+    if(muxPrgInfoList){
+        freeMuxPidInfoList(muxPrgInfoList);
+        muxPrgInfoList = NULL;
+    }
     //get call channal signal status
     memset(sendbuf,0,sizeof(sendbuf));
-    sendbuf[0]=0x77;
-    sendbuf[1]=0x6C;
-    sendbuf[2]=0x23;
-    sendbuf[3]=(unsigned char)(outChannel & 0xFF);
-    sendbuf[4]=0x01;
-    sendbuf[5]=0x01;
-    sendbuf[6]=0x01;
+    sendbuf[iAddr++]=0x77;
+    sendbuf[iAddr++]=0x6C;
+    sendbuf[iAddr++]=0x23;
+    sendbuf[iAddr++]=(unsigned char)(outChannel & 0xFF);
+    sendbuf[iAddr++]=0x01;
+    sendbuf[iAddr++]=0x01;
+    sendbuf[iAddr++]=0x01;
 
     memset(buf, 0, sizeof(buf));
-    communicate(ip, sendbuf, 7, buf, &rlen);
+    communicate(ip, sendbuf, iAddr, buf, &rlen);
     
     if( 9 == rlen ){
           // for(i=0;i<rlen;i++)
           //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
-              
-        prgCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
+        prgCnt = buf[iAddr++];
+        prgCnt += buf[iAddr++] * 0x100;
         res = ok;
 
     }
@@ -289,7 +227,7 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
     int getCnt = prgCnt / 200 + ((prgCnt % 200 > 0) ? 1 : 0);
 
     int nowCnt = 0;
-    int cmdStringAddr = 0;
+    int cmdStringAddr = iAddr;
     for (i = 0; i < getCnt; i++)
     {
         memset(sendbuf,0,sizeof(sendbuf));
@@ -305,29 +243,31 @@ ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t *muxPrgInfoList
         /////////////////////
 
         memset(buf, 0, sizeof(buf));
-        communicate(ip, sendbuf, 9, buf, &rlen);
+        communicate(ip, sendbuf, iAddr, buf, &rlen);
     
 
         if(rlen < 9) {
             return error;
         }
-
-        nowCnt = (buf[8] << 8 | buf[7]) & 0xFFFF;
-        
         cmdStringAddr = 7;
+        nowCnt = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
+        //nowCnt = (buf[8] << 8 | buf[7]) & 0xFFFF;
+        
+        cmdStringAddr += 2;
         for (j = 0; j < nowCnt; j++)
         {
             muxPrgInfo = NULL;
             muxPrgInfo = malloc(sizeof(MuxPrgInfoGet_st));
             muxPrgInfo->inChannel = buf[cmdStringAddr++];
             muxPrgInfo->prgIndex = buf[cmdStringAddr++];
-            muxPrgInfo->prgNum = (buf[cmdStringAddr+1] << 8 | buf[cmdStringAddr]) & 0xFFFF;
+            muxPrgInfo->prgNum = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
             cmdStringAddr += 2;
-            muxPrgInfo->prgPid = (buf[cmdStringAddr+1] << 8 | buf[cmdStringAddr]) & 0xFFFF;
+            muxPrgInfo->prgPid = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
             cmdStringAddr += 2;
             list_append(muxPrgInfoList, muxPrgInfo);
         }
     }
+    muxPrgList[outChannel - 1] = muxPrgInfoList;
     return ok;
 }
 
@@ -351,41 +291,44 @@ void freeMuxPidInfoList(list_t *muxPidInfoList){
 
 
 //MuxPidInfo_st
-ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) // MuxPidInfo_st
+ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t **muxPidList) // MuxPidInfo_st
 {
 
     unsigned char buf[256];
-    
-    unsigned char sendbuf[256];
+    unsigned char sendbuf[20];
     int rlen=0;
-    int prgCnt =0;
+    int prgCnt =0, iAddr = 0;
     enum ErrorTypeEm res;
-    
+    list_t *muxPidInfoList = NULL;
+    if(muxPidList != NULL) {
+            muxPidInfoList = muxPidList[outChannel - 1];
+    }
     //free
-   if(muxPidInfoList){
-        freeMuxPidInfoList(muxPidInfoList);     
-   }
+    if(muxPidInfoList){
+        freeMuxPidInfoList(muxPidInfoList);
+        muxPidInfoList = NULL;
+    }
 
 
     int pidCnt  = 0, i=0, j =0;
     memset(sendbuf,0,sizeof(sendbuf));
-    sendbuf[0]=0x77;
-    sendbuf[1]=0x6C;
-    sendbuf[2]=0x23;
-    sendbuf[3]=(unsigned char)(outChannel & 0xFF);
-    sendbuf[4]=0x02;
-    sendbuf[5]=0x01;
-    sendbuf[6]=0x01;
+    sendbuf[iAddr++]=0x77;
+    sendbuf[iAddr++]=0x6C;
+    sendbuf[iAddr++]=0x23;
+    sendbuf[iAddr++]=(unsigned char)(outChannel & 0xFF);
+    sendbuf[iAddr++]=0x02;
+    sendbuf[iAddr++]=0x01;
+    sendbuf[iAddr++]=0x01;
 
     memset(buf, 0, sizeof(buf));
-    communicate(ip, sendbuf, 7, buf, &rlen);
+    communicate(ip, sendbuf, iAddr, buf, &rlen);
 
 
      if( 9 == rlen ){
           // for(i=0;i<slen;i++)
           //   printf("Recive GetOutPidMuxMap buf[%d]=0x[%02x]\n",i, buf[i]);    
-              
-        pidCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
+        pidCnt = buf[iAddr++];
+        pidCnt += buf[iAddr++] * 0x100;
         res = ok;
 
     }
@@ -402,40 +345,42 @@ ErrorTypeEm GetOutPidMuxMap(char *ip, int outChannel, list_t *muxPidInfoList) //
     int cmdStringAddr = 0;
     for (i = 0; i < getCnt; i++)
     {
+        iAddr = 0;
         memset(sendbuf,0,sizeof(sendbuf));
-        sendbuf[0]=0x77;
-        sendbuf[1]=0x6C;
-        sendbuf[2]=0x23;
-        sendbuf[3]=(unsigned char)(outChannel & 0xFF);
-        sendbuf[4]=0x02;
-        sendbuf[5]=0x01;
-        sendbuf[6]=0x02;
-        sendbuf[7]=(unsigned char)(getCnt & 0xff);
-        sendbuf[8]=(unsigned char)((i + 1) & 0xff);
+        sendbuf[iAddr++]=0x77;
+        sendbuf[iAddr++]=0x6C;
+        sendbuf[iAddr++]=0x23;
+        sendbuf[iAddr++]=(unsigned char)(outChannel & 0xFF);
+        sendbuf[iAddr++]=0x02;
+        sendbuf[iAddr++]=0x01;
+        sendbuf[iAddr++]=0x02;
+        sendbuf[iAddr++]=(unsigned char)(getCnt & 0xff);
+        sendbuf[iAddr++]=(unsigned char)((i + 1) & 0xff);
         memset(buf, 0, sizeof(buf));
-        communicate(ip, sendbuf, 9, buf, &rlen);
+        communicate(ip, sendbuf, iAddr, buf, &rlen);
+        cmdStringAddr= 7;
         if(  rlen < 9 ){
-          // for(i=0;i<slen;i++)
-          //   printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);    
+           //for(i=0;i<slen;i++)
+              //printf("Recive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);
             return error;
         }
-        else{        			
-            nowCnt = ( buf[8]<<8 | buf[7]) & 0xffff;       
-            res = ok;
-        } 
+        nowCnt = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
+
         ////////////////////
-        cmdStringAddr= 7;
+        cmdStringAddr += 2;
         for (j = 0; j < nowCnt; j++)
         {
             MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));
             muxPidInfo->inChannel = buf[cmdStringAddr++];
-            muxPidInfo->oldPid = buf[cmdStringAddr+1] << 8 | buf[cmdStringAddr];
+            muxPidInfo->oldPid = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
             cmdStringAddr += 2;
-            muxPidInfo->newPid = buf[cmdStringAddr+1] << 8 | buf[cmdStringAddr];
+            muxPidInfo->newPid = LittleFormat_fromBytes(cmdStringAddr, 2, buf);
             cmdStringAddr += 2;
             list_append(muxPidInfoList, muxPidInfo); 		
         }
     }
+    muxPidList[outChannel - 1] = muxPidInfoList;
+
     return ok;
 }
 ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)

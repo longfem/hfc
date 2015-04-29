@@ -92,17 +92,12 @@
 		var recdata;
 		var os = getOS();
 		function getOS(){
-		    var ua = navigator.userAgent.toLowerCase();
-                    if (window.ActiveXObject)
-                        return "ie";
-                    else if (document.getBoxObjectFor)
-                        return "firefox";
-                    else if (window.MessageEvent && !document.getBoxObjectFor)
-                        return "chrome";
-                    else if (window.opera)
-                        return "opera";
-                    else if (window.openDatabase)
-                        return "safari";
+            var str=navigator.userAgent;
+            var BrowserS=['MSIE 9.0','MSIE 8.0','MSIE 7.0','MSIE6.0',
+                'Firefox','Opera','Chrome'];
+            for(var i=0;i<BrowserS.length;i++){
+                if(str.indexOf(BrowserS[i])>=0){return BrowserS[i].replace('MSIE','IE');}
+            }
 		}
 		//获取设备基本信息				
 		$.ajax({
