@@ -136,10 +136,10 @@ static void setDevip(HttpConn *conn) {
 	int flag = ptr1 - param;
 	substr(param, pos + 1, flag, newgatway);
 	substr(param, flag + 1, strlen(param), submask);
-	unsigned int tmpip = ntohl( inet_addr( newip ) );
+	unsigned int vip = ntohl( inet_addr( newip ) );
 	unsigned int tmpgatway = ntohl( inet_addr( newgatway ) );
 	unsigned int tmpsubmask = ntohl( inet_addr( submask ) );
-	if(0 == setIp(tmpip, tmpip)){
+	if(0 == setIp(tmpip, vip)){
 		setGateway(tmpip, tmpgatway);
 		getSubMask(tmpip, tmpsubmask);
 	}
