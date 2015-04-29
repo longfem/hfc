@@ -406,16 +406,18 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
     sendbuf[6]=0x01;
     
     unsigned int muxPrgInfoListLen = list_len(pmuxPrgInfoList);
-
     sendbuf[7]=(unsigned char)(muxPrgInfoListLen & 0xFF);
     sendbuf[8]=(unsigned char)((muxPrgInfoListLen & 0xFF00) >>8);
 
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 7, buf, &slen);
 
-    if( slen ==8 ){
-          // for(i=0;i<slen;i++)
-          //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);                   
+
+//for(i=0;i<slen;i++)
+//             printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
+
+    if( slen == 8 ){
+
          res = ok;
     }
     else{
@@ -482,13 +484,14 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
         
         
 		memset(buf,0,sizeof(buf));
+		for(i=0;i<20;i++)
+                     printf("sendbuf[%d]=0x[%02x]\n",i, sendbuf[i]);
     	communicate(ip, sendbuf, dataAddr, buf, &slen);
 
-    	//printf("\n####Recive SendOutPrgMuxMap j=%d dataAddr=%d, receive nums=[%d]\n", j, dataAddr, slen );
-    
+    	printf("\n####Recive SendOutPrgMuxMap j=%d dataAddr=%d, receive nums=[%d]\n", j, dataAddr, slen );
     	if(slen < 8){
     		printf("errorl..........muxPrgInfoList \n");
-    		return error;
+    		//return error;
     	}
 
 

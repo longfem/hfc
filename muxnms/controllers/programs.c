@@ -484,7 +484,7 @@ static void streamtable(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	streamsarray = cJSON_CreateArray();
-	if(list_len(&clsProgram.PrgAVMuxList)>0)
+	if(clsProgram.PrgAVMuxList != NULL)
 	{
 		list_t *AVMuxList = clsProgram.PrgAVMuxList[pos - 1];
 		if(AVMuxList == NULL){
