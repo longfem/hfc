@@ -484,11 +484,9 @@ ErrorTypeEm SendOutPrgMuxMap(char *ip, int outChannel, list_t *pmuxPrgInfoList)
         
         
 		memset(buf,0,sizeof(buf));
-		for(i=0;i<20;i++)
-                     printf("sendbuf[%d]=0x[%02x]\n",i, sendbuf[i]);
     	communicate(ip, sendbuf, dataAddr, buf, &slen);
 
-    	printf("\n####Recive SendOutPrgMuxMap j=%d dataAddr=%d, receive nums=[%d]\n", j, dataAddr, slen );
+    	//printf("\n####Recive SendOutPrgMuxMap j=%d dataAddr=%d, receive nums=[%d]\n", j, dataAddr, slen );
     	if(slen < 8){
     		printf("errorl..........muxPrgInfoList \n");
     		//return error;
