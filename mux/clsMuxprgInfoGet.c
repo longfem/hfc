@@ -823,52 +823,55 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
     }
     
 
-	
+    
     res = ok;
 
-	
-	
-	//printf("\n####Recive SendTable_pmt cccc receive nums pmtListLen=[%d]\n", pmtListLen );
+    
+    
+    //printf("\n####Recive SendTable_pmt cccc receive nums pmtListLen=[%d]\n", pmtListLen );
     table_pmtList_st  *pmt_tablelist = NULL;
     BufferUn_st *pbuff = NULL;
     int paketListLen = 0;
     ////////////////////////////////////////////////////////////////////////
-	unsigned char iPmtCnt = 1;
+    unsigned char iPmtCnt = 1;
     
-    list_t * paketlist= NULL;
+    list_t * paketList= NULL;
+    BufferUn_st *pPacket = NULL;
 
-	for (i = 0; i < pmtListLen; i++)
-	{
+
+    printf("pmtListLen===========%d\n", pmtListLen);
+
+    for (i = 0; i < pmtListLen; i++)
+    {
         pmt_tablelist = NULL;
         list_get(pmtList, i, &pbuff); 
 
-		 
+         
         if(pbuff== NULL) continue;
 
-		list_t *paketList = NULL;
-		
-		MaketPaketSection(pbuff->pbuf, pbuff->bufLen, &paketlist);
+        paketList = NULL;
+                
+        MaketPaketSection(pbuff->pbuf, pbuff->bufLen, &paketList);
 
-		
-		 
-		if (NULL == paketList){
-			printf("\n####Recive paketList = null 1\n" );
-			return error;
-		}
+                 
+        if (NULL == paketList){
+            printf("\n####Recive paketList = null 1\n" );
+            return error;
+        }
 
         paketListLen = list_len(paketList);
 
-		if(paketListLen <=0)
-		{
-			printf("paketListLen <=0 return\n");
-			return error;
-		}
-		 
+        if(paketListLen <=0)
+        {
+            printf("paketListLen <=0 return\n");
+            return error;
+        }
+         
         memset(buf,0,sizeof(buf));
-	
+    
         memset(sendbuf, 0 ,sizeof(sendbuf));
-	
-		iAddr = 0;
+    
+        iAddr = 0;
         sendbuf[0]=0x77;
         sendbuf[1]=0x6C;
         sendbuf[2]=0x22;
@@ -876,10 +879,6 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
         sendbuf[4]=0x02; //type pmt
         sendbuf[5]=0x02;
         sendbuf[6]=(unsigned char)(pmtListLen & 0xFF);
-
-           for(k=0;i<7;i++)
-                printf("send pmt  buf[%d]=0x[%02x]\n",k, buf[k]);
-           
 
         communicate(ip, sendbuf, 7, buf, &slen);
     
@@ -891,13 +890,14 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
                 res = error;
                 return res;                  
         }
-		
+        
         res = ok; 
 
-		//printf("pmt send paketListen=%d\n", paketListLen);
-		for (j = 0; j < paketListLen; j++)
-		{
-			iAddr = 0;
+        
+        //printf("pmt send paketListen=%d\n", paketListLen);
+        for (j = 0; j < paketListLen; j++)
+        {
+            iAddr = 0;
 
             memset(buf,0,sizeof(buf));
             memset(sendbuf, 0 ,sizeof(sendbuf));
@@ -912,40 +912,59 @@ ErrorTypeEm SendTable_pmt(char *ip, int outChannel, list_t *pmtList)
             sendbuf[7]=(unsigned char)(paketListLen & 0xFF);
             sendbuf[8]=(unsigned char)(j + 1);
 
-			//printf("\n####Recive SendTable_pmt 1\n" );
-			 
-            pbuff = NULL;
-            list_get(paketList, j, &pbuff);
-            memcpy(sendbuf+9, pbuff->pbuf, pbuff->bufLen);
+            //printf("\n####Recive SendTable_pmt 1\n" );
+             
+            pPacket = NULL;
+            list_get(paketList, j, &pPacket);
+            memcpy(sendbuf+9, pPacket->pbuf, pPacket->bufLen);
 
-            communicate(ip, sendbuf, 9 + pbuff->bufLen, buf, &slen);
-			//printf("send paketlist slen=%d\n", slen);
+            communicate(ip, sendbuf, 9 + pPacket->bufLen, buf, &slen);
+            //printf("send paketlist slen=%d\n", slen);
 
-            free(pbuff);
-            pbuff = NULL;
+           
 
             if( slen < 7 ){
               // for(i=0;i<slen;i++)
               //   printf("Recive GetOutChnNetID buf[%d]=0x[%02x]\n",i, buf[i]);
-		  
-				printf("\n####Recive SendTable_pmt error \n" );
+          
+                printf("\n####Recive SendTable_pmt error \n" );
                 res = error;
-				return res;
+                for(k= paketListLen -1 ;k>-1;k--){    
+                    pPacket = NULL;
+                    list_get(paketList, k, &pPacket); 
+                    if(pPacket != NULL){
+                        free(pPacket);
+                        pPacket = NULL;    
+                    } 
+
+                    list_pop(paketList,k);        
+                }
+                return res;
             }
-			res = ok;
+
+            res = ok;
             
 
-		}
+        }
 
-        //free
+    
+
         //free ptemp
-        for(k= paketListLen -1 ;k>-1;k--){               
+        for(k= paketListLen -1 ;k>-1;k--){    
+            pPacket = NULL;
+            list_get(paketList, k, &pPacket); 
+            if(pPacket != NULL){
+                free(pPacket);
+                pPacket = NULL;    
+            } 
+
             list_pop(paketList,k);        
         }
 
 
-	}
-	return ok;
+
+    }
+    return ok;
 }
 
 ErrorTypeEm SendTable_psi(char *ip, int outChannel, PsiTableType tableType, unsigned char *ptableBytes, int length)
