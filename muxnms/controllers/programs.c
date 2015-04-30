@@ -284,10 +284,10 @@ static void getoutprg(HttpConn *conn) {
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(tmpip, outChn);
 		LoadBitrateAndTableEnable(tmpip, outChn);
-		//ChnBypass_read(tmpip, outChn);
-		//printf("=====RecordInputChnUseStatus===start\n");
-		//RecordInputChnUseStatus(outChn);
-		//printf("=====RecordInputChnUseStatus===end\n");
+
+		ChnBypass_read(tmpip, outChn);
+		RecordInputChnUseStatus(outChn);
+
 	}
 	getoutprgsJson(tmpip, Chn - 1, outprg);
 	render(outprg);
@@ -486,7 +486,7 @@ static void streamtable(HttpConn *conn) {
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	streamsarray = cJSON_CreateArray();
-	if(list_len(&clsProgram.PrgAVMuxList)>0)
+	if(clsProgram.PrgAVMuxList != NULL)
 	{
 		list_t *AVMuxList = clsProgram.PrgAVMuxList[pos - 1];
 		if(AVMuxList == NULL){

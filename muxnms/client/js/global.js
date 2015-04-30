@@ -463,6 +463,66 @@ function gbl_monitor() {
                         $('.outch2stsimg')[0].src = "img/circle16_error.ico";
                         break;
                 }
+                $.each(data.children, function(index, item){
+                    switch(item.ch){
+                        case 1:
+                            if(item.sts == 0){
+                                $('.inchsts1img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts1img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 2:
+                            if(item.sts == 0){
+                                $('.inchsts2img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts2img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 3:
+                            if(item.sts == 0){
+                                $('.inchsts3img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts3img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 4:
+                            if(item.sts == 0){
+                                $('.inchsts4img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts4img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 5:
+                            if(item.sts == 0){
+                                $('.inchsts5img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts5img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 6:
+                            if(item.sts == 0){
+                                $('.inchsts6img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts6img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 7:
+                            if(item.sts == 0){
+                                $('.inchsts7img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts7img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                        case 8:
+                            if(item.sts == 0){
+                                $('.inchsts8img')[0].src = "img/circle16_green.ico";
+                            }else{
+                                $('.inchsts8img')[0].src = "img/circle16_error.ico";
+                            }
+                            break;
+                    }
+                });
             },
             error : function(err) {
             }

@@ -390,10 +390,10 @@ unsigned char PrgMuxInfoGet(char *ip)
 	list_t   *prgAVMux = NULL;
 	for (i = 0; i < clsProgram._outChannelCntMax; i++)
 	{	
-		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList[i]) != ok)
+		if (GetOutProgramMuxMap(ip, i + 1, clsProgram.PrgPmtMuxList) != ok)
 			return 0;
 
-		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList[i]) != ok)
+		if (GetOutPidMuxMap(ip, i + 1, clsProgram.PrgAVMuxList) != ok)
 			return 0;
 	}
 

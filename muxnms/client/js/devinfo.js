@@ -158,6 +158,7 @@ function readprgs(){
     channeltree.reload();
     devlisttree.reload();
     node = devlisttree.getNodeByKey("id1.0");
+    //node.removeChildren();
     globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
     //获取全局初始化信息
     $.ajax({
@@ -188,7 +189,6 @@ function readprgs(){
                 dataType: "json",
                 success: function(data){
                     data = JSON.stringify(data).replace('\\','');
-                    //alert("-----"+data);
                     var treeData1 = JSON.parse(data);
                     node.addChildren(treeData1);
                 },
@@ -365,7 +365,7 @@ function devinfo_output(devType){
 		);
 	}
 	$('.main-content').append(
-		'<div id="dialog-NIT" title="NIT段编辑">'			
+		'<div id="dialog-NIT" title="NIT段编辑">'
 			+'<div class="nit_edit">'
 				+'<label>网络ID &nbsp</label>'
 				+'<input type="text" class="nit_id" value=""></input>&nbsp&nbsp(十六进制)<br/>'
@@ -591,10 +591,16 @@ function devinfo_output(devType){
             progress_dialog.dialog( "open" );
             progressbar.progressbar( "value", 0 );
             var pro = 1;
+            var flag = false;
+            if(os == "Chrome"){
+                var flag = true;
+            }else{
+                var flag = false;
+            }
             for(var i=1;i<globalObj._intChannelCntMax+1; i++){
                 $.ajax({
                     type: "GET",
-                    async:true,
+                    async: flag,
                     url: "http://"+globalObj.localip+":4000/do/programs/search?inch="+i,
                     // data: {ip:"192.168.1.134", inch:2},
                     dataType: "json",
@@ -1213,7 +1219,6 @@ function devinfo_output(devType){
 								});
                                 globalObj._tbleditcount = dataSet.length;
 								//编辑节目对话框表
-                                //var xxxx = $('#tbl_editprg').dataTable();
 								if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
                                     $('#tbl_editprg').dataTable().fnClearTable();
                                     $('#tbl_editprg').dataTable().fnAddData(dataSet);
@@ -1526,19 +1531,19 @@ function devinfo_output(devType){
 										var item = [itemv.NO,itemv.ch, itemv.oldPid.toString(16),itemv.newPid.toString(16)];
 										pidData[pidData.length] = item;					
 									});
-								}									
-								
+								}
 								//编辑数据流表
-								if ( $.fn.dataTable.isDataTable( '#tbl_pid' ) ) {									
-									$('#tbl_pid').dataTable().fnClearTable();
-									if(pidData.length != 0){
-										$('#tbl_pid').dataTable().fnAddData(pidData);
-									}
-								}else{
+								//if ( $.fn.dataTable.isDataTable( '#tbl_pid' ) ) {
+									//$('#tbl_pid').dataTable().fnClearTable();
+									//if(pidData.length != 0){
+									//	$('#tbl_pid').dataTable().fnAddData(pidData);
+									//}
+								//}else{
 									//PID表
                                     globalObj._tbl_pid = $('#tbl_pid').dataTable( {
 										"data": pidData,
 										"order": [[ 0, "asc" ]],
+                                        "bDestroy" : true,
 										"paging":   false,
 										"info":     false,
 										"searching":   false,
@@ -1547,7 +1552,7 @@ function devinfo_output(devType){
 											$('td:eq(1)', nRow).html( '<input type="text" pattern="([0-9]{1}$)" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1] + '"></input>' );
 											$('td:eq(2)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2] + '"></input>' );
 											$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
-										},		
+										},
 										"columns": [
 											{ "title": "序号", "width": "60px" },
 											{ "title": "通道"},
@@ -1555,6 +1560,7 @@ function devinfo_output(devType){
 											{ "title": "输出PID(Hex)" }
 										]
 									});
+                                    $('#tbl_pid').dataTable().fnDraw();
 									$('#tbl_pid tbody').on( 'click', 'tr', function () {
 										if ( $(this).hasClass('selected') ) {
 											$(this).removeClass('selected');
@@ -1563,7 +1569,7 @@ function devinfo_output(devType){
 											$(this).addClass('selected');
 										}
 									} );
-								}				
+								//}
 							 },    
 							 error : function(err) {      
 							 }   
@@ -2354,6 +2360,8 @@ function devinfo_output(devType){
                             alert("权限不足，请与管理员联系");
                         }
 						dialog_pid.dialog( "close" );
+                         $('#tbl_pid').DataTable().destroy();
+                         $('#tbl_pid').empty();
 					 },    
 					 error : function(err) {    
 					 }   
@@ -2362,6 +2370,8 @@ function devinfo_output(devType){
 			},
 			"取消": function() {
 				dialog_pid.dialog( "close" );
+                $('#tbl_pid').DataTable().destroy();
+                $('#tbl_pid').empty();
 			}
 		}
 	});
@@ -2456,11 +2466,9 @@ function devinfo_output(devType){
 					 }
 				});
 				dialog_edit.dialog( "close" );
-                $('#tbl_editprg').DataTable().destroy();
 			},
 			"取消": function() {
 			    dialog_edit.dialog( "close" );
-                $('#tbl_editprg').DataTable().destroy();
 			}
 		}
 	});

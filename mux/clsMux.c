@@ -52,10 +52,8 @@ int sendOutPutMuxInfo(char *ip, int outChnId){
 	//------ 设置输出通道信息 -----		
 		int outChnIndexTmp = outChnId - 1;        
         //printf("(sendOutPutMuxInfo outChnId =%d)\n", outChnId);
-		//ChnBypass_write(ip, outChnId); // 发送直传标志
-		//printf("===RecordInputChnUseStatus  start===\n");
-        ///RecordInputChnUseStatus(outChnId);
-        //printf("===RecordInputChnUseStatus  end===\n");
+		ChnBypass_write(ip, outChnId); // 发送直传标志
+        RecordInputChnUseStatus(outChnId);
 
 		SendMux(ip, outChnId); // 发送表复用信息
 		
@@ -105,40 +103,32 @@ int sendOutPutOption(char *ip, int outChnId)
 void RecordInputChnUseStatus(int outChnId)
 {
     int i = 0;
-	int outChannelIndex = outChnId - 1;
 	MuxPidInfo_st *tmpPidInfo = NULL;
 	for (i = 0; i < clsProgram._intChannelCntMax; i++)
 	{
-	    printf("--------->>>>xxx\n");
-		clsProgram.needInputData[outChannelIndex][i] = 0;
-		printf("--------->>>>yyy\n");
+		clsProgram.needInputData[outChnId][i] = 0;
 	}
-	printf("--------->>>>000\n");
-//	if (clsProgram.PrgAVMuxList != NULL && clsProgram.PrgAVMuxList[outChannelIndex] != NULL)
-//	{
-//	    for(i = 0;i < list_len(clsProgram.PrgAVMuxList[outChannelIndex]); i++){
-//	        printf("--------->>>>111\n");
-//            list_get(clsProgram.PrgAVMuxList[outChnId - 1], i, &tmpPidInfo);
-//            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 2){
-//                printf("--------->>>>222\n");
-//                clsProgram.needInputData[outChannelIndex][tmpPidInfo->inChannel - 1] = 1;
-//            }
-//
-//	    }
-//	}
-//	printf("--------->>>>333\n");
-//	ChannelProgramSt *outpst = NULL;
-//    list_get(&(clsProgram.outPrgList), outChannelIndex, &outpst);
-//	if (&outpst->dtPidList != NULL)
-//	{
-//	    for(i = 0;i < list_len(&outpst->dtPidList); i++){
-//            list_get(&outpst->dtPidList, i, &tmpPidInfo);
-//            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 2){
-//                clsProgram.needInputData[outChannelIndex][tmpPidInfo->inChannel - 1] = 1;
-//            }
-//
-//        }
-//	}
+	if (clsProgram.PrgAVMuxList != NULL && clsProgram.PrgAVMuxList[outChnId] != NULL)
+	{
+	    for(i = 0;i < list_len(clsProgram.PrgAVMuxList[outChnId]); i++){
+            list_get(clsProgram.PrgAVMuxList[outChnId], i, &tmpPidInfo);
+            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 16){
+                clsProgram.needInputData[outChnId][tmpPidInfo->inChannel - 1] = 1;
+            }
+
+	    }
+	}
+	ChannelProgramSt *outpst = NULL;
+    list_get(&(clsProgram.outPrgList), outChnId, &outpst);
+	if (&outpst->dtPidList != NULL)
+	{
+	    for(i = 0;i < list_len(&outpst->dtPidList); i++){
+            list_get(&outpst->dtPidList, i, &tmpPidInfo);
+            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 16){
+                clsProgram.needInputData[outChnId][tmpPidInfo->inChannel - 1] = 1;
+            }
+        }
+	}
 }
 
 void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
@@ -212,10 +202,12 @@ void ShowNeedChnDataButNoInputWarning(int isValidInputStatus, int inputStatus, c
             {
                 for (iOutChn = 0; iOutChn < clsProgram._outChannelCntMax; iOutChn++)
                 {
-                    if (clsProgram.needInputData[iOutChn, i])
+                    if (clsProgram.needInputData[iOutChn][i]){
                         isNeedInputdata = 1;
+                    }
                 }
             }
+
             if(isNeedInputdata){
                 if ((inputStatus & (1 << i)) == 0) // 报警
                 {
