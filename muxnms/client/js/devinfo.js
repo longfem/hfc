@@ -607,8 +607,8 @@ function devinfo_output(devType){
                     success: function(data){
                         //更新进度条
                         if(data.sts != 0){
-                            alert("搜索出现异常!!");
-                            return;
+                            //alert("搜索出现异常!!");
+                            //return;
                         }
                         pro++;
                         if(globalObj._intChannelCntMax == pro){
