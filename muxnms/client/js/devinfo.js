@@ -193,8 +193,6 @@ function readprgs(){
                     node.addChildren(treeData1);
                 },
                 error : function(err) {
-                    // view("异常！");
-                    var xxx = err;
                     alert("异常！====="+JSON.stringify(err));
                 }
             });
@@ -234,12 +232,75 @@ function readprgs(){
                     prgnode.setTitle("节目: "+ globalObj._selectcount2);
                 }
                 prgnode.render();
+                //获取制表信息
+                 $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+globalObj.localip+":4000/do/programs/gettableinfo?inch="+ globalObj._channel,
+                    // data: {ip:"192.168.1.134", inch:2},
+                    dataType: "json",
+                    success: function(data){
+                        if(data.sts == 1){
+
+                        }else{
+                            var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+                            tablenode.addChildren(data);
+                            //获取制表后输出流表
+                            $.ajax({
+                                type: "GET",
+                                async:false,
+                                url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
+                                data: '{channel:'+1+',prgnum:'+globalObj._selectcount+'}',
+                                dataType: "json",
+                                success: function(data){
+                                    if(data.sts == 5){
+                                        return;
+                                    }
+                                    var StreamData = [];
+                                    $.each(data, function(key, itemv) {
+                                        var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
+                                        StreamData[StreamData.length] = item;
+                                    });
+                                    //编辑数据流表
+                                    if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
+                                        $('#tbl_outtable').dataTable().fnClearTable();
+                                        $('#tbl_outtable').dataTable().fnAddData(StreamData);
+                                    }else{
+                                        //表结构右侧table
+                                        var tout = $('#tbl_outtable').dataTable( {
+                                            "data": StreamData,
+                                            "order": [[ 0, "asc" ]],
+                                            "paging":   false,
+                                            "info":     false,
+                                            "searching":   false,
+                                            "scrollY": 390,
+                                            "bAutoWidth": false,
+                                            "columns": [
+                                                { "title": "NO"},
+                                                { "title": "CH"},
+                                                { "title": "IN-PID"},
+                                                { "title": "OUT-PID"},
+                                                { "title": "TYPE" }
+                                            ]
+                                        });
+                                        tout.fnDraw();
+                                    }
+                                },
+                                error : function(err) {
+                                    alert(err);
+                                }
+                            });
+                        }
+
+                    },
+                    error : function(err) {
+                        alert("异常！====="+JSON.stringify(err));
+                    }
+                });
             }
 
         },
         error : function(err) {
-            // view("异常！");
-            var xxx = err;
             alert("异常！====="+JSON.stringify(err));
         }
     });
@@ -269,8 +330,6 @@ function readoutprgs(channeltree, snt){
             }
         },
         error : function(err) {
-            // view("异常！");
-            var xxx = err;
             alert("异常！====="+JSON.stringify(err));
         }
     });
@@ -368,9 +427,9 @@ function devinfo_output(devType){
 		'<div id="dialog-NIT" title="NIT段编辑">'
 			+'<div class="nit_edit">'
 				+'<label>网络ID &nbsp</label>'
-				+'<input type="text" class="nit_id" value=""></input>&nbsp&nbsp(十六进制)<br/>'
+				+'<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nit_id" value="" />&nbsp&nbsp(十六进制)<br/>'
 				+'<label>网络名称</label>'
-				+'<input type="text" class="nit_name" value="段1"></input>'
+				+'<input type="text" class="nit_name" value=""/>'
 				+'<br/>'
 				+'<textarea rows="8" style="width:350px;margin-left:30px">'
 				+'</textarea>'
@@ -380,25 +439,41 @@ function devinfo_output(devType){
 		+'<ul id="table_menu" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
 			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-			+'<li>---</li>'
+            +'<li class="menu_editstr"><a href="#editstr"><span class="ui-icon ui-icon-pencil"></span>编辑这个传输流</a></li>'
+            +'<li class="menu_deletestr"><a href="#deletestr"><span class="ui-icon ui-icon-closethick"></span>删除这个传输流</a></li>'
+            +'<li class="menu_hr">---</li>'
+            +'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑段</a></li>'
 			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
 			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
-			+'<li>---</li>'
+            +'<li class="menu_deleteall"><a href="#deleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有段</a></li>'
+            +'<li class="menu_deleteallstr"><a href="#deleteallstr"><span class="ui-icon ui-icon-closethick"></span>删除所有传输流</a></li>'
+			+'<li class="menu_hr">---</li>'
+            +'<li class="menu_addstrc"><a href="#addstrc"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-C]</a></li>'
+            +'<li class="menu_addstrs"><a href="#addstrs"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-S]</a></li>'
+            +'<li class="menu_addstrt"><a href="#addstrt"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-T]</a></li>'
 			+'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
 			+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
 			
 		+'</ul>'
 		+'<ul id="table_menu2" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-			+'<li>---</li>'
-			+'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
-			+'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
-			+'<li>---</li>'
-			+'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
-			+'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
-			
-		+'</ul>'
+            +'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
+            +'<li class="menu_collasp"><a href="#collasp"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+            +'<li class="menu_editstr"><a href="#editstr"><span class="ui-icon ui-icon-pencil"></span>编辑这个传输流</a></li>'
+            +'<li class="menu_deletestr"><a href="#deletestr"><span class="ui-icon ui-icon-closethick"></span>删除这个传输流</a></li>'
+            +'<li class="menu_hr">---</li>'
+            +'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑段</a></li>'
+            +'<li class="menu_add"><a href="#add"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
+            +'<li class="menu_delete"><a href="#delete"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
+            +'<li class="menu_deleteall"><a href="#deleteall"><span class="ui-icon ui-icon-closethick"></span>删除所有段</a></li>'
+            +'<li class="menu_deleteallstr"><a href="#deleteallstr"><span class="ui-icon ui-icon-closethick"></span>删除所有传输流</a></li>'
+            +'<li class="menu_hr">---</li>'
+            +'<li class="menu_addstrc"><a href="#addstrc"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-C]</a></li>'
+            +'<li class="menu_addstrs"><a href="#addstrs"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-S]</a></li>'
+            +'<li class="menu_addstrt"><a href="#addstrt"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-T]</a></li>'
+            +'<li class="menu_import"><a href="#import"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'
+            +'<li class="menu_export"><a href="#export"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'
+
+        +'</ul>'
 		+'<!-- Definition of context menu -->'
 		+'<ul id="program_menu" class="contextMenu ui-helper-hidden">'
 			+'<li class="menu_expandall"><a href="#expandall"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
@@ -620,8 +695,6 @@ function devinfo_output(devType){
 
                     },
                     error : function(err) {
-                        // view("异常！");
-                        var xxx = err;
                         alert("异常！====="+JSON.stringify(err));
                     }
                 });
@@ -1601,7 +1674,62 @@ function devinfo_output(devType){
 		menu: {
 			selector: "#table_menu",
 			position: {my: "center"},
-			select: function(event, data){				
+            beforeOpen: function(event, data){
+                var arr = data.node.key.match(/\./g);
+                if(arr.length == 1 && data.node.key == "id1.5") {
+                    $(".menu_collasp").css("display", "block");
+                    $(".menu_expandall").css("display", "block");
+                    $(".menu_add").css("display", "block"); //添加段
+                    $(".menu_deleteall").css("display", "block"); //刪除所有段
+                    $(".menu_delete").css("display", "none"); //刪除段
+                    $(".menu_edit").css("display", "none"); //编辑段
+                    $(".menu_deleteallstr").css("display", "none"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "none"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "none"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "none"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "block"); //导入NIT
+                    $(".menu_export").css("display", "block"); //导出NIT
+                    $(".menu_editstr").css("display", "none"); //编辑传输流
+                    $(".menu_deletestr").css("display", "none"); //删除传输流
+                    $(".menu_hr").css("display", "block");
+                }else if(arr.length == 2 && data.node.key == "id1.5.1"){
+                    $(".menu_collasp").css("display", "block");
+                    $(".menu_expandall").css("display", "block");
+                    $(".menu_add").css("display", "none"); //添加段
+                    $(".menu_deleteall").css("display", "none"); //刪除所有段
+                    $(".menu_delete").css("display", "block"); //刪除段
+                    $(".menu_edit").css("display", "block"); //编辑段
+                    $(".menu_deleteallstr").css("display", "block"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "block"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "block"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "block"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "none"); //导入NIT
+                    $(".menu_export").css("display", "none"); //导出NIT
+                    $(".menu_editstr").css("display", "none"); //编辑传输流
+                    $(".menu_deletestr").css("display", "none"); //删除传输流
+                    $(".menu_hr").css("display", "block");
+                }else if(arr.length == 3 && data.node.key.substr(0,5) == "id1.5"){
+                    $(".menu_collasp").css("display", "none");
+                    $(".menu_expandall").css("display", "none");
+                    $(".menu_add").css("display", "none"); //添加段
+                    $(".menu_deleteall").css("display", "none"); //刪除所有段
+                    $(".menu_delete").css("display", "none"); //刪除段
+                    $(".menu_edit").css("display", "none"); //编辑段
+                    $(".menu_deleteallstr").css("display", "none"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "none"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "none"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "none"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "none"); //导入NIT
+                    $(".menu_export").css("display", "none"); //导出NIT
+                    $(".menu_editstr").css("display", "block"); //编辑传输流
+                    $(".menu_deletestr").css("display", "block"); //删除传输流
+                    $(".menu_hr").css("display", "none");
+                }else{
+                    $("li[class^=menu_]").css("display", "none");
+                }
+            },
+			select: function(event, data){
+                globalObj._channel = 1;
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -1615,6 +1743,8 @@ function devinfo_output(devType){
 						data.node.setExpanded(false);
 						break;
 					} case '#add': {
+                        $('.nit_name').val("");
+                        $('.nit_id').val("");
 						dialog_NIT.dialog( "open" );
 						break;
 					} case '#delete': {
@@ -2258,7 +2388,62 @@ function devinfo_output(devType){
 		menu: {
 			selector: "#table_menu2",
 			position: {my: "center"},
-			select: function(event, data){				
+            beforeOpen: function(event, data){
+                var arr = data.node.key.match(/\./g);
+                if(arr.length == 1 && data.node.key == "id1.5") {
+                    $(".menu_collasp").css("display", "block");
+                    $(".menu_expandall").css("display", "block");
+                    $(".menu_add").css("display", "block"); //添加段
+                    $(".menu_deleteall").css("display", "block"); //刪除所有段
+                    $(".menu_delete").css("display", "none"); //刪除段
+                    $(".menu_edit").css("display", "none"); //编辑段
+                    $(".menu_deleteallstr").css("display", "none"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "none"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "none"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "none"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "block"); //导入NIT
+                    $(".menu_export").css("display", "block"); //导出NIT
+                    $(".menu_editstr").css("display", "none"); //编辑传输流
+                    $(".menu_deletestr").css("display", "none"); //删除传输流
+                    $(".menu_hr").css("display", "block");
+                }else if(arr.length == 2 && data.node.key == "id1.5.1"){
+                    $(".menu_collasp").css("display", "block");
+                    $(".menu_expandall").css("display", "block");
+                    $(".menu_add").css("display", "none"); //添加段
+                    $(".menu_deleteall").css("display", "none"); //刪除所有段
+                    $(".menu_delete").css("display", "block"); //刪除段
+                    $(".menu_edit").css("display", "block"); //编辑段
+                    $(".menu_deleteallstr").css("display", "block"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "block"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "block"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "block"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "none"); //导入NIT
+                    $(".menu_export").css("display", "none"); //导出NIT
+                    $(".menu_editstr").css("display", "none"); //编辑传输流
+                    $(".menu_deletestr").css("display", "none"); //删除传输流
+                    $(".menu_hr").css("display", "block");
+                }else if(arr.length == 3 && data.node.key.substr(0,5) == "id1.5"){
+                    $(".menu_collasp").css("display", "none");
+                    $(".menu_expandall").css("display", "none");
+                    $(".menu_add").css("display", "none"); //添加段
+                    $(".menu_deleteall").css("display", "none"); //刪除所有段
+                    $(".menu_delete").css("display", "none"); //刪除段
+                    $(".menu_edit").css("display", "none"); //编辑段
+                    $(".menu_deleteallstr").css("display", "none"); //删除所有传输流
+                    $(".menu_addstrc").css("display", "none"); //添加传输流[DVB-C Style]
+                    $(".menu_addstrs").css("display", "none"); //添加传输流[DVB-S Style]
+                    $(".menu_addstrt").css("display", "none"); //添加传输流[DVB-T Style]
+                    $(".menu_import").css("display", "none"); //导入NIT
+                    $(".menu_export").css("display", "none"); //导出NIT
+                    $(".menu_editstr").css("display", "block"); //编辑传输流
+                    $(".menu_deletestr").css("display", "block"); //删除传输流
+                    $(".menu_hr").css("display", "none");
+                }else{
+                    $("li[class^=menu_]").css("display", "none");
+                }
+            },
+			select: function(event, data){
+                globalObj._channel = 2;
 				switch(data.menuId){
 					case '#expandall' :{
 						var nodes = data.node.children;
@@ -2384,10 +2569,69 @@ function devinfo_output(devType){
 		modal: true,
 		buttons: {
 			"确定": function() {
-			  dialog_NIT.dialog( "close" );
+                var nitid = parseInt($('.nit_id')[0].value, 16);
+                if($('.nit_name').val().length > 32){
+                    alert("名称太长，最多32字符.");
+                    return;
+                }
+                if(!isNaN(nitid)){
+                    if(nitid < 0 || nitid > 0xffff){
+                        return;
+                    }
+                }else{
+                    return;
+                }
+                var jsonstr = '{"channel":' + globalObj._channel + ',"netid":' + nitid + ',"name":"' + $('.nit_name').val() + '"}';
+                $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+globalObj.localip+":4000/do/globalopt/addnitinfo",
+                    data: JSON.parse(jsonstr),
+                    dataType: "json",
+                    success: function(data){
+                        if(data.sts == 0){
+                            dialog_NIT.dialog( "close" );
+                            return;
+                        }else if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
+                        }else if(data.sts == 9){
+                            window.location = "/login.esp";
+                            return;
+                        }
+                        //获取制表信息
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+globalObj.localip+":4000/do/programs/gettableinfo?inch="+ globalObj._channel,
+                            // data: {ip:"192.168.1.134", inch:2},
+                            dataType: "json",
+                            success: function(data){
+                                if(data.sts == 1){
+
+                                }else{
+                                    var tablenode;
+                                    if(globalObj._channel == 1){
+                                        $("#out_tree").fancytree("getTree").reload();
+                                        tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+                                    }else{
+                                        $("#out_tree2").fancytree("getTree").reload();
+                                        tablenode = $("#out_tree2").fancytree("getTree").getNodeByKey("id1.0");
+                                    }
+                                    tablenode.addChildren(data);
+                                }
+                            },
+                            error : function(err) {
+                                alert("异常！====="+JSON.stringify(err));
+                            }
+                        });
+                        dialog_NIT.dialog( "close" );
+                    },
+                    error : function(err) {
+                    }
+                });
 			},
 			"取消": function() {
-			  dialog_NIT.dialog( "close" );
+			    dialog_NIT.dialog( "close" );
 			}
 		}
 	});

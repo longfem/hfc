@@ -1,6 +1,7 @@
 #include <string.h>
 #include "datastructdef.h"
 #include "cJSON.h"
+#include "list.h"
 
 extern ClsProgram_st clsProgram;
 extern ClsMux_st *pclsMux;
@@ -8,7 +9,7 @@ extern ClsParams_st *pdb;
 
 void getTableJson(int channel, char *outprg, int flag){
 	char str[100] = {0};
-	char idstr[20] = {0};
+	char idstr[100] = {0};
 	int i = 0, j = 0, k = 0;
 	BufferUn_st *pat;
 	pat_senction_st *p_pat;	
@@ -18,7 +19,7 @@ void getTableJson(int channel, char *outprg, int flag){
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddNumberToObject(tablejson, "sts", flag);//制表状态码
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddTrueToObject(tablejson,"expanded");
+	cJSON_AddFalseToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.1");
 	cJSON_AddStringToObject(tablejson,"title", "PAT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
@@ -34,7 +35,7 @@ void getTableJson(int channel, char *outprg, int flag){
 			for(i=1;i<4;i++){
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
-				cJSON_AddTrueToObject(subTablejson,"expanded");
+				cJSON_AddFalseToObject(subTablejson,"expanded");
 				sprintf(idstr, "id1.1.1.%d", i);//1.1.1.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				switch(i){
@@ -65,7 +66,7 @@ void getTableJson(int channel, char *outprg, int flag){
 			{
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
-				cJSON_AddTrueToObject(subTablejson,"expanded");
+				cJSON_AddFalseToObject(subTablejson,"expanded");
 				sprintf(idstr, "id1.1.1.%d", i+4);//1.1.0.4
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				if(i == 0){
@@ -90,7 +91,7 @@ void getTableJson(int channel, char *outprg, int flag){
 	}
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddTrueToObject(tablejson,"expanded");
+	cJSON_AddFalseToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.2");
 	cJSON_AddStringToObject(tablejson,"title", "PMT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
@@ -287,7 +288,7 @@ void getTableJson(int channel, char *outprg, int flag){
 	}
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddTrueToObject(tablejson,"expanded");
+	cJSON_AddFalseToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.3");
 	cJSON_AddStringToObject(tablejson,"title", "SDT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");	
@@ -300,7 +301,7 @@ void getTableJson(int channel, char *outprg, int flag){
 			for(i=1;i<4;i++){ 
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
-				cJSON_AddTrueToObject(subTablejson,"expanded");
+				cJSON_AddFalseToObject(subTablejson,"expanded");
 				sprintf(idstr, "id1.3.%d", i);//1.3.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				switch(i){
@@ -332,7 +333,7 @@ void getTableJson(int channel, char *outprg, int flag){
 			{
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
 				cJSON_AddTrueToObject(subTablejson,"folder");
-				cJSON_AddTrueToObject(subTablejson,"expanded");
+				cJSON_AddFalseToObject(subTablejson,"expanded");
 				sprintf(idstr, "id1.3.%d", i+4);//1.3.4.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				memset(str, 0, sizeof(str));
@@ -362,7 +363,7 @@ void getTableJson(int channel, char *outprg, int flag){
 	
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddTrueToObject(tablejson,"expanded");
+	cJSON_AddFalseToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.4");
 	cJSON_AddStringToObject(tablejson,"title", "CAT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
@@ -376,16 +377,31 @@ void getTableJson(int channel, char *outprg, int flag){
 	
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddTrueToObject(tablejson,"expanded");
+	cJSON_AddFalseToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.5");
 	cJSON_AddStringToObject(tablejson,"title", "NIT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_nit){
-		if(0){ //nit
-		
-		}else{
-		
-		}
+	    if(clsProgram.NitSection != NULL){
+	        list_t *NitS = NULL;
+	        Nit_section_t *nist = NULL;
+            NitS = clsProgram.NitSection[channel - 1];
+            if(NitS != NULL){
+                for(i=0;i<list_len(NitS);i++){
+                    list_get(NitS, i, &nist);
+                    cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());
+                    cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+                    cJSON_AddTrueToObject(subTablejson,"folder");
+                    cJSON_AddFalseToObject(subTablejson,"expanded");
+                    cJSON_AddStringToObject(subTablejson,"key", "id1.5.1");
+                    cJSON_AddStringToObject(subTablejson,"icon", "img/channel_out.ico");
+                    memset(str, 0, sizeof(str));
+                    sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
+                    cJSON_AddStringToObject(subTablejson,"title", str);
+                }
+
+            }
+        }
 	}	
 	
 	prgjsonstring = cJSON_PrintUnformatted(tablesarray);

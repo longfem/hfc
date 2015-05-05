@@ -283,7 +283,7 @@ static void getoutprg(HttpConn *conn) {
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
 		getOutPrograms(tmpip, outChn);
-		LoadBitrateAndTableEnable(tmpip, outChn);
+		//LoadBitrateAndTableEnable(tmpip, outChn);
 
 		ChnBypass_read(tmpip, outChn);
 		RecordInputChnUseStatus(outChn);
@@ -475,7 +475,20 @@ static void maketable(HttpConn *conn) {
 	getTableJson(pos, outstring, flag);
 	render(outstring);
     
-} 
+}
+
+/*获取制表信息*/
+static void gettableinfo(HttpConn *conn) {
+	int pos = 0;
+	char outstring[60960] = {0};
+	MprJson *jsonparam = httpGetParams(conn);
+    pos = atoi(mprGetJson(jsonparam, "inch"));
+	//获取制表后结果
+
+	getTableJson(pos, outstring, 0);
+	render(outstring);
+
+}
 
 /*制表后获取输出流表*/
 static void streamtable(HttpConn *conn) { 
@@ -1494,7 +1507,8 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-search", search);
 	espDefineAction(route, "programs-cmd-reprgnum", reprgnum);
 	espDefineAction(route, "programs-cmd-reprgpid", reprgpid);
-	
+	espDefineAction(route, "programs-cmd-gettableinfo", gettableinfo);
+
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
     ediAddValidation(edi, "present", "programs", "title", 0);

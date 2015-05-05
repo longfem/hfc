@@ -7,9 +7,11 @@
 #include "esp.h"
 #include "devinfo.h"
 #include "cJSON.h"
+#include "datastructdef.h"
 #include "clsMuxOutCh.h"
 #include "clsMuxprgInfoGet.h"
 #include "clsMux.h"
+#include "list.h"
 
 /*
     Create a new resource in the database
@@ -17,6 +19,7 @@
 char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 char optstr[256] = {0};
+extern ClsProgram_st clsProgram;
 
 static void rendersts(const char *str,int status)
 {
@@ -249,11 +252,15 @@ static void getoptlogs() {
 
 static void getmonitorinfo(HttpConn *conn) {
     char str[256] = {0};
-    int inputStatus = 0;
+    int inputStatus = 0, outChn = 0;
     cJSON *result = cJSON_CreateObject();
     char* jsonstring;
     int outValidBitrate = 0;
     unsigned int outstatus = 0;
+    for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
+        ChnBypass_read(tmpip, outChn);
+        RecordInputChnUseStatus(outChn);
+    }
     OutChn_validBitrateGet(tmpip, 1, &outValidBitrate);
     GetOutChannelStatus(tmpip, 1, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
@@ -277,6 +284,56 @@ static void getmonitorinfo(HttpConn *conn) {
     render(str);
 }
 
+static void addnitinfo(HttpConn *conn) {
+    char str[16] = {0};
+    char idstr[100] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 9);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
+    MprJson *jsonparam = httpGetParams(conn);
+    //printf("==========addnitinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+    int channel = atoi(mprGetJson(jsonparam, "channel"));
+    int netid = atoi(mprGetJson(jsonparam, "netid"));
+    cchar *name = mprGetJson(jsonparam, "name");
+    list_t *NitS = NULL;
+    Nit_section_t *nist = NULL;
+    if(clsProgram.NitSection != NULL && clsProgram.NitSection[channel - 1] != NULL){
+        if(list_len(clsProgram.PrgAVMuxList[channel - 1])>0){
+            rendersts(str, 0);
+            render(str);
+            return;
+        }
+    }else{
+        NitS = (list_t*)malloc(sizeof(list_t));
+        list_init(NitS);
+        nist = malloc(sizeof(Nit_section_t));
+        nist->networkId = netid;
+        Commdes_t *nameList = malloc(sizeof(Commdes_t));
+        memset(nameList, 0 , sizeof(Commdes_t));
+        nameList->index = 1;
+        nameList->tag = 0x40;
+        nameList->dataLen = strlen((unsigned char*)name);
+        printf("===dataLen==%d\n", nameList->dataLen);
+        nameList->data = malloc(sizeof(unsigned char) * nameList->dataLen);
+        memset(nameList->data, 0, nameList->dataLen);
+        memcpy(idstr, name, nameList->dataLen);
+        memcpy(nameList->data, idstr, nameList->dataLen);
+        nist->nameList = nameList;
+        list_append(NitS, nist);
+        clsProgram.NitSection[channel - 1] = NitS;
+    }
+    rendersts(str, 1);
+    render(str);
+}
+
 
 static void common(HttpConn *conn) {
 }
@@ -290,9 +347,10 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
 	espDefineAction(route, "globalopt-cmd-reset", reset);
 	espDefineAction(route, "globalopt-cmd-setDevip", setDevip);
 	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
+	espDefineAction(route, "globalopt-cmd-addnitinfo", addnitinfo);
 	espDefineAction(route, "globalopt-cmd-getoptlogs", getoptlogs);
 	espDefineAction(route, "globalopt-cmd-getmonitorinfo", getmonitorinfo);
-    
+
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
     ediAddValidation(edi, "present", "globalopt", "title", 0);
