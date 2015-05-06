@@ -32,6 +32,7 @@ static void getDevinfo(HttpConn *conn) { \
 static void espinit() {
 	int i=0;
 	ChannelProgramSt *pst = NULL;
+	Nit_section_t *nit = NULL;
 	//全局变量初始化
 	clsProgram._outChannelCntMax = 2;
 	clsProgram._intChannelCntMax = 8;
@@ -55,6 +56,12 @@ static void espinit() {
 		pst->channelId = i + 1;
 		list_append(&(clsProgram.outPrgList), pst);
 	}
+	for(i=0; i<clsProgram._outChannelCntMax; i++){
+        nit = malloc(sizeof(Nit_section_t));
+        memset(nit, 0, sizeof(Nit_section_t));
+        nit->networkId = 0x00;
+        list_append(&(clsProgram.NitSection), nit);
+    }
 
 	clsProgram.m_autoMuxStartPid = malloc(clsProgram._outChannelCntMax);
 	clsProgram.chnBypass2 = malloc(sizeof(int) * clsProgram._outChannelCntMax);

@@ -6,7 +6,8 @@ var globalObj = {
     _index: 0,          //编辑节目index
     _editnodekey: "",   //编辑节目节点key
     _channel: 1,        //操作中的通道
-    _tbl_edit: null,
+    _tbl_edit: null,    //节目编辑表格
+    _tbl_nitc: null,    //NITC编辑表格
     _tbl_pid: null,
     _prgoptflag: 0,     //节目操场判断: 0--编辑, 1--添加
     _isuserprg: 1,     //节目类型判断: 0--userprg, 1--devprg
@@ -146,13 +147,16 @@ function readprgs(){
     var node;
     var channeltree;
     var devlisttree;
+    var tabletree;
     if(globalObj._channel == 1){
         channeltree =  $("#channel").fancytree("getTree");
         devlisttree = $("#devlist").fancytree("getTree");
+        tabletree = $("#out_tree").fancytree("getTree");
         globalObj._selectcount = 0;
     }else if(globalObj._channel == 2){
         channeltree =  $("#channel2").fancytree("getTree");
         devlisttree = $("#devlist2").fancytree("getTree");
+        tabletree = $("#out_tree2").fancytree("getTree");
         globalObj._selectcount2 = 0;
     }
     channeltree.reload();
@@ -243,7 +247,8 @@ function readprgs(){
                         if(data.sts == 1){
 
                         }else{
-                            var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
+                            tabletree.reload();
+                            var tablenode = tabletree.getNodeByKey("id1.0");
                             tablenode.addChildren(data);
                             //获取制表后输出流表
                             $.ajax({
@@ -531,7 +536,7 @@ function devinfo_output(devType){
 			+'<table class="tbl_program">'
 				+'<tr>'
 					+'<td><label>名称</label></td>'
-					+'<td><input type="text" class="prg_name" value=""></input></td>'
+					+'<td><input type="text" class="prg_name" value="" /></td>'
 					+'<td><label>业务类型</label></td>'
 					+'<td>'
 						+'<select id="r_servicetype" style="width:250px">'
@@ -1748,9 +1753,81 @@ function devinfo_output(devType){
 						dialog_NIT.dialog( "open" );
 						break;
 					} case '#delete': {
-						//dialog.dialog( "open" );
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+globalObj.localip+":4000/do/nitController/delnit?channel=1",
+                            //data: ,
+                            dataType: "json",
+                            success: function(data){
+                                if(data.sts == 0){
+                                    dialog_NIT.dialog( "close" );
+                                    return;
+                                }else if(data.sts == 5){
+                                    alert("权限不足，请与管理员联系");
+                                }else if(data.sts == 9){
+                                    window.location = "/login.esp";
+                                    return;
+                                }
+                            },
+                            error : function(err) {
+                            }
+                        });
+                        data.node.remove();
 						break;
-					} case '#import': {
+					} case '#addstrc': {
+                        if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
+                            $('#tbl_nitc').dataTable().fnClearTable();
+                        }else {
+                            globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
+                                "data": [],
+                                "order": [[0, "asc"]],
+                                "paging": false,
+                                "info": false,
+                                "searching": false,
+                                "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                                    $('td:eq(0)', nRow).html( '<input type="text" pattern="(^\d+$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                                    $('td:eq(1)', nRow).html(
+                                        '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
+                                            +'<option value ="0" selected="selected">reserve</option>'
+                                            +'<option value ="1">digital television service</option>'
+                                            +'<option value ="2">digital radio sound service</option>'
+                                            +'<option value ="3">Teletext service</option>'
+                                            +'<option value ="4">NVOD reference service</option>'
+                                            +'<option value ="5">NVOD time-shifted service</option>'
+                                            +'<option value ="6">mosaic service</option>'
+                                            +'<option value ="7">PAL coded signal</option>'
+                                            +'<option value ="8">SECAM coded siganl</option>'
+                                            +'<option value ="9">D/D2-MAC</option>'
+                                            +'<option value ="10">FM Radio</option>'
+                                            +'<option value ="11">NTSC coded signal</option>'
+                                            +'<option value ="12">data broadcast service</option>'
+                                            +'<option value ="13">reserve for Common interface Usage</option>'
+                                            +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
+                                            +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
+                                            +'<option value ="16">DVB MHP service</option>'
+                                        +'</select>'
+                                    );
+                                },
+                                "columns": [
+                                    {"title": "业务ID"},
+                                    {"title": "类型"},
+                                    {"title": "说明"}
+                                ]
+                            });
+
+                            $('#tbl_nitc tbody').on('click', 'tr', function () {
+                                if ($(this).hasClass('selected')) {
+                                    $(this).removeClass('selected');
+                                } else {
+                                    $('#tbl_nitc').DataTable().$('tr.selected').removeClass('selected');
+                                    $(this).addClass('selected');
+                                }
+                            });
+                        }
+                        dialog_nitc.dialog( "open" );
+                        break;
+                    } case '#import': {
 						
 						break;
 					} case '#export': {
@@ -2460,7 +2537,27 @@ function devinfo_output(devType){
 						dialog_NIT.dialog( "open" );
 						break;
 					} case '#delete': {
-						//dialog.dialog( "open" );
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+globalObj.localip+":4000/do/nitController/delnit?channel=2",
+                            //data: ,
+                            dataType: "json",
+                            success: function(data){
+                                if(data.sts == 0){
+                                    dialog_NIT.dialog( "close" );
+                                    return;
+                                }else if(data.sts == 5){
+                                    alert("权限不足，请与管理员联系");
+                                }else if(data.sts == 9){
+                                    window.location = "/login.esp";
+                                    return;
+                                }
+                            },
+                            error : function(err) {
+                            }
+                        });
+						data.node.remove();
 						break;
 					} case '#import': {
 						
@@ -2476,8 +2573,6 @@ function devinfo_output(devType){
 			}
 		},
 		click: function(event, data) {
-			// We should not toggle, if target was "checkbox", because this
-			// would result in double-toggle (i.e. no toggle)
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
 			  data.node.toggleSelected();
 			}
@@ -2497,7 +2592,56 @@ function devinfo_output(devType){
 			  dialog_desc.dialog( "close" );
 			}
 		}
-	});	
+	});
+
+    //编辑NIT右键菜单弹出对话框
+    var dialog_nitc = $( "#dialog-NITC" ).dialog({
+        autoOpen: false,
+        height: 500,
+        width: 700,
+        modal: true,
+        buttons: {
+            "添加":function() {
+                $('#tbl_nitc').DataTable().row.add( [
+                    0,
+                    0,
+                    "reserve"
+                ] ).draw();
+            } ,
+            "删除":function() {
+                $('#tbl_nitc').DataTable().row('.selected').remove().draw( false );
+            },
+            "确定": function() {
+                var data = $('#tbl_nitc').DataTable().$('input, select').serialize();
+                var jsonstr = '{"channel":' + globalObj._channel +',"streamid":' + parseInt($('.nitc_id').val(), 16)
+                    + ',"netid":' + parseInt($('.nitc_netid').val(), 16) + ',"hz":' + parseInt($('.nitc_hz').val())
+                    + ',"ksm":' + parseInt($('.nitc_ksm').val()) + ',"fecout":' + $('#nitc_fecout').val() + ',"cnt":'+$('#tbl_nitc').DataTable().$('tr').length
+                    + ',"fecin":' + $('#nitc_fecin').val() + ',"qam":' + $('#nitc_qam').val() + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') + '"}';
+
+                $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+globalObj.localip+":4000/do/nitController/addnitcstream",
+                    data: JSON.parse(jsonstr),
+                    dataType: "json",
+                    success: function(data){
+                        if(data.sts == 0){
+                            alert("数据输入错误!!");
+                            return;
+                        }else if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
+                        }
+                    },
+                    error : function(err) {
+                    }
+                });
+                dialog_nitc.dialog( "close" );
+            },
+            "取消": function() {
+                dialog_nitc.dialog( "close" );
+            }
+        }
+    });
 	
 	//PID透传右键菜单弹出对话框
 	var dialog_pid = $( "#dialog-pid" ).dialog({
@@ -2585,7 +2729,7 @@ function devinfo_output(devType){
                 $.ajax({
                     type: "GET",
                     async:false,
-                    url: "http://"+globalObj.localip+":4000/do/globalopt/addnitinfo",
+                    url: "http://"+globalObj.localip+":4000/do/nitController/addnitinfo",
                     data: JSON.parse(jsonstr),
                     dataType: "json",
                     success: function(data){

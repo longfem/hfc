@@ -328,7 +328,7 @@ typedef struct  ClsProgram_t
 	// ClsMux muxer = null;
 	 list_t **PrgPmtMuxList; // MuxPrgInfoGet_st  list Array
 	 list_t **PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
-	 list_t **NitSection; // list Array Nit_section_st
+	 list_t NitSection; // list Array Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
 	 int pidMap_eachTransmit_numberMax;
 }ClsProgram_st;	

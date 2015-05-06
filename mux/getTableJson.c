@@ -373,8 +373,7 @@ void getTableJson(int channel, char *outprg, int flag){
 		}else{
 		
 		}
-	}	
-	
+	}
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
 	cJSON_AddFalseToObject(tablejson,"expanded");
@@ -382,24 +381,19 @@ void getTableJson(int channel, char *outprg, int flag){
 	cJSON_AddStringToObject(tablejson,"title", "NIT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_nit){
-	    if(clsProgram.NitSection != NULL){
-	        list_t *NitS = NULL;
-	        Nit_section_t *nist = NULL;
-            NitS = clsProgram.NitSection[channel - 1];
-            if(NitS != NULL){
-                for(i=0;i<list_len(NitS);i++){
-                    list_get(NitS, i, &nist);
-                    cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());
-                    cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
-                    cJSON_AddTrueToObject(subTablejson,"folder");
-                    cJSON_AddFalseToObject(subTablejson,"expanded");
-                    cJSON_AddStringToObject(subTablejson,"key", "id1.5.1");
-                    cJSON_AddStringToObject(subTablejson,"icon", "img/channel_out.ico");
-                    memset(str, 0, sizeof(str));
-                    sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
-                    cJSON_AddStringToObject(subTablejson,"title", str);
-                }
-
+        Nit_section_t *nist = NULL;
+        list_get(&clsProgram.NitSection, channel-1, &nist);
+        if(nist != NULL){
+            if(nist->networkId != 0x00){
+                cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());
+                cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+                cJSON_AddTrueToObject(subTablejson,"folder");
+                cJSON_AddFalseToObject(subTablejson,"expanded");
+                cJSON_AddStringToObject(subTablejson,"key", "id1.5.1");
+                cJSON_AddStringToObject(subTablejson,"icon", "img/channel_out.ico");
+                memset(str, 0, sizeof(str));
+                sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
+                cJSON_AddStringToObject(subTablejson,"title", str);
             }
         }
 	}	

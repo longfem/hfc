@@ -46,12 +46,6 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char sdtTable[8 * 188];
 	unsigned char catTable[188];
 	Dev_prgInfo_st *ptmpPrgInfo;
-
-	
-
-	//if (AutoMakeNewPid(outChnId)==0)
-	//	return 0;
- 	 //MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId);
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
