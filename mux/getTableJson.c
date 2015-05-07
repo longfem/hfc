@@ -376,7 +376,7 @@ void getTableJson(int channel, char *outprg, int flag){
 	}
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
-	cJSON_AddFalseToObject(tablejson,"expanded");
+	cJSON_AddTrueToObject(tablejson,"expanded");
 	cJSON_AddStringToObject(tablejson,"key", "id1.5");
 	cJSON_AddStringToObject(tablejson,"title", "NIT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
@@ -388,12 +388,30 @@ void getTableJson(int channel, char *outprg, int flag){
                 cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());
                 cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
                 cJSON_AddTrueToObject(subTablejson,"folder");
-                cJSON_AddFalseToObject(subTablejson,"expanded");
+                cJSON_AddTrueToObject(subTablejson,"expanded");
                 cJSON_AddStringToObject(subTablejson,"key", "id1.5.1");
                 cJSON_AddStringToObject(subTablejson,"icon", "img/channel_out.ico");
                 memset(str, 0, sizeof(str));
                 sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
                 cJSON_AddStringToObject(subTablejson,"title", str);
+                //nit section steam
+                if(nist->streamLoopLen > 0){
+                    cJSON_AddItemToObject(subTablejson, "children", streamsarray = cJSON_CreateArray());
+                    Nit_streamLoop_t *streamLoop = nist->streamLoop;
+                    for(i=0;i<nist->streamLoopLen;i++){
+                        cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
+                        cJSON_AddFalseToObject(streamjson,"folder");
+                        cJSON_AddNumberToObject(streamjson,"streamid", streamLoop->streamId);
+                        memset(idstr, 0, sizeof(idstr));
+                        sprintf(idstr, "id1.5.1.%d", i+1);
+                        cJSON_AddStringToObject(streamjson,"key", idstr);
+                        cJSON_AddStringToObject(streamjson,"icon", "img/favicon.ico");
+                        memset(str, 0, sizeof(str));
+                        sprintf(str,"传输流ID[0x%04x] 原始网络ID[0x%04x]", streamLoop->streamId, streamLoop->original_network_id);
+                        cJSON_AddStringToObject(streamjson,"title", str);
+                        streamLoop++;
+                    }
+                }
             }
         }
 	}	
