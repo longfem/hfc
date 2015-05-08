@@ -125,6 +125,195 @@ function createTable(){
         }
     });
 }
+
+function addstrc(){
+    $('.nitc_id').val("");
+    $('.nitc_netid').val("");
+    $('.nitc_hz').val("00000");
+    $('.nitc_ksm').val("00000");
+    $('#nitc_fecout')[0].options[0].selected = true;
+    $('#nitc_fecin')[0].options[0].selected = true;
+    $('#nitc_qam')[0].options[0].selected = true;
+    if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
+        $('#tbl_nitc').dataTable().fnClearTable();
+    }else {
+        dataSet.length = 0;
+        globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
+            "data": dataSet,
+            "order": [[0, "asc"]],
+            "paging": false,
+            "info": false,
+            "searching": false,
+            "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                $('td:eq(0)', nRow).html( '<input type="number" pattern="(^[0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                $('td:eq(1)', nRow).html(
+                    '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
+                    +'<option value ="0" selected="selected">reserve</option>'
+                    +'<option value ="1">digital television service</option>'
+                    +'<option value ="2">digital radio sound service</option>'
+                    +'<option value ="3">Teletext service</option>'
+                    +'<option value ="4">NVOD reference service</option>'
+                    +'<option value ="5">NVOD time-shifted service</option>'
+                    +'<option value ="6">mosaic service</option>'
+                    +'<option value ="7">PAL coded signal</option>'
+                    +'<option value ="8">SECAM coded siganl</option>'
+                    +'<option value ="9">D/D2-MAC</option>'
+                    +'<option value ="10">FM Radio</option>'
+                    +'<option value ="11">NTSC coded signal</option>'
+                    +'<option value ="12">data broadcast service</option>'
+                    +'<option value ="13">reserve for Common interface Usage</option>'
+                    +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
+                    +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
+                    +'<option value ="16">DVB MHP service</option>'
+                    +'</select>'
+                );
+            },
+            "columns": [
+                {"title": "业务ID"},
+                {"title": "类型"}
+            ]
+        });
+        $('#tbl_nitc tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $('#tbl_nitc').DataTable().$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    }
+}
+
+function addstrs(){
+    $('.nits_id').val("");
+    $('.nits_netid').val("");
+    $('.nits_hz').val("00000");
+    $('.nits_ksm').val("00000");
+    $('.nits_path').val("0");
+    $('#nits_pol')[0].options[0].selected = true;
+    $('#nits_fecin')[0].options[0].selected = true;
+    $('#nits_qpsk')[0].options[0].selected = true;
+    $('#nits_tip')[0].options[0].selected = true;
+    if ( $.fn.dataTable.isDataTable( '#tbl_nits' ) ) {
+        $('#tbl_nits').dataTable().fnClearTable();
+    }else {
+        dataSet.length = 0;
+        globalObj._tbl_nitc = $('#tbl_nits').dataTable({
+            "data": dataSet,
+            "order": [[0, "asc"]],
+            "paging": false,
+            "info": false,
+            "searching": false,
+            "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nits_id'+iDisplayIndex+ '" name="nits_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                $('td:eq(1)', nRow).html(
+                    '<select id="nits_type'+iDisplayIndex+ '" name="nits_type'+iDisplayIndex +'">'
+                    +'<option value ="0" selected="selected">reserve</option>'
+                    +'<option value ="1">digital television service</option>'
+                    +'<option value ="2">digital radio sound service</option>'
+                    +'<option value ="3">Teletext service</option>'
+                    +'<option value ="4">NVOD reference service</option>'
+                    +'<option value ="5">NVOD time-shifted service</option>'
+                    +'<option value ="6">mosaic service</option>'
+                    +'<option value ="7">PAL coded signal</option>'
+                    +'<option value ="8">SECAM coded siganl</option>'
+                    +'<option value ="9">D/D2-MAC</option>'
+                    +'<option value ="10">FM Radio</option>'
+                    +'<option value ="11">NTSC coded signal</option>'
+                    +'<option value ="12">data broadcast service</option>'
+                    +'<option value ="13">reserve for Common interface Usage</option>'
+                    +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
+                    +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
+                    +'<option value ="16">DVB MHP service</option>'
+                    +'</select>'
+                );
+            },
+            "columns": [
+                {"title": "业务ID"},
+                {"title": "类型"}
+            ]
+        });
+        $('#tbl_nits tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $('#tbl_nits').DataTable().$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    }
+}
+
+function editnitc(data, res){
+    $('.nitc_id').val(res.streamid.toString(16));
+    $('.nitc_netid').val(res.netid.toString(16));
+    $('.nitc_hz').val(res.hz.toString(16));
+    $('.nitc_ksm').val(res.ksm.toString(16));
+    $('#nitc_fecout')[0].options[Number(res.fecout)].selected = true;
+    $('#nitc_fecin')[0].options[Number(res.fecin)].selected = true;
+    $('#nitc_qam')[0].options[Number(res.qam)].selected = true;
+    dataSet.length = 0;
+    if(res.children){
+        $.each(res.children, function(key, itemv) {
+            var item = [itemv.serid.toString(16),itemv.sertype];
+            dataSet[dataSet.length] = item;
+        });
+    }
+    //编辑节目对话框表
+    if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
+        $('#tbl_nitc').dataTable().fnClearTable();
+        if(dataSet.length > 0)
+            $('#tbl_nitc').dataTable().fnAddData(dataSet);
+    }else{
+        globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
+            "data": dataSet,
+            "order": [[0, "asc"]],
+            "paging": false,
+            "info": false,
+            "searching": false,
+            "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                $('td:eq(0)', nRow).html( '<input type="number" pattern="(^[0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                $('td:eq(1)', nRow).html(
+                    '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
+                    +'<option value ="0" selected="selected">reserve</option>'
+                    +'<option value ="1">digital television service</option>'
+                    +'<option value ="2">digital radio sound service</option>'
+                    +'<option value ="3">Teletext service</option>'
+                    +'<option value ="4">NVOD reference service</option>'
+                    +'<option value ="5">NVOD time-shifted service</option>'
+                    +'<option value ="6">mosaic service</option>'
+                    +'<option value ="7">PAL coded signal</option>'
+                    +'<option value ="8">SECAM coded siganl</option>'
+                    +'<option value ="9">D/D2-MAC</option>'
+                    +'<option value ="10">FM Radio</option>'
+                    +'<option value ="11">NTSC coded signal</option>'
+                    +'<option value ="12">data broadcast service</option>'
+                    +'<option value ="13">reserve for Common interface Usage</option>'
+                    +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
+                    +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
+                    +'<option value ="16">DVB MHP service</option>'
+                    +'</select>'
+                );
+            },
+            "columns": [
+                {"title": "业务ID"},
+                {"title": "类型"}
+            ]
+        });
+        $('#tbl_nitc tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $('#tbl_nitc').DataTable().$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    }
+    $.each(dataSet, function(key, itemv) {
+        $('#nitc_type' + key)[0].options[Number(itemv[1])].selected = true;
+    });
+}
+
 function checkselectedprg(nodekey, selected, snode){
     var chantree;
     var snt;
@@ -1701,58 +1890,42 @@ function devinfo_output(devType){
                         });
                         data.node.remove();
 						break;
-					} case '#addstrc': {
-                        if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
-                            $('#tbl_nitc').dataTable().fnClearTable();
-                        }else {
-                            dataSet.length = 0;
-                            globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
-                                "data": dataSet,
-                                "order": [[0, "asc"]],
-                                "paging": false,
-                                "info": false,
-                                "searching": false,
-                                "fnRowCallback": function (nRow, aData, iDisplayIndex) {
-                                    $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
-                                    $('td:eq(1)', nRow).html(
-                                        '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
-                                            +'<option value ="0" selected="selected">reserve</option>'
-                                            +'<option value ="1">digital television service</option>'
-                                            +'<option value ="2">digital radio sound service</option>'
-                                            +'<option value ="3">Teletext service</option>'
-                                            +'<option value ="4">NVOD reference service</option>'
-                                            +'<option value ="5">NVOD time-shifted service</option>'
-                                            +'<option value ="6">mosaic service</option>'
-                                            +'<option value ="7">PAL coded signal</option>'
-                                            +'<option value ="8">SECAM coded siganl</option>'
-                                            +'<option value ="9">D/D2-MAC</option>'
-                                            +'<option value ="10">FM Radio</option>'
-                                            +'<option value ="11">NTSC coded signal</option>'
-                                            +'<option value ="12">data broadcast service</option>'
-                                            +'<option value ="13">reserve for Common interface Usage</option>'
-                                            +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
-                                            +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
-                                            +'<option value ="16">DVB MHP service</option>'
-                                        +'</select>'
-                                    );
-                                },
-                                "columns": [
-                                    {"title": "业务ID"},
-                                    {"title": "类型"}
-                                ]
-                            });
-                            $('#tbl_nitc tbody').on('click', 'tr', function () {
-                                if ($(this).hasClass('selected')) {
-                                    $(this).removeClass('selected');
-                                } else {
-                                    $('#tbl_nitc').DataTable().$('tr.selected').removeClass('selected');
-                                    $(this).addClass('selected');
+					} case '#deleteallstr':{
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+globalObj.localip+":4000/do/nitController/delallstr?channel=1",
+                            //data: ,
+                            dataType: "json",
+                            success: function(res){
+                                if(res.sts == 0){
+                                    dialog_NIT.dialog( "close" );
+                                    return;
+                                }else if(res.sts == 5){
+                                    alert("权限不足，请与管理员联系");
+                                }else if(res.sts == 9){
+                                    window.location = "/login.esp";
+                                    return;
                                 }
-                            });
-                        }
+                                $.each(data.childNodes, function(index,node){
+                                    node.remove();
+                                });
+                            },
+                            error : function(err) {
+                            }
+                        });
+                        break;
+                    } case '#addstrc':{
+                        addstrc();
                         globalObj._prgoptflag = 1;
                         globalObj._editnodekey = data.node.key;
                         dialog_nitc.dialog( "open" );
+                        break;
+                    } case '#addstrs':{
+                        addstrs();
+                        globalObj._prgoptflag = 1;
+                        globalObj._editnodekey = data.node.key;
+                        dialog_nits.dialog( "open" );
                         break;
                     } case '#editstr': {
                         $.ajax({
@@ -1772,76 +1945,20 @@ function devinfo_output(devType){
                                     window.location = "/login.esp";
                                     return;
                                 }
-                                $('.nitc_id').val(res.streamid.toString(16));
-                                $('.nitc_netid').val(res.netid.toString(16));
-                                $('.nitc_hz').val(res.hz.toString(16));
-                                $('.nitc_ksm').val(res.ksm.toString(16));
-                                $('#nitc_fecout')[0].options[Number(res.fecout)].selected = true;
-                                $('#nitc_fecin')[0].options[Number(res.fecin)].selected = true;
-                                $('#nitc_qam')[0].options[Number(res.qam)].selected = true;
-                                dataSet.length = 0;
-                                if(res.children){
-                                    $.each(res.children, function(key, itemv) {
-                                        var item = [itemv.serid.toString(16),itemv.sertype];
-                                        dataSet[dataSet.length] = item;
-                                    });
+                                switch(data.node.data.type){
+                                    case 'DVB-C':
+                                        editnitc(data, res);
+                                        globalObj._prgoptflag = 0;
+                                        globalObj._editnodekey = data.node.key;
+                                        dialog_nitc.dialog( "open" );
+                                        break;
+                                    case 'DVB-S':
+
+                                        break;
+                                    case 'DVB-T':
+
+                                        break;
                                 }
-                                //编辑节目对话框表
-                                if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
-                                    $('#tbl_nitc').dataTable().fnClearTable();
-                                    if(dataSet.length > 0)
-                                        $('#tbl_nitc').dataTable().fnAddData(dataSet);
-                                }else{
-                                    globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
-                                        "data": dataSet,
-                                        "order": [[0, "asc"]],
-                                        "paging": false,
-                                        "info": false,
-                                        "searching": false,
-                                        "fnRowCallback": function (nRow, aData, iDisplayIndex) {
-                                            $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
-                                            $('td:eq(1)', nRow).html(
-                                                '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
-                                                +'<option value ="0" selected="selected">reserve</option>'
-                                                +'<option value ="1">digital television service</option>'
-                                                +'<option value ="2">digital radio sound service</option>'
-                                                +'<option value ="3">Teletext service</option>'
-                                                +'<option value ="4">NVOD reference service</option>'
-                                                +'<option value ="5">NVOD time-shifted service</option>'
-                                                +'<option value ="6">mosaic service</option>'
-                                                +'<option value ="7">PAL coded signal</option>'
-                                                +'<option value ="8">SECAM coded siganl</option>'
-                                                +'<option value ="9">D/D2-MAC</option>'
-                                                +'<option value ="10">FM Radio</option>'
-                                                +'<option value ="11">NTSC coded signal</option>'
-                                                +'<option value ="12">data broadcast service</option>'
-                                                +'<option value ="13">reserve for Common interface Usage</option>'
-                                                +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
-                                                +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
-                                                +'<option value ="16">DVB MHP service</option>'
-                                                +'</select>'
-                                            );
-                                        },
-                                        "columns": [
-                                            {"title": "业务ID"},
-                                            {"title": "类型"}
-                                        ]
-                                    });
-                                    $('#tbl_nitc tbody').on('click', 'tr', function () {
-                                        if ($(this).hasClass('selected')) {
-                                            $(this).removeClass('selected');
-                                        } else {
-                                            $('#tbl_nitc').DataTable().$('tr.selected').removeClass('selected');
-                                            $(this).addClass('selected');
-                                        }
-                                    });
-                                }
-                                $.each(dataSet, function(key, itemv) {
-                                    $('#nitc_type' + key)[0].options[Number(itemv[1])].selected = true;
-                                });
-                                globalObj._prgoptflag = 0;
-                                globalObj._editnodekey = data.node.key;
-                                dialog_nitc.dialog( "open" );
                             },
                             error : function(err) {
                             }
@@ -2702,7 +2819,74 @@ function devinfo_output(devType){
             }
         }
     });
-	
+
+    //编辑NIT右键菜单弹出对话框
+    var dialog_nits = $( "#dialog-NITS" ).dialog({
+        autoOpen: false,
+        height: 550,
+        width: 700,
+        modal: true,
+        buttons: {
+            "添加":function() {
+                $('#tbl_nits').DataTable().row.add( [
+                    0,
+                    0
+                ] ).draw();
+            } ,
+            "删除":function() {
+                $('#tbl_nits').DataTable().row('.selected').remove().draw( false );
+            },
+            "确定": function() {
+                var oristreamid = 0;
+                if(globalObj._channel == 1 && globalObj._prgoptflag == 0){
+                    oristreamid = $("#out_tree").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
+                }else if(globalObj._channel == 2 && globalObj._prgoptflag == 0){
+                    oristreamid = $("#out_tree2").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
+                }
+                var data = $('#tbl_nits').DataTable().$('input, select').serialize();
+                var jsonstr;
+                if(data == ""){
+                    jsonstr = '{"channel":' + globalObj._channel +',"flag":' + globalObj._prgoptflag
+                    +',"oristreamid":' + oristreamid +',"streamid":' + parseInt($('.nits_id').val(), 16)
+                    + ',"netid":' + parseInt($('.nits_netid').val(), 16) + ',"hz":' + parseInt($('.nits_hz').val(), 16)
+                    + ',"ksm":' + parseInt($('.nits_ksm').val(), 16) + ',"path":' + parseInt($('.nits_path').val(), 16)
+                    + ',"pol":' + $('#nits_pol').val() + ',"cnt":'+$('#tbl_nits').DataTable().$('tr').length
+                    + ',"fecin":' + $('#nits_fecin').val() + ',"qpsk":' + $('#nits_qpsk').val() + ',"tip":' + $('#nits_tip').val() + '}';
+                }else{
+                    jsonstr = '{"channel":' + globalObj._channel +',"flag":' + globalObj._prgoptflag
+                    +',"oristreamid":' + oristreamid +',"streamid":' + parseInt($('.nits_id').val(), 16)
+                    + ',"netid":' + parseInt($('.nits_netid').val(), 16) + ',"hz":' + parseInt($('.nits_hz').val(), 16)
+                    + ',"ksm":' + parseInt($('.nits_ksm').val(), 16) + ',"path":' + parseInt($('.nits_path').val(), 16)
+                    + ',"pol":' + $('#nits_pol').val() + ',"cnt":'+$('#tbl_nits').DataTable().$('tr').length
+                    + ',"fecin":' + $('#nits_fecin').val() + ',"qpsk":' + $('#nits_qpsk').val() + ',"tip":' + $('#nits_tip').val() + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') + '"}';
+                }
+                $.ajax({
+                    type: "GET",
+                    async:false,
+                    url: "http://"+globalObj.localip+":4000/do/nitController/addnitsstream",
+                    data: JSON.parse(jsonstr),
+                    dataType: "json",
+                    success: function(data){
+                        if(data.sts == 0){
+                            alert("数据输入错误!!");
+                            return;
+                        }else if(data.sts == 5){
+                            alert("权限不足，请与管理员联系");
+                        }
+                        //获取制表信息
+                        createTable();
+                    },
+                    error : function(err) {
+                    }
+                });
+                dialog_nits.dialog( "close" );
+            },
+            "取消": function() {
+                dialog_nits.dialog( "close" );
+            }
+        }
+    });
+
 	//PID透传右键菜单弹出对话框
 	var dialog_pid = $( "#dialog-pid" ).dialog({
 		autoOpen: false,

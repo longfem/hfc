@@ -117,6 +117,60 @@
             </div>
         </div>
     </div>
+    <div id="dialog-NITS" title="卫星传输系统描述符">
+        <div class="nit_section">
+            <label>传输流ID &nbsp</label>
+            <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nits_id" value="" />
+            <label>原始网络ID &nbsp</label>
+            <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nits_netid" value="" /><br/>
+            <label>频率</label>
+            <input type="text" class="nits_hz" value=""/>
+            <label>(KHz)eg:312000</label>
+            <br/>
+            <label>符号率</label>
+            <input type="text" class="nits_ksm" value=""/>
+            <label>(KSymbol)eg:27450</label>
+            <br/>
+            <label>轨道位置</label>
+            <input type="text" class="nits_path" value=""/>
+            <label>eg:192</label>
+            <br/>
+            <label>Polarization</label>
+            <select id="nits_pol" style="width:250px">
+                <option value ="0">[0]linear - horizontal</option>
+                <option value ="1">[1]linear - vertical</option>
+                <option value ="2">[2]Circular - left</option>
+                <option value ="3">[3]Circular - right</option>
+            </select><br/>
+            <label>FEC Inner</label>
+            <select id="nits_fecin" style="width:250px">
+                <option value ="0">[0]not defined</option>
+                <option value ="1">[1]1/2 conv.code rate</option>
+                <option value ="2">[2]2/3 conv.code rate</option>
+                <option value ="3">[3]3/4 conv.code rate</option>
+                <option value ="4">[4]5/6 conv.code rate</option>
+                <option value ="5">[5]7/8 conv.code rate</option>
+                <option value ="15">[15]no conv.code</option>
+            </select><br/>
+            <label>调制方式</label>
+            <select id="nits_qpsk" style="width:250px">
+                <option value ="0">[0]not defined</option>
+                <option value ="1">[1]QPSK</option>
+            </select><br/>
+            <label>东西部标示</label>
+            <select id="nits_tip" style="width:250px">
+                <option value ="0">[0]indicate the western position</option>
+                <option value ="1">[1]indicate the eastern position</option>
+            </select><br/>
+            <fieldset>
+                <legend>业务列表</legend>
+                <div class="tbl_nit">
+                    <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_nits"></table>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    </div>
 	<div class="footer">
 		<hr/>
 		<p> <%= mprGetDate(0); %></p>

@@ -429,6 +429,12 @@ ul,ol{
     line-height: 1.9;
 }
 
+#dialog-NITS {
+    display:none;
+    padding: 10px;
+    line-height: 1.9;
+}
+
 fieldset input {
 	margin-left: 30px;
   }

@@ -24,69 +24,8 @@ static void rendersts(const char *str,int status)
 	free(jsonstring);
 }
 
-int Perform(MprJson *jsonparam, Nit_section_t *nist, int flag)
-{
-    int i = 0, j = 0, val = 0;
-    char idstr[16] = {0};
-    cchar *tmpstr;
-    int cnt = atoi(mprGetJson(jsonparam, "cnt"));
-    int hz = atoi(mprGetJson(jsonparam, "hz"));
-    int ksm = atoi(mprGetJson(jsonparam, "ksm"));
-    int fecout = atoi(mprGetJson(jsonparam, "fecout"));
-    unsigned char desBytes[13 + cnt * 3 + 2];
-    unsigned int u32int, u32Tmp;
-    desBytes[i++] = 0x44;
-    desBytes[i++] = 11;
-    if(hz == 0){
-        u32int = 0;
-    }else{
-        if(hz<0 || hz> 0x99999999)
-            return 0;
-        u32int = hz;
-    }
-    u32int *= 0x10; // kHz步进省去的1位
-    desBytes[i++] = (unsigned char)(u32int >> 24);
-    desBytes[i++] = (unsigned char)(u32int >> 16);
-    desBytes[i++] = (unsigned char)(u32int >> 8);
-    desBytes[i++] = (unsigned char)(u32int);
-    // fec outer
-    u32Tmp = (unsigned int)(0xfff0 + (fecout & 0x0f));
-    desBytes[i++] = (unsigned char)(u32Tmp >> 8);
-    desBytes[i++] = (unsigned char)(u32Tmp);
-    // modulation
-    desBytes[i++] = (unsigned char)atoi(mprGetJson(jsonparam, "qam"));
-    if(ksm == 0){
-        u32int = 0;
-    }else{
-        if(ksm<0 || ksm> 0x99999999)
-            return 0;
-        u32int = ksm;
-    }
-    u32int *= 0x10; // k步进省去的1位
-    u32int <<= 4;
-    u32int += (unsigned int)(atoi(mprGetJson(jsonparam, "fecin")) & 0x0f);  // fec inner
-    desBytes[i++] = (unsigned char)(u32int >> 24);
-    desBytes[i++] = (unsigned char)(u32int >> 16);
-    desBytes[i++] = (unsigned char)(u32int >> 8);
-    desBytes[i++] = (unsigned char)(u32int);
-    if (cnt > 0)
-    {
-        desBytes[i++] = 0x41;
-        desBytes[i++] = (unsigned char)(cnt * 3);
-        for(j=0;j<cnt;j++){
-            memset(idstr, 0, sizeof(idstr));
-            sprintf(idstr, "nitc_id%d", j);
-            tmpstr = mprGetJson(jsonparam, idstr);
-            sscanf(tmpstr, "%x", &val);
-            desBytes[i++] = (unsigned char)(val >> 8);
-            desBytes[i++] = (unsigned char)val;
-            memset(idstr, 0, sizeof(idstr));
-            sprintf(idstr, "nitc_type%d", j);
-            tmpstr = mprGetJson(jsonparam, idstr);
-            sscanf(tmpstr, "%d", &val);
-            desBytes[i++] = (unsigned char)val;
-        }
-    }
+int nitstream(Nit_section_t *nist, int flag, int i, unsigned char *desBytes, MprJson *jsonparam){
+    int j = 0;
     if(flag){
         //add
         nist->streamLoopLen++;
@@ -151,7 +90,150 @@ int Perform(MprJson *jsonparam, Nit_section_t *nist, int flag)
             streamLoop++;
         }
     }
+}
 
+int Perform_S(MprJson *jsonparam, Nit_section_t *nist, int flag){
+    int i = 0, j = 0, val = 0;
+    char idstr[16] = {0};
+    cchar *tmpstr;
+    int cnt = atoi(mprGetJson(jsonparam, "cnt"));
+    int hz = atoi(mprGetJson(jsonparam, "hz"));
+    int ksm = atoi(mprGetJson(jsonparam, "ksm"));
+    int path = atoi(mprGetJson(jsonparam, "path"));
+    unsigned int u32int;
+    unsigned char desBytes[13 + cnt * 3 + 2];
+    desBytes[i++] = 0x43;
+    desBytes[i++] = 11;
+    // frequency
+    if(hz == 0){
+        u32int = 0;
+    }else{
+        if(hz<0 || hz> 0x99999999)
+            return 0;
+        u32int = hz;
+    }
+    desBytes[i++] = (unsigned char)(u32int >> 24);
+    desBytes[i++] = (unsigned char)(u32int >> 16);
+    desBytes[i++] = (unsigned char)(u32int >> 8);
+    desBytes[i++] = (unsigned char)(u32int);
+    // orbital_position
+    if(path == 0){
+        u32int = 0;
+    }else{
+        if(path<0 || path> 0x9999)
+            return 0;
+        u32int = path;
+    }
+    desBytes[i++] = (unsigned char)(u32int >> 8);
+    desBytes[i++] = (unsigned char)(u32int);
+    //west_east_flag polarization modulation
+    desBytes[i++] = (unsigned char)(atoi(mprGetJson(jsonparam, "tip")) << 7) |
+        (atoi(mprGetJson(jsonparam, "pol")) << 5) | atoi(mprGetJson(jsonparam, "qpsk"));
+    // symbol rate and fec inner
+    if(ksm == 0){
+        u32int = 0;
+    }else{
+        if(ksm<0 || ksm> 0x99999999)
+            return 0;
+        u32int = ksm;
+    }
+    u32int *= 0x10; // K步进补齐省略位
+    u32int <<= 4;
+    u32int += (unsigned int)(atoi(mprGetJson(jsonparam, "fecin")) & 0x0f);  // fec inner
+    desBytes[i++] = (unsigned char)(u32int >> 24);
+    desBytes[i++] = (unsigned char)(u32int >> 16);
+    desBytes[i++] = (unsigned char)(u32int >> 8);
+    desBytes[i++] = (unsigned char)(u32int);
+    if (cnt > 0)
+    {
+        desBytes[i++] = 0x41;
+        desBytes[i++] = (unsigned char)(cnt * 3);
+        for(j=0;j<cnt;j++){
+            memset(idstr, 0, sizeof(idstr));
+            sprintf(idstr, "nits_id%d", j);
+            tmpstr = mprGetJson(jsonparam, idstr);
+            sscanf(tmpstr, "%d", &val);
+            desBytes[i++] = (unsigned char)(val >> 8);
+            desBytes[i++] = (unsigned char)val;
+            memset(idstr, 0, sizeof(idstr));
+            sprintf(idstr, "nits_type%d", j);
+            tmpstr = mprGetJson(jsonparam, idstr);
+            sscanf(tmpstr, "%d", &val);
+            desBytes[i++] = (unsigned char)val;
+        }
+    }
+    printf("===desbytes===\n");
+    for(j = 0;j<i;j++){
+        printf("[%d]%02x\n", j, desBytes[j]);
+    }
+    nitstream(nist, flag, i, desBytes, jsonparam);
+    return 1;
+}
+
+int Perform(MprJson *jsonparam, Nit_section_t *nist, int flag)
+{
+    int i = 0, j = 0, val = 0;
+    char idstr[16] = {0};
+    cchar *tmpstr;
+    int cnt = atoi(mprGetJson(jsonparam, "cnt"));
+    int hz = atoi(mprGetJson(jsonparam, "hz"));
+    int ksm = atoi(mprGetJson(jsonparam, "ksm"));
+    int fecout = atoi(mprGetJson(jsonparam, "fecout"));
+    unsigned char desBytes[13 + cnt * 3 + 2];
+    unsigned int u32int, u32Tmp;
+    desBytes[i++] = 0x44;
+    desBytes[i++] = 11;
+    if(hz == 0){
+        u32int = 0;
+    }else{
+        if(hz<0 || hz> 0x99999999)
+            return 0;
+        u32int = hz;
+    }
+    u32int *= 0x10; // kHz步进省去的1位
+    desBytes[i++] = (unsigned char)(u32int >> 24);
+    desBytes[i++] = (unsigned char)(u32int >> 16);
+    desBytes[i++] = (unsigned char)(u32int >> 8);
+    desBytes[i++] = (unsigned char)(u32int);
+    // fec outer
+    u32Tmp = (unsigned int)(0xfff0 + (fecout & 0x0f));
+    desBytes[i++] = (unsigned char)(u32Tmp >> 8);
+    desBytes[i++] = (unsigned char)(u32Tmp);
+    // modulation
+    desBytes[i++] = (unsigned char)atoi(mprGetJson(jsonparam, "qam"));
+    if(ksm == 0){
+        u32int = 0;
+    }else{
+        if(ksm<0 || ksm> 0x99999999)
+            return 0;
+        u32int = ksm;
+    }
+    u32int *= 0x10; // k步进省去的1位
+    u32int <<= 4;
+    u32int += (unsigned int)(atoi(mprGetJson(jsonparam, "fecin")) & 0x0f);  // fec inner
+    desBytes[i++] = (unsigned char)(u32int >> 24);
+    desBytes[i++] = (unsigned char)(u32int >> 16);
+    desBytes[i++] = (unsigned char)(u32int >> 8);
+    desBytes[i++] = (unsigned char)(u32int);
+    if (cnt > 0)
+    {
+        desBytes[i++] = 0x41;
+        desBytes[i++] = (unsigned char)(cnt * 3);
+        for(j=0;j<cnt;j++){
+            memset(idstr, 0, sizeof(idstr));
+            sprintf(idstr, "nitc_id%d", j);
+            tmpstr = mprGetJson(jsonparam, idstr);
+            sscanf(tmpstr, "%d", &val);
+            desBytes[i++] = (unsigned char)(val >> 8);
+            desBytes[i++] = (unsigned char)val;
+            memset(idstr, 0, sizeof(idstr));
+            sprintf(idstr, "nitc_type%d", j);
+            tmpstr = mprGetJson(jsonparam, idstr);
+            sscanf(tmpstr, "%d", &val);
+            desBytes[i++] = (unsigned char)val;
+        }
+    }
+    nitstream(nist, flag, i, desBytes, jsonparam);
     return 1;
 }
 
@@ -192,8 +274,9 @@ static int ShowCableDes(Nit_streamLoop_t *streamLoop , cJSON *result){
         cJSON *streamsarray, *streamjson;
         if (i < offset + length){
             cJSON_AddItemToObject(result, "children", streamsarray = cJSON_CreateArray());
-            unsigned char desTag = desBytes[i++];
-            unsigned char desLength = desBytes[i++];
+            //unsigned char desTag = desBytes[i++];
+            //unsigned char desLength = desBytes[i++];
+            i += 2;
             for (j = 0; j < offset + length; j++){
                 if (i + 3 > offset + length)
                     break;
@@ -481,6 +564,94 @@ static void delstr(HttpConn *conn) {
     render(str);
 }
 
+static void delallstr(HttpConn *conn) {
+    int i = 0;
+    char str[32] = {0};
+    MprJson *jsonparam = httpGetParams(conn);
+    cchar *inChn = mprGetJson(jsonparam, "channel");
+    Nit_section_t *nist = NULL;
+    int inCh = atoi(inChn);
+    list_get(&clsProgram.NitSection, inCh-1, &nist);
+    Nit_streamLoop_t *streamLoop = nist->streamLoop;
+    if(nist->streamLoopLen > 0){
+        for(i=0;i<nist->streamLoopLen;i++){
+            if(streamLoop->BufferUn_stLen > 0){
+                if(streamLoop->desList->bufLen > 0){
+                    free(streamLoop->desList->pbuf);
+                    streamLoop->desList->pbuf = NULL;
+                }
+                free(streamLoop->desList);
+                streamLoop->desList = NULL;
+            }
+            streamLoop++;
+        }
+        free(nist->streamLoop);
+        streamLoop = NULL;
+    }
+    nist->streamLoopLen = 0;
+    rendersts(str, 1);
+    render(str);
+}
+
+static void addnitsstream(HttpConn *conn) {
+    char idstr[16] = {0};
+    int i = 0, val = 0;
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(idstr, 9);
+        render(idstr);
+        return;
+    }
+     if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(idstr, 5);//无权限
+        render(idstr);
+        return;
+    }
+    MprJson *jsonparam = httpGetParams(conn);
+    cchar *tmpstr;
+    int inCh = atoi(mprGetJson(jsonparam, "channel"));
+    int cnt = atoi(mprGetJson(jsonparam, "cnt"));
+    int flag = atoi(mprGetJson(jsonparam, "flag"));
+    //验证数据
+    int streamid = atoi(mprGetJson(jsonparam, "streamid"));
+    if(streamid>0xffff || streamid<0){
+        memset(idstr, 0, sizeof(idstr));
+        rendersts(idstr, 0);
+        render(idstr);
+        return;
+    }
+    int netid = atoi(mprGetJson(jsonparam, "netid"));
+    if(netid>0xffff || netid<0){
+        memset(idstr, 0, sizeof(idstr));
+        rendersts(idstr, 0);
+        render(idstr);
+        return;
+    }
+    for(i=0;i<cnt;i++){
+        memset(idstr, 0, sizeof(idstr));
+        sprintf(idstr, "nits_id%d", i);
+        tmpstr = mprGetJson(jsonparam, idstr);
+        sscanf(tmpstr, "%d", &val);
+        if(val>0xffff || val<0){
+            memset(idstr, 0, sizeof(idstr));
+            rendersts(idstr, 0);
+            render(idstr);
+            return;
+        }
+    }
+    Nit_section_t *nist = NULL;
+    list_get(&clsProgram.NitSection, inCh-1, &nist);
+    if(Perform_S(jsonparam, nist, flag) == 0){
+        memset(idstr, 0, sizeof(idstr));
+        rendersts(idstr, 0);
+        render(idstr);
+        return;
+    }
+    memset(idstr, 0, sizeof(idstr));
+    rendersts(idstr, 1);
+    render(idstr);
+}
+
 static void common(HttpConn *conn) {
 
 }
@@ -496,6 +667,10 @@ ESP_EXPORT int esp_controller_muxnms_nitController(HttpRoute *route, MprModule *
 	espDefineAction(route, "nitController-cmd-getstream", getstream);
 	espDefineAction(route, "nitController-cmd-addnitcstream", addnitcstream);
 	espDefineAction(route, "nitController-cmd-delstr", delstr);
+	espDefineAction(route, "nitController-cmd-addnitsstream", addnitsstream);
+	espDefineAction(route, "nitController-cmd-delallstr", delallstr);
+
+
 
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
