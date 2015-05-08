@@ -24,7 +24,7 @@ static void rendersts(const char *str,int status)
 	free(jsonstring);
 }
 
-int Perform(MprJson *jsonparam, Nit_section_t *nist)
+int Perform(MprJson *jsonparam, Nit_section_t *nist, int flag)
 {
     int i = 0, j = 0, val = 0;
     char idstr[16] = {0};
@@ -77,7 +77,7 @@ int Perform(MprJson *jsonparam, Nit_section_t *nist)
             memset(idstr, 0, sizeof(idstr));
             sprintf(idstr, "nitc_id%d", j);
             tmpstr = mprGetJson(jsonparam, idstr);
-            sscanf(tmpstr, "%d", &val);
+            sscanf(tmpstr, "%x", &val);
             desBytes[i++] = (unsigned char)(val >> 8);
             desBytes[i++] = (unsigned char)val;
             memset(idstr, 0, sizeof(idstr));
@@ -87,51 +87,71 @@ int Perform(MprJson *jsonparam, Nit_section_t *nist)
             desBytes[i++] = (unsigned char)val;
         }
     }
-
-    nist->streamLoopLen++;
-    Nit_streamLoop_t *newstreamLoop = malloc(nist->streamLoopLen * sizeof(Nit_streamLoop_t));
-    Nit_streamLoop_t *newstreamLoopList = newstreamLoop;
-    Nit_streamLoop_t *streamLoop = nist->streamLoop;
-    //copy old stream to new
-    for(j=0;j<nist->streamLoopLen - 1;j++){
-        memcpy(newstreamLoop, streamLoop, sizeof(Nit_streamLoop_t));
-        newstreamLoop->desList = malloc(sizeof(BufferUn_st));
-        memcpy(newstreamLoop->desList, streamLoop->desList, sizeof(BufferUn_st));
-        newstreamLoop->desList->pbuf = malloc(newstreamLoop->desList->bufLen * sizeof(unsigned char));
-        memcpy(newstreamLoop->desList->pbuf, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
-        newstreamLoop++;
-        streamLoop++;
-    }
-    newstreamLoop->BufferUn_stLen = 1;
-    newstreamLoop->streamId = atoi(mprGetJson(jsonparam, "streamid"));
-    newstreamLoop->original_network_id = atoi(mprGetJson(jsonparam, "netid"));
-    newstreamLoop->desList = malloc(sizeof(BufferUn_st));
-    newstreamLoop->desList->pbuf = malloc(i * sizeof(unsigned char));
-    newstreamLoop->desList->bufLen = i;
-    memcpy(newstreamLoop->desList->pbuf, desBytes, i);
-    //释放过时的stream内存
-    streamLoop = nist->streamLoop;
-    if(nist->streamLoopLen - 1 > 0){
+    if(flag){
+        //add
+        nist->streamLoopLen++;
+        Nit_streamLoop_t *newstreamLoop = malloc(nist->streamLoopLen * sizeof(Nit_streamLoop_t));
+        Nit_streamLoop_t *newstreamLoopList = newstreamLoop;
+        Nit_streamLoop_t *streamLoop = nist->streamLoop;
+        //copy old stream to new
         for(j=0;j<nist->streamLoopLen - 1;j++){
-            if(streamLoop->BufferUn_stLen > 0){
-                if(streamLoop->desList->bufLen > 0){
-                    free(streamLoop->desList->pbuf);
-                    streamLoop->desList->pbuf = NULL;
+            memcpy(newstreamLoop, streamLoop, sizeof(Nit_streamLoop_t));
+            newstreamLoop->desList = malloc(sizeof(BufferUn_st));
+            memcpy(newstreamLoop->desList, streamLoop->desList, sizeof(BufferUn_st));
+            newstreamLoop->desList->pbuf = malloc(newstreamLoop->desList->bufLen * sizeof(unsigned char));
+            memcpy(newstreamLoop->desList->pbuf, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
+            newstreamLoop++;
+            streamLoop++;
+        }
+        newstreamLoop->BufferUn_stLen = 1;
+        newstreamLoop->streamId = atoi(mprGetJson(jsonparam, "streamid"));
+        newstreamLoop->original_network_id = atoi(mprGetJson(jsonparam, "netid"));
+        newstreamLoop->desList = malloc(sizeof(BufferUn_st));
+        newstreamLoop->desList->pbuf = malloc(i * sizeof(unsigned char));
+        newstreamLoop->desList->bufLen = i;
+        memcpy(newstreamLoop->desList->pbuf, desBytes, i);
+        //释放过时的stream内存
+        streamLoop = nist->streamLoop;
+        if(nist->streamLoopLen - 1 > 0){
+            for(j=0;j<nist->streamLoopLen - 1;j++){
+                if(streamLoop->BufferUn_stLen > 0){
+                    if(streamLoop->desList->bufLen > 0){
+                        free(streamLoop->desList->pbuf);
+                        streamLoop->desList->pbuf = NULL;
+                    }
+                    free(streamLoop->desList);
+                    streamLoop->desList = NULL;
                 }
+                streamLoop++;
+            }
+            free(nist->streamLoop);
+            streamLoop = NULL;
+        }
+        //指向新内存地址
+        nist->streamLoop = newstreamLoopList;
+    }else{
+        //edit
+        Nit_streamLoop_t *streamLoop = nist->streamLoop;
+        int originalstreamid = atoi(mprGetJson(jsonparam, "oristreamid"));
+        for(j=0;j<nist->streamLoopLen;j++){
+            if(streamLoop->streamId == originalstreamid){
+                //释放过时的流
+                free(streamLoop->desList->pbuf);
                 free(streamLoop->desList);
-                streamLoop->desList = NULL;
+
+                streamLoop->BufferUn_stLen = 1;
+                streamLoop->streamId = atoi(mprGetJson(jsonparam, "streamid"));
+                streamLoop->original_network_id = atoi(mprGetJson(jsonparam, "netid"));
+                streamLoop->desList = malloc(sizeof(BufferUn_st));
+                streamLoop->desList->pbuf = malloc(i * sizeof(unsigned char));
+                streamLoop->desList->bufLen = i;
+                memcpy(streamLoop->desList->pbuf, desBytes, i);
+                break;
             }
             streamLoop++;
         }
-        free(nist->streamLoop);
-        streamLoop = NULL;
     }
-    //指向新内存地址
-    nist->streamLoop = newstreamLoopList;
-//    printf("========desBytes===========\n");
-//    for(j=0;j<i;j++){
-//        printf("[%d]%02x\n", j, desBytes[j]);
-//    }
+
     return 1;
 }
 
@@ -211,7 +231,6 @@ static void addnitinfo(HttpConn *conn) {
     cchar *name = mprGetJson(jsonparam, "name");
     Nit_section_t *nist = NULL;
     list_get(&clsProgram.NitSection, channel - 1, &nist);
-    printf("-------flag---%d\n", flag);
     if(flag){
         //add
         if(nist->networkId != 0x00){
@@ -233,7 +252,6 @@ static void addnitinfo(HttpConn *conn) {
         }
     }else{
         //edit
-        printf("-------edit---\n");
         nist->networkId = netid;
         free(nist->nameList->data);
         nist->nameList->data = NULL;
@@ -248,6 +266,7 @@ static void addnitinfo(HttpConn *conn) {
 
 static void delnit(HttpConn *conn) {
     char str[16] = {0};
+    int i = 0;
     cchar *role = getSessionVar("role");
     if(role == NULL){
         rendersts(str, 9);
@@ -268,6 +287,15 @@ static void delnit(HttpConn *conn) {
         free(nist->nameList->data);
     }
     free(nist->nameList);
+    Nit_streamLoop_t *streamLoop = nist->streamLoop;
+    for(i=0; i<nist->streamLoopLen;i++){
+        free(streamLoop->desList->pbuf);
+        free(streamLoop->desList);
+        streamLoop++;
+    }
+    if(nist->streamLoopLen > 0){
+        free(nist->streamLoop);
+    }
     memset(nist, 0, sizeof(Nit_section_t));
     rendersts(str, 1);
     render(str);
@@ -291,6 +319,7 @@ static void addnitcstream(HttpConn *conn) {
     cchar *tmpstr;
     int inCh = atoi(mprGetJson(jsonparam, "channel"));
     int cnt = atoi(mprGetJson(jsonparam, "cnt"));
+    int flag = atoi(mprGetJson(jsonparam, "flag"));
     //验证数据
     int streamid = atoi(mprGetJson(jsonparam, "streamid"));
     if(streamid>0xffff || streamid<0){
@@ -320,7 +349,7 @@ static void addnitcstream(HttpConn *conn) {
     }
     Nit_section_t *nist = NULL;
     list_get(&clsProgram.NitSection, inCh-1, &nist);
-    if(Perform(jsonparam, nist) == 0){
+    if(Perform(jsonparam, nist, flag) == 0){
         memset(idstr, 0, sizeof(idstr));
         rendersts(idstr, 0);
         render(idstr);
@@ -398,6 +427,60 @@ static void getstream(HttpConn *conn) {
     free(jsonstring);
 }
 
+static void delstr(HttpConn *conn) {
+    int i = 0;
+    char str[32] = {0};
+    MprJson *jsonparam = httpGetParams(conn);
+    cchar *inChn = mprGetJson(jsonparam, "channel");
+    Nit_section_t *nist = NULL;
+    int inCh = atoi(inChn);
+    list_get(&clsProgram.NitSection, inCh-1, &nist);
+    int streamid = atoi(mprGetJson(jsonparam, "streamid"));
+    int newlen = nist->streamLoopLen - 1;
+    Nit_streamLoop_t *streamLoop = nist->streamLoop;
+    Nit_streamLoop_t *newstreamLoopList = NULL;
+    if(newlen > 0){
+        Nit_streamLoop_t *newstreamLoop = malloc(newlen * sizeof(Nit_streamLoop_t));
+        newstreamLoopList = newstreamLoop;
+        for(i=0;i<nist->streamLoopLen;i++){
+            if(streamLoop->streamId != streamid){
+                //copy old stream to new
+                memcpy(newstreamLoop, streamLoop, sizeof(Nit_streamLoop_t));
+                newstreamLoop->desList = malloc(sizeof(BufferUn_st));
+                memcpy(newstreamLoop->desList, streamLoop->desList, sizeof(BufferUn_st));
+                newstreamLoop->desList->pbuf = malloc(newstreamLoop->desList->bufLen * sizeof(unsigned char));
+                memcpy(newstreamLoop->desList->pbuf, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
+                newstreamLoop++;
+            }
+            streamLoop++;
+        }
+    }
+    //释放过时的stream内存
+    streamLoop = nist->streamLoop;
+    if(nist->streamLoopLen > 0){
+        for(i=0;i<nist->streamLoopLen;i++){
+            if(streamLoop->BufferUn_stLen > 0){
+                if(streamLoop->desList->bufLen > 0){
+                    free(streamLoop->desList->pbuf);
+                    streamLoop->desList->pbuf = NULL;
+                }
+                free(streamLoop->desList);
+                streamLoop->desList = NULL;
+            }
+            streamLoop++;
+        }
+        free(nist->streamLoop);
+        streamLoop = NULL;
+    }
+    if(newlen > 0){
+        //指向新内存地址
+        nist->streamLoop = newstreamLoopList;
+    }
+    nist->streamLoopLen = newlen;
+    rendersts(str, 1);
+    render(str);
+}
+
 static void common(HttpConn *conn) {
 
 }
@@ -412,6 +495,7 @@ ESP_EXPORT int esp_controller_muxnms_nitController(HttpRoute *route, MprModule *
 	espDefineAction(route, "nitController-cmd-getsection", getsection);
 	espDefineAction(route, "nitController-cmd-getstream", getstream);
 	espDefineAction(route, "nitController-cmd-addnitcstream", addnitcstream);
+	espDefineAction(route, "nitController-cmd-delstr", delstr);
 
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

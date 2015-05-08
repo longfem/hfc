@@ -46,17 +46,93 @@ var dataSet = [
 var dataSet1 = [
 ];
 
+function createTable(){
+    var outtree;
+    if(globalObj._channel == 1){
+        outtree = $("#out_tree").fancytree("getTree");
+    }else if(globalObj._channel == 2){
+        outtree = $("#out_tree2").fancytree("getTree");
+    }
+    $.ajax({
+        type: "GET",
+        async:false,
+        url: "http://"+globalObj.localip+":4000/do/programs/maketable",
+        data: '{channel:'+ globalObj._channel +'}',
+        dataType: "json",
+        success: function(data){
+            if(data.sts == 5){
+                alert("权限不足，请与管理员联系");
+                return;
+            }
+            if(data.sts == 9){
+                window.location = "/login.esp";
+                return;
+            }
+            if(data[0].sts == -1001){
+                alert("在节目表和透传表有相同PID,请删除其中一个后重试!");
+            }
+            outtree.reload();
+            var tablenode = outtree.getNodeByKey("id1.0");
+            tablenode.addChildren(data);
+            //获取制表后输出流表
+            $.ajax({
+                type: "GET",
+                async:false,
+                url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
+                data: '{channel:'+globalObj._channel+',prgnum:'+globalObj._selectcount+'}',
+                dataType: "json",
+                success: function(data){
+                    if(data.sts == 5){
+                        return;
+                    }
+                    var StreamData = [];
+                    $.each(data, function(key, itemv) {
+                        var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
+                        StreamData[StreamData.length] = item;
+                    });
+                    //编辑数据流表
+                    if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
+                        $('#tbl_outtable').dataTable().fnClearTable();
+                        $('#tbl_outtable').dataTable().fnAddData(StreamData);
+                    }else{
+                        //表结构右侧table
+                        var tout = $('#tbl_outtable').dataTable( {
+                            "data": StreamData,
+                            "order": [[ 0, "asc" ]],
+                            "paging":   false,
+                            "info":     false,
+                            "searching":   false,
+                            "scrollY": 390,
+                            "bAutoWidth": false,
+                            "columns": [
+                                { "title": "NO"},
+                                { "title": "CH"},
+                                { "title": "IN-PID"},
+                                { "title": "OUT-PID"},
+                                { "title": "TYPE" }
+                            ]
+                        });
+                        tout.fnDraw();
+                    }
+                },
+                error : function(err) {
+                    alert(err);
+                }
+            });
+        },
+        error : function(err) {
+            alert(err);
+        }
+    });
+}
 function checkselectedprg(nodekey, selected, snode){
     var chantree;
-    var devtree;
     var snt;
     if(globalObj._channel == 1){
         chantree = $("#channel").fancytree("getTree");
-        devtree = $("#devlist").fancytree("getTree");
         snt = globalObj._selectcount;
     }else if(globalObj._channel == 2){
         chantree = $("#channel2").fancytree("getTree");
-        devtree = $("#devlist2").fancytree("getTree");
         snt = globalObj._selectcount2;
     }
     var prgnode;
@@ -136,29 +212,24 @@ function readprgs(){
     var node;
     var channeltree;
     var devlisttree;
-    var tabletree;
     if(globalObj._channel == 1){
         channeltree =  $("#channel").fancytree("getTree");
         devlisttree = $("#devlist").fancytree("getTree");
-        tabletree = $("#out_tree").fancytree("getTree");
         globalObj._selectcount = 0;
     }else if(globalObj._channel == 2){
         channeltree =  $("#channel2").fancytree("getTree");
         devlisttree = $("#devlist2").fancytree("getTree");
-        tabletree = $("#out_tree2").fancytree("getTree");
         globalObj._selectcount2 = 0;
     }
     channeltree.reload();
     devlisttree.reload();
     node = devlisttree.getNodeByKey("id1.0");
-    //node.removeChildren();
     globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
     //获取全局初始化信息
     $.ajax({
         type: "GET",
         async:false,
         url: "http://"+globalObj.localip+":4000/do/programs/getglobalinfo?channel="+globalObj._channel,
-        // data: {ip:"192.168.1.134", inch:2},
         dataType: "json",
         success: function(data){
             if(data.sts == 9){
@@ -225,72 +296,7 @@ function readprgs(){
                     prgnode.setTitle("节目: "+ globalObj._selectcount2);
                 }
                 prgnode.render();
-                //获取制表信息
-                 $.ajax({
-                    type: "GET",
-                    async:false,
-                    url: "http://"+globalObj.localip+":4000/do/programs/gettableinfo?inch="+ globalObj._channel,
-                    // data: {ip:"192.168.1.134", inch:2},
-                    dataType: "json",
-                    success: function(data){
-                        if(data.sts == 1){
-
-                        }else{
-                            tabletree.reload();
-                            var tablenode = tabletree.getNodeByKey("id1.0");
-                            tablenode.addChildren(data);
-                            //获取制表后输出流表
-                            $.ajax({
-                                type: "GET",
-                                async:false,
-                                url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
-                                data: '{channel:'+1+',prgnum:'+globalObj._selectcount+'}',
-                                dataType: "json",
-                                success: function(data){
-                                    if(data.sts == 5){
-                                        return;
-                                    }
-                                    var StreamData = [];
-                                    $.each(data, function(key, itemv) {
-                                        var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
-                                        StreamData[StreamData.length] = item;
-                                    });
-                                    //编辑数据流表
-                                    if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
-                                        $('#tbl_outtable').dataTable().fnClearTable();
-                                        $('#tbl_outtable').dataTable().fnAddData(StreamData);
-                                    }else{
-                                        //表结构右侧table
-                                        var tout = $('#tbl_outtable').dataTable( {
-                                            "data": StreamData,
-                                            "order": [[ 0, "asc" ]],
-                                            "paging":   false,
-                                            "info":     false,
-                                            "searching":   false,
-                                            "scrollY": 390,
-                                            "bAutoWidth": false,
-                                            "columns": [
-                                                { "title": "NO"},
-                                                { "title": "CH"},
-                                                { "title": "IN-PID"},
-                                                { "title": "OUT-PID"},
-                                                { "title": "TYPE" }
-                                            ]
-                                        });
-                                        tout.fnDraw();
-                                    }
-                                },
-                                error : function(err) {
-                                    alert(err);
-                                }
-                            });
-                        }
-
-                    },
-                    error : function(err) {
-                        alert("异常！====="+JSON.stringify(err));
-                    }
-                });
+                createTable();
             }
 
         },
@@ -300,34 +306,6 @@ function readprgs(){
     });
 }
 
-//获取制表信息
-function gettableinfo(){
-    $.ajax({
-        type: "GET",
-        async:false,
-        url: "http://"+globalObj.localip+":4000/do/programs/gettableinfo?inch="+ globalObj._channel,
-        // data: {ip:"192.168.1.134", inch:2},
-        dataType: "json",
-        success: function(data){
-            if(data.sts == 1){
-
-            }else{
-                var tablenode;
-                if(globalObj._channel == 1){
-                    $("#out_tree").fancytree("getTree").reload();
-                    tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
-                }else{
-                    $("#out_tree2").fancytree("getTree").reload();
-                    tablenode = $("#out_tree2").fancytree("getTree").getNodeByKey("id1.0");
-                }
-                tablenode.addChildren(data);
-            }
-        },
-        error : function(err) {
-            alert("异常！====="+JSON.stringify(err));
-        }
-    });
-}
 function readoutprgs(channeltree, snt){
     channeltree.reload();
     var prgnode = channeltree.getNodeByKey("id1.0");
@@ -740,107 +718,14 @@ function devinfo_output(devType){
       }
     }).click(function( event ) {
         event.preventDefault();
+        globalObj._channel = 1;
         if(globalObj._selectcount > 29){
             alert("制表节目数已溢出!");
             return;
         }
 		$("#out_tree").fancytree("getTree").reload();
         globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
-		var nodes = $("#channel").fancytree("getTree").getNodeByKey("id1.0").children;
-		var inCh = 1, flag = 0; //通道号	
-		var jsondata = new Array();
-		var prgindex = new Array();
-		var jsonstr;
-		//if(_selectcount == 0){
-		//	alert("请选择节目!");
-		//	return;
-		//}
-		nodes.forEach(function(node) {
-			flag = 0;
-			prgindex = new Array();
-			var chstr = "inCh" + inCh;
-			if( node.hasChildren() ) {
-				var prgnodes = node.children;				
-				prgnodes.forEach(function(prgnode) {					
-					prgindex[flag] = 'id' + flag + ':' + prgnode.data.index;
-					flag++;
-				});					
-			}
-			jsonstr = chstr+':{' + prgindex.toString() +'}';
-			jsondata[inCh-1] = jsonstr;
-			inCh++;
-		});	
-		//alert("=========arraystring======>>>"+ jsondata.toString());
-		$.ajax({
-			 type: "GET",
-			 async:false,
-			 url: "http://"+globalObj.localip+":4000/do/programs/maketable",
-			 data: '{' + jsondata.toString() + ',channel:'+1+',prgnum:'+globalObj._selectcount+'}',
-			 dataType: "json",
-			 success: function(data){
-                 if(data.sts == 5){
-                     alert("权限不足，请与管理员联系");
-                     return;
-                 }
-                 if(data.sts == 9){
-                     window.location = "/login.esp";
-                     return;
-                 }
-                 if(data[0].sts == -1001){
-                     alert("在节目表和透传表有相同PID,请删除其中一个后重试!");
-                 }
-				 var tablenode = $("#out_tree").fancytree("getTree").getNodeByKey("id1.0");
-				 tablenode.addChildren(data);
-                 //获取制表后输出流表
-                 $.ajax({
-                     type: "GET",
-                     async:false,
-                     url: "http://"+globalObj.localip+":4000/do/programs/streamtable",
-                     data: '{channel:'+1+',prgnum:'+globalObj._selectcount+'}',
-                     dataType: "json",
-                     success: function(data){
-                         if(data.sts == 5){
-                             return;
-                         }
-                         var StreamData = [];
-                         $.each(data, function(key, itemv) {
-                             var item = [itemv.NO,itemv.chn, itemv.newPid.toString(16),itemv.oldPid.toString(16),itemv.type];
-                             StreamData[StreamData.length] = item;
-                         });
-                         //编辑数据流表
-                         if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
-                             $('#tbl_outtable').dataTable().fnClearTable();
-                             $('#tbl_outtable').dataTable().fnAddData(StreamData);
-                         }else{
-                             //表结构右侧table
-                             var tout = $('#tbl_outtable').dataTable( {
-                                 "data": StreamData,
-                                 "order": [[ 0, "asc" ]],
-                                 "paging":   false,
-                                 "info":     false,
-                                 "searching":   false,
-                                 "scrollY": 390,
-                                 "bAutoWidth": false,
-                                 "columns": [
-                                     { "title": "NO"},
-                                     { "title": "CH"},
-                                     { "title": "IN-PID"},
-                                     { "title": "OUT-PID"},
-                                     { "title": "TYPE" }
-                                 ]
-                             });
-                             tout.fnDraw();
-                         }
-                     },
-                     error : function(err) {
-                         alert(err);
-                     }
-                 });
-			 },    
-			 error : function(err) { 
-				alert(err);
-			 }   
-		});
+        createTable();
     });
 	
 	$( "#output-write" ).button({
@@ -1828,7 +1713,7 @@ function devinfo_output(devType){
                                 "info": false,
                                 "searching": false,
                                 "fnRowCallback": function (nRow, aData, iDisplayIndex) {
-                                    $('td:eq(0)', nRow).html( '<input type="text" pattern="(^\d+$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                                    $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
                                     $('td:eq(1)', nRow).html(
                                         '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
                                             +'<option value ="0" selected="selected">reserve</option>'
@@ -1866,6 +1751,7 @@ function devinfo_output(devType){
                             });
                         }
                         globalObj._prgoptflag = 1;
+                        globalObj._editnodekey = data.node.key;
                         dialog_nitc.dialog( "open" );
                         break;
                     } case '#editstr': {
@@ -1875,33 +1761,36 @@ function devinfo_output(devType){
                             url: "http://"+globalObj.localip+":4000/do/nitController/getstream?channel=1&streamid="+ data.node.data.streamid,
                             //data: ,
                             dataType: "json",
-                            success: function(data){
-                                if(data.sts == 0){
+                            success: function(res){
+                                if(res.sts == 0){
                                     alert("读取流错误!");
                                     dialog_NIT.dialog( "close" );
                                     return;
-                                }else if(data.sts == 5){
+                                }else if(res.sts == 5){
                                     alert("权限不足，请与管理员联系");
-                                }else if(data.sts == 9){
+                                }else if(res.sts == 9){
                                     window.location = "/login.esp";
                                     return;
                                 }
-                                $('.nitc_id').val(data.streamid.toString(16));
-                                $('.nitc_netid').val(data.netid.toString(16));
-                                $('.nitc_hz').val(data.hz.toString(16));
-                                $('.nitc_ksm').val(data.ksm.toString(16));
-                                $('#nitc_fecout')[0].options[Number(data.fecout)].selected = true;
-                                $('#nitc_fecin')[0].options[Number(data.fecin)].selected = true;
-                                $('#nitc_qam')[0].options[Number(data.qam)].selected = true;
+                                $('.nitc_id').val(res.streamid.toString(16));
+                                $('.nitc_netid').val(res.netid.toString(16));
+                                $('.nitc_hz').val(res.hz.toString(16));
+                                $('.nitc_ksm').val(res.ksm.toString(16));
+                                $('#nitc_fecout')[0].options[Number(res.fecout)].selected = true;
+                                $('#nitc_fecin')[0].options[Number(res.fecin)].selected = true;
+                                $('#nitc_qam')[0].options[Number(res.qam)].selected = true;
                                 dataSet.length = 0;
-                                $.each(data.children, function(key, itemv) {
-                                    var item = [itemv.serid.toString(16),itemv.sertype];
-                                    dataSet[dataSet.length] = item;
-                                });
+                                if(res.children){
+                                    $.each(res.children, function(key, itemv) {
+                                        var item = [itemv.serid.toString(16),itemv.sertype];
+                                        dataSet[dataSet.length] = item;
+                                    });
+                                }
                                 //编辑节目对话框表
                                 if ( $.fn.dataTable.isDataTable( '#tbl_nitc' ) ) {
                                     $('#tbl_nitc').dataTable().fnClearTable();
-                                    $('#tbl_nitc').dataTable().fnAddData(dataSet);
+                                    if(dataSet.length > 0)
+                                        $('#tbl_nitc').dataTable().fnAddData(dataSet);
                                 }else{
                                     globalObj._tbl_nitc = $('#tbl_nitc').dataTable({
                                         "data": dataSet,
@@ -1910,7 +1799,7 @@ function devinfo_output(devType){
                                         "info": false,
                                         "searching": false,
                                         "fnRowCallback": function (nRow, aData, iDisplayIndex) {
-                                            $('td:eq(0)', nRow).html( '<input type="text" pattern="(^\d+$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                                            $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nitc_id'+iDisplayIndex+ '" name="nitc_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
                                             $('td:eq(1)', nRow).html(
                                                 '<select id="nitc_type'+iDisplayIndex+ '" name="nitc_type'+iDisplayIndex +'">'
                                                 +'<option value ="0" selected="selected">reserve</option>'
@@ -1951,11 +1840,36 @@ function devinfo_output(devType){
                                     $('#nitc_type' + key)[0].options[Number(itemv[1])].selected = true;
                                 });
                                 globalObj._prgoptflag = 0;
+                                globalObj._editnodekey = data.node.key;
                                 dialog_nitc.dialog( "open" );
                             },
                             error : function(err) {
                             }
                         });
+                        break;
+                    } case '#deletestr': {
+                        var oristreamid = data.node.data.streamid;
+                        $.ajax({
+                            type: "GET",
+                            async:false,
+                            url: "http://"+globalObj.localip+":4000/do/nitController/delstr?channel=1&streamid="+oristreamid,
+                            //data: ,
+                            dataType: "json",
+                            success: function(data){
+                                if(data.sts == 0){
+                                    dialog_NIT.dialog( "close" );
+                                    return;
+                                }else if(data.sts == 5){
+                                    alert("权限不足，请与管理员联系");
+                                }else if(data.sts == 9){
+                                    window.location = "/login.esp";
+                                    return;
+                                }
+                            },
+                            error : function(err) {
+                            }
+                        });
+                        data.node.remove();
                         break;
                     } case '#import': {
 						
@@ -2339,8 +2253,8 @@ function devinfo_output(devType){
 							}   
 						});
                         globalObj._prgoptflag = 0;
-						dialog_edit.dialog( "open" );
                         globalObj._editnodekey = data.node.key;
+						dialog_edit.dialog( "open" );
 						break;
 					} case '#deleteall': {
 						
@@ -2741,12 +2655,27 @@ function devinfo_output(devType){
                 $('#tbl_nitc').DataTable().row('.selected').remove().draw( false );
             },
             "确定": function() {
+                var oristreamid = 0;
+                if(globalObj._channel == 1 && globalObj._prgoptflag == 0){
+                    oristreamid = $("#out_tree").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
+                }else if(globalObj._channel == 2 && globalObj._prgoptflag == 0){
+                    oristreamid = $("#out_tree2").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
+                }
                 var data = $('#tbl_nitc').DataTable().$('input, select').serialize();
-                var jsonstr = '{"channel":' + globalObj._channel +',"streamid":' + parseInt($('.nitc_id').val(), 16)
+                var jsonstr;
+                if(data == ""){
+                    jsonstr = '{"channel":' + globalObj._channel +',"flag":' + globalObj._prgoptflag
+                    +',"oristreamid":' + oristreamid +',"streamid":' + parseInt($('.nitc_id').val(), 16)
+                    + ',"netid":' + parseInt($('.nitc_netid').val(), 16) + ',"hz":' + parseInt($('.nitc_hz').val(), 16)
+                    + ',"ksm":' + parseInt($('.nitc_ksm').val(), 16) + ',"fecout":' + $('#nitc_fecout').val() + ',"cnt":'+$('#tbl_nitc').DataTable().$('tr').length
+                    + ',"fecin":' + $('#nitc_fecin').val() + ',"qam":' + $('#nitc_qam').val() + '}';
+                }else{
+                    jsonstr = '{"channel":' + globalObj._channel +',"flag":' + globalObj._prgoptflag
+                    +',"oristreamid":' + oristreamid +',"streamid":' + parseInt($('.nitc_id').val(), 16)
                     + ',"netid":' + parseInt($('.nitc_netid').val(), 16) + ',"hz":' + parseInt($('.nitc_hz').val(), 16)
                     + ',"ksm":' + parseInt($('.nitc_ksm').val(), 16) + ',"fecout":' + $('#nitc_fecout').val() + ',"cnt":'+$('#tbl_nitc').DataTable().$('tr').length
                     + ',"fecin":' + $('#nitc_fecin').val() + ',"qam":' + $('#nitc_qam').val() + ',"' + data.replace(/&/g, '","').replace(/=/g, '":"') + '"}';
-
+                }
                 $.ajax({
                     type: "GET",
                     async:false,
@@ -2761,7 +2690,7 @@ function devinfo_output(devType){
                             alert("权限不足，请与管理员联系");
                         }
                         //获取制表信息
-                        gettableinfo();
+                        createTable();
                     },
                     error : function(err) {
                     }
@@ -2874,7 +2803,7 @@ function devinfo_output(devType){
                             return;
                         }
                         //获取制表信息
-                        gettableinfo();
+                        createTable();
                         dialog_NIT.dialog( "close" );
                     },
                     error : function(err) {
