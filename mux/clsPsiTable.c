@@ -208,7 +208,7 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 			//printf("prgnumber:%d \n",ptmpPrgInfo->prgNum);
 
 
-			iAddr += BigFormat_intToBytes(ptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number	 :16; //½ÚÄ¿ºÅ
+			iAddr += BigFormat_intToBytes(ptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number	 :16; //ï¿½ï¿½Ä¿ï¿½ï¿½
 			iAddr += BigFormat_intToBytes(((0xe0 << 8) | ptmpPrgInfo->pmtPid), tmpBytes, iAddr, 2);
 
 			//printf("prgnumber:%d ",p_patPrg_t->program_number);
@@ -275,7 +275,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 
 	int sescLen = 0;
-	sescLen += 2;//Ìø¹ý´æ·ÅsectionLenth×ÔÉíµÄ2¸ö×Ö½Ú
+	sescLen += 2;//ï¿½ï¿½ï¿½ï¿½ï¿½sectionLenthï¿½ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½Ö½ï¿½
 	iAddr += 2;
 
 	p_pmt->program_number = outPrgInfo->prgNum;
@@ -288,7 +288,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 	p_pmt->current_next_indicator = 0x1;
 
 	sescLen++;
-	//ÏÂÃæ5¸öºÍPATÒ»Ñù
+	//ï¿½ï¿½ï¿½ï¿½5ï¿½ï¿½ï¿½ï¿½PATÒ»ï¿½ï¿½
 	tmpBytes[iAddr++] = (unsigned char)((3 << 6) // reserved
 		| ((verisonNumber & 0x1f) << 1)  // version number
 		| (1 << 0)); // current_next_indicator
@@ -311,7 +311,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 	iAddr += BigFormat_intToBytes(((0x7 << 13) | outPrgInfo->newPcrPid), tmpBytes, iAddr, 2);//reserved2+pcr_pid=2Byte
 
 
-	//CA¼ÓÈÅÂß¼­£¬ÐèÒªµÈ´ý¼ÓÈë
+	//CAï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½È´ï¿½ï¿½ï¿½ï¿½
 	int prgInfoLen = 0;
 	iAddr += 2;
 
@@ -362,14 +362,14 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 	}
 
 
-	//iaddr=28¿ªÊ¼
+	//iaddr=28ï¿½ï¿½Ê¼
 	p_pmt->reserved3 = 0xf;
 	p_pmt->program_info_length = prgInfoLen;
 	sescLen += p_pmt->program_info_length;
 	BigFormat_intToBytes(((0xf << 12)  // reserved3
 		| (p_pmt->program_info_length & 0xfff)), tmpBytes, iAddr - p_pmt->program_info_length - 2, 2);
 
-	//sescLenÇ°Ãæ±Èprogram_info_length¶àµÄÎ»ÒÆ=9+program_info_length,ºóÃæ¼ÌÐø¶Ô sescLen½øÐÐ×·¼Ó
+	//sescLenÇ°ï¿½ï¿½ï¿½program_info_lengthï¿½ï¿½ï¿½Î»ï¿½ï¿½=9+program_info_length,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ sescLenï¿½ï¿½ï¿½ï¿½×·ï¿½ï¿½
 
 
 	if (outPrgInfo->pdataStreamListLen !=0)
@@ -454,7 +454,7 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 	p_pmt->section_length = sescLen + 4;//
 	BigFormat_intToBytes((0xb000//(0x7 << 13)  // 1011=b
-		| (p_pmt->section_length & 0xfff)), tmpBytes, iAddr + 4 - p_pmt->section_length - 2, 2); // section_length£¬,ÔÚ¸Õ²ÅÌø¹ýµÄABA´¦´æ·Å£¬ËùÒÔADDR²»ÓÃ×ÔÔö
+		| (p_pmt->section_length & 0xfff)), tmpBytes, iAddr + 4 - p_pmt->section_length - 2, 2); // section_lengthï¿½ï¿½,ï¿½Ú¸Õ²ï¿½ï¿½ï¿½ï¿½ï¿½ABAï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ADDRï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	// -- crc -
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
@@ -508,7 +508,7 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 	// -- sdt --
 	tmpBytes[iAddr++] = 0x42;
 	int sectionLenAddr = iAddr;
-	iAddr += 2; // Ìø¹ý³¤¶È×Ö½Ú
+	iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 	iAddr += BigFormat_intToBytes(streamId, tmpBytes, iAddr, 2);
 	tmpBytes[iAddr++] = (unsigned char)((3 << 6) // reserved
 		| ((verisonNumber & 0x1f) << 1)  // version number
@@ -529,16 +529,16 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 			| (0 << 1) // EIT_schedule_flag
 			| (0 << 0)); // EIT_present_following_flag
 		int des_length_addr = iAddr;
-		iAddr += 2; // Ìø¹ý³¤¶È×Ö½Ú
+		iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 
-		// Ìí¼Ó×Ô¶¨ÒåÃû³Æ
+		// ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		tmpBytes[iAddr++] = 0x48;
 
 		unsigned char *prgNameTmp=malloc(ptmpPrgInfo->prgNameLen);
 		memcpy(prgNameTmp, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
 
 		//   if (ptmpPrgInfo->prgNameLen == 0)
-		// prgNameTmp = string.Empty;//×îºóÐèÒª´ò¿ª
+		// prgNameTmp = string.Empty;//ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
 		//byte[] nameStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(prgNameTmp);
 
 		unsigned char *providerNameTmp=malloc(ptmpPrgInfo->providerNameLen);
@@ -655,7 +655,7 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 	// -- cat --
 	tmpBytes[iAddr++] = 0x01;
 	int sectionLenAddr = iAddr;
-	iAddr += 2; // Ìø¹ý³¤¶È×Ö½Ú
+	iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 	tmpBytes[iAddr++] = 0xff; // reserved
 	tmpBytes[iAddr++] = 0xff;
 	tmpBytes[iAddr++] = (unsigned char)((0x3 << 6) // reserved
@@ -730,7 +730,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	// -- nit --
 	tmpBytes[iAddr++] = 0x40;
 	int sectionLenAddr = iAddr;
-	iAddr += 2; // Ìø¹ý³¤¶È×Ö½Ú
+	iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 	iAddr += BigFormat_intToBytes(networkId, tmpBytes, iAddr, 2);
 	tmpBytes[iAddr++] = (unsigned char)((3 << 6) // reserved
 		| ((verisonNumber & 0x1f) << 1)  // version number
@@ -738,7 +738,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[iAddr++] = 0; // section number
 	tmpBytes[iAddr++] = 0; // last_section_number
 	int networkDesLenAddr = iAddr;
-	iAddr += 2; // Ìø¹ýÃèÊö·û³¤¶È×Ö½Ú
+	iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 	if (nitInfo->nameListLen>0)
 	{
 		Commdes_t *nameDesTmp=nitInfo->nameList;
@@ -763,7 +763,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[networkDesLenAddr + 1] = (unsigned char)nameDesLen;
 
 	int tsLoopLenAddr = iAddr;
-	iAddr += 2; // Ìø¹ýÃèÊö·û³¤¶È×Ö½Ú
+	iAddr += 2; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
 
 	if (nitInfo->streamLoopLen>0)
 	{
@@ -801,8 +801,8 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[tsLoopLenAddr + 1] = (unsigned char)tsLoopLen;
 
 
-	printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
-	printf("creat nit  addr	 %d  \n",iAddr);
+	//printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
+	//printf("creat nit  addr	 %d  \n",iAddr);
 
 	BigFormat_intToBytes(((0xb << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff)), tmpBytes, sectionLenAddr, 2);
 	// -- crc --
@@ -813,7 +813,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	{
 		for (i = 0; i < iAddr; i++)
 			nitTable[i] = tmpBytes[i];
-#if 1  				
+#if 0
 		for(i=0; i<iAddr; i++)
 		printf("  %d		  offset:%d  \n",nitTable[i],i);
 
@@ -1012,7 +1012,7 @@ int ParsePat(unsigned char buf[], int offset, pat_senction_st *p_pat)
 	tmpByteValue = buf[iAddr++];
 
 
-	//ÒÔÏÂËÄ¸öÕ¼Ò»¸ö×Ö½Ú
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½Õ¼Ò»ï¿½ï¿½ï¿½Ö½ï¿½
 	p_pat->section_syntax_indicator = (tmpByteValue >> 7) & 0x1;
 	p_pat->flag_0 = (tmpByteValue >> 6) & 0x1;
 	p_pat->reserved0 = (tmpByteValue >> 4) & 0x3;
