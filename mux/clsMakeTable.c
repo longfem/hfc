@@ -15,24 +15,23 @@ static int isTableInit=0;
 int MakeTable(int outChnId)
 {
 	ChannelProgramSt *outpst = NULL;
-	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);	
+	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
+
 	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
 }
 
 
 
 
-int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prginfolist,Chn_ca_st *caNode)
+int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginfolist,Chn_ca_st *caNode)
 {
-
-	
-
 
 	//Error_psiTable errFlag;
 	int outChnIndex = outChnId - 1;
 	int rstPat;
 	int i;
-
+    Nit_section_t *outNit = NULL;
+    list_get(&clsProgram.NitSection, outChnId-1, &outNit);
 
 	ClsMuxInit(2,2);
 	//ClsMuxInit(2,2);
@@ -45,8 +44,17 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	unsigned char pmtTable[188];
 	unsigned char sdtTable[8 * 188];
 	unsigned char catTable[188];
+	unsigned char nitTable[8 * 188];
 	Dev_prgInfo_st *ptmpPrgInfo;
+
+	
+
+	if (AutoMakeNewPid(outChnId)==0)
+		return 0;	
+
+ 	 //MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId);
+
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
 	{
@@ -54,13 +62,16 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 		return 0;
 	}
 
+
+
 	int streamId = outChnArray[outChnIndex].streamId;
 	int netWorkId = outChnArray[outChnIndex].networkId;
 	int oringinalNetworkId = outChnArray[outChnIndex].oringal_networkid;
 	int version = outChnArray[outChnIndex].version;
+	//int version = 1;
+	//int oringinalNetworkId=11;
 
 	// PAT
-
 	if (outChnArray[outChnIndex].isAutoRaiseVersion==1) 
 	{
 		version++;
@@ -75,7 +86,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
 	memcpy(pbuff->pbuf, patTable, sizeof(patTable));
 	pbuff->bufLen=sizeof(patTable);
-	//ist_set(&pclsMux->table_pat,outChnIndex,pbuff);
+
 
 	if (!rstPat)
 	{
@@ -159,7 +170,6 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	if (!rstPat)
 	{
 		CleanOutputTable(outChnId);
-
 		return 0;
 	}
 	else
@@ -170,11 +180,8 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}
 
 #if 0
-
 	sdt_senction_st *p_sdt = (sdt_senction_st*)malloc(sizeof(sdt_senction_st));	
 	rstPat=ParseSdt(pbuff->pbuf, 5, p_sdt);	
-
-
 	if(rstPat)
 	{
 		printf("PRASE sdt SUCCESSFULL---%d\n",rstPat);
@@ -194,6 +201,7 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 
 		if (!rstPat)
 		{
+			CleanOutputTable(outChnId);
 			return 0;
 		}
 		else
@@ -210,8 +218,43 @@ int buildTable(int outChnId, 	DatabaseOutputChannel_st *outChnArray,	list_t  prg
 	}
 
 #endif
+//NIT
+#if 1
+	if (outNit!=NULL)
+	{
+		rstPat = CreateNit(nitTable, outNit, outNit->networkId, version);
+		list_get(&pclsMux->table_nit,outChnIndex,&pbuff);
+		memcpy(pbuff->pbuf, nitTable, sizeof(nitTable));
+		pbuff->bufLen=sizeof(nitTable);
 
+		if (!rstPat)
+		{
+			CleanOutputTable(outChnId);
+			return 0;
+		}
+		else
+		{	
+			printf("make nit SUCCESSFULL---%d\n",rstPat);
 
+		}
+
+	}
+	else
+	{
+		printf("no need to make nit\n");
+
+	}
+#endif
+
+#if 1
+		Nit_section_t *p_nit = (Nit_section_t*)malloc(sizeof(Nit_section_t)); 
+		rstPat=ParseNit(pbuff->pbuf, 5, p_nit); 
+		if(rstPat)
+		{
+			printf("PRASE nit SUCCESSFULL---%d\n",rstPat);
+			printNIT(p_nit);
+		}
+#endif
 
 	if (DirectlyTransmit_repeatePid_verify(outChnId)==0)
 		return -1001;
@@ -350,8 +393,7 @@ void printPMT(pmt_senction_st* PMTS)
 void printSDT(sdt_senction_st* SDTS)
 {
 
-	int i;
-	int j;
+	int i,j,k;
 
 #if 1
 	printf("crc32----%d\n",SDTS->crc32);
@@ -373,15 +415,11 @@ void printSDT(sdt_senction_st* SDTS)
 	printf("transport_stream_id----%d\n",SDTS->transport_stream_id);
 	printf("version_number----%d\n",SDTS->version_number);
 #endif
-	int k;
-
-
 	sdtPrgName_st* p_last_sdtPrgName_t = SDTS->nameList;
 	//printf("SDTS->nameListLen----%d\n",SDTS->nameListLen);
-
 	for (i = 0; i < SDTS->nameListLen; i++)
 	{	
-#if 1
+#if 0
 		printf("descriptors_loop_length ----%d\n",p_last_sdtPrgName_t->descriptors_loop_length);
 		printf("EIT_present_following_flag----%d\n",p_last_sdtPrgName_t->EIT_present_following_flag);
 		printf("EIT_schedule_flag----%d\n",p_last_sdtPrgName_t->EIT_schedule_flag);
@@ -391,8 +429,6 @@ void printSDT(sdt_senction_st* SDTS)
 		printf("runing_status ----%d\n",p_last_sdtPrgName_t->runing_status);	
 #endif
 		printf("service_id----%d\n",p_last_sdtPrgName_t->service_id);
-
-
 		Commdes_t* p_command_st = p_last_sdtPrgName_t->desList;
 		for (j = 0; j< p_last_sdtPrgName_t->desListLen; j++)
 		{
@@ -408,18 +444,13 @@ void printSDT(sdt_senction_st* SDTS)
 				printf(" %d  ",*ptmp++);			
 
 			}
-
+			printf("\n");
 			p_command_st++;
 		}
 
 		p_last_sdtPrgName_t++;
 	}
 }
-
-
-
-
-
 
 void printCAT(cat_senction_st *SDTS)
 {
@@ -492,6 +523,66 @@ void printCAT(cat_senction_st *SDTS)
 }
 
 
+
+
+
+void printNIT(Nit_section_t* NITS)
+{
+
+	int i,j,k;
+	printf("networkId is :%d  vList: \n",NITS->networkId);
+	printf("version is :%d  vList: \n",NITS->version);
+
+	
+		Commdes_t* p_command_st = NITS->nameList;
+		for (j = 0; j< NITS->nameListLen; j++)
+		{
+			printf("Commdes_st index----%d\n",p_command_st->index);
+			printf("Commdes_st tag ----%d\n",p_command_st->tag);
+			printf("Commdes_st userNew----%d\n",p_command_st->userNew);
+			printf("Commdes_st dataLen is :%d  vList: \n",p_command_st->dataLen);
+			
+
+			unsigned char *ptmp=p_command_st->data;
+			for (k = 0; k < p_command_st->dataLen; k++)
+			{
+				printf(" %d  ",*ptmp++);			
+
+			}
+			printf("\n");
+			p_command_st++;
+		}
+		
+
+		Nit_streamLoop_t* itemloop = NITS->streamLoop;
+		
+		printf(" NITS->streamLoopLen  ----%d\n", NITS->streamLoopLen);
+		for (i = 0; i< NITS->streamLoopLen; i++)
+		{
+			printf("itemloop index----%d\n",itemloop->streamId);
+			printf("itemloop tag ----%d\n",itemloop->original_network_id);
+
+			BufferUn_st *pBufferUn_st=itemloop->BufferUn_stList;//deslist is BufferUn_st list,name is note good
+			printf(" itemloop->BufferUn_stLen ----%d\n", itemloop->BufferUn_stLen);
+
+			for (j = 0; j < itemloop->BufferUn_stLen; j++)
+			{
+				unsigned char *ptmp=pBufferUn_st->pbuf;
+				for (k = 0; k < pBufferUn_st->bufLen; k++)
+				{
+					printf(" %d  ",*ptmp++);	
+				}
+				printf("\n");
+				pBufferUn_st++;
+
+			}	
+		}
+
+
+
+}
+
+
 int CleanOutputTable(int outChannel)
 {
 	
@@ -520,6 +611,16 @@ int CleanOutputTable(int outChannel)
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
 	pbuff->bufLen=9999;
 
+	//CAT
+	list_get(&pclsMux->table_cat,outChnIndex,&pbuff);
+	pbuff->bufLen=9999;
+
+
+	//NIT
+	list_get(&pclsMux->table_nit,outChnIndex,&pbuff);
+	pbuff->bufLen=9999;
+	
+
 	
 	
 
@@ -545,6 +646,9 @@ void ClsMuxInit(int _outMaxNum,int treeView_inLength)
 			list_init(&pclsMux->table_pat);
 			list_init(&pclsMux->table_pmtList);
 			list_init(&pclsMux->table_sdt);
+			list_init(&pclsMux->table_cat);
+		    list_init(&pclsMux->table_nit);
+
 		}
 		for (i = 0; i < treeView_inLength; i++)
 		{
@@ -562,6 +666,16 @@ void ClsMuxInit(int _outMaxNum,int treeView_inLength)
 				pbuff->pbuf=malloc(8 * 188);
 				pbuff->bufLen=9999;
 				list_append(&pclsMux->table_sdt,pbuff);
+
+				pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+				pbuff->pbuf=malloc(188);
+				pbuff->bufLen=9999;
+				list_append(&pclsMux->table_cat,pbuff);
+
+				pbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+				pbuff->pbuf=malloc(8 * 188);
+				pbuff->bufLen=9999;
+				list_append(&pclsMux->table_nit,pbuff);
 
 
 				list_t *table_pmt=(list_t*)malloc(sizeof(list_t));

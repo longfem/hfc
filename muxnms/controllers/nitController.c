@@ -35,31 +35,31 @@ int nitstream(Nit_section_t *nist, int flag, int i, unsigned char *desBytes, Mpr
         //copy old stream to new
         for(j=0;j<nist->streamLoopLen - 1;j++){
             memcpy(newstreamLoop, streamLoop, sizeof(Nit_streamLoop_t));
-            newstreamLoop->desList = malloc(sizeof(BufferUn_st));
-            memcpy(newstreamLoop->desList, streamLoop->desList, sizeof(BufferUn_st));
-            newstreamLoop->desList->pbuf = malloc(newstreamLoop->desList->bufLen * sizeof(unsigned char));
-            memcpy(newstreamLoop->desList->pbuf, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
+            newstreamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
+            memcpy(newstreamLoop->BufferUn_stList, streamLoop->BufferUn_stList, sizeof(BufferUn_st));
+            newstreamLoop->BufferUn_stList->pbuf = malloc(newstreamLoop->BufferUn_stList->bufLen * sizeof(unsigned char));
+            memcpy(newstreamLoop->BufferUn_stList->pbuf, streamLoop->BufferUn_stList->pbuf, streamLoop->BufferUn_stList->bufLen);
             newstreamLoop++;
             streamLoop++;
         }
         newstreamLoop->BufferUn_stLen = 1;
         newstreamLoop->streamId = atoi(mprGetJson(jsonparam, "streamid"));
         newstreamLoop->original_network_id = atoi(mprGetJson(jsonparam, "netid"));
-        newstreamLoop->desList = malloc(sizeof(BufferUn_st));
-        newstreamLoop->desList->pbuf = malloc(i * sizeof(unsigned char));
-        newstreamLoop->desList->bufLen = i;
-        memcpy(newstreamLoop->desList->pbuf, desBytes, i);
+        newstreamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
+        newstreamLoop->BufferUn_stList->pbuf = malloc(i * sizeof(unsigned char));
+        newstreamLoop->BufferUn_stList->bufLen = i;
+        memcpy(newstreamLoop->BufferUn_stList->pbuf, desBytes, i);
         //释放过时的stream内存
         streamLoop = nist->streamLoop;
         if(nist->streamLoopLen - 1 > 0){
             for(j=0;j<nist->streamLoopLen - 1;j++){
                 if(streamLoop->BufferUn_stLen > 0){
-                    if(streamLoop->desList->bufLen > 0){
-                        free(streamLoop->desList->pbuf);
-                        streamLoop->desList->pbuf = NULL;
+                    if(streamLoop->BufferUn_stList->bufLen > 0){
+                        free(streamLoop->BufferUn_stList->pbuf);
+                        streamLoop->BufferUn_stList->pbuf = NULL;
                     }
-                    free(streamLoop->desList);
-                    streamLoop->desList = NULL;
+                    free(streamLoop->BufferUn_stList);
+                    streamLoop->BufferUn_stList = NULL;
                 }
                 streamLoop++;
             }
@@ -75,16 +75,16 @@ int nitstream(Nit_section_t *nist, int flag, int i, unsigned char *desBytes, Mpr
         for(j=0;j<nist->streamLoopLen;j++){
             if(streamLoop->streamId == originalstreamid){
                 //释放过时的流
-                free(streamLoop->desList->pbuf);
-                free(streamLoop->desList);
+                free(streamLoop->BufferUn_stList->pbuf);
+                free(streamLoop->BufferUn_stList);
 
                 streamLoop->BufferUn_stLen = 1;
                 streamLoop->streamId = atoi(mprGetJson(jsonparam, "streamid"));
                 streamLoop->original_network_id = atoi(mprGetJson(jsonparam, "netid"));
-                streamLoop->desList = malloc(sizeof(BufferUn_st));
-                streamLoop->desList->pbuf = malloc(i * sizeof(unsigned char));
-                streamLoop->desList->bufLen = i;
-                memcpy(streamLoop->desList->pbuf, desBytes, i);
+                streamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
+                streamLoop->BufferUn_stList->pbuf = malloc(i * sizeof(unsigned char));
+                streamLoop->BufferUn_stList->bufLen = i;
+                memcpy(streamLoop->BufferUn_stList->pbuf, desBytes, i);
                 break;
             }
             streamLoop++;
@@ -162,10 +162,10 @@ int Perform_S(MprJson *jsonparam, Nit_section_t *nist, int flag){
             desBytes[i++] = (unsigned char)val;
         }
     }
-    printf("===desbytes===\n");
-    for(j = 0;j<i;j++){
-        printf("[%d]%02x\n", j, desBytes[j]);
-    }
+//    printf("===desbytes===\n");
+//    for(j = 0;j<i;j++){
+//        printf("[%d]%02x\n", j, desBytes[j]);
+//    }
     nitstream(nist, flag, i, desBytes, jsonparam);
     return 1;
 }
@@ -238,13 +238,13 @@ int Perform(MprJson *jsonparam, Nit_section_t *nist, int flag)
 }
 
 static int ShowCableDes(Nit_streamLoop_t *streamLoop , cJSON *result){
-    unsigned char desBytes[streamLoop->desList->bufLen];
-    memcpy(desBytes, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
+    unsigned char desBytes[streamLoop->BufferUn_stList->bufLen];
+    memcpy(desBytes, streamLoop->BufferUn_stList->pbuf, streamLoop->BufferUn_stList->bufLen);
     if(desBytes[0] == 0x44){
         cJSON_AddNumberToObject(result,"streamid", streamLoop->streamId);
         cJSON_AddNumberToObject(result,"netid", streamLoop->original_network_id);
         int offset = 2;
-        if ((streamLoop->desList->bufLen < (11 + offset)))
+        if ((streamLoop->BufferUn_stList->bufLen < (11 + offset)))
             return 0;
         int i = offset, j = 0;
         unsigned int u32Tmp;
@@ -270,7 +270,7 @@ static int ShowCableDes(Nit_streamLoop_t *streamLoop , cJSON *result){
         cJSON_AddNumberToObject(result,"ksm", (u32Tmp >> 4));
         // fec inter
         cJSON_AddNumberToObject(result,"fecin", (int)(desBytes[i++] & 0x0f));
-        int length = streamLoop->desList->bufLen - 2;
+        int length = streamLoop->BufferUn_stList->bufLen - 2;
         cJSON *streamsarray, *streamjson;
         if (i < offset + length){
             cJSON_AddItemToObject(result, "children", streamsarray = cJSON_CreateArray());
@@ -278,6 +278,57 @@ static int ShowCableDes(Nit_streamLoop_t *streamLoop , cJSON *result){
             //unsigned char desLength = desBytes[i++];
             i += 2;
             for (j = 0; j < offset + length; j++){
+                if (i + 3 > offset + length)
+                    break;
+                cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
+                int serId = desBytes[i++] << 8;
+                serId |= desBytes[i++];
+                cJSON_AddNumberToObject(streamjson,"serid", serId);
+                int serType = desBytes[i++];
+                cJSON_AddNumberToObject(streamjson,"sertype", serType);
+            }
+        }
+    }else if(desBytes[0] == 0x43){
+        cJSON_AddNumberToObject(result,"streamid", streamLoop->streamId);
+        cJSON_AddNumberToObject(result,"netid", streamLoop->original_network_id);
+        int offset = 2;
+        if ((streamLoop->BufferUn_stList->bufLen < (11 + offset)))
+            return 0;
+        int i = offset, j = 0;
+        unsigned int u32Tmp;
+        // freq
+        u32Tmp = (unsigned int)(desBytes[i++] << 24);
+        u32Tmp += (unsigned int)(desBytes[i++] << 16);
+        u32Tmp += (unsigned int)(desBytes[i++] << 8);
+        u32Tmp += (unsigned int)(desBytes[i++]);
+        cJSON_AddNumberToObject(result,"hz", u32Tmp);//hz
+        // orbital_position
+        u32Tmp = (unsigned int)(desBytes[i++] << 8);
+        u32Tmp += (unsigned int)(desBytes[i++]);
+        cJSON_AddNumberToObject(result,"position", u32Tmp);
+        unsigned char tmpByte = desBytes[i++];
+        cJSON_AddNumberToObject(result,"tip", tmpByte >> 7);
+        // polarization
+        cJSON_AddNumberToObject(result,"pol", (tmpByte >> 5) & 0x03);
+        // modulation
+        cJSON_AddNumberToObject(result,"qpsk", tmpByte & 0x1);
+        // symbol rate
+        u32Tmp = (unsigned int)(desBytes[i++] << 24);
+        u32Tmp += (unsigned int)(desBytes[i++] << 16);
+        u32Tmp += (unsigned int)(desBytes[i++] << 8);
+        u32Tmp += (unsigned int)(desBytes[i]);
+        u32Tmp /= 0x10; // K步进补齐省略位
+        cJSON_AddNumberToObject(result,"ksm", u32Tmp >> 4);
+        // fec inter
+        cJSON_AddNumberToObject(result,"fecin", (int)(desBytes[i++] & 0x0f));
+        int length = streamLoop->BufferUn_stList->bufLen - 2;
+        cJSON *streamsarray, *streamjson;
+        if (i < offset + length)
+        {
+            cJSON_AddItemToObject(result, "children", streamsarray = cJSON_CreateArray());
+            i += 2;
+            for (j = 0; j < offset + length; j++ )
+            {
                 if (i + 3 > offset + length)
                     break;
                 cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
@@ -372,8 +423,8 @@ static void delnit(HttpConn *conn) {
     free(nist->nameList);
     Nit_streamLoop_t *streamLoop = nist->streamLoop;
     for(i=0; i<nist->streamLoopLen;i++){
-        free(streamLoop->desList->pbuf);
-        free(streamLoop->desList);
+        free(streamLoop->BufferUn_stList->pbuf);
+        free(streamLoop->BufferUn_stList);
         streamLoop++;
     }
     if(nist->streamLoopLen > 0){
@@ -529,10 +580,10 @@ static void delstr(HttpConn *conn) {
             if(streamLoop->streamId != streamid){
                 //copy old stream to new
                 memcpy(newstreamLoop, streamLoop, sizeof(Nit_streamLoop_t));
-                newstreamLoop->desList = malloc(sizeof(BufferUn_st));
-                memcpy(newstreamLoop->desList, streamLoop->desList, sizeof(BufferUn_st));
-                newstreamLoop->desList->pbuf = malloc(newstreamLoop->desList->bufLen * sizeof(unsigned char));
-                memcpy(newstreamLoop->desList->pbuf, streamLoop->desList->pbuf, streamLoop->desList->bufLen);
+                newstreamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
+                memcpy(newstreamLoop->BufferUn_stList, streamLoop->BufferUn_stList, sizeof(BufferUn_st));
+                newstreamLoop->BufferUn_stList->pbuf = malloc(newstreamLoop->BufferUn_stList->bufLen * sizeof(unsigned char));
+                memcpy(newstreamLoop->BufferUn_stList->pbuf, streamLoop->BufferUn_stList->pbuf, streamLoop->BufferUn_stList->bufLen);
                 newstreamLoop++;
             }
             streamLoop++;
@@ -543,12 +594,12 @@ static void delstr(HttpConn *conn) {
     if(nist->streamLoopLen > 0){
         for(i=0;i<nist->streamLoopLen;i++){
             if(streamLoop->BufferUn_stLen > 0){
-                if(streamLoop->desList->bufLen > 0){
-                    free(streamLoop->desList->pbuf);
-                    streamLoop->desList->pbuf = NULL;
+                if(streamLoop->BufferUn_stList->bufLen > 0){
+                    free(streamLoop->BufferUn_stList->pbuf);
+                    streamLoop->BufferUn_stList->pbuf = NULL;
                 }
-                free(streamLoop->desList);
-                streamLoop->desList = NULL;
+                free(streamLoop->BufferUn_stList);
+                streamLoop->BufferUn_stList = NULL;
             }
             streamLoop++;
         }
@@ -576,12 +627,12 @@ static void delallstr(HttpConn *conn) {
     if(nist->streamLoopLen > 0){
         for(i=0;i<nist->streamLoopLen;i++){
             if(streamLoop->BufferUn_stLen > 0){
-                if(streamLoop->desList->bufLen > 0){
-                    free(streamLoop->desList->pbuf);
-                    streamLoop->desList->pbuf = NULL;
+                if(streamLoop->BufferUn_stList->bufLen > 0){
+                    free(streamLoop->BufferUn_stList->pbuf);
+                    streamLoop->BufferUn_stList->pbuf = NULL;
                 }
-                free(streamLoop->desList);
-                streamLoop->desList = NULL;
+                free(streamLoop->BufferUn_stList);
+                streamLoop->BufferUn_stList = NULL;
             }
             streamLoop++;
         }

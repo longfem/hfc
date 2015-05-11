@@ -402,7 +402,7 @@ void getTableJson(int channel, char *outprg, int flag){
                         cJSON_AddItemToArray(streamsarray,streamjson = cJSON_CreateObject());
                         cJSON_AddFalseToObject(streamjson,"folder");
                         cJSON_AddNumberToObject(streamjson,"streamid", streamLoop->streamId);
-                        switch(streamLoop->desList->pbuf[0]){
+                        switch(streamLoop->BufferUn_stList->pbuf[0]){
                             case 0x44:
                                 cJSON_AddStringToObject(streamjson,"type", "DVB-C");
                                 break;

@@ -205,7 +205,7 @@ function addstrs(){
             "info": false,
             "searching": false,
             "fnRowCallback": function (nRow, aData, iDisplayIndex) {
-                $('td:eq(0)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="nits_id'+iDisplayIndex+ '" name="nits_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                $('td:eq(0)', nRow).html( '<input type="text" pattern="((^[0-9]{1,4}$)" id="nits_id'+iDisplayIndex+ '" name="nits_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
                 $('td:eq(1)', nRow).html(
                     '<select id="nits_type'+iDisplayIndex+ '" name="nits_type'+iDisplayIndex +'">'
                     +'<option value ="0" selected="selected">reserve</option>'
@@ -311,6 +311,78 @@ function editnitc(data, res){
     }
     $.each(dataSet, function(key, itemv) {
         $('#nitc_type' + key)[0].options[Number(itemv[1])].selected = true;
+    });
+}
+
+function editnits(data, res){
+    $('.nits_id').val(res.streamid);
+    $('.nits_netid').val(res.netid.toString(16));
+    $('.nits_hz').val(res.hz.toString(16));
+    $('.nits_ksm').val(res.ksm.toString(16));
+    $('.nits_path').val(res.position.toString(16));
+    $('#nits_pol')[0].options[Number(res.pol)].selected = true;
+    $('#nits_fecin')[0].options[Number(res.fecin)].selected = true;
+    $('#nits_qpsk')[0].options[Number(res.qpsk)].selected = true;
+    $('#nits_tip')[0].options[Number(res.tip)].selected = true;
+    dataSet.length = 0;
+    if(res.children){
+        $.each(res.children, function(key, itemv) {
+            var item = [itemv.serid.toString(16),itemv.sertype];
+            dataSet[dataSet.length] = item;
+        });
+    }
+    //编辑节目对话框表
+    if ( $.fn.dataTable.isDataTable( '#tbl_nits' ) ) {
+        $('#tbl_nits').dataTable().fnClearTable();
+        if(dataSet.length > 0)
+            $('#tbl_nits').dataTable().fnAddData(dataSet);
+    }else{
+        globalObj._tbl_nitc = $('#tbl_nits').dataTable({
+            "data": dataSet,
+            "order": [[0, "asc"]],
+            "paging": false,
+            "info": false,
+            "searching": false,
+            "fnRowCallback": function (nRow, aData, iDisplayIndex) {
+                $('td:eq(0)', nRow).html( '<input type="text" pattern="(^[0-9]{1,4}$)" id="nits_id'+iDisplayIndex+ '" name="nits_id'+iDisplayIndex+ '" value="'+ aData[0] + '"></input>' );
+                $('td:eq(1)', nRow).html(
+                    '<select id="nits_type'+iDisplayIndex+ '" name="nits_type'+iDisplayIndex +'">'
+                    +'<option value ="0" selected="selected">reserve</option>'
+                    +'<option value ="1">digital television service</option>'
+                    +'<option value ="2">digital radio sound service</option>'
+                    +'<option value ="3">Teletext service</option>'
+                    +'<option value ="4">NVOD reference service</option>'
+                    +'<option value ="5">NVOD time-shifted service</option>'
+                    +'<option value ="6">mosaic service</option>'
+                    +'<option value ="7">PAL coded signal</option>'
+                    +'<option value ="8">SECAM coded siganl</option>'
+                    +'<option value ="9">D/D2-MAC</option>'
+                    +'<option value ="10">FM Radio</option>'
+                    +'<option value ="11">NTSC coded signal</option>'
+                    +'<option value ="12">data broadcast service</option>'
+                    +'<option value ="13">reserve for Common interface Usage</option>'
+                    +'<option value ="14">RCS Map (see EN 301 790[34])</option>'
+                    +'<option value ="15">RCS FLS (see EN 301 790[34])</option>'
+                    +'<option value ="16">DVB MHP service</option>'
+                    +'</select>'
+                );
+            },
+            "columns": [
+                {"title": "业务ID"},
+                {"title": "类型"}
+            ]
+        });
+        $('#tbl_nits tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            } else {
+                $('#tbl_nits').DataTable().$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+    }
+    $.each(dataSet, function(key, itemv) {
+        $('#nits_type' + key)[0].options[Number(itemv[1])].selected = true;
     });
 }
 
@@ -854,7 +926,6 @@ function devinfo_output(devType){
         if(globalObj._intChannelCntMax != 0 || globalObj._intChannelCntMax != ""){
             progress_dialog.dialog( "open" );
             progressbar.progressbar( "value", 0 );
-            var pro = 1;
             var flag = false;
             if(os == "Chrome"){
                 var flag = true;
@@ -874,12 +945,11 @@ function devinfo_output(devType){
                             //alert("搜索出现异常!!");
                             //return;
                         }
-                        pro++;
-                        if(globalObj._intChannelCntMax == pro){
+                        if(globalObj._intChannelCntMax == i){
                             progressbar.progressbar( "value", 10 * 10 );
                         }else{
-                            progressbar.progressbar( "value", Math.round(pro*100/globalObj._intChannelCntMax ));
-                            $('.progress-label')[0].dataset.ch = pro;
+                            progressbar.progressbar( "value", Math.round(i*100/globalObj._intChannelCntMax ));
+                            $('.progress-label')[0].dataset.ch = i + 1;
                         }
 
                     },
@@ -1907,9 +1977,9 @@ function devinfo_output(devType){
                                     window.location = "/login.esp";
                                     return;
                                 }
-                                $.each(data.childNodes, function(index,node){
-                                    node.remove();
-                                });
+                                while(data.node.hasChildren()){
+                                    data.node.getFirstChild().remove();
+                                }
                             },
                             error : function(err) {
                             }
@@ -1953,7 +2023,10 @@ function devinfo_output(devType){
                                         dialog_nitc.dialog( "open" );
                                         break;
                                     case 'DVB-S':
-
+                                        editnits(data, res);
+                                        globalObj._prgoptflag = 0;
+                                        globalObj._editnodekey = data.node.key;
+                                        dialog_nits.dialog( "open" );
                                         break;
                                     case 'DVB-T':
 

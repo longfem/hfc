@@ -618,16 +618,13 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 	{
 		for (i = 0; i < iAddr; i++)
 			sdtTable[i] = tmpBytes[i];
+#if 0   //print sdt byte results				
+		for(i=0; i<iAddr; i++)
+		printf("  %d		  offset:%d  \n",sdtTable[i],i);
 
-
-		
-#if 0
-				
-			for(i=0; i<iAddr; i++)
-				printf("  %d		  offset:%d  \n",sdtTable[i],i);
-		
-			printf("sdt table length is %d\n",iAddr);
+		printf("sdt table length is %d\n",iAddr);
 #endif
+
 		return iAddr;
 	}
 	return 0;
@@ -750,6 +747,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			tmpBytes[iAddr++] = (unsigned char)nameDesTmp->tag;
 			if (nameDesTmp->dataLen>0)
 			{
+			   tmpBytes[iAddr++] = (unsigned char)nameDesTmp->dataLen;
 				memcpy(tmpBytes+iAddr, nameDesTmp->data,nameDesTmp->dataLen);
 				iAddr += nameDesTmp->dataLen;
 			}
@@ -781,7 +779,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			iAddr += 2;  
 			if (tsLoopTmp->BufferUn_stLen>0)
 			{
-				BufferUn_st *tsDesBytesTmp=tsLoopTmp->desList;
+				BufferUn_st *tsDesBytesTmp=tsLoopTmp->BufferUn_stList;
 				for (j = 0; j <tsLoopTmp->BufferUn_stLen; j++)
 				{
 					if (tsDesBytesTmp->bufLen>0)
@@ -802,29 +800,29 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[tsLoopLenAddr] = (unsigned char)(0xf0 | (tsLoopLen >> 8));
 	tmpBytes[tsLoopLenAddr + 1] = (unsigned char)tsLoopLen;
 
+
+	printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
+	printf("creat nit  addr	 %d  \n",iAddr);
+
 	BigFormat_intToBytes(((0xb << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff)), tmpBytes, sectionLenAddr, 2);
 	// -- crc --
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
 
-#if 0
-
-	for(i=0; i<iAddr; i++)
-		printf("  %d		  offset:%d  \n",tmpBytes[i],i);
-
-	printf("NIT table length is %d\n",iAddr);
-#endif
-
 	if (iAddr < 1021) // 1108
 	{
 		for (i = 0; i < iAddr; i++)
 			nitTable[i] = tmpBytes[i];
-		return 1;
+#if 1  				
+		for(i=0; i<iAddr; i++)
+		printf("  %d		  offset:%d  \n",nitTable[i],i);
+
+		printf("nit table length is %d\n",iAddr);
+#endif
+
+		return iAddr;
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 
 
 
@@ -1356,11 +1354,12 @@ int  ParseNit(unsigned char buf[], int offset, Nit_section_t *nitSec)
 	int tsLoopLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
 	iAddr += 2;
 
+	printf("tsLoopLen ***************** ----%d\n",tsLoopLen);
 
 	//reset  count
 	tmpLen=0;
 	tmpiAddr=iAddr;
-	for (i = 0; i < nameDesLen; )
+	for (i = 0; i < tsLoopLen; )
 	{
 		tmpiAddr+=2;
 		tmpiAddr+=2;
@@ -1373,16 +1372,17 @@ int  ParseNit(unsigned char buf[], int offset, Nit_section_t *nitSec)
 		tmpLen++;			 
 	}
 
+	printf("tmpLen ***************** ----%d\n",tmpLen);
 
 	nitSec->streamLoopLen=tmpLen;
 	nitSec->streamLoop=(Nit_streamLoop_t*)malloc(sizeof(Nit_streamLoop_t)*tmpLen);
 	Nit_streamLoop_t *tsLoopTmp= nitSec->streamLoop;
 
-
 	for (i = 0; i < tsLoopLen; )
 	{
-		tsLoopTmp->desList = (BufferUn_st*)malloc(sizeof(BufferUn_st));
-		BufferUn_st *desBytes=tsLoopTmp->desList;
+		tsLoopTmp->BufferUn_stList = (BufferUn_st*)malloc(sizeof(BufferUn_st));
+		tsLoopTmp->BufferUn_stLen=1;
+		BufferUn_st *desBytes=tsLoopTmp->BufferUn_stList;
 		tsLoopTmp->streamId = BigFormat_fromBytes(iAddr, 2, buf);
 		iAddr += 2;
 		tsLoopTmp->original_network_id = BigFormat_fromBytes(iAddr, 2, buf);

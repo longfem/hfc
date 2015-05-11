@@ -377,7 +377,7 @@ typedef struct Nit_streamLoop_st
 {
 	 int streamId;
 	 int original_network_id;
-	 BufferUn_st *desList; // Commdes_st//in fact is byte[]
+	 BufferUn_st *BufferUn_stList; // Commdes_st//in fact is byte[]
 	 int BufferUn_stLen;
 
 }Nit_streamLoop_t;
