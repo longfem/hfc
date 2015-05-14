@@ -23,7 +23,6 @@ static void getDevinfo(HttpConn *conn) { \
 		render("login.esp");
 		return;
 	}
-	MprJson *jsonparam = httpGetParams(conn);
 	char pProg[256] = {0}; 
     getbaseJson(tmpip, pProg);
 	render(pProg);

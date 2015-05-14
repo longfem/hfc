@@ -1605,8 +1605,7 @@ function devinfo_output(devType){
 									} );
 								}
 							},    
-							error : function(err) {    
-								var xxx = err;
+							error : function(err) {
 								alert("异常！====="+JSON.stringify(err));    
 							}   
 						});
@@ -1643,9 +1642,10 @@ function devinfo_output(devType){
                         $('.prg_merchant').val("");
                         $('.prg_no').val("1");
                         $('.prg_pid').val("1ff");
-                        $('.prg_prc').val(data.node.data.chnid.toString());
+                        $('.prg_prc').val("");
                         $('.prg_prc1').val("1ffe");
                         $('.prg_prc2').val("1ffe");
+                        $('.prg_prc').attr("disabled", false);
                         //编辑节目对话框表
                         if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
                             $('#tbl_editprg').dataTable().fnClearTable();
@@ -1798,9 +1798,7 @@ function devinfo_output(devType){
 								
 								dig_itmes.dialog( "open" );
 							 },    
-							 error : function(err) {    
-								  // view("异常！");   
-								var xxx = err;
+							 error : function(err) {
 								alert("异常！====="+JSON.stringify(err));    
 							 }   
 						});						
@@ -2573,9 +2571,10 @@ function devinfo_output(devType){
                         $('.prg_merchant').val("");
                         $('.prg_no').val("1");
                         $('.prg_pid').val("1ff");
-                        $('.prg_prc').val(data.node.data.chnid.toString());
+                        $('.prg_prc').val("");
                         $('.prg_prc1').val("1ffe");
                         $('.prg_prc2').val("1ffe");
+                        $('.prg_prc').attr("disabled", false);
                         //编辑节目对话框表
                         if ( $.fn.dataTable.isDataTable( '#tbl_editprg' ) ) {
                             $('#tbl_editprg').dataTable().fnClearTable();
@@ -3288,26 +3287,24 @@ function devinfo_output(devType){
 					 dataType: "json",
 					 success: function(data){
 						if(data.sts == 1){
-                            var snt;
                             var tmptree;
+                            var snt;
                             if(globalObj._channel == 1){
                                 tmptree = $("#channel").fancytree("getTree");
                                 if(globalObj._prgoptflag == 1){
-                                    snt = globalObj._selectcount + 1;
-                                }else{
-                                    snt = globalObj._selectcount;
+                                    globalObj._selectcount++;
                                 }
-
+                                snt = globalObj._selectcount;
                             }else if(globalObj._channel == 2){
                                 tmptree = $("#channel2").fancytree("getTree");
                                 if(globalObj._prgoptflag == 1){
-                                    snt = globalObj._selectcount2 + 1;
-                                }else{
-                                    snt = globalObj._selectcount2;
+                                    globalObj._selectcount2++;
                                 }
+                                snt = globalObj._selectcount2;
                             }
                             //获取输出通道信息
                             readoutprgs(tmptree, snt);
+                            $('.prg_prc').attr("disabled", true);
 						}else if(data.sts == 5){
                             alert("权限不足，请与管理员联系");
                         }

@@ -17,13 +17,13 @@ int MakeTable(int outChnId)
 	ChannelProgramSt *outpst = NULL;
 	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
 
-	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->caNode);
+	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->userPrgNodes,outpst->caNode);
 }
 
 
 
 
-int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginfolist,Chn_ca_st *caNode)
+int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginfolist,list_t  userprginfolist,Chn_ca_st *caNode)
 {
 
 	//Error_psiTable errFlag;
@@ -46,15 +46,13 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 	unsigned char catTable[188];
 	unsigned char nitTable[8 * 188];
 	Dev_prgInfo_st *ptmpPrgInfo;
+	User_prgInfo_t *userptmpPrgInfo;
 
-	
 
 	if (AutoMakeNewPid(outChnId)==0)
-		return 0;	
-
+		return 0;
  	 //MakePidMapTable(outChnId,prginfolist,clsProgram.PrgAVMuxList);
   	MakePidMapTable(outChnId);
-
 	int selCnt = CountSelectedPrgCnt(outChnId);
 	if (selCnt > 29)
 	{
@@ -82,7 +80,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 	BufferUn_st  *pbuff;
 
 
-	rstPat=CreatePat(prginfolist,patTable, streamId, netWorkId, version);	
+	rstPat=CreatePat(prginfolist,userprginfolist,patTable, streamId, netWorkId, version);	
 	list_get(&pclsMux->table_pat,outChnIndex,&pbuff);
 	memcpy(pbuff->pbuf, patTable, sizeof(patTable));
 	pbuff->bufLen=sizeof(patTable);
@@ -111,7 +109,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 #endif
 
 
-	//PMT
+	//PMT dev
 
 	list_t *tablePmt;
 	list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
@@ -130,7 +128,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		rstPat=CreatePmt(ptmpPrgInfo,pmtTable,version);
 		if(rstPat)
 		{
-			printf("make pmt SUCCESSFULL---%d\n",rstPat);
+			printf("make dev pmt SUCCESSFULL---%d\n",rstPat);
 			BufferUn_st *pmtbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
 
 			pmtbuff->pbuf=malloc(sizeof(pmtTable));
@@ -160,13 +158,50 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 	}	
 
 
-	//SDT
-	rstPat=CreateSdt(prginfolist,sdtTable, streamId, oringinalNetworkId, version);		
+//pmt user
+	for (i = 0; i < list_len(&userprginfolist); i++)
+		{
+			list_get(&userprginfolist, i, &userptmpPrgInfo);	
+			rstPat=CreatePmtUser(userptmpPrgInfo,pmtTable,version);
+			if(rstPat)
+			{
+				printf("make user pmt SUCCESSFULL---%d\n",rstPat);
+				BufferUn_st *pmtbuff =(BufferUn_st*)malloc(sizeof(BufferUn_st));
+	
+				pmtbuff->pbuf=malloc(sizeof(pmtTable));
+				memcpy(pmtbuff->pbuf, pmtTable, sizeof(pmtTable));
+				pmtbuff->bufLen=sizeof(pmtTable);
+				list_append(tablePmt,pmtbuff);	
+	
+			}
+			else
+			{
+				CleanOutputTable(outChnId);
+				return 0;
+	
+			}
+	
+	
+#if 0
+	
+			BufferUn_st  *outPMTBuffer;
+			list_get(&pclsMux->table_pmtList, outChnIndex, &tablePmt);
+			list_get(tablePmt,i,&outPMTBuffer);
+			pmt_senction_st *PMTS = (pmt_senction_st*)malloc(sizeof(pmt_senction_st));
+			int rst=ParsePmt(outPMTBuffer->pbuf, 5, PMTS);
+			printPMT(PMTS);
+#endif
+	
+		}	
 
+	//SDT
+	printf("=====xx 1---\n");
+	rstPat=CreateSdt(prginfolist,userprginfolist,sdtTable, streamId, oringinalNetworkId, version);
+    printf("=====xx 2---\n");
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
 	memcpy(pbuff->pbuf, sdtTable,rstPat);
 	pbuff->bufLen=rstPat;
-
+    printf("=====xx 3---\n");
 	if (!rstPat)
 	{
 		CleanOutputTable(outChnId);
@@ -179,7 +214,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 
 	}
 
-#if 0
+#if 1
 	sdt_senction_st *p_sdt = (sdt_senction_st*)malloc(sizeof(sdt_senction_st));	
 	rstPat=ParseSdt(pbuff->pbuf, 5, p_sdt);	
 	if(rstPat)
@@ -233,7 +268,16 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 			return 0;
 		}
 		else
-		{	
+		{
+        #if 1
+            Nit_section_t *p_nit = (Nit_section_t*)malloc(sizeof(Nit_section_t));
+            rstPat=ParseNit(pbuff->pbuf, 5, p_nit);
+            if(rstPat)
+            {
+                printf("PRASE nit SUCCESSFULL---%d\n",rstPat);
+                printNIT(p_nit);
+            }
+        #endif
 			printf("make nit SUCCESSFULL---%d\n",rstPat);
 
 		}
@@ -246,19 +290,8 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 	}
 #endif
 
-#if 1
-		Nit_section_t *p_nit = (Nit_section_t*)malloc(sizeof(Nit_section_t)); 
-		rstPat=ParseNit(pbuff->pbuf, 5, p_nit); 
-		if(rstPat)
-		{
-			printf("PRASE nit SUCCESSFULL---%d\n",rstPat);
-			printNIT(p_nit);
-		}
-#endif
-
 	if (DirectlyTransmit_repeatePid_verify(outChnId)==0)
 		return -1001;
-
 	return 1;
 }
 

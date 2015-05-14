@@ -128,13 +128,13 @@ static int BigFormat_fromBytes(int offset, int length, unsigned char inBytes[])
 	return rtnInt;
 }
 
-int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int networkId, int verisonNumber)
+int  CreatePat(list_t  prginfolist,list_t  userprginfolist,unsigned char patTable[],int streamId, int networkId, int verisonNumber)
 {
 
 	int i;
 	int iAddr = 0;
 	Dev_prgInfo_st *ptmpPrgInfo;
-
+	User_prgInfo_t *userptmpPrgInfo;
 	pat_senction_st* p_pat=(pat_senction_st*)malloc(sizeof(pat_senction_st));
 	unsigned char tmpBytes[1024];
 
@@ -210,6 +210,26 @@ int  CreatePat(list_t  prginfolist,unsigned char patTable[],int streamId, int ne
 
 			iAddr += BigFormat_intToBytes(ptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number	 :16; //��Ŀ��
 			iAddr += BigFormat_intToBytes(((0xe0 << 8) | ptmpPrgInfo->pmtPid), tmpBytes, iAddr, 2);
+
+			//printf("prgnumber:%d ",p_patPrg_t->program_number);
+		}
+
+		for (i = 0; i <list_len(&userprginfolist); i++)
+		{
+			list_get(&userprginfolist, i, &userptmpPrgInfo);
+			//patPrg_t* p_patPrg_t=(patPrg_t*)malloc(sizeof(patPrg_t));
+
+
+			//DIRECETLY COPY HERE
+			//p_patPrg_t->program_number=ptmpPrgInfo->prgNum;
+			//p_patPrg_t->pid=ptmpPrgInfo->pmtPid;
+
+
+			//printf("prgnumber:%d \n",ptmpPrgInfo->prgNum);
+
+
+			iAddr += BigFormat_intToBytes(userptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number	 :16; //��Ŀ��
+			iAddr += BigFormat_intToBytes(((0xe0 << 8) | userptmpPrgInfo->pmtPid), tmpBytes, iAddr, 2);
 
 			//printf("prgnumber:%d ",p_patPrg_t->program_number);
 		}
@@ -484,8 +504,245 @@ int  CreatePmt(Dev_prgInfo_st *outPrgInfo, unsigned char pmtTable[], int verison
 
 	return 0;
 }
+int  CreatePmtUser(User_prgInfo_t *outPrgInfo, unsigned char pmtTable[], int verisonNumber)
+{
+	unsigned char tmpBytes[1024];
+	pmt_senction_st* p_pmt=(pmt_senction_st*)malloc(sizeof(pmt_senction_st));
 
-int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int originalNetworkId, int verisonNumber)
+
+	int offStep = 0;
+	int iAddr = 0;
+	int i;
+	// head
+	tmpBytes[iAddr++] = 0x47;
+	iAddr += BigFormat_intToBytes(((0x2 << 13) | outPrgInfo->pmtPid), tmpBytes, iAddr, 2); // es_info_length
+
+	tmpBytes[iAddr++] = 0x10;
+	//printf("debug :offset %d  value %d\n",iAddr,tmpBytes[iAddr-1]);
+	tmpBytes[iAddr++] = 0;
+
+
+
+	p_pmt->table_id = 0x02;
+	tmpBytes[iAddr++] = 0x02;
+	//tmpByteValue = buf[iAddr++];//section_syntax_indicator+flag_0+erserverd0=4bit+section_length=16bits
+	p_pmt->section_syntax_indicator = 0x1;
+	p_pmt->flag_0 = 0;
+	p_pmt->reserved0 = 0x3;
+
+
+	int sescLen = 0;
+	sescLen += 2;//�����sectionLenth�����2���ֽ�
+	iAddr += 2;
+
+	p_pmt->program_number = outPrgInfo->prgNum;
+	offStep = BigFormat_intToBytes(outPrgInfo->prgNum, tmpBytes, iAddr, 2);//program_number
+	sescLen += offStep;
+	iAddr += offStep;
+
+	p_pmt->reserved1 = 0x3;
+	p_pmt->version_number = verisonNumber;
+	p_pmt->current_next_indicator = 0x1;
+
+	sescLen++;
+	//����5����PATһ��
+	tmpBytes[iAddr++] = (unsigned char)((3 << 6) // reserved
+		| ((verisonNumber & 0x1f) << 1)  // version number
+		| (1 << 0)); // current_next_indicator
+
+
+
+	p_pmt->section_number = 0;
+	sescLen++;
+	p_pmt->last_section_number = 0;
+	sescLen++;
+	tmpBytes[iAddr++] = 0; // section number
+	tmpBytes[iAddr++] = 0; // last_section_number
+
+
+	p_pmt->reserved2 = 0x7;
+	p_pmt->pcrPid = outPrgInfo->newPcrPid;
+	sescLen += 2;
+
+	//iAddr=13 ,14
+	iAddr += BigFormat_intToBytes(((0x7 << 13) | outPrgInfo->newPcrPid), tmpBytes, iAddr, 2);//reserved2+pcr_pid=2Byte
+
+
+	//CA�����߼�����Ҫ�ȴ����
+	int prgInfoLen = 0;
+	iAddr += 2;
+
+
+
+	//int indexL1 = 1;
+
+
+
+
+	if (outPrgInfo->pmtDesListLen!=0)
+	{
+
+		Commdes_t* desInfoTmp = outPrgInfo->pmtDesList;
+
+
+		//p_pmt->pmtDesListLen=outPrgInfo->pmtDesListLen;
+		//	p_pmt->pmtDesList=(Commdes_t*)malloc(sizeof(Commdes_t)*(outPrgInfo->pmtDesListLen));
+		//	Commdes_t* p_Commdes_st= p_pmt->pmtDesList;
+
+		for (i = 0; i < outPrgInfo->pmtDesListLen; i++)
+		{
+			prgInfoLen++;
+			prgInfoLen++;
+			prgInfoLen += desInfoTmp->dataLen;
+
+
+			//	p_Commdes_st->tag = desInfoTmp->tag;
+			//p_Commdes_st->index = indexL1++;
+			//	p_Commdes_st->data = malloc(desInfoTmp->dataLen);
+			//	memcpy(p_Commdes_st->data, desInfoTmp->data, desInfoTmp->dataLen);
+
+
+			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
+			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
+
+
+			memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
+			iAddr += desInfoTmp->dataLen;
+
+			desInfoTmp++;
+			//p_Commdes_st++;
+
+
+		}
+
+
+	}
+
+
+	//iaddr=28��ʼ
+	p_pmt->reserved3 = 0xf;
+	p_pmt->program_info_length = prgInfoLen;
+	sescLen += p_pmt->program_info_length;
+	BigFormat_intToBytes(((0xf << 12)  // reserved3
+		| (p_pmt->program_info_length & 0xfff)), tmpBytes, iAddr - p_pmt->program_info_length - 2, 2);
+
+	//sescLenǰ���program_info_length���λ��=9+program_info_length,�������� sescLen����׷��
+
+
+	if (outPrgInfo->pdataStreamListLen !=0)
+	{
+		DataStream_t* dataStreamInfoTmp = outPrgInfo->pdataStreamList;
+
+
+		//p_pmt->pdataStreamListLen=outPrgInfo->pdataStreamListLen;
+		//p_pmt->pdataStreamList=(DataStream_t*)malloc(sizeof(DataStream_t)*(outPrgInfo->pdataStreamListLen));
+		//DataStream_t* p_DataStream_st= p_pmt->pdataStreamList;
+
+
+
+		for (i = 0; i < outPrgInfo->pdataStreamListLen; i++)
+		{
+
+			//p_DataStream_st->streamType = dataStreamInfoTmp->streamType;
+			sescLen++;
+			//p_DataStream_st->outPid = dataStreamInfoTmp->outPid;
+			sescLen += 2;
+
+
+			int indexL2 = 1;
+			sescLen += 2;
+
+
+			tmpBytes[iAddr++] = (unsigned char)(dataStreamInfoTmp->streamType);
+			iAddr += BigFormat_intToBytes(((0x7 << 13) | dataStreamInfoTmp->outPid), tmpBytes, iAddr, 2);
+			int esInfoLenAddr = iAddr;
+			iAddr += 2;
+
+
+			if (dataStreamInfoTmp->desNodeLen != 0)
+			{
+				int j;
+				Commdes_t* desInfoTmp = dataStreamInfoTmp->desNode;
+
+				//dataStreamInfoTmp->desNodeLen=dataStreamInfoTmp->desNodeLen;
+				//dataStreamInfoTmp->desNode=(Commdes_t*)malloc(sizeof(Commdes_t)*(dataStreamInfoTmp->desNodeLen));
+				//Commdes_t* p_Commdes_st= dataStreamInfoTmp->desNode;
+
+
+				for (j = 0; j < dataStreamInfoTmp->desNodeLen; j++)
+				{
+
+					sescLen++;
+					sescLen++;
+					sescLen += desInfoTmp->dataLen;
+
+
+					//p_Commdes_st->tag = desInfoTmp->tag;
+					//p_Commdes_st->index = indexL2++;
+					//p_Commdes_st->data = malloc(desInfoTmp->dataLen);
+					//memcpy(p_Commdes_st->data, desInfoTmp->data, desInfoTmp->dataLen);
+
+
+					tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
+					tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
+
+
+					memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
+					iAddr += desInfoTmp->dataLen;
+
+
+					desInfoTmp++;
+					//	p_Commdes_st++;
+
+				}
+			}
+			//p_DataStream_st->index = indexL1++;
+			dataStreamInfoTmp++;
+			//p_DataStream_st++;
+			BigFormat_intToBytes(((0xf << 12)  // reserved
+				| ((iAddr - esInfoLenAddr - 2) & 0xfff)), tmpBytes, esInfoLenAddr, 2);
+
+
+		}
+
+
+	}
+
+
+	p_pmt->section_length = sescLen + 4;//
+	BigFormat_intToBytes((0xb000//(0x7 << 13)  // 1011=b
+		| (p_pmt->section_length & 0xfff)), tmpBytes, iAddr + 4 - p_pmt->section_length - 2, 2); // section_length��,�ڸղ�����ABA����ţ�����ADDR��������
+
+	// -- crc -
+	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
+
+	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
+	//for git
+#if 0
+	for(i=0; i<iAddr; i++)
+		printf("  %d          offset:%d  \n",tmpBytes[i],i);
+
+	printf("length is %d\n",iAddr);
+
+#endif
+	if (iAddr <= 188)
+	{
+		for (i = 0; i < iAddr; i++)
+			pmtTable[i] = tmpBytes[i];
+		for (i = iAddr; i < 188; i++)
+			pmtTable[i] = 0xff;
+		return 1;
+	}
+
+	iAddr -= 4;
+	p_pmt->crc32 = (tmpBytes[iAddr++] << 24) | (tmpBytes[iAddr++] << 16) | (tmpBytes[iAddr++] << 8) | tmpBytes[iAddr++];
+	free(p_pmt);
+	p_pmt=NULL;
+
+	return 0;
+}
+
+int CreateSdt(list_t  prginfolist,list_t  userprginfolist, unsigned char sdtTable[], int streamId, int originalNetworkId, int verisonNumber)
 {
 
 
@@ -495,6 +752,7 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 	//byte[] tmpBytes = new byte[8 * 188];
 	unsigned char tmpBytes[8 * 188];
 	Dev_prgInfo_st *ptmpPrgInfo;
+	User_prgInfo_t *userptmpPrgInfo;
 
 
 
@@ -563,20 +821,16 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 		free(providerNameTmp);
 		iAddr += ptmpPrgInfo->prgNameLen;
 
-#if 1
-
 		int j;
 		Commdes_t* desInfoTmp = ptmpPrgInfo->psdtDesList;
 
 		for (j = 0; j < ptmpPrgInfo->psdtDesListLen; j++)
 		{
-
-
 			if (desInfoTmp->tag == 0x48) // service_tag
-				{
+			{
 				desInfoTmp++;
 				continue;
-				}
+			}
 			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
 			tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
 
@@ -584,10 +838,7 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 			memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
 			iAddr += desInfoTmp->dataLen;
 			desInfoTmp++;
-
-
 		}
-#endif
 
 		//printf("now the len%d\n",iAddr);
 		int isCrypto;
@@ -604,12 +855,85 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 			| ((iAddr - des_length_addr - 2) & 0xfff)), tmpBytes, des_length_addr, 2); // des_loop_length
 	}
 
+//usernode
+	for (i = 0; i <list_len(&userprginfolist); i++)
+	{
+			list_get(&userprginfolist, i, &userptmpPrgInfo);
+			iAddr += BigFormat_intToBytes(userptmpPrgInfo->prgNum, tmpBytes, iAddr, 2);
+			tmpBytes[iAddr++] = (unsigned char)((0x3f << 2) // reserved_future_use
+				| (0 << 1) // EIT_schedule_flag
+				| (0 << 0)); // EIT_present_following_flag
+			int des_length_addr = iAddr;
+			iAddr += 2;
+
+			int j;
+			Commdes_t* desInfoTmp = userptmpPrgInfo->psdtDesList;
+
+			for (j = 0; j < userptmpPrgInfo->psdtDesListLen; j++)
+			{
+			if (desInfoTmp->tag == 0x48) // service_tag
+			{
+                desInfoTmp++;
+                continue;
+                }
+                tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->tag);
+                tmpBytes[iAddr++] = (unsigned char)(desInfoTmp->dataLen);
+                memcpy(tmpBytes+iAddr, desInfoTmp->data,desInfoTmp->dataLen);
+                iAddr += desInfoTmp->dataLen;
+                desInfoTmp++;
+			}
+
+			tmpBytes[iAddr++] = 0x48;
+	
+			unsigned char *prgNameTmp=malloc(userptmpPrgInfo->prgNameLen);
+			memcpy(prgNameTmp, userptmpPrgInfo->prgName, userptmpPrgInfo->prgNameLen);
+			//	 if (ptmpPrgInfo->prgNameLen == 0)
+			// prgNameTmp = string.Empty;//�����Ҫ��
+			//byte[] nameStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(prgNameTmp);
+	
+			unsigned char *providerNameTmp=malloc(userptmpPrgInfo->providerNameLen);
+			memcpy(providerNameTmp, userptmpPrgInfo->providerName, userptmpPrgInfo->providerNameLen);
+			//	  if (providerNameTmp == null)
+			//	 providerNameTmp = string.Empty;
+			// byte[] privoderStrBytesTmp = Encoding.GetEncoding("GBK").GetBytes(providerNameTmp);
+
+			tmpBytes[iAddr++] = (unsigned char)(1 + 1 + 1 + userptmpPrgInfo->prgNameLen + userptmpPrgInfo->providerNameLen);
+			tmpBytes[iAddr++] =(unsigned char) userptmpPrgInfo->serviceType;
+			tmpBytes[iAddr++] = (unsigned char)userptmpPrgInfo->providerNameLen;
+			memcpy(tmpBytes+iAddr,providerNameTmp, userptmpPrgInfo->providerNameLen);
+			iAddr += userptmpPrgInfo->providerNameLen;
+	
+			tmpBytes[iAddr++] = (unsigned char)userptmpPrgInfo->prgNameLen;
+			memcpy(tmpBytes+iAddr,prgNameTmp, userptmpPrgInfo->prgNameLen);
+
+			free(prgNameTmp);		
+			free(providerNameTmp);
+			iAddr += userptmpPrgInfo->prgNameLen;
+	
+	
+			//printf("now the len%d\n",iAddr);
+			int isCrypto;
+			if(userptmpPrgInfo->isCrypto)
+			{
+				isCrypto=1;
+			}
+			else
+			{
+				isCrypto=0;
+			}
+			BigFormat_intToBytes(((4 << 13)  // runing_status
+				| (isCrypto << 12) // free_CA_mode
+				| ((iAddr - des_length_addr - 2) & 0xfff)), tmpBytes, des_length_addr, 2); // des_loop_length
+		}
+
+
+
 
 
 	int numLenTmp = ((0xf << 12) |((iAddr + 4 - sectionLenAddr - 2) & 0xfff));
 	BigFormat_intToBytes(numLenTmp, tmpBytes, sectionLenAddr, 2);
 
-
+    printf("=====x 6---\n");
 	// -- crc --
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
@@ -620,7 +944,7 @@ int CreateSdt(list_t  prginfolist,  unsigned char sdtTable[], int streamId, int 
 			sdtTable[i] = tmpBytes[i];
 #if 0   //print sdt byte results				
 		for(i=0; i<iAddr; i++)
-		printf("  %d		  offset:%d  \n",sdtTable[i],i);
+			printf("  %d		  offset:%d  \n",sdtTable[i],i);
 
 		printf("sdt table length is %d\n",iAddr);
 #endif
@@ -692,11 +1016,11 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 
 
 #if 0
-	
-		for(i=0; i<iAddr; i++)
-			printf("  %d		  offset:%d  \n",tmpBytes[i],i);
-	
-		printf("cat table length is %d\n",iAddr);
+
+	for(i=0; i<iAddr; i++)
+		printf("  %d		  offset:%d  \n",tmpBytes[i],i);
+
+	printf("cat table length is %d\n",iAddr);
 #endif
 
 
@@ -747,7 +1071,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 			tmpBytes[iAddr++] = (unsigned char)nameDesTmp->tag;
 			if (nameDesTmp->dataLen>0)
 			{
-			   tmpBytes[iAddr++] = (unsigned char)nameDesTmp->dataLen;
+				tmpBytes[iAddr++] = (unsigned char)nameDesTmp->dataLen;
 				memcpy(tmpBytes+iAddr, nameDesTmp->data,nameDesTmp->dataLen);
 				iAddr += nameDesTmp->dataLen;
 			}
@@ -801,8 +1125,8 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[tsLoopLenAddr + 1] = (unsigned char)tsLoopLen;
 
 
-	//printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
-	//printf("creat nit  addr	 %d  \n",iAddr);
+	printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
+	printf("creat nit  addr	 %d  \n",iAddr);
 
 	BigFormat_intToBytes(((0xb << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff)), tmpBytes, sectionLenAddr, 2);
 	// -- crc --
@@ -813,9 +1137,9 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	{
 		for (i = 0; i < iAddr; i++)
 			nitTable[i] = tmpBytes[i];
-#if 0
+#if 1  				
 		for(i=0; i<iAddr; i++)
-		printf("  %d		  offset:%d  \n",nitTable[i],i);
+			printf("  %d		  offset:%d  \n",nitTable[i],i);
 
 		printf("nit table length is %d\n",iAddr);
 #endif
@@ -1178,7 +1502,7 @@ int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
 		nameNode->desListLen=cLen[q];
 		nameNode->desList=(Commdes_t*)malloc(sizeof(Commdes_t)*cLen[q]);
 		Commdes_t* desNode= nameNode->desList;
-		
+
 		while (ppStart + 2 <= ppEnd)
 		{
 
@@ -1188,7 +1512,7 @@ int ParseSdt(unsigned char buf[], int offset, sdt_senction_st *sdtSec)
 
 			if (ppStart + desNodeLen <= ppEnd)
 			{
-		
+
 				desNode->data  = malloc(desNodeLen);
 				memcpy(desNode->data, buf+ppStart, desNodeLen);
 				desNode->dataLen=desNodeLen;

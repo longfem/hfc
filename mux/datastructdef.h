@@ -98,7 +98,7 @@ typedef struct User_prgInfo_st
     int index;
     int prgNum;
     int streamId;
-    int newworkId;
+    int networkId;
     int pmtPid;
     int pcrPidInChn; // 指示pcrPid的来处
     int oldPcrPid;		//2字节

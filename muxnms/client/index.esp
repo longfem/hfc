@@ -48,7 +48,7 @@
 								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
 								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
 								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
-								<!-- <li id="l45"><a href="javascript:gbl_export()">导出配置</a></li> -->
+								<li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li>
 							</ul>
 						</li>	
 						<li class="subs" id="l5">
@@ -297,6 +297,7 @@
     <script type="text/javascript" src="lib/jquery.fancytree.min.js"></script>    
     <script type="text/javascript" src="lib/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="lib/ichart.1.2.min.js"></script>
+    <script type="text/javascript" src="lib/ajaxfileupload.js"></script>
     <!--<script type="text/javascript" src="lib/jquery.i18n.properties.js"></script> -->
 	<script type="text/javascript" src="js/global.js"></script> 
 	<script type="text/javascript" src="js/alarm.js"></script> 

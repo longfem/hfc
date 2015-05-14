@@ -792,8 +792,9 @@ static void setpidtransinfo(HttpConn *conn) {
 static void getprginfo(HttpConn *conn) {
 	int i = 0, j = 0;	
 	char str[512] = {0};
-	char prgname[32] = {0};
+	char prgname[100] = {0};
 	ChannelProgramSt *outpst = NULL;
+	User_prgInfo_t *userprg = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	cJSON *result = cJSON_CreateObject();
 	cJSON *streamarray, *streamjson;
@@ -804,38 +805,73 @@ static void getprginfo(HttpConn *conn) {
 	int index = atoi(mprGetJson(jsonparam, "index"));
 	int chnid = atoi(mprGetJson(jsonparam, "chnid"));
 	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
-	for(i=0; i<list_len(&outpst->prgNodes); i++){
-		list_get(&outpst->prgNodes, i, &outprg);
-		//printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
-		if((outprg->index == index)&&(outprg->chnId == chnid)){
-			cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
-			cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
-			cJSON_AddNumberToObject(result,"index", outprg->index);
-			cJSON_AddNumberToObject(result,"serviceType", outprg->serviceType);
-			cJSON_AddNumberToObject(result,"networkId", outprg->networkId);
-			cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
-			cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
-			cJSON_AddNumberToObject(result,"newPcrPid", outprg->newPcrPid);
-			memcpy(prgname, outprg->prgName, outprg->prgNameLen);
-			cJSON_AddStringToObject(result,"prgName", prgname);
-			memset(prgname, 0, 32);
-			memcpy(prgname, outprg->providerName, outprg->providerNameLen);
-			cJSON_AddStringToObject(result,"providerName", prgname);
-			cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
-			DataStream_t *streaminfo = outprg->pdataStreamList;
-			for(j=0; j<outprg->pdataStreamListLen; j++) {
-				cJSON_AddItemToArray(streamarray,streamjson = cJSON_CreateObject());
-				cJSON_AddNumberToObject(streamjson,"NO", j);
-				cJSON_AddNumberToObject(streamjson,"index", streaminfo->index);
-				cJSON_AddNumberToObject(streamjson,"streamtype", streaminfo->streamType);
-				cJSON_AddNumberToObject(streamjson,"inpid", streaminfo->inPid);
-				cJSON_AddNumberToObject(streamjson,"outpid", streaminfo->outPid);
-				cJSON_AddNumberToObject(streamjson,"inChn", streaminfo->inChn);
-				streaminfo++;
-			}
-			break;
-		}
+	if(chnid == 9){
+	    for(i=0; i<list_len(&outpst->userPrgNodes); i++){
+            list_get(&outpst->userPrgNodes, i, &userprg);
+            if(userprg->index == index){
+                cJSON_AddNumberToObject(result,"prgNum", userprg->prgNum);
+                cJSON_AddNumberToObject(result,"chnId", userprg->pcrPidInChn);
+                cJSON_AddNumberToObject(result,"index", userprg->index);
+                cJSON_AddNumberToObject(result,"serviceType", userprg->serviceType);
+                cJSON_AddNumberToObject(result,"networkId", userprg->networkId);
+                cJSON_AddNumberToObject(result,"pmtPid", userprg->pmtPid);
+                cJSON_AddNumberToObject(result,"oldPcrPid", userprg->oldPcrPid);
+                cJSON_AddNumberToObject(result,"newPcrPid", userprg->newPcrPid);
+                memcpy(prgname, userprg->prgName, userprg->prgNameLen);
+                cJSON_AddStringToObject(result,"prgName", prgname);
+                memset(prgname, 0, sizeof(prgname));
+                memcpy(prgname, userprg->providerName, userprg->providerNameLen);
+                cJSON_AddStringToObject(result,"providerName", prgname);
+                cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
+                DataStream_t *streaminfo = userprg->pdataStreamList;
+                for(j=0; j<userprg->pdataStreamListLen; j++) {
+                    cJSON_AddItemToArray(streamarray,streamjson = cJSON_CreateObject());
+                    cJSON_AddNumberToObject(streamjson,"NO", j);
+                    cJSON_AddNumberToObject(streamjson,"index", streaminfo->index);
+                    cJSON_AddNumberToObject(streamjson,"streamtype", streaminfo->streamType);
+                    cJSON_AddNumberToObject(streamjson,"inpid", streaminfo->inPid);
+                    cJSON_AddNumberToObject(streamjson,"outpid", streaminfo->outPid);
+                    cJSON_AddNumberToObject(streamjson,"inChn", streaminfo->inChn);
+                    streaminfo++;
+                }
+                break;
+            }
+        }
+	}else{
+        for(i=0; i<list_len(&outpst->prgNodes); i++){
+            list_get(&outpst->prgNodes, i, &outprg);
+            //printf("==========read=====%d=====%d\n", pmtPid, outprg->pmtPid);
+            if((outprg->index == index)&&(outprg->chnId == chnid)){
+                cJSON_AddNumberToObject(result,"prgNum", outprg->prgNum);
+                cJSON_AddNumberToObject(result,"chnId", outprg->chnId);
+                cJSON_AddNumberToObject(result,"index", outprg->index);
+                cJSON_AddNumberToObject(result,"serviceType", outprg->serviceType);
+                cJSON_AddNumberToObject(result,"networkId", outprg->networkId);
+                cJSON_AddNumberToObject(result,"pmtPid", outprg->pmtPid);
+                cJSON_AddNumberToObject(result,"oldPcrPid", outprg->oldPcrPid);
+                cJSON_AddNumberToObject(result,"newPcrPid", outprg->newPcrPid);
+                memcpy(prgname, outprg->prgName, outprg->prgNameLen);
+                cJSON_AddStringToObject(result,"prgName", prgname);
+                memset(prgname, 0, sizeof(prgname));
+                memcpy(prgname, outprg->providerName, outprg->providerNameLen);
+                cJSON_AddStringToObject(result,"providerName", prgname);
+                cJSON_AddItemToObject(result, "children", streamarray = cJSON_CreateArray());
+                DataStream_t *streaminfo = outprg->pdataStreamList;
+                for(j=0; j<outprg->pdataStreamListLen; j++) {
+                    cJSON_AddItemToArray(streamarray,streamjson = cJSON_CreateObject());
+                    cJSON_AddNumberToObject(streamjson,"NO", j);
+                    cJSON_AddNumberToObject(streamjson,"index", streaminfo->index);
+                    cJSON_AddNumberToObject(streamjson,"streamtype", streaminfo->streamType);
+                    cJSON_AddNumberToObject(streamjson,"inpid", streaminfo->inPid);
+                    cJSON_AddNumberToObject(streamjson,"outpid", streaminfo->outPid);
+                    cJSON_AddNumberToObject(streamjson,"inChn", streaminfo->inChn);
+                    streaminfo++;
+                }
+                break;
+            }
+        }
 	}
+
 	jsonstring = cJSON_PrintUnformatted(result);
 	//printf("==========jsonstring===========%s\n", jsonstring);
 	memcpy(str, jsonstring, strlen(jsonstring));
@@ -893,6 +929,7 @@ static void setprginfo(HttpConn *conn) {
                     if(userinfo->index == orgiralindex){
                         userinfo->prgNum = prgNum;
                         userinfo->pmtPid = pmtPid;
+                        userinfo->pcrPidInChn = chnid;
                         userinfo->oldPcrPid = oldpcrpid;
                         userinfo->newPcrPid = newpcrpid;
                         userinfo->serviceType = servicetype;
@@ -900,6 +937,38 @@ static void setprginfo(HttpConn *conn) {
                         memcpy(userinfo->prgName, prgname, userinfo->prgNameLen);
                         userinfo->providerNameLen = strlen(providername);
                         memcpy(userinfo->providerName, providername, userinfo->providerNameLen);
+                        //comment
+                        free(userinfo->psdtDesList->data);
+                        free(userinfo->psdtDesList);
+                        userinfo->psdtDesListLen = 0;
+                        Commdes_t *sdtDes = malloc(sizeof(Commdes_t));
+                        int iAddr = 0;
+                        sdtDes->tag = 0x48;
+                        sdtDes->index = 1;
+                        sdtDes->userNew = 1;
+                        char sdtdata[3 + strlen(prgname) + 1 + strlen(providername)];
+                        sdtdata[iAddr++] = (unsigned char)sizeof(sdtdata);
+                        sdtdata[iAddr++] = (unsigned char)servicetype;
+                        sdtdata[iAddr++] = (unsigned char)strlen(providername);
+                        if(strlen(providername)>0){
+                            memcpy(sdtdata+iAddr, providername, strlen(providername));
+                            iAddr += strlen(providername);
+                        }
+                        sdtdata[iAddr++] = (unsigned char)strlen(prgname);
+                        if(strlen(prgname)>0){
+                            memcpy(sdtdata+iAddr, prgname, strlen(prgname));
+                            iAddr += strlen(prgname);
+                        }
+                        sdtDes->dataLen = sizeof(sdtdata);
+                        sdtDes->data = malloc(sdtDes->dataLen);
+                        memset(sdtDes->data, 0, sdtDes->dataLen);
+                        memcpy(sdtDes->data, sdtdata, sdtDes->dataLen);
+                        if(userinfo->psdtDesListLen == 0){
+                            userinfo->psdtDesList = sdtDes;
+                            userinfo->psdtDesListLen = 1;
+                        }else{
+
+                        }
                         //修改节目数据流信息
                         //重新分配新的数据流内存
                         DataStream_t *StreamList = malloc(streamcnt * sizeof(DataStream_t));
@@ -910,7 +979,7 @@ static void setprginfo(HttpConn *conn) {
                             sprintf(rsts, "index%d", k);
                             index = atoi(mprGetJson(jsonparam, rsts));
                             matched = 0;
-                            for(j=0; j<outprg->pdataStreamListLen; j++){
+                            for(j=0; j<userinfo->pdataStreamListLen; j++){
                                 if(oldpdataStreamInfo->index == index){
                                     matched = 1;
                                     //复制数据流到新内存空间
@@ -994,6 +1063,8 @@ static void setprginfo(HttpConn *conn) {
             userinfo->providerNameLen = strlen(providername);
             userinfo->providerName = malloc(userinfo->providerNameLen);
             memcpy(userinfo->providerName, providername, userinfo->providerNameLen);
+            userinfo->pmtDesListLen = 0;
+            userinfo->psdtDesListLen = 0;
             //验证
             if(userinfo->pmtPid<0 || userinfo->pmtPid>0x1fff){
                 rendersts(rsts, 3);
@@ -1010,6 +1081,41 @@ static void setprginfo(HttpConn *conn) {
                 render(rsts);
                 return;
             }
+            if(userinfo->pcrPidInChn<0 || userinfo->pcrPidInChn>clsProgram._intChannelCntMax ){
+                rendersts(rsts, 5);
+                render(rsts);
+                return;
+            }
+            //comment
+            Commdes_t *sdtDes = malloc(sizeof(Commdes_t));
+            int iAddr = 0;
+            sdtDes->tag = 0x48;
+            sdtDes->index = 1;
+            sdtDes->userNew = 1;
+            char sdtdata[3 + strlen(prgname) + 1 + strlen(providername)];
+            sdtdata[iAddr++] = (unsigned char)sizeof(sdtdata);
+            sdtdata[iAddr++] = (unsigned char)servicetype;
+            sdtdata[iAddr++] = (unsigned char)strlen(providername);
+            if(strlen(providername)>0){
+                memcpy(sdtdata+iAddr, providername, strlen(providername));
+                iAddr += strlen(providername);
+            }
+            sdtdata[iAddr++] = (unsigned char)strlen(prgname);
+            if(strlen(prgname)>0){
+                memcpy(sdtdata+iAddr, prgname, strlen(prgname));
+                iAddr += strlen(prgname);
+            }
+            sdtDes->dataLen = sizeof(sdtdata);
+            sdtDes->data = malloc(sdtDes->dataLen);
+            memset(sdtDes->data, 0, sdtDes->dataLen);
+            memcpy(sdtDes->data, sdtdata, sdtDes->dataLen);
+            if(userinfo->psdtDesListLen == 0){
+                userinfo->psdtDesList = sdtDes;
+                userinfo->psdtDesListLen = 1;
+            }else{
+
+            }
+
             DataStream_t *StreamList = malloc(streamcnt * sizeof(DataStream_t));
             DataStream_t *pdataStreamInfo = StreamList;
             for(k=0; k<streamcnt; k++){

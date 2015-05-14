@@ -552,32 +552,66 @@ function gbl_monitor() {
 
 }
 
-function gbl_export() {
-    $.ajax({
-        type: "GET",
-        async:false,
-        url: "http://192.168.1.249:4000/do/programs/getprg?inch="+1,
-        // data: {ip:"192.168.1.134", inch:2},
-        dataType: "json",
-        success: function(data){
-            data = JSON.stringify(data).replace('\\','');
-            //alert("-----"+data);
-            var fso, tf;
-            try{
-                fso = new ActiveXObject("Scripting.FileSystemObject");
-                tf = fso.CreateTextFile("F:\\DB_USER.json", true);
-                tf.WriteLine(data);
-            }catch(err){
-                alert("=====>>>"+err);
+function gbl_import() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
+    $('.main-content').empty();
+    $('.main-content').append(
+        '<div class="src_content">'
+        +'<fieldset>'
+            +'<legend>配置导入</legend>'
+                +'<div class="register_form">'
+                    +'<form method="post" action="" id="fupload" enctype="multipart/form-data">'
+                        +'<label>选择导入文件:</label>'
+                        +'<input type="file" name="impath" id="impath" accept="text/json" />'
+                        +'<button class="btn_import">导入</button>'
+                    +'</form>'
+                +'</div>'
+            +'</fieldset>'
+        +'</div>'
+    );
 
-            }finally{
-                tf.Close();
+    function uploadByForm() {
+        var formData = new FormData($("#fupload")[0]);//用form 表单直接 构造formData 对象; 就不需要下面的append 方法来为表单进行赋值了。
+
+        //var formData = new FormData();//构造空对象，下面用append 方法赋值。
+//          formData.append("policy", "");
+//          formData.append("signature", "");
+//          formData.append("file", $("#file_upload")[0].files[0]);
+        var url = "http://"+globalObj.localip+":4000/do/globalopt/imexport";
+        $.ajax({
+            url : url,
+            type : 'POST',
+            data : formData,
+
+            /**
+             * 必须false才会避开jQuery对 formdata 的默认处理
+             * XMLHttpRequest会对 formdata 进行正确的处理
+             */
+            processData : false,
+            /**
+             *必须false才会自动加上正确的Content-Type
+             */
+            contentType : false,
+            success : function(responseStr) {
+                alert("成功：" + JSON.stringify(responseStr));
+                //                  var jsonObj = $.parseJSON(responseStr);//eval("("+responseStr+")");
+            },
+            error : function(responseStr) {
+                alert("失败:" + JSON.stringify(responseStr));//将    json对象    转成    json字符串。
             }
-        },
-        error : function(err) {
-            // view("异常！");
-            var xxx = err;
-            alert("异常！====="+JSON.stringify(err));
+        });
+    }
+
+    $(".btn_import").button({
+        icons: {
+            primary: "ui-icon-gear"
         }
+    }).click(function (event) {
+        event.preventDefault();
+
+        uploadByForm();
+
     });
 }

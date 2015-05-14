@@ -226,6 +226,7 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         cJSON_AddNumberToObject(basejson, "ch", 9);
         cJSON_AddNumberToObject(basejson, "index", userprg->index);
         cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
+
         //添加节目节点TITLE
         memset(idstr, 0, sizeof(idstr));
         memcpy(idstr, userprg->prgName, userprg->prgNameLen);
@@ -241,7 +242,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         sprintf(idstr, "id1.%d.%d", 9, userprg->index);//1.2.1
         cJSON_AddStringToObject(prgjson,"key", idstr);
         cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
-
         cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
         //subprgjson
         cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
@@ -251,7 +251,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         sprintf(idstr, "id1.%d.%d.1", 9, userprg->index);
         cJSON_AddStringToObject(subprgjson,"key", idstr);
         cJSON_AddStringToObject(subprgjson,"icon", "img/channel_in.ico");
-
         cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
         sprintf(idstr, "id1.%d.%d.2", 9, userprg->index);
         cJSON_AddStringToObject(subprgjson,"title", "multiplex buffer utilization descriptor");
@@ -263,7 +262,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         //PMT
         Commdes_t *tmpinfo = malloc(sizeof(Commdes_t));
         int offset = 0, flag = 0;
-        //unsigned char tmpstr[100] = {0};
         for(j=0; j<userprg->pmtDesListLen; j++) {
             memcpy(tmpinfo, userprg->pmtDesList+offset, sizeof(Commdes_t) );
             offset += 1;
@@ -549,8 +547,8 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
         char* prgjsonstring;
         basearry = cJSON_CreateArray();
         adduserprgjson(basearry, pst);
+        prgjsonstring = cJSON_PrintUnformatted(basearry);
         memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
-
         //释放内存
         cJSON_Delete(basearry);
         free(prgjsonstring);

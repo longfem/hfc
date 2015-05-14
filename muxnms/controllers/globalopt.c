@@ -284,6 +284,23 @@ static void getmonitorinfo(HttpConn *conn) {
     render(str);
 }
 
+static void imexport(HttpConn *conn) {
+    printf("==========imexport=========\n");
+    HttpUploadFile  *file;
+    MprKey          *kp;
+    int             index;
+    for (ITERATE_ITEMS(conn->rx->files, file, index)) {
+        printf("NAME %s\n", file->name);
+        printf("FILENAME %s\n", file->filename);
+        printf("CLIENT_NAME %s\n", file->clientFilename);
+        printf("TYPE %s\n", file->contentType);
+        printf("SIZE %d\n", file->size);
+    }
+    //printf("==========rx=========%s\n", conn->rx);
+
+
+}
+
 static void common(HttpConn *conn) {
 }
 
@@ -298,6 +315,7 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
 	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
 	espDefineAction(route, "globalopt-cmd-getoptlogs", getoptlogs);
 	espDefineAction(route, "globalopt-cmd-getmonitorinfo", getmonitorinfo);
+	espDefineAction(route, "globalopt-cmd-imexport", imexport);
 
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
