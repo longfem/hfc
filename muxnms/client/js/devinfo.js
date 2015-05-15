@@ -546,14 +546,22 @@ function checkselectedprg(nodekey, selected, snode){
                 break;
             case 2:	//节目节点
                 prgnode = chantree.getNodeByKey(nodekey);
-                var chstr = "flag:3,"+"selected:1,ch:"+ snode.data.chnid + ",index:"+ snode.data.index;
+                if(nodekey.indexOf("cat")>0){
+                    var chstr = "flag:8,"+"selected:1,ch:"+ snode.data.chnid;
+                }else{
+                    var chstr = "flag:3,"+"selected:1,ch:"+ snode.data.chnid + ",index:"+ snode.data.index;
+                }
                 jsondata[0] = chstr;
                 break;
             case 3: //流节点
             case 4:
                 prgnode = chantree.getNodeByKey(snode.getParent().key);
-                var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                    + ",streamindex:"+ snode.data.index;
+                if(nodekey.indexOf("cat")>0){
+                    var chstr = "flag:9,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
+                }else{
+                    var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
+                        + ",streamindex:"+ snode.data.index;
+                }
                 jsondata[0] = chstr;
                 break;
             default:
@@ -1289,8 +1297,7 @@ function devinfo_output(devType){
 			}
 		},
 		select: function(event, data) {
-            var xxx = data;
-            var yyy = event;
+
 		},
 		click: function(event, data) {
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
@@ -1349,7 +1356,9 @@ function devinfo_output(devType){
                             }else{
                                 tmpnode = channeltree.getNodeByKey(data.node.parent.key);
                                 tmpnode.addNode(selnode.toDict(true));
-                                globalObj._selectcount++;
+                                if(data.node.key.indexOf("cat")<0){
+                                    globalObj._selectcount++;
+                                }
                             }
                             break;
                         case 3: //流节点
@@ -1358,7 +1367,9 @@ function devinfo_output(devType){
                             }else{
                                 channeltree.getNodeByKey(data.node.parent.parent.key).addNode(selnode.getParent().toDict());//添加节目节点
                                 channeltree.getNodeByKey(data.node.parent.key).addNode(selnode.toDict(true));
-                                globalObj._selectcount++;
+                                if(data.node.key.indexOf("cat")<0){
+                                    globalObj._selectcount++;
+                                }
                             }
                             break;
                         case 4:

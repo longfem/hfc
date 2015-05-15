@@ -574,25 +574,11 @@ function gbl_import() {
 
     function uploadByForm() {
         var formData = new FormData($("#fupload")[0]);//用form 表单直接 构造formData 对象; 就不需要下面的append 方法来为表单进行赋值了。
-
-        //var formData = new FormData();//构造空对象，下面用append 方法赋值。
-//          formData.append("policy", "");
-//          formData.append("signature", "");
-//          formData.append("file", $("#file_upload")[0].files[0]);
         var url = "http://"+globalObj.localip+":4000/do/globalopt/imexport";
         $.ajax({
             url : url,
             type : 'POST',
-            data : formData,
-
-            /**
-             * 必须false才会避开jQuery对 formdata 的默认处理
-             * XMLHttpRequest会对 formdata 进行正确的处理
-             */
             processData : false,
-            /**
-             *必须false才会自动加上正确的Content-Type
-             */
             contentType : false,
             success : function(responseStr) {
                 alert("成功：" + JSON.stringify(responseStr));
