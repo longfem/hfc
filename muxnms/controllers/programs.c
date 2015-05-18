@@ -302,7 +302,7 @@ static void selectprgs(HttpConn *conn) {
 	Dev_prgInfo_st *inprg = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
-	printf("==========selectprgs===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	//printf("==========selectprgs===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	flag = atoi(mprGetJson(jsonparam, "flag"));
 	int selected = atoi(mprGetJson(jsonparam, "selected"));
@@ -377,7 +377,6 @@ static void selectprgs(HttpConn *conn) {
         }else{ //delete prg
             if(ch == 9){ //user prg
                 User_prgInfo_t *usrprg = NULL;
-                printf("--user prg--=ch===%d===%d\n", pos-1, list_len(&outpst->userPrgNodes));
                 for(i=0; i<list_len(&outpst->userPrgNodes); i++){
                     list_get(&outpst->userPrgNodes, i, &usrprg);
                     if(usrprg->index == prgindex){

@@ -1408,8 +1408,8 @@ int MakePidMapTable(int outChannel)
 		if(list_len(PrgAVMuxListI)>0)
 		{
 			clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
-		printf("printPrgAVMuxList   out channel:%d ",i);
-			printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
+		    //printf("printPrgAVMuxList   out channel:%d ",i);
+			//printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
 		}
 	}
 	return 1;

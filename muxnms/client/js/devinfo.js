@@ -14,7 +14,7 @@ var globalObj = {
     localip: window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7),
     timerID: undefined
 
-}
+};
 
 var channel_root = [
 	{"title": "输入通道", folder: true, key: "id1.0", expanded: true, "expanded": true, "icon": "img/book.ico"}	  
@@ -1210,6 +1210,7 @@ function devinfo_output(devType){
 						"paging":   false,
 						"info":     false,
 						"searching":   false,
+                        "scrollY": 390,
 						"scrollCollapse": true,
 						"columns": [
 							{ "title": "NO"},
@@ -2871,58 +2872,194 @@ function devinfo_output(devType){
                     $("li[class^=menu_]").css("display", "none");
                 }
             },
-			select: function(event, data){
+            select: function(event, data){
                 globalObj._channel = 2;
-				switch(data.menuId){
-					case '#expandall' :{
-						var nodes = data.node.children;
-						data.node.setExpanded(true);
-						$.each(nodes, function(index,item){
-							item.setExpanded(true);
-							//item.render();
-						});
-						break;
-					} case '#collasp': {
-						data.node.setExpanded(false);
-						break;
-					} case '#add': {
-						dialog_NIT.dialog( "open" );
-						break;
-					} case '#delete': {
-                        $.ajax({
-                            type: "GET",
-                            async:false,
-                            url: "http://"+globalObj.localip+":4000/do/nitController/delnit?channel=2",
-                            //data: ,
-                            dataType: "json",
-                            success: function(data){
-                                if(data.sts == 0){
-                                    dialog_NIT.dialog( "close" );
-                                    return;
-                                }else if(data.sts == 5){
-                                    alert("权限不足，请与管理员联系");
-                                }else if(data.sts == 9){
-                                    window.location = "/login.esp";
-                                    return;
-                                }
-                            },
-                            error : function(err) {
-                            }
+                switch(data.menuId){
+                    case '#expandall' :{
+                        var nodes = data.node.children;
+                        data.node.setExpanded(true);
+                        $.each(nodes, function(index,item){
+                            item.setExpanded(true);
+                            //item.render();
                         });
-						data.node.remove();
-						break;
-					} case '#import': {
-						
-						break;
-					} case '#export': {
-						
-						break;
-					} default: {
-						alert("Menu select " + data.menuId + ", " + data.node);
-						break;
-					}			  
-				}
-			}
+                        break;
+                    } case '#collasp': {
+                    data.node.setExpanded(false);
+                    break;
+                } case '#add': {
+                    $('.nit_name').val("");
+                    $('.nit_id').val("");
+                    globalObj._prgoptflag = 1;
+                    dialog_NIT.dialog( "open" );
+                    break;
+                } case '#edit': {
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+globalObj.localip+":4000/do/nitController/getsection?channel=2",
+                        //data: ,
+                        dataType: "json",
+                        success: function(data){
+                            if(data.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                            }else if(data.sts == 9){
+                                window.location = "/login.esp";
+                                return;
+                            }
+                            $('.nit_name').val(data.name);
+                            $('.nit_id').val(data.streamid.toString(16));
+                            globalObj._prgoptflag = 0;
+                            dialog_NIT.dialog( "open" );
+                        },
+                        error : function(err) {
+                        }
+                    });
+                    break;
+                } case '#delete': {
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+globalObj.localip+":4000/do/nitController/delnit?channel=2",
+                        //data: ,
+                        dataType: "json",
+                        success: function(data){
+                            if(data.sts == 0){
+                                dialog_NIT.dialog( "close" );
+                                return;
+                            }else if(data.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                            }else if(data.sts == 9){
+                                window.location = "/login.esp";
+                                return;
+                            }
+                        },
+                        error : function(err) {
+                        }
+                    });
+                    data.node.remove();
+                    break;
+                } case '#deleteallstr':{
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+globalObj.localip+":4000/do/nitController/delallstr?channel=2",
+                        //data: ,
+                        dataType: "json",
+                        success: function(res){
+                            if(res.sts == 0){
+                                dialog_NIT.dialog( "close" );
+                                return;
+                            }else if(res.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                            }else if(res.sts == 9){
+                                window.location = "/login.esp";
+                                return;
+                            }
+                            while(data.node.hasChildren()){
+                                data.node.getFirstChild().remove();
+                            }
+                        },
+                        error : function(err) {
+                        }
+                    });
+                    break;
+                } case '#addstrc':{
+                    addstrc();
+                    globalObj._prgoptflag = 1;
+                    globalObj._editnodekey = data.node.key;
+                    dialog_nitc.dialog( "open" );
+                    break;
+                } case '#addstrs':{
+                    addstrs();
+                    globalObj._prgoptflag = 1;
+                    globalObj._editnodekey = data.node.key;
+                    dialog_nits.dialog( "open" );
+                    break;
+                }  case '#addstrt':{
+                    addstrt();
+                    globalObj._prgoptflag = 1;
+                    globalObj._editnodekey = data.node.key;
+                    dialog_nitt.dialog( "open" );
+                    break;
+                } case '#editstr': {
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+globalObj.localip+":4000/do/nitController/getstream?channel=2&streamid="+ data.node.data.streamid,
+                        //data: ,
+                        dataType: "json",
+                        success: function(res){
+                            if(res.sts == 0){
+                                alert("读取流错误!");
+                                dialog_NIT.dialog( "close" );
+                                return;
+                            }else if(res.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                            }else if(res.sts == 9){
+                                window.location = "/login.esp";
+                                return;
+                            }
+                            switch(data.node.data.type){
+                                case 'DVB-C':
+                                    editnitc(data, res);
+                                    globalObj._prgoptflag = 0;
+                                    globalObj._editnodekey = data.node.key;
+                                    dialog_nitc.dialog( "open" );
+                                    break;
+                                case 'DVB-S':
+                                    editnits(data, res);
+                                    globalObj._prgoptflag = 0;
+                                    globalObj._editnodekey = data.node.key;
+                                    dialog_nits.dialog( "open" );
+                                    break;
+                                case 'DVB-T':
+                                    editnitt(data, res);
+                                    globalObj._prgoptflag = 0;
+                                    globalObj._editnodekey = data.node.key;
+                                    dialog_nitt.dialog( "open" );
+                                    break;
+                            }
+                        },
+                        error : function(err) {
+                        }
+                    });
+                    break;
+                } case '#deletestr': {
+                    var oristreamid = data.node.data.streamid;
+                    $.ajax({
+                        type: "GET",
+                        async:false,
+                        url: "http://"+globalObj.localip+":4000/do/nitController/delstr?channel=2&streamid="+oristreamid,
+                        //data: ,
+                        dataType: "json",
+                        success: function(data){
+                            if(data.sts == 0){
+                                dialog_NIT.dialog( "close" );
+                                return;
+                            }else if(data.sts == 5){
+                                alert("权限不足，请与管理员联系");
+                            }else if(data.sts == 9){
+                                window.location = "/login.esp";
+                                return;
+                            }
+                        },
+                        error : function(err) {
+                        }
+                    });
+                    data.node.remove();
+                    break;
+                } case '#import': {
+
+                    break;
+                } case '#export': {
+
+                    break;
+                } default: {
+                    alert("Menu select " + data.menuId + ", " + data.node);
+                    break;
+                }
+                }
+            }
 		},
 		click: function(event, data) {
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){

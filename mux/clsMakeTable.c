@@ -217,7 +217,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 	if(rstPat)
 	{
 		printf("PRASE sdt SUCCESSFULL---%d\n",rstPat);
-		printSDT(p_sdt);
+		//printSDT(p_sdt);
 	}
 #endif
 

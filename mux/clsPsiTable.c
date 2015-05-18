@@ -932,8 +932,6 @@ int CreateSdt(list_t  prginfolist,list_t  userprginfolist, unsigned char sdtTabl
 
 	int numLenTmp = ((0xf << 12) |((iAddr + 4 - sectionLenAddr - 2) & 0xfff));
 	BigFormat_intToBytes(numLenTmp, tmpBytes, sectionLenAddr, 2);
-
-    printf("=====x 6---\n");
 	// -- crc --
 	unsigned  long crcWord=  CrcBytes(tmpBytes,5,iAddr - 5);
 	iAddr += BigFormat_uintToBytes(crcWord, tmpBytes, iAddr, 4);
