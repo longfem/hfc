@@ -25,7 +25,7 @@
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
-//char *tmpip = "192.168.1.49";
+char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 char optstr[256] = {0};
 
@@ -268,7 +268,7 @@ static void getprg(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "inch"); 
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
-    getprgsJson(conn->rx->parsedUri->host, inCh, pProg);
+    getprgsJson(tmpip, inCh, pProg);
 	render(pProg);
     
 } 
@@ -279,17 +279,17 @@ static void getoutprg(HttpConn *conn) {
 	char outprg[81920] = {0};
 	int outChn = 0;	
 	if(1){
-		PrgMuxInfoGet(conn->rx->parsedUri->host);
+		PrgMuxInfoGet(tmpip);
 	}
 	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
-		getOutPrograms(conn->rx->parsedUri->host, outChn);
-		LoadBitrateAndTableEnable(conn->rx->parsedUri->host, outChn);
+		getOutPrograms(tmpip, outChn);
+		LoadBitrateAndTableEnable(tmpip, outChn);
 
-		ChnBypass_read(conn->rx->parsedUri->host, outChn);
+		ChnBypass_read(tmpip, outChn);
 		RecordInputChnUseStatus(outChn);
 
 	}
-	getoutprgsJson(conn->rx->parsedUri->host, Chn - 1, outprg);
+	getoutprgsJson(tmpip, Chn - 1, outprg);
 	render(outprg);
     
 } 
@@ -533,7 +533,7 @@ static void writetable(HttpConn *conn) {
         render(rsts);
         return;
     }
-	if(!sendPrograms(conn->rx->parsedUri->host, inCh)){
+	if(!sendPrograms(tmpip, inCh)){
 		rendersts(rsts, 1);
 	}else{
 		rendersts(rsts, 0);
@@ -1241,7 +1241,7 @@ static void search(HttpConn *conn) {
     MprJson *jsonparam = httpGetParams(conn);
     //printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
-    rst = Search(conn->rx->parsedUri->host, inCh);
+    rst = Search(tmpip, inCh);
 
     cJSON *result = cJSON_CreateObject();
     cJSON_AddNumberToObject(result, "sts", rst);
