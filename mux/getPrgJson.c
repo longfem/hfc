@@ -9,9 +9,8 @@ ClsProgram_st clsProgram;
 void getprgsJson(char *ip, int inChn, char *outprg){
 	int i = 0, j = 0, res = 0;	
 	char str[200] = {0};
-	char idstr[20] = {0};
-	list_t  prginfolist; 	
-	Dev_prgInfo_st *ptmpPrgInfo;
+	char idstr[100] = {0};
+	Dev_prgInfo_st *ptmpPrgInfo= NULL;
 	Dev_prgInfo_st *PrgInfo;
 	ChannelProgramSt *pst = NULL;
 	//释放输入通道节目占用的内存
@@ -19,9 +18,12 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	if( list_len(&pst->prgNodes) > 0){
 		freePrograms(&pst->prgNodes);
 	}
-    res = getPrograms(ip, inChn, &prginfolist);	
+	Chn_ca_st *caNode = &pst->caNode;
+    list_t *caIdenList = &caNode->caIdenList;
+    freecanode(caIdenList);
+    res = getPrograms(ip, inChn, &pst->prgNodes);
 	if(0 != res){
-		GetCatDesList(ip, inChn, &pst->caNode.caIdenList);
+		GetCatDesList(ip, inChn, caIdenList);
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
 		channelsarray = cJSON_CreateArray();
@@ -31,14 +33,11 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		sprintf(idstr, "id1.%d", inChn);//1.2	
 		cJSON_AddStringToObject(channeljson,"key", idstr);
 		cJSON_AddStringToObject(channeljson,"icon", "img/channel_in.ico");
-		
 		cJSON_AddItemToObject(channeljson, "children", prgsarray = cJSON_CreateArray());
-		for(i=0; i<list_len(&prginfolist); i++) {
+		for(i=0; i<list_len(&pst->prgNodes); i++) {
 			cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
-			list_get(&prginfolist, i, &ptmpPrgInfo);			
-			//PrgInfo = malloc(sizeof(Dev_prgInfo_st));
-			//memcpy(PrgInfo, ptmpPrgInfo, sizeof(Dev_prgInfo_st));
-			list_append(&pst->prgNodes, ptmpPrgInfo);	
+			ptmpPrgInfo = NULL;
+			list_get(&pst->prgNodes, i, &ptmpPrgInfo);
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
@@ -53,7 +52,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			sprintf(idstr, "id1.%d.%d", inChn, ptmpPrgInfo->index);//1.2.1
 			cJSON_AddStringToObject(prgjson,"key", idstr);
 			cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
-			
+
 			cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
 			//subprgjson
 			cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
@@ -132,7 +131,6 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddFalseToObject(streamjson,"expanded");
 					cJSON_AddStringToObject(streamjson,"key", idstr);
 					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
-				
 					//cJSON_AddItemToObject(subprgjson, "children", streamsarray);
 				}else if(4 == streaminfo->streamType){
 					//MPEG2 AUDIO
@@ -170,7 +168,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					cJSON_AddTrueToObject(streamjson,"folder");
 					cJSON_AddFalseToObject(streamjson,"expanded");
 					cJSON_AddStringToObject(streamjson,"key", idstr);
-					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");				
+					cJSON_AddStringToObject(streamjson,"icon", "img/channel_in.ico");
 				}				
 				Commdes_t *desNodeinfo = malloc(sizeof(Commdes_t));
 				for(k=0; k<streaminfo->desNodeLen; k++) {
@@ -182,9 +180,37 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 					
 				}
 				free(desNodeinfo);
-			}	
-			free(streaminfo);	
+			}
+			free(streaminfo);
 		}
+		//添加CAT
+		CA_descriptor *cades = NULL;
+		cJSON_AddItemToArray(prgsarray,prgjson = cJSON_CreateObject());
+        cJSON_AddStringToObject(prgjson,"title", "CAT");
+        cJSON_AddTrueToObject(prgjson,"folder");
+        cJSON_AddFalseToObject(prgjson,"expanded");
+        cJSON_AddNumberToObject(prgjson, "chnid", inChn);
+        memset(idstr, 0, sizeof(idstr));
+        sprintf(idstr, "id1.%d.cat", inChn);//1.2.1
+        cJSON_AddStringToObject(prgjson,"key", idstr);
+        cJSON_AddStringToObject(prgjson,"icon", "img/star.ico");
+        if(list_len(caIdenList)>0){
+            cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
+            for(j=0;j<list_len(caIdenList);j++){
+                list_get(caIdenList, j, &cades);
+                //subprgjson
+                cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
+                sprintf(idstr, "id1.%d.cat.%d", inChn, cades->index);
+                cJSON_AddStringToObject(subprgjson,"key", idstr);
+                cJSON_AddNumberToObject(subprgjson,"index", cades->index);
+                cJSON_AddNumberToObject(subprgjson, "chnid", cades->inChannel);
+                cJSON_AddStringToObject(subprgjson,"icon", "img/circle16_green.ico");
+                memset(str, 0, sizeof(str));
+                sprintf(str,"CA descriptor SysID=%d(0x%x) PID(0x%x)",cades->inCaSysId, cades->inCaSysId, cades->inCaPid );
+                cJSON_AddStringToObject(subprgjson,"title", str);
+            }
+        }
+
 		//添加通道节点TITLE
 		sprintf(str,"通道%d(ASI-%d)  -  原始网络ID=0x%04X,传输流ID=0x%04X",ptmpPrgInfo->chnId, ptmpPrgInfo->chnId, ptmpPrgInfo->networkId, ptmpPrgInfo->streamId );
 		cJSON_AddStringToObject(channeljson,"title", str);
@@ -194,9 +220,8 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
 		printf("---prgjsonlen--->>>%d\n",strlen(prgjsonstring));
 		//释放内存	
-		cJSON_Delete(channelsarray);		
+		cJSON_Delete(channelsarray);
 		free(prgjsonstring);
-		//freePrograms(&prginfolist);
 	}else{
 		cJSON *channelsarray,*channeljson;
 		char* prgjsonstring;
@@ -223,7 +248,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
     int i = 0, j = 0;
     char str[200] = {0};
-    char idstr[20] = {0};
+    char idstr[100] = {0};
     cJSON *basejson,*prgjson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;
     User_prgInfo_t *userprg = NULL;
     for(i=0; i<list_len(&pst->userPrgNodes); i++) {
@@ -232,6 +257,7 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         cJSON_AddNumberToObject(basejson, "ch", 9);
         cJSON_AddNumberToObject(basejson, "index", userprg->index);
         cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
+
         //添加节目节点TITLE
         memset(idstr, 0, sizeof(idstr));
         memcpy(idstr, userprg->prgName, userprg->prgNameLen);
@@ -247,7 +273,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         sprintf(idstr, "id1.%d.%d", 9, userprg->index);//1.2.1
         cJSON_AddStringToObject(prgjson,"key", idstr);
         cJSON_AddStringToObject(prgjson,"icon", "img/notebook.ico");
-
         cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
         //subprgjson
         cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
@@ -257,7 +282,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         sprintf(idstr, "id1.%d.%d.1", 9, userprg->index);
         cJSON_AddStringToObject(subprgjson,"key", idstr);
         cJSON_AddStringToObject(subprgjson,"icon", "img/channel_in.ico");
-
         cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
         sprintf(idstr, "id1.%d.%d.2", 9, userprg->index);
         cJSON_AddStringToObject(subprgjson,"title", "multiplex buffer utilization descriptor");
@@ -269,7 +293,6 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         //PMT
         Commdes_t *tmpinfo = malloc(sizeof(Commdes_t));
         int offset = 0, flag = 0;
-        //unsigned char tmpstr[100] = {0};
         for(j=0; j<userprg->pmtDesListLen; j++) {
             memcpy(tmpinfo, userprg->pmtDesList+offset, sizeof(Commdes_t) );
             offset += 1;
@@ -380,16 +403,16 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
 void getoutprgsJson(char *ip, int inChn, char *outprg){
 	int i = 0;
 	char str[200] = {0};
-	char idstr[20] = {0};
+	char idstr[100] = {0};
 	Dev_prgInfo_st *ptmpPrgInfo;
 	ChannelProgramSt *pst = NULL;		
 	list_get(&clsProgram.outPrgList, inChn, &pst);
+	cJSON *basearry,*basejson,*prgjson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
+    char* prgjsonstring;
+    basearry = cJSON_CreateArray();
 	if(list_len(&pst->prgNodes)>0){
-	    cJSON *basearry,*basejson,*prgjson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
-        char* prgjsonstring;
-        basearry = cJSON_CreateArray();
 		for(i=0; i<list_len(&pst->prgNodes); i++) {
-			list_get(&pst->prgNodes, i, &ptmpPrgInfo);	
+			list_get(&pst->prgNodes, i, &ptmpPrgInfo);
 			cJSON_AddItemToArray(basearry,basejson = cJSON_CreateObject());
 			cJSON_AddNumberToObject(basejson, "ch", ptmpPrgInfo->chnId);	
 			cJSON_AddNumberToObject(basejson, "index", ptmpPrgInfo->index);
@@ -539,40 +562,65 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			}	
 			free(streaminfo);
 		}
-        if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
-            adduserprgjson(basearry, pst);
-        }
-		prgjsonstring = cJSON_PrintUnformatted(basearry);
-		
-		memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
-		//printf("--outprgjsonlen---->>>%d\n",strlen(prgjsonstring));
-		//释放内存	
-		cJSON_Delete(basearry);		
-		free(prgjsonstring);
-		//freePrograms(&prginfolist);
-	} else if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
-	    cJSON *basearry;
-        char* prgjsonstring;
-        basearry = cJSON_CreateArray();
+	}
+	if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
         adduserprgjson(basearry, pst);
+	}
+	list_t *caIdenList = &pst->caNode.caIdenList;
+	if(list_len(caIdenList)>0){
+	    printf("------------------ca\n");
+	    int j = 0;
+        cJSON_AddItemToArray(basearry,basejson = cJSON_CreateObject());
+        cJSON_AddNumberToObject(basejson, "ch", inChn + 1);
+        cJSON_AddStringToObject(basejson, "index", "cat");
+        cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
+        cJSON_AddStringToObject(prgjson,"title", "CAT");
+        cJSON_AddTrueToObject(prgjson,"folder");
+        cJSON_AddFalseToObject(prgjson,"expanded");
+        cJSON_AddNumberToObject(prgjson, "chnid", inChn + 1);
+        memset(idstr, 0, sizeof(idstr));
+        sprintf(idstr, "id1.%d.cat", inChn + 1);//1.2.1
+        cJSON_AddStringToObject(prgjson,"key", idstr);
+        cJSON_AddStringToObject(prgjson,"icon", "img/star.ico");
+        cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
+        CA_descriptor *cades = NULL;
+        for(j=0;j<list_len(caIdenList);j++){
+            list_get(caIdenList, j, &cades);
+            //subprgjson
+            cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
+            sprintf(idstr, "id1.%d.cat.%d", inChn + 1, cades->index);
+            cJSON_AddStringToObject(subprgjson,"key", idstr);
+            cJSON_AddNumberToObject(subprgjson,"index", cades->index);
+            cJSON_AddNumberToObject(subprgjson, "chnid", cades->inChannel);
+            cJSON_AddStringToObject(subprgjson,"icon", "img/circle16_green.ico");
+            memset(str, 0, sizeof(str));
+            sprintf(str,"CA descriptor SysID=%d(0x%x) PID(0x%x)",cades->inCaSysId, cades->inCaSysId, cades->inCaPid );
+            cJSON_AddStringToObject(subprgjson,"title", str);
+        }
+
+	}
+	prgjsonstring = cJSON_PrintUnformatted(basearry);
+	printf("--outprgjsonlen---->>>%d\n",strlen(prgjsonstring));
+	if(strlen(prgjsonstring) == 2){
+	    cJSON *channeljson;
+        char* prgjsonstring;
+        channeljson = cJSON_CreateObject();
+        cJSON_AddNumberToObject(channeljson, "sts", 1);
+        prgjsonstring = cJSON_PrintUnformatted(channeljson);
         memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
 
         //释放内存
+        cJSON_Delete(channeljson);
         cJSON_Delete(basearry);
         free(prgjsonstring);
-	} else{
-		cJSON *channeljson;
-		char* prgjsonstring;
-		channeljson = cJSON_CreateObject();
-		cJSON_AddNumberToObject(channeljson, "sts", 1);
-		prgjsonstring = cJSON_PrintUnformatted(channeljson);		
-		memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
-		
-		//释放内存	
-		cJSON_Delete(channeljson);		
-		free(prgjsonstring);
+	}else{
+	    memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
+        //printf("--outprgjsonlen---->>>%d\n",strlen(prgjsonstring));
+        //释放内存
+        cJSON_Delete(basearry);
+        free(prgjsonstring);
 	}
-	
+
 }
 
 

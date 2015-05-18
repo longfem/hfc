@@ -11,5 +11,5 @@ int freePrograms(list_t *prginfolist);
 int freeUserPrograms(list_t *prginfolist);
 int freeProgramsMalloc(Dev_prgInfo_st * data);
 int freeUserProgramsMalloc(User_prgInfo_t * data);
-
+int freecanode(list_t *caIdenList);
 #endif 

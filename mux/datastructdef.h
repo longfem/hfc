@@ -98,7 +98,7 @@ typedef struct User_prgInfo_st
     int index;
     int prgNum;
     int streamId;
-    int newworkId;
+    int networkId;
     int pmtPid;
     int pcrPidInChn; // 指示pcrPid的来处
     int oldPcrPid;		//2字节
@@ -328,7 +328,7 @@ typedef struct  ClsProgram_t
 	// ClsMux muxer = null;
 	 list_t **PrgPmtMuxList; // MuxPrgInfoGet_st  list Array
 	 list_t **PrgAVMuxList;  // list Array MuxPidInfo_st , 节目映射PID, 数组以输出通道为序
-	 list_t *nitSection; // list Array Nit_section_st
+	 list_t NitSection; // list Array Nit_section_st
 	// Dglt_showPidMap dglt_showPidMap = null;
 	 int pidMap_eachTransmit_numberMax;
 }ClsProgram_st;	
@@ -377,7 +377,7 @@ typedef struct Nit_streamLoop_st
 {
 	 int streamId;
 	 int original_network_id;
-	 BufferUn_st *desList; // Commdes_st//in fact is byte[]
+	 BufferUn_st *BufferUn_stList; // Commdes_st//in fact is byte[]
 	 int BufferUn_stLen;
 
 }Nit_streamLoop_t;

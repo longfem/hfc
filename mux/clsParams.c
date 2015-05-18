@@ -67,7 +67,7 @@ void Init(int outChannelNumMax)
 	clsProgram.PrgAVMuxList = (list_t **) malloc(sizeof(list_t *) * clsProgram._outChannelCntMax);		
 	for(i=0; i< clsProgram._outChannelCntMax; i++){
 		clsProgram.PrgAVMuxList[i] = NULL;
-	} 
+	}
 	//////////////////////////////////////////////////////////////////////////////
 	// clsProgram.PrgPmtMuxList = malloc(sizeof(list_t) * clsProgram._outChannelCntMax);	
 	// mux

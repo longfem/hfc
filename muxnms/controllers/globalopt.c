@@ -7,9 +7,11 @@
 #include "esp.h"
 #include "devinfo.h"
 #include "cJSON.h"
+#include "datastructdef.h"
 #include "clsMuxOutCh.h"
 #include "clsMuxprgInfoGet.h"
 #include "clsMux.h"
+#include "list.h"
 
 /*
     Create a new resource in the database
@@ -17,6 +19,7 @@
 char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 char optstr[256] = {0};
+extern ClsProgram_st clsProgram;
 
 static void rendersts(const char *str,int status)
 {
@@ -249,11 +252,15 @@ static void getoptlogs() {
 
 static void getmonitorinfo(HttpConn *conn) {
     char str[256] = {0};
-    int inputStatus = 0;
+    int inputStatus = 0, outChn = 0;
     cJSON *result = cJSON_CreateObject();
     char* jsonstring;
     int outValidBitrate = 0;
     unsigned int outstatus = 0;
+    for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
+        ChnBypass_read(tmpip, outChn);
+        RecordInputChnUseStatus(outChn);
+    }
     OutChn_validBitrateGet(tmpip, 1, &outValidBitrate);
     GetOutChannelStatus(tmpip, 1, &outstatus);
     cJSON_AddNumberToObject(result,"outValidBitrate", outValidBitrate);
@@ -277,6 +284,22 @@ static void getmonitorinfo(HttpConn *conn) {
     render(str);
 }
 
+static void imexport(HttpConn *conn) {
+    printf("==========imexport=========\n");
+    HttpUploadFile  *file;
+    MprKey          *kp;
+    int             index;
+    for (ITERATE_ITEMS(conn->rx->files, file, index)) {
+        printf("NAME %s\n", file->name);
+        printf("FILENAME %s\n", file->filename);
+        printf("CLIENT_NAME %s\n", file->clientFilename);
+        printf("TYPE %s\n", file->contentType);
+        printf("SIZE %d\n", file->size);
+    }
+    //printf("==========rx=========%s\n", conn->rx);
+
+
+}
 
 static void common(HttpConn *conn) {
 }
@@ -292,7 +315,8 @@ ESP_EXPORT int esp_controller_muxnms_globalopt(HttpRoute *route, MprModule *modu
 	espDefineAction(route, "globalopt-cmd-setPassword", setPassword);
 	espDefineAction(route, "globalopt-cmd-getoptlogs", getoptlogs);
 	espDefineAction(route, "globalopt-cmd-getmonitorinfo", getmonitorinfo);
-    
+	espDefineAction(route, "globalopt-cmd-imexport", imexport);
+
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
     ediAddValidation(edi, "present", "globalopt", "title", 0);

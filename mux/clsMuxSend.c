@@ -88,38 +88,38 @@ int SendTable(char *ip, int outChnId)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////
-	pbuff = NULL;	
-	list_get(&pclsMux->table_cat, iChn, &pbuff); 
-	psiType = cat;
-	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
-	{		
-		printf("===call send psi cat not null\n");
-		if (SendTable_psi(ip, outChnId, cat, pbuff->pbuf, pbuff->bufLen) != ok)
+
+
+//	pbuff = NULL;
+//	list_get(&pclsMux->table_cat, iChn, &pbuff);
+//	psiType = cat;
+//	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
+//	{
+//		if (SendTable_psi(ip, outChnId, cat, pbuff->pbuf, pbuff->bufLen) != ok)
+//			rslt = 0;
+//	}
+//	else
+//	{
+//		if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
+//			rslt = 0;
+//	}
+
+
+
+	pbuff = NULL;
+	list_get(&pclsMux->table_nit, iChn, &pbuff);
+	psiType = nit;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit)
+	{
+		
+		if (SendTable_psi(ip, outChnId, nit, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 	}
 	else
-	{		
-		if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
+	{
+		if (SendTable_psi(ip, outChnId, nit, NULL, 0) != ok)
 			rslt = 0;
 	}
-
-
-	// pbuff = NULL;	
-	// list_get(&pclsMux->table_nit, iChn, &pbuff); 
-	// psiType = nit;
-	// if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_nit)
-	// {
-		
-	// 	if (SendTable_psi(ip, outChnId, nit, pbuff->pbuf, pbuff->bufLen) != ok)
-	// 		rslt = 0;
-	// }
-	// else
-	// {
-	// 	if (SendTable_psi(ip, outChnId, nit, NULL, 0) != ok)
-	// 		rslt = 0;
-	// }
-
-	//////////////////////////////////////////////////////////////////
 	
 	if (SendTable_psi_finish(ip, outChnId) != ok){
 		rslt = 0;

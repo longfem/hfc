@@ -22,6 +22,16 @@ int LittleFormat_fromBytes(int offset, int length, char *inBytes)
     return rtnInt;
 }
 
+int BigFormat_fromBytes(int offset, int length, char *inBytes)
+{
+    int rtnInt = 0, i = 0;
+    for (i = 0; i < length; i++)
+    {
+        rtnInt <<= 8;
+        rtnInt += inBytes[offset++];
+    }
+    return rtnInt;
+}
 
 
 ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
@@ -572,7 +582,6 @@ ErrorTypeEm SendEnableMuxTable(char *ip, int outChannel)
 
 ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
 {
-
     unsigned char buf[100];
     int i = 0, j=0;
     unsigned char sendbuf[20];
@@ -580,31 +589,23 @@ ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
 
     int dataAddr, iAddr;
     enum ErrorTypeEm res;
-
     memset(sendbuf, 0, sizeof(sendbuf));
     sendbuf[iAddr++]=0x77;
     sendbuf[iAddr++]=0x6C;
     sendbuf[iAddr++]=0x11;    
     sendbuf[iAddr++]=0x05;
     sendbuf[iAddr++]=(unsigned char)channelId;
-
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, iAddr, buf, &slen);
-
-    if( slen ==6 ){        
-        res = ok;
-
+    if(CheckReturnBytes(sendbuf, iAddr, buf, slen) != 0){
+        printf("===------GetCatDesList error!!\n");
+        return error;
     }
-    else{            
-        return error;          
-    }
-
     // --- cat描述符 ---
     int desCntIndex = 1;
     int catDesCnt = buf[iAddr++];
-
-    catDesList = malloc(sizeof(list_t));
-    list_init(catDesList);
+    //catDesList = malloc(sizeof(list_t));
+    //list_init(catDesList);
     //////////////////////////////////////////////////////
    
 
@@ -620,7 +621,7 @@ ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
         catDesInfo->descriptor_length = buf[iAddr++];
         if (catDesInfo->descriptor_length < 4)
             break;
-        catDesInfo->inCaSysId = catDesInfo->outCaSysId = (buf[iAddr] << 8 | buf[iAddr + 1]) & 0xffff;
+        catDesInfo->inCaSysId = catDesInfo->outCaSysId = BigFormat_fromBytes(iAddr, 2, buf);
         iAddr += 2;
         int tmpBytes = buf[iAddr++];
         catDesInfo->reserved = tmpBytes >> 5;
@@ -628,9 +629,7 @@ ErrorTypeEm GetCatDesList(char *ip, int channelId, list_t *catDesList)
         catDesInfo->private_data_byte_len = catDesInfo->descriptor_length - 4;
         catDesInfo->private_data_byte = (unsigned char *)malloc(catDesInfo->private_data_byte_len);
         memcpy(catDesInfo->private_data_byte, buf + iAddr, catDesInfo->private_data_byte_len);
-        
         list_append(catDesList, catDesInfo);
-        
         iAddr += catDesInfo->private_data_byte_len;
     }
 

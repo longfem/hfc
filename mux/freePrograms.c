@@ -157,3 +157,26 @@ int freePrograms(list_t *prginfolist)
 	
 	return 0;
 }
+
+int freecanode(list_t *caIdenList){
+    int i = 0;
+    CA_descriptor *ca = NULL;
+    if(caIdenList != NULL){
+        if(list_len(caIdenList)>0){
+            for(i=list_len(caIdenList)-1;i>-1;i--){
+                list_get(caIdenList, i, &ca);
+                if(ca->private_data_byte_len>0){
+                    free(ca->private_data_byte);
+                    ca->private_data_byte = NULL;
+                    ca->private_data_byte_len = 0;
+                }
+                free(ca);
+                ca = NULL;
+                list_pop(caIdenList, i);
+            }
+        }
+        //free(caIdenList);
+        caIdenList = NULL;
+    }
+
+}

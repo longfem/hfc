@@ -421,9 +421,15 @@ ul,ol{
 	display:none;
 	padding: 10px;
 	line-height: 1.9;
-  }  
-  
-  fieldset input {
+  }
+
+  .dialog-nit {
+      display:none;
+      padding: 10px;
+      line-height: 1.9;
+  }
+
+fieldset input {
 	margin-left: 30px;
   }
   
@@ -850,3 +856,18 @@ span.fancytree-node.userprg > span.fancytree-title {
     text-align: center;
 }
 
+.nit_section label {
+    display: block;
+    float: left;
+    width: 100px;
+    margin-left: 20px;
+}
+
+.nit_section input {
+    float: left;
+    margin-right: 20px;
+}
+
+.tbl_nit {
+    padding: 20px;
+}
