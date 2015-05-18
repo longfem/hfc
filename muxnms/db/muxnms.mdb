@@ -27,7 +27,6 @@
             'logtime': { type: 'int' },
         },
         data: [
-            
         ],
     },
 }

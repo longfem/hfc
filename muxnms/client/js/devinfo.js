@@ -557,7 +557,7 @@ function checkselectedprg(nodekey, selected, snode){
             case 4:
                 prgnode = chantree.getNodeByKey(snode.getParent().key);
                 if(nodekey.indexOf("cat")>0){
-                    var chstr = "flag:9,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index;
+                    var chstr = "flag:9,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ snode.data.index;
                 }else{
                     var chstr = "flag:4,"+"selected:1,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
                         + ",streamindex:"+ snode.data.index;
@@ -580,14 +580,22 @@ function checkselectedprg(nodekey, selected, snode){
                 }
                 break;
             case 2:	//节目节点
-                var chstr = "flag:3,"+"selected:0,ch:"+ snode.data.chnid + ",index:"+ snode.data.index;
+                if(nodekey.indexOf("cat")>0){
+                    var chstr = "flag:8,"+"selected:0,ch:"+ snode.data.chnid;
+                }else {
+                    var chstr = "flag:3," + "selected:0,ch:" + snode.data.chnid + ",index:" + snode.data.index;
+                }
                 jsondata[0] = chstr;
                 break;
             case 3:
             case 4:
                 prgnode = chantree.getNodeByKey(snode.getParent().key);
-                var chstr = "flag:4,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ prgnode.data.index
-                    + ",streamindex:"+ snode.data.index;
+                if(nodekey.indexOf("cat")>0){
+                    var chstr = "flag:9,"+"selected:0,ch:"+ prgnode.data.chnid + ",index:"+ snode.data.index;
+                }else {
+                    var chstr = "flag:4," + "selected:0,ch:" + prgnode.data.chnid + ",index:" + prgnode.data.index
+                        + ",streamindex:" + snode.data.index;
+                }
                 jsondata[0] = chstr;
                 break;
             //break;
@@ -680,11 +688,11 @@ function readprgs(){
                     var nkey = "id1." + prg.ch;
                     node = channeltree.getNodeByKey(nkey);
                     node.addChildren(prg.children);
-                    var prgkey = "id1." + prg.ch +"."+prg.children.index;
+                    var prgkey = prg.children.key;
                     node = devlisttree.getNodeByKey(prgkey);
-                    if(globalObj._channel == 1){
+                    if(globalObj._channel == 1 && prgkey.indexOf("cat")<0){
                         globalObj._selectcount++;
-                    }else if(globalObj._channel == 2){
+                    }else if(globalObj._channel == 2 && prgkey.indexOf("cat")<0){
                         globalObj._selectcount2++;
                     }
                     if(node != null){
@@ -1414,7 +1422,9 @@ function devinfo_output(devType){
                         case 2:	//节目节点
                             tmpnode = channeltree.getNodeByKey(data.node.key);
                             tmpnode.remove();
-                            globalObj._selectcount--;
+                            if(data.node.key.indexOf("cat")<0){
+                                globalObj._selectcount--;
+                            }
                             break;
                         case 3:
                             tmpnode = channeltree.getNodeByKey(data.node.key);

@@ -195,13 +195,10 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		}	
 
 	//SDT
-	printf("=====xx 1---\n");
 	rstPat=CreateSdt(prginfolist,userprginfolist,sdtTable, streamId, oringinalNetworkId, version);
-    printf("=====xx 2---\n");
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
 	memcpy(pbuff->pbuf, sdtTable,rstPat);
 	pbuff->bufLen=rstPat;
-    printf("=====xx 3---\n");
 	if (!rstPat)
 	{
 		CleanOutputTable(outChnId);
@@ -428,7 +425,7 @@ void printSDT(sdt_senction_st* SDTS)
 
 	int i,j,k;
 
-#if 1
+#if 0
 	printf("crc32----%d\n",SDTS->crc32);
 	printf("current_next_indicator----%d\n",SDTS->current_next_indicator);
 	printf("last_section_number----%d\n",SDTS->last_section_number);

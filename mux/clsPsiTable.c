@@ -1137,7 +1137,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	{
 		for (i = 0; i < iAddr; i++)
 			nitTable[i] = tmpBytes[i];
-#if 1  				
+#if 0
 		for(i=0; i<iAddr; i++)
 			printf("  %d		  offset:%d  \n",nitTable[i],i);
 

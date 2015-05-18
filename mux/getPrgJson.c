@@ -23,10 +23,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
     freecanode(caIdenList);
     res = getPrograms(ip, inChn, &pst->prgNodes);
 	if(0 != res){
-	    caIdenList = malloc(sizeof(list_t));
-        list_init(caIdenList);
 		GetCatDesList(ip, inChn, caIdenList);
-		printf("===ca static=num=%d\n", list_len(&pst->caNode.caIdenList));
 		cJSON *prgjson,*channelsarray,*channeljson,*subprgjson,*subprgsarray,*streamjson,*streamsarray,*audiosarray,*prgsarray;//*prgsjson,
 		char* prgjsonstring;
 		channelsarray = cJSON_CreateArray();
@@ -574,15 +571,15 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 	    printf("------------------ca\n");
 	    int j = 0;
         cJSON_AddItemToArray(basearry,basejson = cJSON_CreateObject());
-        cJSON_AddNumberToObject(basejson, "ch", inChn);
+        cJSON_AddNumberToObject(basejson, "ch", inChn + 1);
         cJSON_AddStringToObject(basejson, "index", "cat");
         cJSON_AddItemToObject(basejson, "children", prgjson = cJSON_CreateObject());
         cJSON_AddStringToObject(prgjson,"title", "CAT");
         cJSON_AddTrueToObject(prgjson,"folder");
         cJSON_AddFalseToObject(prgjson,"expanded");
-        cJSON_AddNumberToObject(prgjson, "chnid", inChn);
+        cJSON_AddNumberToObject(prgjson, "chnid", inChn + 1);
         memset(idstr, 0, sizeof(idstr));
-        sprintf(idstr, "id1.%d.cat", inChn);//1.2.1
+        sprintf(idstr, "id1.%d.cat", inChn + 1);//1.2.1
         cJSON_AddStringToObject(prgjson,"key", idstr);
         cJSON_AddStringToObject(prgjson,"icon", "img/star.ico");
         cJSON_AddItemToObject(prgjson, "children", subprgsarray = cJSON_CreateArray());
@@ -591,7 +588,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
             list_get(caIdenList, j, &cades);
             //subprgjson
             cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
-            sprintf(idstr, "id1.%d.cat.%d", inChn, cades->index);
+            sprintf(idstr, "id1.%d.cat.%d", inChn + 1, cades->index);
             cJSON_AddStringToObject(subprgjson,"key", idstr);
             cJSON_AddNumberToObject(subprgjson,"index", cades->index);
             cJSON_AddNumberToObject(subprgjson, "chnid", cades->inChannel);

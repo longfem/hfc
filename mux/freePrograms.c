@@ -163,7 +163,7 @@ int freecanode(list_t *caIdenList){
     CA_descriptor *ca = NULL;
     if(caIdenList != NULL){
         if(list_len(caIdenList)>0){
-            for(i=list_len(caIdenList);i>-1;i--){
+            for(i=list_len(caIdenList)-1;i>-1;i--){
                 list_get(caIdenList, i, &ca);
                 if(ca->private_data_byte_len>0){
                     free(ca->private_data_byte);

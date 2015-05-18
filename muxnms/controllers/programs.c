@@ -302,7 +302,7 @@ static void selectprgs(HttpConn *conn) {
 	Dev_prgInfo_st *inprg = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
-	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+	printf("==========selectprgs===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	pos = atoi(mprGetJson(jsonparam, "channel"));
 	flag = atoi(mprGetJson(jsonparam, "flag"));
 	int selected = atoi(mprGetJson(jsonparam, "selected"));
@@ -448,7 +448,6 @@ static void selectprgs(HttpConn *conn) {
             }
         }
 	}else if(flag ==8){//cat
-	    printf("cat add/del === 1\n");
 	    ch = atoi(mprGetJson(jsonparam, "ch"));
         list_get(&(clsProgram.inPrgList), ch-1, &pst);
         list_t *caIdenList = &pst->caNode.caIdenList;
@@ -456,24 +455,20 @@ static void selectprgs(HttpConn *conn) {
         CA_descriptor *ca = NULL;
         CA_descriptor *outca = NULL;
         if(selected){
-            printf("cat add/del === 2\n");
             if(outcaIdenList == NULL){
                 outcaIdenList = malloc(sizeof(list_t));
                 list_init(outcaIdenList);
             }
             for(i=0;i<list_len(caIdenList);i++){
-                printf("cat add/del === 3\n");
                 list_get(caIdenList, i, &ca);
                 outca = malloc(sizeof(CA_descriptor));
                 memcpy(outca, ca, sizeof(CA_descriptor));
                 outca->private_data_byte = malloc(ca->private_data_byte_len);
                 memcpy(outca->private_data_byte, ca->private_data_byte, ca->private_data_byte_len);
-                printf("cat add/del === 4\n");
                 list_append(outcaIdenList, outca);
             }
-            printf("cat add/del =num== %d\n", list_len(outcaIdenList));
         }else{
-            for(i=list_len(outcaIdenList);i>-1;i--){
+            for(i=list_len(outcaIdenList)-1;i>-1;i--){
                 list_get(outcaIdenList, i, &outca);
                 if(outca->inChannel == ch){
                     if(outca->private_data_byte_len>0){
@@ -483,7 +478,7 @@ static void selectprgs(HttpConn *conn) {
                     outca = NULL;
                     list_pop(outcaIdenList, i);
                     if(list_len(outcaIdenList) == 0){
-                        free(outcaIdenList);
+                        //free(outcaIdenList);
                         outcaIdenList = NULL;
                     }
                 }
@@ -515,7 +510,7 @@ static void selectprgs(HttpConn *conn) {
         }else{
             for(i=0;i<list_len(outcaIdenList);i++){
                 list_get(outcaIdenList, i, &outca);
-                if(outca->inChannel == ch && ca->index == prgindex){
+                if(outca->inChannel == ch && outca->index == prgindex){
                     if(outca->private_data_byte_len>0){
                         free(outca->private_data_byte);
                     }
@@ -523,7 +518,7 @@ static void selectprgs(HttpConn *conn) {
                     outca = NULL;
                     list_pop(outcaIdenList, i);
                     if(list_len(outcaIdenList) == 0){
-                        free(outcaIdenList);
+                        //free(outcaIdenList);
                         outcaIdenList = NULL;
                     }
                     break;
