@@ -91,28 +91,54 @@ function createTable(){
                         StreamData[StreamData.length] = item;
                     });
                     //编辑数据流表
-                    if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
-                        $('#tbl_outtable').dataTable().fnClearTable();
-                        $('#tbl_outtable').dataTable().fnAddData(StreamData);
+                    if(globalObj._channel == 1){
+                        if ( $.fn.dataTable.isDataTable( '#tbl_outtable' ) ) {
+                            $('#tbl_outtable').dataTable().fnClearTable();
+                            $('#tbl_outtable').dataTable().fnAddData(StreamData);
+                        }else{
+                            //表结构右侧table
+                            var tout = $('#tbl_outtable').dataTable( {
+                                "data": StreamData,
+                                "order": [[ 0, "asc" ]],
+                                "paging":   false,
+                                "info":     false,
+                                "searching":   false,
+                                "scrollY": 390,
+                                "bAutoWidth": false,
+                                "columns": [
+                                    { "title": "NO"},
+                                    { "title": "CH"},
+                                    { "title": "IN-PID"},
+                                    { "title": "OUT-PID"},
+                                    { "title": "TYPE" }
+                                ]
+                            });
+                            tout.fnDraw();
+                        }
                     }else{
-                        //表结构右侧table
-                        var tout = $('#tbl_outtable').dataTable( {
-                            "data": StreamData,
-                            "order": [[ 0, "asc" ]],
-                            "paging":   false,
-                            "info":     false,
-                            "searching":   false,
-                            "scrollY": 390,
-                            "bAutoWidth": false,
-                            "columns": [
-                                { "title": "NO"},
-                                { "title": "CH"},
-                                { "title": "IN-PID"},
-                                { "title": "OUT-PID"},
-                                { "title": "TYPE" }
-                            ]
-                        });
-                        tout.fnDraw();
+                        if ( $.fn.dataTable.isDataTable( '#tbl_outtable2' ) ) {
+                            $('#tbl_outtable2').dataTable().fnClearTable();
+                            $('#tbl_outtable2').dataTable().fnAddData(StreamData);
+                        }else{
+                            //表结构右侧table
+                            var tout = $('#tbl_outtable2').dataTable( {
+                                "data": StreamData,
+                                "order": [[ 0, "asc" ]],
+                                "paging":   false,
+                                "info":     false,
+                                "searching":   false,
+                                "scrollY": 390,
+                                "bAutoWidth": false,
+                                "columns": [
+                                    { "title": "NO"},
+                                    { "title": "CH"},
+                                    { "title": "IN-PID"},
+                                    { "title": "OUT-PID"},
+                                    { "title": "TYPE" }
+                                ]
+                            });
+                            tout.fnDraw();
+                        }
                     }
                 },
                 error : function(err) {
