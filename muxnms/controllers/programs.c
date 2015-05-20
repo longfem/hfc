@@ -36,10 +36,10 @@ static void rendersts(char *str,int status)
 	cJSON_AddNumberToObject(result,"sts", status);
 	jsonstring = cJSON_PrintUnformatted(result);
 	memcpy(str, jsonstring, strlen(jsonstring));
-	//释放内存	
-	cJSON_Delete(result);		
+	//释放内存
+	cJSON_Delete(result);
 	free(jsonstring);
-} 
+}
 
 static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streamindex, int flag){
 	int cm = 0, i = 0, j = 0, hascontained = 0, streamlen = outprg->pdataStreamListLen;
@@ -144,13 +144,13 @@ static void cpystream(Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg, int streami
 static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInfo_st *inprg){
 	int k = 0, cm = 0, i = 0;
 	outprg = malloc(sizeof(Dev_prgInfo_st));
-	memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));				
+	memcpy(outprg, inprg, sizeof(Dev_prgInfo_st));
 	//pmt
 	outprg->pmtDesList = malloc(outprg->pmtDesListLen * sizeof(Commdes_t) );
 	Commdes_t *pmtDesInfo = outprg->pmtDesList;
 	Commdes_t *inpmtDesInfo = inprg->pmtDesList;
 	for (k = 0; k < outprg->pmtDesListLen; k++)
-	{  
+	{
 		memcpy(pmtDesInfo, inpmtDesInfo, sizeof(Commdes_t) );
 		pmtDesInfo->data = malloc(pmtDesInfo->dataLen * sizeof(unsigned char) );
 		memcpy(pmtDesInfo->data, inpmtDesInfo->data, pmtDesInfo->dataLen * sizeof(unsigned char));
@@ -179,13 +179,13 @@ static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInf
             outpdataStreamInfo++;
         }
     }
-	
+
 	//SDT 描述符
 	outprg->psdtDesList = malloc(outprg->psdtDesListLen * sizeof(Commdes_t));
 	Commdes_t *psdtDesInfo = outprg->psdtDesList;
 	Commdes_t *inpsdtDesInfo = inprg->psdtDesList;
 	for (k = 0; k < outprg->psdtDesListLen; k++)
-	{ 					
+	{
 		memcpy(psdtDesInfo, inpsdtDesInfo, sizeof(Commdes_t) );
 		psdtDesInfo->data = malloc(inpsdtDesInfo->dataLen);
 		memcpy(psdtDesInfo->data, inpsdtDesInfo->data, inpsdtDesInfo->dataLen);
@@ -196,7 +196,7 @@ static void cpyprg2(ChannelProgramSt *outpst, Dev_prgInfo_st *outprg, Dev_prgInf
 	memcpy(outprg->prgName, inprg->prgName, inprg->prgNameLen);
 	outprg->providerName = malloc(inprg->providerNameLen);
 	memcpy(outprg->providerName, inprg->providerName, inprg->providerNameLen);
-	
+
 	list_append(&(outpst->prgNodes), outprg);
 }
 
@@ -263,21 +263,21 @@ static int SeekReplacedPid(list_t *pidList, int chnId, int oldPid, int ifNotAdde
     return ifNotAddedUseNewPidValue;
 }
 
-static void getprg(HttpConn *conn) { 
+static void getprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
-    cchar *inChn = mprGetJson(jsonparam, "inch"); 
+    cchar *inChn = mprGetJson(jsonparam, "inch");
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
     getprgsJson(conn->rx->parsedUri->host, inCh, pProg);
 	render(pProg);
-    
-} 
+
+}
 
 static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
 	int Chn = atoi(mprGetJson(jsonparam, "inch"));
 	char outprg[81920] = {0};
-	int outChn = 0;	
+	int outChn = 0;
 	if(1){
 		PrgMuxInfoGet(conn->rx->parsedUri->host);
 	}
@@ -291,8 +291,8 @@ static void getoutprg(HttpConn *conn) {
 	}
 	getoutprgsJson(conn->rx->parsedUri->host, Chn - 1, outprg);
 	render(outprg);
-    
-} 
+
+}
 
 static void selectprgs(HttpConn *conn) {
 	int i = 0, j = 0, pos = 0, ch = 0, prgindex = 0, hascontained = 0, flag = 0;
@@ -435,12 +435,17 @@ static void selectprgs(HttpConn *conn) {
                 list_get(&(outpst->prgNodes), i, &outprg);
                 if((outprg->chnId == ch)&&(outprg->index == prgindex)){
                     hascontained = 1;
-                    list_get(&(clsProgram.inPrgList), ch-1, &pst);
-                    for(j=0; j<list_len(&pst->prgNodes); j++){
-                        list_get(&(pst->prgNodes), j, &inprg);
-                        if((inprg->chnId == ch)&&(inprg->index == prgindex)){
-                            cpystream(outprg, inprg, streamindex, selected);
-                            break;
+                    if(outprg->pdataStreamListLen == 1){
+                        freeProgramsMalloc(outprg);
+                        list_pop(&outpst->prgNodes,i);
+                    }else{
+                        list_get(&(clsProgram.inPrgList), ch-1, &pst);
+                        for(j=0; j<list_len(&pst->prgNodes); j++){
+                            list_get(&(pst->prgNodes), j, &inprg);
+                            if((inprg->chnId == ch)&&(inprg->index == prgindex)){
+                                cpystream(outprg, inprg, streamindex, selected);
+                                break;
+                            }
                         }
                     }
                 }
@@ -530,7 +535,7 @@ static void selectprgs(HttpConn *conn) {
 }
 
 /*制表准备工作*/
-static void maketable(HttpConn *conn) { 
+static void maketable(HttpConn *conn) {
 	int pos = 0, flag = 0;
 	char outstring[60960] = {0};
 	cchar *role = getSessionVar("role");
@@ -551,7 +556,7 @@ static void maketable(HttpConn *conn) {
 	//获取制表后结果
 	getTableJson(pos, outstring, flag);
 	render(outstring);
-    
+
 }
 
 /*获取制表信息*/
@@ -568,7 +573,7 @@ static void gettableinfo(HttpConn *conn) {
 }
 
 /*制表后获取输出流表*/
-static void streamtable(HttpConn *conn) { 
+static void streamtable(HttpConn *conn) {
 	int pos = 0, i = 0;
 	char outstring[8192] = {0};
 	cJSON *streamsarray,*streamjson;
@@ -597,19 +602,19 @@ static void streamtable(HttpConn *conn) {
 		}
 	}
 	streamjsonstring = cJSON_PrintUnformatted(streamsarray);
-		
+
 	memcpy(outstring, streamjsonstring, strlen(streamjsonstring));
 	printf("---streamtable--->>>%d\n",strlen(streamjsonstring));
-	//释放内存	
-	cJSON_Delete(streamsarray);		
+	//释放内存
+	cJSON_Delete(streamsarray);
 	free(streamjsonstring);
 	render(outstring);
-    
+
 }
 
-static void writetable(HttpConn *conn) { 
-	MprJson *jsonparam = httpGetParams(conn); 
-    cchar *inChn = mprGetJson(jsonparam, "channel"); 
+static void writetable(HttpConn *conn) {
+	MprJson *jsonparam = httpGetParams(conn);
+    cchar *inChn = mprGetJson(jsonparam, "channel");
 	int inCh = atoi(inChn);
 	char rsts[20] = {0};
 	cchar *role = getSessionVar("role");
@@ -646,12 +651,12 @@ static void writetable(HttpConn *conn) {
     }
     ediUpdateRec(db, optlog);
     //ediClose(db);
-} 
+}
 
-static void getchanneloutinfo(HttpConn *conn) { 
-	MprJson *jsonparam = httpGetParams(conn); 
-    cchar *inChn = mprGetJson(jsonparam, "channel"); 
-	int inCh = atoi(inChn);	
+static void getchanneloutinfo(HttpConn *conn) {
+	MprJson *jsonparam = httpGetParams(conn);
+    cchar *inChn = mprGetJson(jsonparam, "channel");
+	int inCh = atoi(inChn);
 	char rsts[20] = {0};
 	if(!pdb){
 		printf("getchanneloutinfo-----pdb is null!\n");
@@ -668,7 +673,7 @@ static void getchanneloutinfo(HttpConn *conn) {
 	cJSON_AddNumberToObject(pdbjson,"version", pdb->pvalueTree->poutChnArray[inCh-1].version);
 	cJSON_AddNumberToObject(pdbjson,"isManualMapMode", pdb->pvalueTree->poutChnArray[inCh-1].isManualMapMode);
 	cJSON_AddNumberToObject(pdbjson,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT);
-	
+
 	cJSON_AddNumberToObject(pdbjson,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
 	cJSON_AddNumberToObject(pdbjson,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_nit);
 	cJSON_AddNumberToObject(pdbjson,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat);
@@ -679,9 +684,9 @@ static void getchanneloutinfo(HttpConn *conn) {
 	render(jsonstring);
 	cJSON_Delete(pdbjson);
 	free(jsonstring);
-} 
+}
 
-static void setchanneloutinfo(HttpConn *conn) { 
+static void setchanneloutinfo(HttpConn *conn) {
 	char rsts[20] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -694,9 +699,9 @@ static void setchanneloutinfo(HttpConn *conn) {
         render(rsts);
         return;
     }
-	MprJson *jsonparam = httpGetParams(conn); 
+	MprJson *jsonparam = httpGetParams(conn);
 	//printf("==========setchanneloutinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
-    cchar *inChn = mprGetJson(jsonparam, "channel"); 	
+    cchar *inChn = mprGetJson(jsonparam, "channel");
 	int inCh = atoi(inChn);
 	pdb->pvalueTree->poutChnArray[inCh-1].networkId = atoi(mprGetJson(jsonparam, "networkId"));
 	pdb->pvalueTree->poutChnArray[inCh-1].oringal_networkid = atoi(mprGetJson(jsonparam, "oringal_networkid"));
@@ -731,24 +736,24 @@ static void setchanneloutinfo(HttpConn *conn) {
     }
     ediUpdateRec(db, optlog);
     //ediClose(db);
-} 
+}
 
-static void getpidtransinfo(HttpConn *conn) { 
+static void getpidtransinfo(HttpConn *conn) {
 	int i = 0;
 	char outprg[512] = {0};
-	MprJson *jsonparam = httpGetParams(conn); 
-    cchar *inChn = mprGetJson(jsonparam, "channel"); 	
+	MprJson *jsonparam = httpGetParams(conn);
+    cchar *inChn = mprGetJson(jsonparam, "channel");
 	int inCh = atoi(inChn);
 	cJSON *result, *pidarrayjsn,*pidjson;
 	char *jsonstring;
 	MuxPidInfo_st *mpf = NULL;
 	ChannelProgramSt *outpst = NULL;
 	result = cJSON_CreateObject();
-	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);	
+	list_get(&(clsProgram.outPrgList), inCh-1, &outpst);
 	if(list_len(&outpst->dtPidList)>0){
 		cJSON_AddNumberToObject(result,"cnt", list_len(&outpst->dtPidList));
 		cJSON_AddItemToObject(result, "children", pidarrayjsn = cJSON_CreateArray());
-		for(i=0;i<list_len(&outpst->dtPidList);i++){			
+		for(i=0;i<list_len(&outpst->dtPidList);i++){
 			list_get(&outpst->dtPidList,i, &mpf);
 			cJSON_AddItemToArray(pidarrayjsn,pidjson = cJSON_CreateObject());
 			cJSON_AddNumberToObject(pidjson,"NO", i);
@@ -756,19 +761,19 @@ static void getpidtransinfo(HttpConn *conn) {
 			cJSON_AddNumberToObject(pidjson,"oldPid", mpf->oldPid);
 			cJSON_AddNumberToObject(pidjson,"newPid", mpf->newPid);
 		}
-	}else{		
-		cJSON_AddNumberToObject(result,"cnt", 0);		
+	}else{
+		cJSON_AddNumberToObject(result,"cnt", 0);
 	}
 	jsonstring = cJSON_PrintUnformatted(result);
 	memcpy(outprg, jsonstring, strlen(jsonstring));
-	//释放内存	
-	cJSON_Delete(result);		
+	//释放内存
+	cJSON_Delete(result);
 	free(jsonstring);
 	render(outprg);
 }
 
-static void setpidtransinfo(HttpConn *conn) { 
-	MprJson *jsonparam = httpGetParams(conn); 
+static void setpidtransinfo(HttpConn *conn) {
+	MprJson *jsonparam = httpGetParams(conn);
 	//printf("==========setpidtransinfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	char idstr[16] = {0};
 	cchar *role = getSessionVar("role");
@@ -811,7 +816,7 @@ static void setpidtransinfo(HttpConn *conn) {
 			return;
 		}
 		sprintf(idstr, "p_newpid%d", i);
-		tmpstr = mprGetJson(jsonparam, idstr);	
+		tmpstr = mprGetJson(jsonparam, idstr);
 		sscanf(tmpstr, "%x", &val);
 		if(val>0xffff || val<1){
 			memset(idstr, 0, sizeof(idstr));
@@ -822,11 +827,11 @@ static void setpidtransinfo(HttpConn *conn) {
 	}
 	//释放原dtPidList内存空间
 	if(list_len(&outpst->dtPidList)>0){
-		for(i=list_len(&outpst->dtPidList)-1;i>-1;i--){			
+		for(i=list_len(&outpst->dtPidList)-1;i>-1;i--){
 			list_get(&outpst->dtPidList,i, &mpf);
 			free(mpf);
 			mpf = NULL;
-			list_pop_tail(&outpst->dtPidList);			
+			list_pop_tail(&outpst->dtPidList);
 		}
 	}
 	//存储新数据
@@ -840,7 +845,7 @@ static void setpidtransinfo(HttpConn *conn) {
 		tmpstr = mprGetJson(jsonparam, idstr);
 		sscanf(tmpstr, "%x", &mpf->oldPid);
 		sprintf(idstr, "p_newpid%d", i);
-		tmpstr = mprGetJson(jsonparam, idstr);	
+		tmpstr = mprGetJson(jsonparam, idstr);
 		sscanf(tmpstr, "%x", &mpf->newPid);
 		list_append(&outpst->dtPidList, mpf);
 	}
@@ -867,7 +872,7 @@ static void setpidtransinfo(HttpConn *conn) {
 }
 
 static void getprginfo(HttpConn *conn) {
-	int i = 0, j = 0;	
+	int i = 0, j = 0;
 	char str[512] = {0};
 	char prgname[100] = {0};
 	ChannelProgramSt *outpst = NULL;
@@ -875,8 +880,8 @@ static void getprginfo(HttpConn *conn) {
 	Dev_prgInfo_st *outprg = NULL;
 	cJSON *result = cJSON_CreateObject();
 	cJSON *streamarray, *streamjson;
-	char* jsonstring;	
-	MprJson *jsonparam = mprParseJson(espGetQueryString(conn)); 
+	char* jsonstring;
+	MprJson *jsonparam = mprParseJson(espGetQueryString(conn));
 	//printf("==========jsonparam===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	int index = atoi(mprGetJson(jsonparam, "index"));
@@ -952,13 +957,13 @@ static void getprginfo(HttpConn *conn) {
 	jsonstring = cJSON_PrintUnformatted(result);
 	//printf("==========jsonstring===========%s\n", jsonstring);
 	memcpy(str, jsonstring, strlen(jsonstring));
-	//释放内存	
+	//释放内存
 	cJSON_Delete(result);
 	free(jsonstring);
 	render(str);
-} 
+}
 
-static void setprginfo(HttpConn *conn) { 	
+static void setprginfo(HttpConn *conn) {
 	int i = 0, j = 0, k = 0, cm = 0, index = 0, matched = 0, val = 0;
 	char rsts[20] = {0};
 	cchar *role = getSessionVar("role");
@@ -974,7 +979,7 @@ static void setprginfo(HttpConn *conn) {
     }
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
-	MprJson *jsonparam = httpGetParams(conn); 
+	MprJson *jsonparam = httpGetParams(conn);
 	//printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
 	int inCh = atoi(mprGetJson(jsonparam, "channel"));
 	cchar *prgname = mprGetJson(jsonparam, "prgname");
@@ -1407,10 +1412,10 @@ static void setprginfo(HttpConn *conn) {
 }
 
 static void common(HttpConn *conn) {
-	
+
 }
 
-static void getglobalinfo(HttpConn *conn) { 
+static void getglobalinfo(HttpConn *conn) {
 	char str[64] = {0};
     cchar *role = getSessionVar("role");
     if(role == NULL){
@@ -1424,8 +1429,8 @@ static void getglobalinfo(HttpConn *conn) {
 	cJSON_AddNumberToObject(result, "sts", 0);
 	jsonstring = cJSON_PrintUnformatted(result);
 	memcpy(str, jsonstring, strlen(jsonstring));
-	//释放内存	
-	cJSON_Delete(result);		
+	//释放内存
+	cJSON_Delete(result);
 	free(jsonstring);
 	render(str);
 }
@@ -1435,7 +1440,7 @@ static void search(HttpConn *conn) {
 	int i = 0, rst = 0;
     char* jsonstring;
     MprJson *jsonparam = httpGetParams(conn);
-    //printf("==========setprginfo===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
+    //printf("==========search===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     rst = Search(conn->rx->parsedUri->host, inCh);
 

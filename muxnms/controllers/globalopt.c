@@ -53,7 +53,7 @@ static void reboot(HttpConn *conn) {
         render(str);
         return;
     }
-    
+
 	rebootDevice(conn->rx->parsedUri->host);
 	rendersts(str, 1);
 	render(str);
@@ -91,7 +91,7 @@ static void reset(HttpConn *conn) {
         render(str);
         return;
     }
-    
+
 	restoreFactory(conn->rx->parsedUri->host);
 	rendersts(str, 1);
 	render(str);
@@ -127,15 +127,15 @@ static void setDevip(HttpConn *conn) {
         render(str);
         return;
     }
-	cchar *param = espGetQueryString(conn);	
-   
-	char newip[16] = {0}; 	
-	char newgatway[16] = {0}; 
-	char submask[16] = {0}; 
-	char* ptr = strchr(param, '&');  
-    int pos = ptr-param;  	
+	cchar *param = espGetQueryString(conn);
+
+	char newip[16] = {0};
+	char newgatway[16] = {0};
+	char submask[16] = {0};
+	char* ptr = strchr(param, '&');
+    int pos = ptr-param;
 	substr(param, 0, pos, newip);
-	char *ptr1 = strrchr (param, '&');  
+	char *ptr1 = strrchr (param, '&');
 	int flag = ptr1 - param;
 	substr(param, pos + 1, flag, newgatway);
 	substr(param, flag + 1, strlen(param), submask);
