@@ -561,43 +561,58 @@ function gbl_import() {
         '<div class="src_content">'
         +'<fieldset>'
             +'<legend>配置导入</legend>'
-                +'<div class="register_form">'
-                    +'<form method="post" action="" id="fupload" enctype="multipart/form-data">'
-                        +'<label>选择导入文件:</label>'
-                        +'<input type="file" name="impath" id="impath" accept="text/json" />'
-                        +'<button class="btn_import">导入</button>'
-                    +'</form>'
+            +'<div class="register_form">'
+                +'<div id="filelist">Your browser doesn\'t have Flash, Silverlight or HTML5 support.</div>'
+                +'<div id="container">'
+                    +'<a id="pickfiles" href="javascript:;">[Select files]</a>'
+                    +'<a id="uploadfiles" href="javascript:;">[Upload files]</a>'
                 +'</div>'
-            +'</fieldset>'
+                +'<br />'
+                +'<pre id="console"></pre>'
+            +'</div>'
+        +'</fieldset>'
         +'</div>'
     );
 
-    function uploadByForm() {
-        var formData = new FormData($("#fupload")[0]);//用form 表单直接 构造formData 对象; 就不需要下面的append 方法来为表单进行赋值了。
-        var url = "http://"+globalObj.localip+":4000/do/globalopt/imexport";
-        $.ajax({
-            url : url,
-            type : 'POST',
-            processData : false,
-            contentType : false,
-            success : function(responseStr) {
-                alert("成功：" + JSON.stringify(responseStr));
-                //                  var jsonObj = $.parseJSON(responseStr);//eval("("+responseStr+")");
+    var uploader = new plupload.Uploader({
+        runtimes : 'html5,flash,silverlight,html4',
+        browse_button : 'pickfiles', // you can pass in id...
+        container: document.getElementById('container'), // ... or DOM Element itself
+        url : 'client/upload.php',
+
+        filters : {
+            max_file_size : '10mb',
+            mime_types: [
+                {title : "Image files", extensions : "jpg,gif,png,txt"},
+                {title : "Zip files", extensions : "zip"}
+            ]
+        },
+
+        init: {
+            PostInit: function() {
+                document.getElementById('filelist').innerHTML = '';
+
+                document.getElementById('uploadfiles').onclick = function() {
+                    uploader.start();
+                    return false;
+                };
             },
-            error : function(responseStr) {
-                alert("失败:" + JSON.stringify(responseStr));//将    json对象    转成    json字符串。
+
+            FilesAdded: function(up, files) {
+                plupload.each(files, function(file) {
+                    document.getElementById('filelist').innerHTML += '<div id="' + file.id + '">' + file.name + ' (' + plupload.formatSize(file.size) + ') <b></b></div>';
+                });
+            },
+
+            UploadProgress: function(up, file) {
+                document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+            },
+
+            Error: function(up, err) {
+                document.getElementById('console').innerHTML += "\nError #" + err.code + ": " + err.message;
             }
-        });
-    }
-
-    $(".btn_import").button({
-        icons: {
-            primary: "ui-icon-gear"
         }
-    }).click(function (event) {
-        event.preventDefault();
-
-        uploadByForm();
-
     });
+
+    uploader.init();
 }

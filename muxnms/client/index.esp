@@ -48,29 +48,29 @@
 								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
 								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
 								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
-								<li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li>
-							</ul>
-						</li>	
-						<li class="subs" id="l5">
-							<a class="flag STRING_LOG" href="javascript:void(0)"><strong>日志记录</strong></a>
-							<ul>               
-								<li id="l51"><a href="javascript:alarm_output(2)">操作日志</a></li>               
-								<li id="l52"><a href="javascript:alarm_output(1)">告警日志</a></li> 
-							</ul>
-						</li>											
-						<li id="l6">
-							<a href="javascript:void(0)" class="STRING_HELP"><strong>帮助</strong></a>
-						</li>
-						<li id="l7">
-							<a href="javascript:btn_close()" class="STRING_EXIT"><strong>退出</strong></a>
-						</li>
-					</ul>
-				</div>
-				
-			</div>
-		</div>   
-		<div class="main-content">
-			<!--  CONTENT  -->
+                                <!--<li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li> -->
+                            </ul>
+                        </li>
+                        <li class="subs" id="l5">
+                            <a class="flag STRING_LOG" href="javascript:void(0)"><strong>日志记录</strong></a>
+                            <ul>
+                                <li id="l51"><a href="javascript:alarm_output(2)">操作日志</a></li>
+                                <!-- <li id="l52"><a href="javascript:alarm_output(1)">告警日志</a></li> -->
+                             </ul>
+                         </li>
+                         <li id="l6">
+                             <a href="javascript:void(0)" class="STRING_HELP"><strong>帮助</strong></a>
+                         </li>
+                         <li id="l7">
+                             <a href="javascript:btn_close()" class="STRING_EXIT"><strong>退出</strong></a>
+                         </li>
+                     </ul>
+                 </div>
+
+             </div>
+         </div>
+         <div class="main-content">
+             <!--  CONTENT  -->
 		</div>
         <div id="dialog-form" title="编辑节目">
         <table class="tbl_program">
@@ -297,10 +297,9 @@
     <script type="text/javascript" src="lib/jquery.fancytree.min.js"></script>    
     <script type="text/javascript" src="lib/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="lib/ichart.1.2.min.js"></script>
-    <!--<script type="text/javascript" src="lib/jquery.i18n.properties.js"></script> -->
 	<script type="text/javascript" src="js/global.js"></script> 
 	<script type="text/javascript" src="js/alarm.js"></script> 
-	<script type="text/javascript" src="js/devinfo.js"></script>
+	<script type="text/javascript" src="js/devinfo.min.js"></script>
 	<script src="lib/jquery.popup.js" type="text/javascript"></script>
 	<script src="lib/jquery.fancytree.menu.js" type="text/javascript"></script>
     <script type="text/javascript">		
@@ -328,8 +327,6 @@
 				if(err.responseText == "login.esp"){
 					window.location = "/login.esp";
 				}
-				//alert("异常！====="+JSON.stringify(err));
-
 			 }   
 		});
 		$('.main-content').empty();
@@ -389,9 +386,7 @@
 				 success: function(data){
 					recdata = data;
 				 },    
-				 error : function(err) {    
-					//var xxx = err;
-					//alert("异常！====="+JSON.stringify(err));    
+				 error : function(err) {
 				 }   
 			});
 			//
@@ -488,26 +483,7 @@
 				$(this).children("ul").slideDown("fast");
 				$(this).siblings().children("ul").slideUp("fast");
 			});
-		});	  
-		/*loadProperties();
-		function loadProperties(){ 
-			$.i18n.properties({
-				 name:'language',
-				 path:'i18n/', 
-				 mode:'map', 
-				 callback: function() {
-					$('.STRING_BASE')[0].text = $.i18n.prop('STRING_BASE');
-					$('.STRING_DETAIL')[0].text = $.i18n.prop('STRING_DETAIL');
-					$('.STRING_NETSET')[0].text = $.i18n.prop('STRING_NETSET');
-					$('.STRING_MDEVICE')[0].text = $.i18n.prop('STRING_MDEVICE');
-					$('.STRING_LOG')[0].text = $.i18n.prop('STRING_LOG');
-					$('.STRING_HELP')[0].text = $.i18n.prop('STRING_HELP');
-					$('.STRING_EXIT')[0].text = $.i18n.prop('STRING_EXIT');
-					$('.STRING_READ')[0].textContent = $.i18n.prop('STRING_READ');
-					$('.STRING_WRITE')[0].textContent = $.i18n.prop('STRING_WRITE');
-				 } 
-			}); 
-		};*/
+		});
     </script> 
 </body>
 </html>
