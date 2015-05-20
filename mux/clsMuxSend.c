@@ -88,6 +88,8 @@ int SendTable(char *ip, int outChnId)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////
+
+
 //	pbuff = NULL;
 //	list_get(&pclsMux->table_cat, iChn, &pbuff);
 //	psiType = cat;
@@ -101,6 +103,7 @@ int SendTable(char *ip, int outChnId)
 //		if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
 //			rslt = 0;
 //	}
+
 
 
 	pbuff = NULL;
