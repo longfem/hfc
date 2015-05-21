@@ -23,7 +23,7 @@ static void getDevinfo(HttpConn *conn) { \
 		render("login.esp");
 		return;
 	}
-	char pProg[256] = {0}; 
+	char pProg[256] = {0};
     getbaseJson(conn->rx->parsedUri->host, pProg);
 	render(pProg);
 }
