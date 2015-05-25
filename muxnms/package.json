@@ -11,8 +11,8 @@
         "http": {
             "database": "mdb://muxnms.mdb",
             "serverPrefix": "/do",
-			indexes: [
-				'login.esp'
+			"indexes": [
+				"login.esp"
 			],
             "routes": "esp-html-mvc",
             "xsrf": true

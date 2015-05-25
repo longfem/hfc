@@ -11,7 +11,7 @@
 
 extern ClsProgram_st clsProgram;
 
-//char *tmpip = "192.168.1.49";
+char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 static void getDevinfo(HttpConn *conn) { \
 	if(session("isAuthed") != NULL){
@@ -24,7 +24,7 @@ static void getDevinfo(HttpConn *conn) { \
 		return;
 	}
 	char pProg[256] = {0};
-    getbaseJson(conn->rx->parsedUri->host, pProg);
+    getbaseJson(tmpip, pProg);
 	render(pProg);
 }
 
@@ -53,6 +53,7 @@ static void espinit() {
 		pst = malloc(sizeof(ChannelProgramSt));
 		memset(pst, 0, sizeof(ChannelProgramSt));
 		pst->channelId = i + 1;
+		list_init(&pst->prgNodes);
 		list_append(&(clsProgram.outPrgList), pst);
 	}
 	for(i=0; i<clsProgram._outChannelCntMax; i++){
