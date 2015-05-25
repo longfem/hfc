@@ -53,6 +53,7 @@ static void espinit() {
 		pst = malloc(sizeof(ChannelProgramSt));
 		memset(pst, 0, sizeof(ChannelProgramSt));
 		pst->channelId = i + 1;
+		list_init(&pst->prgNodes);
 		list_append(&(clsProgram.outPrgList), pst);
 	}
 	for(i=0; i<clsProgram._outChannelCntMax; i++){

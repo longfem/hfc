@@ -1443,7 +1443,31 @@ static void search(HttpConn *conn) {
     //printf("==========search===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     rst = Search(tmpip, inCh);
-
+    //删除搜索通道下的输出节目内存数据
+    ChannelProgramSt *outpst = NULL;
+    Dev_prgInfo_st *outprg = NULL;
+    list_get(&(clsProgram.outPrgList), 0, &outpst);
+    if(list_len(&outpst->prgNodes)>0){
+        for(i=list_len(&outpst->prgNodes)-1;i>-1;i--){
+            list_get(&outpst->prgNodes, i, &outprg);
+            if(outprg->chnId == inCh){
+                freeProgramsMalloc(outprg);
+                list_pop(&outpst->prgNodes,i);
+                outprg = NULL;
+            }
+        }
+    }
+    list_get(&(clsProgram.outPrgList), 1, &outpst);
+    if(list_len(&outpst->prgNodes)>0){
+        for(i=list_len(&outpst->prgNodes)-1;i>-1;i--){
+            list_get(&outpst->prgNodes, i, &outprg);
+            if(outprg->chnId == inCh){
+                freeProgramsMalloc(outprg);
+                list_pop(&outpst->prgNodes,i);
+                outprg = NULL;
+            }
+        }
+    }
     cJSON *result = cJSON_CreateObject();
     cJSON_AddNumberToObject(result, "sts", rst);
     cJSON_AddNumberToObject(result, "_intChannelCntMax", clsProgram._intChannelCntMax);
