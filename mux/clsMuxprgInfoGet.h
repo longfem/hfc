@@ -7,7 +7,7 @@
 #define _CLSMUX_PRGINFO_GET_H_
 
 int LittleFormat_fromBytes(int offset, int length, char *inBytes);
-ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate);
+ErrorTypeEm SetOutRate(char *ip, int outChannel, unsigned int outputRate);
 ErrorTypeEm GetPidOffset(char *ip, int outChn, unsigned int *outPid);
 int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate);
 ErrorTypeEm GetOutProgramMuxMap(char *ip, int outChannel, list_t **muxPrgList); // MuxPrgInfo_st;

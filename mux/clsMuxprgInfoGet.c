@@ -34,7 +34,7 @@ int BigFormat_fromBytes(int offset, int length, char *inBytes)
 }
 
 
-ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
+ErrorTypeEm SetOutRate(char *ip, int outChannel, unsigned int outputRate)
 {
     unsigned char buf[20];
     int i = 0;
@@ -44,18 +44,18 @@ ErrorTypeEm SetOutRate(char *ip, int outChannel, int outputRate)
     //get call channal signal status
     enum ErrorTypeEm res;
 
-    printf(" outChannel=%d, SetOutRate =%d\n", outChannel, outputRate);
-
+    printf(" outChannel=%d, SetOutRate =%d SetOutRate=0x%x\n", outChannel, outputRate, outputRate);
+    
     memset(sendbuf,0, sizeof(sendbuf));
     sendbuf[0]=0x77;
     sendbuf[1]=0x6C;
     sendbuf[2]=0x21;
-    sendbuf[3]=(unsigned char)outChannel;
+    sendbuf[3]=(unsigned char) (outChannel & 0xff);
     sendbuf[4]=0x01;
     sendbuf[5]=0x02;
-    sendbuf[6]=(unsigned char) outputRate & 0xff;
-    sendbuf[7]=(unsigned char) (outputRate & 0xff00)>>8;
-    sendbuf[8]=(unsigned char) (outputRate & 0xff0000>>16);
+    sendbuf[6]=(unsigned char) (outputRate & 0xff);
+    sendbuf[7]=(unsigned char) ((outputRate >> 8 ) & 0xff);
+    sendbuf[8]=(unsigned char) ((outputRate >> 16) & 0xff);
 
     for(i=0;i<9;i++)
                  printf("now will send SetOutRate sendbuf[%d]=0x[%02x]\n",i, sendbuf[i]);

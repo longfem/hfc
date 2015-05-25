@@ -28,8 +28,12 @@ int SendTable(char *ip, int outChnId)
 
 	list_get(&pclsMux->table_pat, iChn, &pbuff); 
 
+	printf("====XXXXX=== isNeedSend_pat\n");
+	printf("====XXXXX=== isNeedSend_pat=%d\n", pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat);
+
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
 	{	
+
 //	    for(i=0;i<pbuff->bufLen;i++){
 //	       printf("send_pat[%x]=%x\n",i, pbuff->pbuf[i]);
 //	    }
