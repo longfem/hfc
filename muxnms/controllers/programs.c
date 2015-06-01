@@ -1562,6 +1562,7 @@ static void reprgnum(HttpConn *conn) {
 }
 
 static void reprgpid(HttpConn *conn) {
+    printf("----repid--->>start00\n");
 	char str[64] = {0};
 	cchar *role = getSessionVar("role");
 	if(role == NULL){
@@ -1581,6 +1582,7 @@ static void reprgpid(HttpConn *conn) {
 	Dev_prgInfo_st *outprg = NULL;
 	User_prgInfo_t *userprg = NULL;
     MprJson *jsonparam = httpGetParams(conn);
+    printf("----repid--->>start11\n");
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
         if (inCh == 0 || inCh == i + 1){
@@ -1603,7 +1605,6 @@ static void reprgpid(HttpConn *conn) {
                     if (outprg->newPcrPid != 0x1fff)
                     {
                         newPid = SeekReplacedPid(usingPidList, outprg->chnId, outprg->oldPcrPid, pidAvStart);
-                        printf("----repid--->>11\n");
                         if (newPid != outprg->oldPcrPid || pidAvStart == outprg->oldPcrPid)
                         {
                             //memcpy(&outprg->newPcrPid, &newPid, sizeof(int));
@@ -1611,15 +1612,11 @@ static void reprgpid(HttpConn *conn) {
                             pidAvStart++;
                         }
                     }
-                    printf("----repid--->>22\n");
                     pidAvStart = DesPidRefresh2(outprg->chnId, outprg->index, -1, outprg->pmtDesList, outprg->pmtDesListLen, pidAvStart, usingPidList);
-                    printf("----repid--->>33\n");
                     if(outprg->pdataStreamList != NULL && outprg->pdataStreamListLen>0){
                         DataStream_t *dst = outprg->pdataStreamList;
-                        printf("----repid--->>44\n");
                         for(k=0;k<outprg->pdataStreamListLen;k++){
                             newPid = SeekReplacedPid(usingPidList, dst->inChn, dst->inPid, pidAvStart);
-                            printf("----repid--->>55\n");
                             if (newPid != dst->inPid)
                             {
                                 memcpy(&dst->outPid, &newPid, sizeof(int));
@@ -1629,7 +1626,6 @@ static void reprgpid(HttpConn *conn) {
                             {
                                 pidAvStart++;
                             }
-                            printf("----repid--->>66\n");
                             pidAvStart = DesPidRefresh2(outprg->chnId, outprg->index, dst->index,
                             			dst->desNode, dst->desNodeLen, pidAvStart, usingPidList);
                             dst++;
@@ -1637,7 +1633,6 @@ static void reprgpid(HttpConn *conn) {
                     }
                 }
             }
-            printf("----repid--->>77\n");
             //clsProgram.userPrgNodes
             if((&outpst->userPrgNodes != NULL) && (list_len(&outpst->userPrgNodes)>0)){
                 for(j=0; j<list_len(&outpst->userPrgNodes); j++){
