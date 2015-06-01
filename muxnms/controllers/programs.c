@@ -1584,12 +1584,14 @@ static void reprgpid(HttpConn *conn) {
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
         if (inCh == 0 || inCh == i + 1){
+            printf("----repid--->>start\n");
             pidPrgStart = clsProgram.prgPid_min;
             pidAvStart = clsProgram.subPrgPid_min;
             list_get(&clsProgram.outPrgList, i, &outpst);
             if(list_len(&outpst->prgNodes)>0){
                 for(j=0; j<list_len(&outpst->prgNodes); j++){
                 	list_get(&outpst->prgNodes, j, &outprg);
+                	printf("----repid--->>-----11111\n");
                 	int newPid = SeekReplacedPid(usingPidList, outprg->chnId, outprg->pmtPid, pidPrgStart);
                 	printf("----repid--->>00\n");
                 	if (newPid != outprg->pmtPid || pidPrgStart == outprg->pmtPid)
