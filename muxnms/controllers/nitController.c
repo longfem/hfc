@@ -499,6 +499,7 @@ static void addnitinfo(HttpConn *conn) {
             memset(nameList->data, 0, nameList->dataLen);
             strcpy(nameList->data, name);
             nist->nameList = nameList;
+            nist->nameListLen = 1;
         }
     }else{
         //edit

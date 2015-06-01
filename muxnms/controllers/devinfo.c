@@ -11,7 +11,7 @@
 
 extern ClsProgram_st clsProgram;
 
-char *tmpip = "192.168.1.49";
+//char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 static void getDevinfo(HttpConn *conn) { \
 	if(session("isAuthed") != NULL){
@@ -24,8 +24,24 @@ static void getDevinfo(HttpConn *conn) { \
 		return;
 	}
 	char pProg[256] = {0};
-    getbaseJson(tmpip, pProg);
+	int r = 0;
+	EdiField *src;
+    getbaseJson(conn->rx->parsedUri->host, pProg);
 	render(pProg);
+	//delete optlog 7days ago
+    Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);
+    time_t curTime;
+    time(&curTime);
+    EdiGrid *opts = ediReadTable(db, "optlog");
+    if(opts != NULL){
+       for (r = 0; r < opts->nrecords; r++) {
+           src = opts->records[r]->fields;
+           src += 4;
+           if(atoi(src->value) < (curTime - 7*24*3600)){
+                ediRemoveRec(db, "optlog", opts->records[r]->id);
+           }
+       }
+    }
 }
 
 static void espinit() {

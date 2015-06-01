@@ -26,10 +26,7 @@ int SendTable(char *ip, int outChnId)
 	}
 
 
-	list_get(&pclsMux->table_pat, iChn, &pbuff); 
-
-	printf("====XXXXX=== isNeedSend_pat\n");
-	printf("====XXXXX=== isNeedSend_pat=%d\n", pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat);
+	list_get(&pclsMux->table_pat, iChn, &pbuff);
 
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pat)
 	{	
@@ -59,12 +56,11 @@ int SendTable(char *ip, int outChnId)
 		table_pmtLen = list_len(table_pmt);
 	}
 
-
+    //printf("pmt=====isneedsend?===%d===ichn==%d\n", pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt, iChn);
 	if (pdb->pvalueTree->poutChnArray[iChn].isNeedSend_pmt &&
 		table_pmt != NULL
-		&& table_pmtLen > 0
-		)
-	{		
+		&& table_pmtLen > 0)
+	{
 		if (SendTable_pmt(ip, outChnId, table_pmt) != ok)
            rslt = 0;
 
@@ -74,13 +70,12 @@ int SendTable(char *ip, int outChnId)
 	    if (SendTable_pmt(ip, outChnId, NULL) != ok)
         		rslt = 0;
 	}
-
+	/////////////
 	pbuff = NULL;
 	list_get(&pclsMux->table_sdt, iChn, &pbuff);
-
 	psiType = sdt;
 	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_sdt)
-	{				
+	{
 		if (SendTable_psi(ip, outChnId, sdt, pbuff->pbuf, pbuff->bufLen) != ok)
 			rslt = 0;
 
@@ -92,24 +87,19 @@ int SendTable(char *ip, int outChnId)
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////
-
-
-//	pbuff = NULL;
-//	list_get(&pclsMux->table_cat, iChn, &pbuff);
-//	psiType = cat;
-//	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
-//	{
-//		if (SendTable_psi(ip, outChnId, cat, pbuff->pbuf, pbuff->bufLen) != ok)
-//			rslt = 0;
-//	}
-//	else
-//	{
-//		if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
-//			rslt = 0;
-//	}
-
-
-
+	pbuff = NULL;
+	list_get(&pclsMux->table_cat, iChn, &pbuff);
+	psiType = cat;
+	if (pbuff != NULL && pdb->pvalueTree->poutChnArray[iChn].isNeedSend_cat)
+	{
+		if (SendTable_psi(ip, outChnId, cat, pbuff->pbuf, pbuff->bufLen) != ok)
+			rslt = 0;
+	}
+	else
+	{
+		if (SendTable_psi(ip, outChnId, cat, NULL, 0) != ok)
+			rslt = 0;
+	}
 	pbuff = NULL;
 	list_get(&pclsMux->table_nit, iChn, &pbuff);
 	psiType = nit;

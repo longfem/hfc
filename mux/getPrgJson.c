@@ -568,7 +568,6 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 	}
 	list_t *caIdenList = &pst->caNode.caIdenList;
 	if(list_len(caIdenList)>0){
-	    printf("------------------ca\n");
 	    int j = 0;
         cJSON_AddItemToArray(basearry,basejson = cJSON_CreateObject());
         cJSON_AddNumberToObject(basejson, "ch", inChn + 1);

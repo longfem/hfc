@@ -25,7 +25,7 @@
 extern ClsProgram_st clsProgram;
 extern ClsParams_st *pdb;
 
-char *tmpip = "192.168.1.49";
+//char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 char optstr[256] = {0};
 
@@ -268,7 +268,7 @@ static void getprg(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "inch");
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
-    getprgsJson(tmpip, inCh, pProg);
+    getprgsJson(conn->rx->parsedUri->host, inCh, pProg);
 	render(pProg);
 
 }
@@ -276,20 +276,20 @@ static void getprg(HttpConn *conn) {
 static void getoutprg(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
 	int Chn = atoi(mprGetJson(jsonparam, "inch"));
+	int isEnableOutChannel = atoi(mprGetJson(jsonparam, "isEnableOutChannel"));
 	char outprg[81920] = {0};
 	int outChn = 0;
 	if(1){
-		PrgMuxInfoGet(tmpip);
+		PrgMuxInfoGet(conn->rx->parsedUri->host);
 	}
-	for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
-		getOutPrograms(tmpip, outChn);
-		//LoadBitrateAndTableEnable(tmpip, outChn);
-
-		ChnBypass_read(tmpip, outChn);
-		RecordInputChnUseStatus(outChn);
-
+	if(isEnableOutChannel){
+	    for(outChn=0; outChn<clsProgram._outChannelCntMax; outChn++){
+            getOutPrograms(conn->rx->parsedUri->host, outChn);
+            ChnBypass_read(conn->rx->parsedUri->host, outChn);
+            RecordInputChnUseStatus(outChn);
+        }
 	}
-	getoutprgsJson(tmpip, Chn - 1, outprg);
+	getoutprgsJson(conn->rx->parsedUri->host, Chn - 1, outprg);
 	render(outprg);
 
 }
@@ -628,7 +628,7 @@ static void writetable(HttpConn *conn) {
         render(rsts);
         return;
     }
-	if(!sendPrograms(tmpip, inCh)){
+	if(!sendPrograms(conn->rx->parsedUri->host, inCh)){
 		rendersts(rsts, 1);
 	}else{
 		rendersts(rsts, 0);
@@ -716,7 +716,7 @@ static void setchanneloutinfo(HttpConn *conn) {
 	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pat = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_pat"));
 	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_pmt = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_pmt"));
 	pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_sdt = (unsigned char)atoi(mprGetJson(jsonparam, "isNeedSend_sdt"));
-	//printf(":::%d:::%d:::%d\n", pdb->pvalueTree->poutChnArray[inCh-1].isAutoRaiseVersion, pdb->pvalueTree->poutChnArray[inCh-1].isAutoRankPAT,pdb->pvalueTree->poutChnArray[inCh-1].isNeedSend_cat);
+	printf("pmt=====isneedsend?===%d\n", pdb->pvalueTree->poutChnArray[inCh - 1].isNeedSend_pmt);
 	rendersts(rsts, 1);
 	render(rsts);
 	//add optlog
@@ -1442,7 +1442,7 @@ static void search(HttpConn *conn) {
     MprJson *jsonparam = httpGetParams(conn);
     //printf("==========search===========%s\n", mprJsonToString (jsonparam, MPR_JSON_QUOTES));
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
-    rst = Search(tmpip, inCh);
+    rst = Search(conn->rx->parsedUri->host, inCh);
     //删除搜索通道下的输出节目内存数据
     ChannelProgramSt *outpst = NULL;
     Dev_prgInfo_st *outprg = NULL;

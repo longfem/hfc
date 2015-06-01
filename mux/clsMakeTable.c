@@ -17,7 +17,7 @@ int MakeTable(int outChnId)
 	ChannelProgramSt *outpst = NULL;
 	list_get(&(clsProgram.outPrgList), outChnId-1, &outpst);
 
-	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->userPrgNodes,outpst->caNode);
+	return buildTable(outChnId,pdb->pvalueTree->poutChnArray,outpst->prgNodes,outpst->userPrgNodes,&outpst->caNode);
 }
 
 
@@ -121,7 +121,6 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		free(outPMTBuffer);
 		list_pop_tail(tablePmt);	
 	}
-	//for (i = 0; i < list_len(&prginfolist); i++)
 	for (i = 0; i < list_len(&prginfolist); i++)
 	{
 		list_get(&prginfolist, i, &ptmpPrgInfo);	
@@ -143,8 +142,6 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 			return 0;
 
 		}
-
-
 #if 0
 
 		BufferUn_st  *outPMTBuffer;
@@ -192,8 +189,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 			printPMT(PMTS);
 #endif
 	
-		}	
-
+		}
 	//SDT
 	rstPat=CreateSdt(prginfolist,userprginfolist,sdtTable, streamId, oringinalNetworkId, version);
 	list_get(&pclsMux->table_sdt,outChnIndex,&pbuff);
@@ -210,7 +206,6 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		printf("make SDT SUCCESSFULL---%d\n",rstPat);
 
 	}
-
 #if 1
 	sdt_senction_st *p_sdt = (sdt_senction_st*)malloc(sizeof(sdt_senction_st));	
 	rstPat=ParseSdt(pbuff->pbuf, 5, p_sdt);	
@@ -223,14 +218,13 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 
 
 	//CAT
-#if 0
+#if 1
 	if (list_len(&caNode->caIdenList)>0)
 	{
 		rstPat = CreateCat(caNode, catTable, version);
 		list_get(&pclsMux->table_cat,outChnIndex,&pbuff);
 		memcpy(pbuff->pbuf, catTable, sizeof(catTable));
 		pbuff->bufLen=sizeof(catTable);
-
 		if (!rstPat)
 		{
 			CleanOutputTable(outChnId);
@@ -248,7 +242,6 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		printf("no need to make cat\n");
 
 	}
-
 #endif
 //NIT
 #if 1
@@ -266,7 +259,7 @@ int buildTable(int outChnId,DatabaseOutputChannel_st *outChnArray,list_t  prginf
 		}
 		else
 		{
-        #if 1
+        #if 0
             Nit_section_t *p_nit = (Nit_section_t*)malloc(sizeof(Nit_section_t));
             rstPat=ParseNit(pbuff->pbuf, 5, p_nit);
             if(rstPat)

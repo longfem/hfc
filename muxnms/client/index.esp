@@ -43,12 +43,12 @@
 						</li>
 						<li class="subs" id="l4">
 							<a class="flag STRING_MDEVICE" href="javascript:void(0)"><strong>设备管理</strong></a>
-							<ul>               
-								<li id="l41"><a href="">设备升级</a></li>               
-								<li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>               
-								<li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
-								<li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
-                                <!--<li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li> -->
+							<ul>
+                                <!--<li id="l41"><a href="">设备升级</a></li> -->
+                                <li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>
+                                <li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
+                                <li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
+                                <!-- <li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li> -->
                             </ul>
                         </li>
                         <li class="subs" id="l5">
@@ -59,7 +59,7 @@
                              </ul>
                          </li>
                          <li id="l6">
-                             <a href="javascript:void(0)" class="STRING_HELP"><strong>帮助</strong></a>
+                            <!-- <a href="javascript:void(0)" class="STRING_HELP"><strong>帮助</strong></a> -->
                          </li>
                          <li id="l7">
                              <a href="javascript:btn_close()" class="STRING_EXIT"><strong>退出</strong></a>
@@ -290,7 +290,7 @@
 	<div class="footer">
 		<hr/>
 		<p> <%= mprGetDate(0); %></p>
-		<p>© Prevail Software, 2014-2024. All rights reserved.</p>
+		<p>© Prevail Software, 2014-2024.V0.1.0 All rights reserved.</p>
 	</div>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/jquery-ui.min.js"></script>

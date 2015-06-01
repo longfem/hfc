@@ -567,7 +567,7 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
 					int lastReplacePid = -1;
 					int inPid = 0x1fff;
 					int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
-                    if ((inChn > 0) && (inChn != 9))
+					if ((inChn > 0) && (inChn != 9))
 					{
 						inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
 						if (inPid < 0x1fff)
@@ -906,69 +906,92 @@ int AutoMakeNewPid(int outChannel)
 				}
 			}
 
-//usernode
-		if (list_len(&outpst->userPrgNodes)>0)
-		{
-						for (j = 0; j < list_len(&outpst->userPrgNodes); j++)
+			//usernode
+			if (list_len(&outpst->userPrgNodes)>0)
+			{
+				for (j = 0; j < list_len(&outpst->userPrgNodes); j++)
+				{
+					unsigned char  isNewPrgPid = 0;
+					User_prgInfo_t *prgInfoTmp;
+					list_get(&outpst->userPrgNodes,j,&prgInfoTmp);
+					//printf("program number: %d\n",j);
+					//printPRG(prgInfoTmp);
+					int newPid;
+					//if (prgInfoTmp.chnId > 0 && prgInfoTmp.chnId <= _outChannelCntMax)
+					{
+						newPid = NewPid(0, 0x1fff, prgInfoTmp->pmtPid, pidPrgStart, newUsedPidList, isUsedPid,isUsedPidLenth,0);
+						if (prgInfoTmp->pmtPid != newPid)
 						{
-							unsigned char  isNewPrgPid = 0;
-							User_prgInfo_t *prgInfoTmp;
-							list_get(&outpst->userPrgNodes,j,&prgInfoTmp);
-							//printf("program number: %d\n",j);
-							//printPRG(prgInfoTmp);
-							int newPid;
-							//if (prgInfoTmp.chnId > 0 && prgInfoTmp.chnId <= _outChannelCntMax)
-							{
-								newPid = NewPid(0, 0x1fff, prgInfoTmp->pmtPid, pidPrgStart, newUsedPidList, isUsedPid,isUsedPidLenth,0);
-								if (prgInfoTmp->pmtPid != newPid)
-								{
-									prgInfoTmp->pmtPid = newPid;
-									isNewPrgPid = 1;
-								}
-								if (prgInfoTmp->newPcrPid != 0x1fff)
-								{
-									newPid = NewPid(0, prgInfoTmp->oldPcrPid, prgInfoTmp->newPcrPid, pidAvStart, newUsedPidList, isUsedPid, isUsedPidLenth,1);
-		
-									if (prgInfoTmp->newPcrPid != newPid)
-									{
-										prgInfoTmp->newPcrPid = newPid;
-										isNewPrgPid = 1;
-									}
-								}
-                                if(prgInfoTmp->psdtDesListLen > 0){
-                                    DesPidRefresh(0, -1, -1, prgInfoTmp->pmtDesList,prgInfoTmp->pmtDesListLen, pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
-
-                                }
-								int newPrgNum = NewProgramNum(prgInfoTmp->prgNum, &prgNumList);
-								if (newPrgNum < 0)
-									return 0;
-								if (isNewPrgPid || newPrgNum != prgInfoTmp->prgNum)
-								{
-									prgInfoTmp->prgNum = newPrgNum;
-								}
-#if 1
-								DataStream_t *dsInfoTmp = prgInfoTmp->pdataStreamList;
-								for (iDs = 0; iDs < prgInfoTmp->pdataStreamListLen; iDs++)
-								{	
-									newPid = NewPid(0, dsInfoTmp->inPid, dsInfoTmp->outPid, pidAvStart, newUsedPidList, isUsedPid,isUsedPidLenth, 1);
-		
-									if (dsInfoTmp->outPid != newPid)
-									{
-										isNewPrgPid = 1;
-										dsInfoTmp->outPid = newPid; 							
-									}
-									DesPidRefresh(0, -1, -1,
-										dsInfoTmp->desNode,dsInfoTmp->desNodeLen,pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
-		
-									dsInfoTmp++;
-								}
-		
-#endif
-								//printPRG(prgInfoTmp);
-							}
-		
+							prgInfoTmp->pmtPid = newPid;
+							isNewPrgPid = 1;
 						}
+						if (prgInfoTmp->newPcrPid != 0x1fff)
+						{
+							newPid = NewPid(0, prgInfoTmp->oldPcrPid, prgInfoTmp->newPcrPid, pidAvStart, newUsedPidList, isUsedPid, isUsedPidLenth,1);
+
+							if (prgInfoTmp->newPcrPid != newPid)
+							{
+								prgInfoTmp->newPcrPid = newPid;
+								isNewPrgPid = 1;
+							}
+						}
+						if(prgInfoTmp->psdtDesListLen > 0){
+							DesPidRefresh(0, -1, -1, prgInfoTmp->pmtDesList,prgInfoTmp->pmtDesListLen, pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
+
+						}
+						int newPrgNum = NewProgramNum(prgInfoTmp->prgNum, &prgNumList);
+						if (newPrgNum < 0)
+							return 0;
+						if (isNewPrgPid || newPrgNum != prgInfoTmp->prgNum)
+						{
+							prgInfoTmp->prgNum = newPrgNum;
+						}
+#if 1
+						DataStream_t *dsInfoTmp = prgInfoTmp->pdataStreamList;
+						for (iDs = 0; iDs < prgInfoTmp->pdataStreamListLen; iDs++)
+						{	
+							newPid = NewPid(0, dsInfoTmp->inPid, dsInfoTmp->outPid, pidAvStart, newUsedPidList, isUsedPid,isUsedPidLenth, 1);
+
+							if (dsInfoTmp->outPid != newPid)
+							{
+								isNewPrgPid = 1;
+								dsInfoTmp->outPid = newPid; 							
+							}
+							DesPidRefresh(0, -1, -1,
+								dsInfoTmp->desNode,dsInfoTmp->desNodeLen,pidAvStart, isUsedPid, isUsedPidLenth,newUsedPidList);
+
+							dsInfoTmp++;
+						}
+
+#endif
+						//printPRG(prgInfoTmp);
 					}
+
+				}
+			}
+
+
+			//canode
+			Chn_ca_st *caNode=&outpst->caNode;
+			if (list_len(&caNode->caIdenList)>0)
+			{
+				for (j = 0; j < list_len(&caNode->caIdenList); j++)
+				{
+
+					CA_descriptor *caDes;
+					list_get(&caNode->caIdenList,j,&caDes);
+
+
+					int newPid = NewPid(caDes->inChannel, caDes->inCaPid, caDes->outCaPid, pidAvStart, newUsedPidList, isUsedPid,isUsedPidLenth, 0);
+					if (caDes->outCaPid != newPid)
+					{
+						caDes->outCaPid = newPid;
+						//isNewPrgPid = true;
+
+					}
+				}
+
+			}
 
 
 		}
@@ -1327,88 +1350,143 @@ int MakePidMapTable(int outChannel)
 		}
 
 
-//usernode
+		//usernode
 
 		for (j = 0; j < list_len(&outpst->userPrgNodes); j++)
 		{
 
-		
-					User_prgInfo_t *outPrgInfoTmp;
-					list_get(&outpst->userPrgNodes,j,&outPrgInfoTmp);
-					//list_get(&prginfolist,j,&outPrgInfoTmp);
-					//printf(" outPrgInfoTmp->newPcrPid %d\n",outPrgInfoTmp->newPcrPid);
-					if (outPrgInfoTmp->newPcrPid != 0x1fff)
-					{
-						//printf(" isAddedPid[outPrgInfoTmp->newPcrPid] %d\n",isAddedPid[outPrgInfoTmp->newPcrPid]);
-						if (isAddedPid[outPrgInfoTmp->newPcrPid]==0)
-						{
-							isAddedPid[outPrgInfoTmp->newPcrPid] = 1;
-		
-							pidMapTmp =(MuxPidInfo_st*)malloc(sizeof(MuxPidInfo_st));
-							pidMapTmp->inChannel = outPrgInfoTmp->pcrPidInChn;
-							pidMapTmp->oldPid = outPrgInfoTmp->oldPcrPid;
-							pidMapTmp->newPid = outPrgInfoTmp->newPcrPid;
-							list_append(PrgAVMuxListI,pidMapTmp);
-							//printf("prg level  %d\n",pidMapTmp->newPid);
-						}
-					}		
-		
-					//Commdes_st list foreach
-					if (outPrgInfoTmp->pmtDesListLen>0)
-						{
 
-						}
-							
-		
+			User_prgInfo_t *outPrgInfoTmp;
+			list_get(&outpst->userPrgNodes,j,&outPrgInfoTmp);
+			//list_get(&prginfolist,j,&outPrgInfoTmp);
+			//printf(" outPrgInfoTmp->newPcrPid %d\n",outPrgInfoTmp->newPcrPid);
+			if (outPrgInfoTmp->newPcrPid != 0x1fff)
+			{
+				//printf(" isAddedPid[outPrgInfoTmp->newPcrPid] %d\n",isAddedPid[outPrgInfoTmp->newPcrPid]);
+				if (isAddedPid[outPrgInfoTmp->newPcrPid]==0)
+				{
+					isAddedPid[outPrgInfoTmp->newPcrPid] = 1;
+
+					pidMapTmp =(MuxPidInfo_st*)malloc(sizeof(MuxPidInfo_st));
+					pidMapTmp->inChannel = outPrgInfoTmp->pcrPidInChn;
+					pidMapTmp->oldPid = outPrgInfoTmp->oldPcrPid;
+					pidMapTmp->newPid = outPrgInfoTmp->newPcrPid;
+					list_append(PrgAVMuxListI,pidMapTmp);
+					//printf("prg level  %d\n",pidMapTmp->newPid);
+				}
+			}		
+
+			//Commdes_st list foreach
+			if (outPrgInfoTmp->pmtDesListLen>0)
+			{
+
+			}
+
+
 #if 1
-		
-					//DataStream_st list foreach			
-					DataStream_t *DataStream_stTmp = outPrgInfoTmp->pdataStreamList;
-					for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)//for (k = 0; k < 3; k++)		
+
+			//DataStream_st list foreach			
+			DataStream_t *DataStream_stTmp = outPrgInfoTmp->pdataStreamList;
+			for (k = 0; k < outPrgInfoTmp->pdataStreamListLen; k++)//for (k = 0; k < 3; k++)		
+			{
+				lastThisPidMapToNewPid = -1;
+				for (  l= 0; l < list_len(PrgAVMuxListI); l++)
+				{
+					MuxPidInfo_st *lastPidInfoTmp;
+					list_get(PrgAVMuxListI,l,&lastPidInfoTmp);
+					if(lastPidInfoTmp->oldPid == DataStream_stTmp->inPid && lastPidInfoTmp->inChannel == DataStream_stTmp->inChn)
 					{
-						lastThisPidMapToNewPid = -1;
-						for (  l= 0; l < list_len(PrgAVMuxListI); l++)
-						{
-							MuxPidInfo_st *lastPidInfoTmp;
-							list_get(PrgAVMuxListI,l,&lastPidInfoTmp);
-							if(lastPidInfoTmp->oldPid == DataStream_stTmp->inPid && lastPidInfoTmp->inChannel == DataStream_stTmp->inChn)
-							{
-								lastThisPidMapToNewPid = lastPidInfoTmp->newPid;
-								break;
-							}
-		
-						}
-						if (lastThisPidMapToNewPid != -1)
-						{
-							if (DataStream_stTmp->outPid != lastThisPidMapToNewPid)
-							{
-								if (isNoticeSamePid==1)
-								{
-									return 0;
-								}
-								DataStream_stTmp->outPid = lastThisPidMapToNewPid;
-							}
-						}
-						if (isAddedPid[DataStream_stTmp->outPid]==0)
-						{
-							isAddedPid[DataStream_stTmp->outPid] = 1;
-							pidMapTmp =(MuxPidInfo_st*)malloc(sizeof(MuxPidInfo_st));
-							pidMapTmp->inChannel = DataStream_stTmp->inChn;
-							pidMapTmp->oldPid = DataStream_stTmp->inPid;
-							pidMapTmp->newPid = DataStream_stTmp->outPid;
-							list_append(PrgAVMuxListI,pidMapTmp);
-							//printf("prg->DataStream_stTmp level  %d\n",pidMapTmp->newPid);
-						}
-						DataStream_stTmp++;
+						lastThisPidMapToNewPid = lastPidInfoTmp->newPid;
+						break;
 					}
+
+				}
+				if (lastThisPidMapToNewPid != -1)
+				{
+					if (DataStream_stTmp->outPid != lastThisPidMapToNewPid)
+					{
+						if (isNoticeSamePid==1)
+						{
+							return 0;
+						}
+						DataStream_stTmp->outPid = lastThisPidMapToNewPid;
+					}
+				}
+				if (isAddedPid[DataStream_stTmp->outPid]==0)
+				{
+					isAddedPid[DataStream_stTmp->outPid] = 1;
+					pidMapTmp =(MuxPidInfo_st*)malloc(sizeof(MuxPidInfo_st));
+					pidMapTmp->inChannel = DataStream_stTmp->inChn;
+					pidMapTmp->oldPid = DataStream_stTmp->inPid;
+					pidMapTmp->newPid = DataStream_stTmp->outPid;
+					list_append(PrgAVMuxListI,pidMapTmp);
+					//printf("prg->DataStream_stTmp level  %d\n",pidMapTmp->newPid);
+				}
+				DataStream_stTmp++;
+			}
 #endif
+		}
+
+		//canode
+		Chn_ca_st *caNode=&outpst->caNode;
+		if (list_len(&caNode->caIdenList)>0)
+		{
+			for (j = 0; j < list_len(&caNode->caIdenList); j++)
+			{
+
+				CA_descriptor *caDes;
+				list_get(&caNode->caIdenList,j,&caDes);
+
+
+				if (caDes->inCaPid == -1)				
+				{
+					continue;
+
+				}	
+
+
+				lastThisPidMapToNewPid = -1;
+				for (  l= 0; l < list_len(PrgAVMuxListI); l++)
+				{
+					MuxPidInfo_st *lastPidInfoTmp;
+					list_get(PrgAVMuxListI,l,&lastPidInfoTmp);
+					if(lastPidInfoTmp->oldPid == caDes->inCaPid&& lastPidInfoTmp->inChannel == caDes->inChannel)
+					{
+						lastThisPidMapToNewPid = lastPidInfoTmp->newPid;
+						break;
+					}
+
+				}
+				if (lastThisPidMapToNewPid != -1)
+				{
+					if (caDes->outCaPid!= lastThisPidMapToNewPid)
+					{
+						if (isNoticeSamePid==1)
+						{
+							return 0;
+						}
+						caDes->outCaPid = lastThisPidMapToNewPid;
+					}
+				}
+				if (isAddedPid[caDes->outCaPid]==0)
+				{
+					isAddedPid[caDes->outCaPid] = 1;
+					pidMapTmp =(MuxPidInfo_st*)malloc(sizeof(MuxPidInfo_st));
+					pidMapTmp->inChannel = caDes->inChannel;
+					pidMapTmp->oldPid = caDes->inCaPid;
+					pidMapTmp->newPid = caDes->outCaPid;
+					list_append(PrgAVMuxListI,pidMapTmp);
+					//printf("prg->DataStream_stTmp level  %d\n",pidMapTmp->newPid);
 				}
 
+			}
+
+		}
 
 		if(list_len(PrgAVMuxListI)>0)
 		{
 			clsProgram.PrgAVMuxList[i]=PrgAVMuxListI;
-		    //printf("printPrgAVMuxList   out channel:%d ",i);
+			//printf("printPrgAVMuxList   out channel:%d ",i);
 			//printPrgAVMuxList(clsProgram.PrgAVMuxList[i]);
 		}
 	}

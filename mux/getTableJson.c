@@ -25,12 +25,8 @@ void getTableJson(int channel, char *outprg, int flag){
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_pat){
 		list_get(&(pclsMux->table_pat), channel-1, &pat);
-		p_pat = (pat_senction_st*)malloc(sizeof(pat_senction_st));	
-		/*for(i=0;i<188;i++){
-			printf("%d:\n", pat->pbuf[i]);
-		}*/
+		p_pat = (pat_senction_st*)malloc(sizeof(pat_senction_st));
 		if(ParsePat(pat->pbuf, 5, p_pat)){
-			//printf("-----table_id:::crc-->>%d:::%d\n", p_pat->table_id, p_pat->crc32);
 			cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());	
 			for(i=1;i<4;i++){
 				cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
@@ -368,8 +364,32 @@ void getTableJson(int channel, char *outprg, int flag){
 	cJSON_AddStringToObject(tablejson,"title", "CAT");
 	cJSON_AddStringToObject(tablejson,"icon", "img/channel_out.ico");
 	if(pdb->pvalueTree->poutChnArray[channel-1].isNeedSend_cat){
-		if(0){ //cat
-		
+	    cat_senction_st *p_cat;
+	    BufferUn_st *cat = NULL;
+	    list_get(&(pclsMux->table_cat), channel-1, &cat);
+        p_cat = (cat_senction_st*)malloc(sizeof(cat_senction_st));
+		if(ParseCat(cat->pbuf, 5, p_cat)){ //cat
+		    cJSON_AddItemToObject(tablejson, "children", subTablearray = cJSON_CreateArray());
+            cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+            cJSON_AddFalseToObject(subTablejson,"folder");
+            cJSON_AddStringToObject(subTablejson,"key", "id1.4.1");
+            memset(str, 0, sizeof(str));
+            sprintf(str,"版本：%02d", p_cat->version_number );
+            cJSON_AddStringToObject(subTablejson,"title", str);
+            cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
+            CA_descriptor *calist = p_cat->caIdenList;
+            for(i=1;i<p_cat->caIdenListLen + 1;i++){
+                cJSON_AddItemToArray(subTablearray,subTablejson = cJSON_CreateObject());
+                cJSON_AddFalseToObject(subTablejson,"folder");
+                memset(str, 0, sizeof(str));
+                sprintf(str,"id1.4.%d", i+1);
+                cJSON_AddStringToObject(subTablejson,"key", str);
+                memset(str, 0, sizeof(str));
+                sprintf(str,"CA descriptor SysID(0x%04x) PID(0x%04x)", calist->inCaSysId,  calist->inCaPid);
+                cJSON_AddStringToObject(subTablejson,"title", str);
+                cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
+                calist++;
+            }
 		}else{
 		
 		}

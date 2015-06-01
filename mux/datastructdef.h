@@ -410,6 +410,7 @@ typedef struct cat_senction_t
 	 int caIdenListLen;
 	 int crc32; // 32b
 }cat_senction_st;
+
 typedef struct replacePidt
 {
 	//internal byte inChannel;

@@ -1018,7 +1018,7 @@ int CreateCat(Chn_ca_st *caNode, unsigned char catTable[], int verisonNumber)
 	for(i=0; i<iAddr; i++)
 		printf("  %d		  offset:%d  \n",tmpBytes[i],i);
 
-	printf("cat table length is %d\n",iAddr);
+	printf("cat table valid length is %d\n",iAddr);
 #endif
 
 
@@ -1061,6 +1061,7 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[iAddr++] = 0; // last_section_number
 	int networkDesLenAddr = iAddr;
 	iAddr += 2; // �����������ֽ�
+
 	if (nitInfo->nameListLen>0)
 	{
 		Commdes_t *nameDesTmp=nitInfo->nameList;
@@ -1123,8 +1124,8 @@ int  CreateNit(unsigned char nitTable[], Nit_section_t *nitInfo, int networkId, 
 	tmpBytes[tsLoopLenAddr + 1] = (unsigned char)tsLoopLen;
 
 
-	printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
-	printf("creat nit  addr	 %d  \n",iAddr);
+	//printf("creat nit sectionLenAddr   %d  \n",sectionLenAddr);
+	//printf("creat nit  addr	 %d  \n",iAddr);
 
 	BigFormat_intToBytes(((0xb << 12) | ((iAddr + 4 - sectionLenAddr - 2) & 0xfff)), tmpBytes, sectionLenAddr, 2);
 	// -- crc --
@@ -1588,7 +1589,7 @@ int  ParseCat(unsigned char buf[], int offset, cat_senction_st *catSec)
 	int tmpDescriptor_length;
 	int tmpLen=0;
 
-	while (pStart + 6 <= pEnd)
+	while (tmppStart + 6 <= pEnd)
 	{
 		tmppStart++;
 		tmpDescriptor_length = buf[tmppStart++];
@@ -1676,7 +1677,7 @@ int  ParseNit(unsigned char buf[], int offset, Nit_section_t *nitSec)
 	int tsLoopLen = ((buf[iAddr] & 0x0f) << 8) | buf[iAddr + 1];
 	iAddr += 2;
 
-	printf("tsLoopLen ***************** ----%d\n",tsLoopLen);
+	//printf("tsLoopLen ***************** ----%d\n",tsLoopLen);
 
 	//reset  count
 	tmpLen=0;
@@ -1694,7 +1695,7 @@ int  ParseNit(unsigned char buf[], int offset, Nit_section_t *nitSec)
 		tmpLen++;			 
 	}
 
-	printf("tmpLen ***************** ----%d\n",tmpLen);
+	//printf("tmpLen ***************** ----%d\n",tmpLen);
 
 	nitSec->streamLoopLen=tmpLen;
 	nitSec->streamLoop=(Nit_streamLoop_t*)malloc(sizeof(Nit_streamLoop_t)*tmpLen);
