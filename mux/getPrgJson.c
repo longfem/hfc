@@ -472,7 +472,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					//MPEG2 VIDEO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
 					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
-					sprintf(str,"MPEG2 VIDEO  [PID(0x%x)]",  streaminfo->inPid);
+					sprintf(str,"MPEG2 VIDEO  [PID(0x%x)]",  streaminfo->outPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
 					cJSON_AddFalseToObject(subprgjson,"expanded");
@@ -518,7 +518,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 					//MPEG2 AUDIO
 					cJSON_AddItemToArray(subprgsarray,subprgjson = cJSON_CreateObject());
 					sprintf(idstr, "id1.%d.%d.%d", ptmpPrgInfo->chnId, ptmpPrgInfo->index, streaminfo->index);
-					sprintf(str,"MPEG2 AUDIO  [PID(0x%x)]",  streaminfo->inPid);
+					sprintf(str,"MPEG2 AUDIO  [PID(0x%x)]",  streaminfo->outPid);
 					cJSON_AddStringToObject(subprgjson,"title", str);
 					cJSON_AddTrueToObject(subprgjson,"folder");
 					cJSON_AddFalseToObject(subprgjson,"expanded");

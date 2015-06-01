@@ -556,20 +556,19 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
 	//enum DesTypeEnum dte;
 	if (desList != NULL && desListLen > 0)
 	{
-		//int newPid = 0x1fff;
-		//bool isNeedSeekBefore = true;
+		Commdes_t *destmp = desList;
 		for (i = 0; i < desListLen; i++)
 		{
-			if (desList->tag == 9)//CA
+			if (destmp->tag == 9)//CA
 			{
-				if (desList->data != NULL && desList->dataLen >= 4)
+				if (destmp->data != NULL && destmp->dataLen >= 4)
 				{
 					int lastReplacePid = -1;
 					int inPid = 0x1fff;
-					int caPid = (((desList->data[2] << 8) | desList->data[3]) & 0x1fff);
+					int caPid = (((destmp->data[2] << 8) | destmp->data[3]) & 0x1fff);
 					if ((inChn > 0) && (inChn != 9))
 					{
-						inPid = DesPid_getInPid(inChn, prgIndex, avIndex, desList->index);
+						inPid = DesPid_getInPid(inChn, prgIndex, avIndex, destmp->index);
 						if (inPid < 0x1fff)
 						{
 							MuxPidInfo_st *mp = NULL;
@@ -587,16 +586,16 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
 					if (lastReplacePid != -1)
 					{
 						caPid = lastReplacePid;
-						desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((lastReplacePid >> 8) & 0x1f));
-						desList->data[3] = (unsigned char)lastReplacePid;
+						destmp->data[2] = (unsigned char)(destmp->data[2] & 0xe0 | ((lastReplacePid >> 8) & 0x1f));
+						destmp->data[3] = (unsigned char)lastReplacePid;
 					}
 					else
 					{
 						if (caPid != pidOffset)
 						{
 							caPid = pidOffset;
-							desList->data[2] = (unsigned char)(desList->data[2] & 0xe0 | ((pidOffset >> 8) & 0x1f));
-							desList->data[3] = (unsigned char)pidOffset;
+							destmp->data[2] = (unsigned char)(destmp->data[2] & 0xe0 | ((pidOffset >> 8) & 0x1f));
+							destmp->data[3] = (unsigned char)pidOffset;
 
 							MuxPidInfo_st *muxPidInfo = malloc(sizeof(MuxPidInfo_st));;
 							muxPidInfo->inChannel = inChn;
@@ -608,7 +607,7 @@ int DesPidRefresh2(int inChn, int prgIndex, int avIndex,
 					}
 				}
 			}
-			desList++;
+			destmp++;
 		}
 	}
 	return pidOffset;
