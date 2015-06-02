@@ -1565,24 +1565,29 @@ static void reprgpid(HttpConn *conn) {
     printf("----repid--->>start00\n");
 	char str[64] = {0};
 	cchar *role = getSessionVar("role");
+	printf("----repid--->>start11\n");
 	if(role == NULL){
         rendersts(str, 9);
         render(str);
         return;
     }
+    printf("----repid--->>start12\n");
      if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
         rendersts(str, 5);//无权限
         render(str);
         return;
     }
+    printf("----repid--->>start22\n");
 	int i = 0,j = 0, k = 0, pidPrgStart = 0, pidAvStart = 0;
-	list_t *usingPidList;
+	list_t *usingPidList = NULL;
 	list_init(usingPidList);
+	printf("----repid--->>start33\n");
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	User_prgInfo_t *userprg = NULL;
+	printf("----repid--->>start44\n");
     MprJson *jsonparam = httpGetParams(conn);
-    printf("----repid--->>start11\n");
+    printf("----repid--->>start66\n");
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
         if (inCh == 0 || inCh == i + 1){
