@@ -1574,30 +1574,23 @@ static void reprgpid(HttpConn *conn) {
         render(str);
         return;
     }
-    printf("----repid--->>start22\n");
 	int i = 0,j = 0, k = 0, pidPrgStart = 0, pidAvStart = 0;
 	list_t *usingPidList = malloc(sizeof(list_t));;
 	list_init(usingPidList);
-	printf("----repid--->>start33\n");
 	ChannelProgramSt *outpst = NULL;
 	Dev_prgInfo_st *outprg = NULL;
 	User_prgInfo_t *userprg = NULL;
-	printf("----repid--->>start44\n");
     MprJson *jsonparam = httpGetParams(conn);
-    printf("----repid--->>start66\n");
     int inCh = atoi(mprGetJson(jsonparam, "inch"));
     for ( i = 0; i < clsProgram._outChannelCntMax; i++){
         if (inCh == 0 || inCh == i + 1){
-            printf("----repid--->>start\n");
             pidPrgStart = clsProgram.prgPid_min;
             pidAvStart = clsProgram.subPrgPid_min;
             list_get(&clsProgram.outPrgList, i, &outpst);
             if(list_len(&outpst->prgNodes)>0){
                 for(j=0; j<list_len(&outpst->prgNodes); j++){
                 	list_get(&outpst->prgNodes, j, &outprg);
-                	printf("----repid--->>-----11111\n");
                 	int newPid = SeekReplacedPid(usingPidList, outprg->chnId, outprg->pmtPid, pidPrgStart);
-                	printf("----repid--->>00\n");
                 	if (newPid != outprg->pmtPid || pidPrgStart == outprg->pmtPid)
                     {
                         //memcpy(&outprg->pmtPid, &newPid, sizeof(int));
