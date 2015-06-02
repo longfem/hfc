@@ -11,7 +11,7 @@
 
 extern ClsProgram_st clsProgram;
 
-//char *tmpip = "192.168.1.49";
+char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
 static void getDevinfo(HttpConn *conn) {
 	if(session("isAuthed") != NULL){
@@ -26,7 +26,7 @@ static void getDevinfo(HttpConn *conn) {
 	char pProg[256] = {0};
 	int r = 0;
 	EdiField *src;
-    getbaseJson(conn->rx->parsedUri->host, pProg);
+    getbaseJson(tmpip, pProg);
 	render(pProg);
 	//delete optlog 7days ago
     Edi *db = ediOpen("db/muxnms.mdb", "mdb", EDI_AUTO_SAVE);

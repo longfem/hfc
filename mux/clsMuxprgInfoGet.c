@@ -145,16 +145,18 @@ int GetChannelOutputMaxRate(char *ip, int outChannel, unsigned int *outRate)
     memset(buf,0,sizeof(buf));
     communicate(ip, sendbuf, 6, buf, &slen);
     
-   // printf("\n####Recive GetChannelOutputMaxRate receive nums=[%d]\n", slen );
+    //printf("\n####Recive GetChannelOutputMaxRate receive nums=[%d]\n", slen );
 
 
     if( 9 == slen ){
-       // for(i=0;i<9;i++)
-       //                  printf("Receive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);
-
-        *outRate = ( buf[8]<<24| buf[7]<<8 | buf[6]) & 0xffffff;       
-
-         res = ok;
+        //for(i=0;i<9;i++)
+            //printf("Receive GetChannelOutputMaxRate buf[%d]=0x[%02x]\n",i, buf[i]);
+        int offset = 6;
+        for (i = 0; i < 3; i++)
+        {
+            *outRate += buf[offset++] << (i * 8);
+        }
+        res = ok;
 
     }
     else{
