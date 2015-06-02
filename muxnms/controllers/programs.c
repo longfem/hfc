@@ -1562,16 +1562,13 @@ static void reprgnum(HttpConn *conn) {
 }
 
 static void reprgpid(HttpConn *conn) {
-    printf("----repid--->>start00\n");
 	char str[64] = {0};
 	cchar *role = getSessionVar("role");
-	printf("----repid--->>start11\n");
 	if(role == NULL){
         rendersts(str, 9);
         render(str);
         return;
     }
-    printf("----repid--->>start12\n");
      if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
         rendersts(str, 5);//无权限
         render(str);
@@ -1579,7 +1576,7 @@ static void reprgpid(HttpConn *conn) {
     }
     printf("----repid--->>start22\n");
 	int i = 0,j = 0, k = 0, pidPrgStart = 0, pidAvStart = 0;
-	list_t *usingPidList = NULL;
+	list_t *usingPidList = malloc(sizeof(list_t));;
 	list_init(usingPidList);
 	printf("----repid--->>start33\n");
 	ChannelProgramSt *outpst = NULL;
@@ -1688,6 +1685,7 @@ static void reprgpid(HttpConn *conn) {
         free(mp);
         list_pop(usingPidList, i);
     }
+    free(usingPidList);
     rendersts(str, 1);
     render(str);
     //add optlog
