@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>数字网管</title>
+    <title class="i18n_NMS">DIGIT NMS</title>
     <meta charset="utf-8" />
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">    
     <link rel="stylesheet" href="css/ui.fancytree.min.css" type="text/css"> 
@@ -12,10 +12,10 @@
 <body>
 	<div class="navbar">
 		<nav>
-			<label>数字设备网管</label>
+			<label class="i18n_NMSDEVTITLE">DIGIT DEVICE NMS</label>
 		</nav>
     </div>
-    <div id="dialog-pid" title="PID表">
+    <div id="dialog-pid" title="PID Table">
         <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_pid"></table>
     </div>
     <div class="container">
@@ -24,45 +24,47 @@
 				<div class="ny_zblb1">
 					<ul class="clearfix">
 						<li id="l1">
-							<a class="cur STRING_BASE" href="javascript:toHome()"><strong>基本信息</strong></a>
+							<a class="cur" href="javascript:toHome()"><strong class="i18n_BASEINFO">BASEINFO</strong></a>
 						</li>
 						<li class="subs" id="l2">
-							<a class="flag STRING_DETAIL" href="javascript:void(0)"><strong>详细信息</strong></a>
+							<a class="flag" href="javascript:void(0)"><strong class="i18n_DETAIL">DETAIL</strong></a>
 							<ul>               
-								<li id="l21"><a href="javascript:devinfo_output(recdata.devType)">输出通道</a></li> 							              
-								<li id="l23"><a href="javascript:gbl_monitor()">监测</a></li>
+								<li id="l21"><a href="javascript:devinfo_output(recdata.devType)" class="i18n_OUTPUTCHANNEL">OUT-CHANNEL</a></li> 							              
+								<li id="l23"><a href="javascript:gbl_monitor()" class="i18n_MONITOR">MONITOR</a></li>
 							<!--	<li id="l24"><a href="javascript:dev_srcset()">源设置</a></li>
 								<li id="l25"><a href="javascript:dev_outset()">输出设置</a></li> -->
 							</ul>
 						</li>
 						<li class="subs" id="l3">
-							<a class="flag STRING_NETSET" href="javascript:void(0)"><strong>网络设置</strong></a>
+							<a class="flag" href="javascript:void(0)"><strong class="i18n_NETSETTING">NET SETTING</strong></a>
 							<ul>               
-								<li id="l31"><a href="javascript:gbl_setIp()">IP地址设置</a></li>
+								<li id="l31"><a class="i18n_IPSET" href="javascript:gbl_setIp()">IPSET</a></li>
 							</ul>
 						</li>
 						<li class="subs" id="l4">
-							<a class="flag STRING_MDEVICE" href="javascript:void(0)"><strong>设备管理</strong></a>
-							<ul>
-                                <!--<li id="l41"><a href="">设备升级</a></li> -->
-                                <li id="l42"><a href="javascript:gbl_reset()">恢复出厂设置</a></li>
-                                <li id="l43"><a href="javascript:gbl_restart()">重启设备</a></li>
-                                <li id="l44"><a href="javascript:gbl_password()">修改密码</a></li>
-                                <!-- <li id="l45"><a href="javascript:gbl_import()">(导入/导出)配置</a></li> -->
+							<a class="flag" href="javascript:void(0)"><strong class="i18n_DEVMANAGE">MANAGEMENT</strong></a>
+							<ul>                            
+								<li id="l42"><a href="javascript:gbl_reset()" class="i18n_RESTOREDEFAULT">RESTOREDEFAULT</a></li>               
+								<li id="l43"><a href="javascript:gbl_restart()" class="i18n_RESTART">RESTART</a></li>
+								<li id="l44"><a href="javascript:gbl_password()" class="i18n_CHANGEPASSWORD">CHANGE PASSWORD</a></li>
                             </ul>
                         </li>
                         <li class="subs" id="l5">
-                            <a class="flag STRING_LOG" href="javascript:void(0)"><strong>日志记录</strong></a>
+                            <a class="flag" href="javascript:void(0)"><strong class="i18n_LOGSTORE">LOG RECORD</strong></a>
                             <ul>
-                                <li id="l51"><a href="javascript:alarm_output(2)">操作日志</a></li>
+                                <li id="l51"><a href="javascript:alarm_output(2)" class="i18n_OPERATELOG">OPERATION LOG</a></li>
                                 <!-- <li id="l52"><a href="javascript:alarm_output(1)">告警日志</a></li> -->
                              </ul>
                          </li>
                          <li id="l6">
-                            <!-- <a href="javascript:void(0)" class="STRING_HELP"><strong>帮助</strong></a> -->
+                             <a href="javascript:void(0)"><strong  class="i18n_BACKUP">BACKUP</strong></a>
+							 <ul>
+                                <li id="l61"><a href="javascript:alarm_output(2)" class="i18n_IMPORT">DATA IMPORT</a></li>
+                                <li id="l62"><a href="javascript:alarm_output(1)" class="i18n_EXPORT">DATA EXPORT</a></li> 
+                             </ul>
                          </li>
                          <li id="l7">
-                             <a href="javascript:btn_close()" class="STRING_EXIT"><strong>退出</strong></a>
+                             <a href="javascript:btn_close()"><strong  class="i18n_EXIT">EXIT</strong></a>
                          </li>
                      </ul>
                  </div>
@@ -70,8 +72,8 @@
              </div>
          </div>
          <div class="main-content">
-             <!--  CONTENT  -->
-		</div>
+             <!--  CONTENT  -->			 
+		</div>		 		 
         <div id="dialog-form" title="编辑节目">
         <table class="tbl_program">
             <tr>
@@ -294,6 +296,7 @@
 	</div>
     <script type="text/javascript" src="lib/jquery.min.js"></script>
     <script type="text/javascript" src="lib/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="lib/jquery.i18n.properties-min-1.0.9.js"></script>
     <script type="text/javascript" src="lib/jquery.fancytree.min.js"></script>    
     <script type="text/javascript" src="lib/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="lib/ichart.1.2.min.js"></script>
@@ -313,7 +316,8 @@
             for(var i=0;i<BrowserS.length;i++){
                 if(str.indexOf(BrowserS[i])>=0){return BrowserS[i].replace('MSIE','IE');}
             }
-		}
+		}		
+		
 		//获取设备基本信息				
 		$.ajax({
 			 type: "GET",
@@ -334,45 +338,72 @@
 			'<table id="basedev" class="tbl_baseinfo" cellspacing="0" width="100%">'				
 				+'<tbody>'
 					+'<tr>'
-						+'<th><label>名称:</label></th>'
+						+'<th><label>NAME:</label></th>'
 						+'<th><label id="dev-name" class="tbl_th">T192.168.1.134</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>类型:</label></th>'
+						+'<th><label>TYPE:</label></th>'
 						+'<th><label id="dev-type" class="tbl_th">MUX8inl</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>有效性:</label></th>'
+						+'<th><label>VALID:</label></th>'
 						+'<th><label id="dev-valid" class="tbl_th">是</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>链接方式:</label></th>'
+						+'<th><label>LINK MODE:</label></th>'
 						+'<th><label id="dev-connect" class="tbl_th">TCP</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>网络地址:</label></th>'
+						+'<th><label>NET ADDRESS:</label></th>'
 						+'<th><label id="dev-ip" class="tbl_th">192.168.1.134</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>端口号:</label></th>'
+						+'<th><label>PORT:</label></th>'
 						+'<th><label id="dev-port" class="tbl_th">161</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>硬件版本:</label></th>'
+						+'<th><label>HARD VERSION:</label></th>'
 						+'<th><label id="dev-biosversion" class="tbl_th">2.00</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>软件版本:</label></th>'
+						+'<th><label>SOFTWARE VERSION:</label></th>'
 						+'<th><label id="dev-softversion" class="tbl_th">2.06</label></th>'
 					+'</tr>'
 					+'<tr>'
-						+'<th><label>固件版本:</label></th>'
+						+'<th><label>FIRMWARE VERSION:</label></th>'
 						+'<th><label id="dev-firmware" class="tbl_th">1</label></th>'
 					+'</tr>'
 				+'</tbody>'
 			+'</table>'			
 		);		
-		
+		var nv = localStorage.getItem("language");
+		$.i18n.properties({
+			name : nv, //资源文件名称
+			path : '/i18n/', //资源文件路径
+			mode : 'map', //用Map的方式使用资源文件中的值
+			language : nv,
+			callback : function() {//加载成功后设置显示内容
+				$('.i18n_NMS')[0].textContent = $.i18n.prop('NMS');
+				$('.i18n_NMSDEVTITLE')[0].textContent = $.i18n.prop('NMSDEVTITLE');
+				$('.i18n_BASEINFO')[0].textContent = $.i18n.prop('BASEINFO');
+				$('.i18n_DETAIL')[0].textContent = $.i18n.prop('DETAIL');
+				$('.i18n_OUTPUTCHANNEL')[0].textContent = $.i18n.prop('OUTPUTCHANNEL');
+				$('.i18n_MONITOR').html($.i18n.prop('MONITOR'));
+				$('.i18n_NETSETTING').html($.i18n.prop('NETSETTING'));
+				$('.i18n_IPSET')[0].textContent = $.i18n.prop('IPSET');
+				$('.i18n_DEVMANAGE')[0].textContent = $.i18n.prop('DEVMANAGE');
+				$('.i18n_RESTOREDEFAULT')[0].textContent = $.i18n.prop('RESTOREDEFAULT');
+				$('.i18n_RESTART')[0].textContent = $.i18n.prop('RESTART');
+				$('.i18n_CHANGEPASSWORD')[0].textContent = $.i18n.prop('CHANGEPASSWORD');
+				$('.i18n_LOGSTORE').html($.i18n.prop('LOGSTORE'));
+				$('.i18n_OPERATELOG')[0].textContent = $.i18n.prop('OPERATELOG');
+				$('.i18n_BACKUP').html($.i18n.prop('BACKUP'));
+				$('.i18n_IMPORT')[0].textContent = $.i18n.prop('IMPORT');
+				$('.i18n_EXPORT')[0].textContent = $.i18n.prop('EXPORT');
+				$('.i18n_EXIT').html($.i18n.prop('EXIT'));
+				
+			}
+		});
 		function toHome() {
             if(globalObj.timerID != undefined){
                 clearInterval(globalObj.timerID);
@@ -396,49 +427,67 @@
 				'<table id="basedev" class="tbl_baseinfo" cellspacing="0" width="100%">'				
 					+'<tbody>'
 						+'<tr>'
-							+'<th><label>名称:</label></th>'
+							+'<th><label class="i18n_NAME">Name:</label></th>'
 							+'<th><label id="dev-name" class="tbl_th">T'+recdata.IP+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>类型:</label></th>'
+							+'<th><label class="i18n_TYPE">TYPE:</label></th>'
 							+'<th><label id="dev-type" class="tbl_th">'+recdata.devType+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>有效性:</label></th>'
-							+'<th><label id="dev-valid" class="tbl_th">是</label></th>'
+							+'<th><label class="i18n_VALID">VALID:</label></th>'
+							+'<th><label id="dev-valid" class="tbl_th">YES</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>链接方式:</label></th>'
+							+'<th><label class="i18n_LINKMODE">LINK MODE:</label></th>'
 							+'<th><label id="dev-connect" class="tbl_th">TCP</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>网络地址:</label></th>'
+							+'<th><label class="i18n_NETADDRESS">NET ADDRESS:</label></th>'
 							+'<th><label id="dev-ip" class="tbl_th">'+recdata.IP+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>端口号:</label></th>'
+							+'<th><label class="i18n_PORT">PORT:</label></th>'
 							+'<th><label id="dev-port" class="tbl_th">'+recdata.port+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>硬件版本:</label></th>'
+							+'<th><label class="i18n_HARDVERSION">HARD VERSION:</label></th>'
 							+'<th><label id="dev-biosversion" class="tbl_th">'+recdata.HardVersion+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>软件版本:</label></th>'
+							+'<th><label class="i18n_SOFTWAREVERSION">SOFTWARE VERSION:</label></th>'
 							+'<th><label id="dev-softversion" class="tbl_th">'+recdata.SoftVersion+'</label></th>'
 						+'</tr>'
 						+'<tr>'
-							+'<th><label>固件版本:</label></th>'
+							+'<th><label class="i18n_FIRMWAREVERSION">FIRMWARE VERSION:</label></th>'
 							+'<th><label id="dev-firmware" class="tbl_th">'+recdata.FpgaVersion+'</label></th>'
 						+'</tr>'
 					+'</tbody>'
 				+'</table>'	
 			);
+			
+			$.i18n.properties({
+				name : nv, //资源文件名称
+				path : '/i18n/', //资源文件路径
+				mode : 'map', //用Map的方式使用资源文件中的值
+				language : nv,
+				callback : function() {//加载成功后设置显示内容
+					$('.i18n_NAME')[0].textContent = $.i18n.prop('NAME');
+					$('.i18n_TYPE')[0].textContent = $.i18n.prop('TYPE');
+					$('.i18n_VALID')[0].textContent = $.i18n.prop('VALID');
+					$('.i18n_LINKMODE')[0].textContent = $.i18n.prop('LINKMODE');
+					$('.i18n_NETADDRESS')[0].textContent = $.i18n.prop('NETADDRESS');
+					$('.i18n_PORT')[0].textContent = $.i18n.prop('PORT');
+					$('.i18n_HARDVERSION')[0].textContent = $.i18n.prop('HARDVERSION');
+					$('.i18n_SOFTWAREVERSION')[0].textContent = $.i18n.prop('SOFTWAREVERSION');
+					$('.i18n_FIRMWAREVERSION')[0].textContent = $.i18n.prop('FIRMWAREVERSION');
+				}
+			});
 		}
 		try{
             $("#dev-name")[0].textContent = "T"+recdata.IP;
             $("#dev-type")[0].textContent = recdata.devType;
-            $("#dev-valid")[0].textContent = "是";
+            $("#dev-valid")[0].textContent = nv == "zh-CN"?"是":"YES";
             $("#dev-connect")[0].textContent = "TCP";
             $("#dev-ip")[0].textContent = recdata.IP;
             $("#dev-port")[0].textContent = recdata.port;
