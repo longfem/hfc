@@ -6,16 +6,26 @@ function gbl_restart() {
 	$('.main-content').append(
 		'<div class="src_content">'
 			+'<fieldset>'
-				+'<legend>重启设备</legend>'
+				+'<legend class="i18n_RESTART">REBOOT</legend>'
 				
 				+'<div class="src_btn">'
-					+'<button class="btn_restart">重启设备</button>'
+					+'<button class="i18n_RESTART btn_restart">REBOOT</button>'
 					+'<p class="gbltips"></p>'
 				+'</div>'
 			+'</fieldset>'
 		+'</div>'
 	);
-	
+	$.i18n.properties({
+        name : nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : nv,
+        callback : function() {//加载成功后设置显示内容
+            $('.i18n_RESTART').html($.i18n.prop('RESTART'));
+            $('.i18n_RESTART')[1].textContent = $.i18n.prop('RESTART');
+            
+        }
+    });
 	$( ".btn_restart" ).button({
       icons: {
         primary: "ui-icon-power"
@@ -30,9 +40,9 @@ function gbl_restart() {
 			 success: function(data){
                  if(data.sts == 1){
                      $('.gbltips').empty();
-                     $('.gbltips').append('设备重启命令已下发，请30秒后尝试重新连接');
+                     $('.gbltips').append(nv == "zh-CN"?"设备重启命令已下发，请30秒后尝试重新连接":"Device is Rebooting, pls waitting 30sec to reload....");
                  }else if(data.sts == 5){
-                     alert("权限不足，请与管理员联系");
+                     alert(nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                  }
 			 },    
 			 error : function(err) {   
@@ -50,14 +60,24 @@ function gbl_reset() {
 	$('.main-content').append(
 		'<div class="src_content">'
 			+'<fieldset>'
-				+'<legend>恢复出厂设置</legend>'
+				+'<legend class="i18n_RESTOREDEFAULT">RESTORE DEFAULT</legend>'
 				+'<div class="src_btn">'
-					+'<button class="btn_reset">恢复出厂设置</button>'
+					+'<button class="btn_reset i18n_RESTOREDEFAULT">RESTORE DEFAULT</button>'
 					+'<p class="gbltips"></p>'
 				+'</div>'
 			+'</fieldset>'
 		+'</div>'
 	);
+	$.i18n.properties({
+        name : nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : nv,
+        callback : function() {//加载成功后设置显示内容
+            $('.i18n_RESTOREDEFAULT').html($.i18n.prop('RESTOREDEFAULT'));           
+            $('.i18n_RESTOREDEFAULT')[1].textContent = $.i18n.prop('RESTOREDEFAULT');            
+        }
+    });
 	
 	$( ".btn_reset" ).button({
       icons: {
@@ -73,9 +93,11 @@ function gbl_reset() {
 			 success: function(data){
                  if(data.sts == 1){
                      $('.gbltips').empty();
-                     $('.gbltips').append('恢复出厂设置命令已下发，请30秒后尝试重新连接');
+                     $('.gbltips').append(nv == "zh-CN"?"恢复出厂设置命令已下发，请30秒后尝试重新连接":"Device restored, pls waitting 30secs to reload...");
                  }else if(data.sts == 5){
-                     alert("权限不足，请与管理员联系");
+                     alert(nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
+                 }else{
+                     alert(nv == "zh-CN"?"恢复出厂设置命令已下发异常，请30秒后尝试重新连接":"Device restored error, pls waitting 30secs to reload...");
                  }
 			 },    
 			 error : function(err) {   
@@ -93,27 +115,27 @@ function gbl_setIp() {
 	$('.main-content').append(
 		'<div class="src_content">'
 			+'<fieldset>'
-				+'<legend>网络配置</legend>'
+				+'<legend class="i18n_NETSETTING">NETWORK SETTING</legend>'
 				+'<div class="network_set">'
 					+'<table class="nettable">'
 						+'<tr>'
-							+'<td><label>新IP地址：</label></td>'
+							+'<td><label class="i18n_NEWIP">New IP:</label></td>'
 							+'<td><input type="text" value="" class="newip" /></td>'
-							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="ipvalidate">非法的IP地址!!</label></td>'
+							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="ipvalidate i18n_ILLEGALIP">Invalid IP!!</label></td>'
 						+'</tr>'
 						+'<tr>'
-							+'<td><label>新网关地址：</label></td>'
+							+'<td><label class="i18n_NEWGATEWAY">New Gateway：</label></td>'
 							+'<td><input type="text" value="" class="newgateway" /></td>'
-							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="gatewayvalidate">非法的网关地址!!</label></td>'
+							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="gatewayvalidate i18n_ILLEGALGATEWAY">Invalid Gateway!!</label></td>'
 						+'</tr>'
 						+'<tr>'
-							+'<td><label>新子网掩码：</label></td>'
+							+'<td><label class="i18n_NEWSUBMASK">New SubMask:</label></td>'
 							+'<td><input type="text" value="" class="newsubmask" /></td>'
-							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="submaskvalidate">非法的网关地址!!</label></td>'
+							+'<td><label style="display:none;width:150px;color:red;margin-right:20px" class="submaskvalidate i18n_ILLEGALSUBMASK">Invalid SubMask!!</label></td>'
 						+'</tr>'
 						+'<tr>'
 							+'<td></td>'
-							+'<td><button class="btn_set" style="float:right;margin:10px 30px">配置</button></td>'
+							+'<td><button class="btn_set i18n_BTNCONFIG" style="float:right;margin:10px 30px">Config</button></td>'
 							+'<td></td>'
 						+'</tr>'
 					+'</table>'
@@ -122,7 +144,22 @@ function gbl_setIp() {
 			+'</fieldset>'
 		+'</div>'
 	);
-	
+	$.i18n.properties({
+        name : nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : nv,
+        callback : function() {//加载成功后设置显示内容
+            $('.i18n_NETSETTING').html($.i18n.prop('NETSETTING'));
+            $('.i18n_NEWIP').html($.i18n.prop('NEWIP'));
+            $('.i18n_ILLEGALIP').html($.i18n.prop('ILLEGALIP'));
+            $('.i18n_NEWGATEWAY').html($.i18n.prop('NEWGATEWAY'));
+            $('.i18n_ILLEGALGATEWAY').html($.i18n.prop('ILLEGALGATEWAY'));
+            $('.i18n_NEWSUBMASK').html($.i18n.prop('NEWSUBMASK'));            
+            $('.i18n_ILLEGALSUBMASK').html($.i18n.prop('ILLEGALSUBMASK'));            
+            $('.i18n_BTNCONFIG')[0].textContent = $.i18n.prop('BTNCONFIG');            
+        }
+    });
 	$( ".btn_set" ).button({
       icons: {
         primary: "ui-icon-gear"
@@ -164,7 +201,7 @@ function gbl_setIp() {
 		$(".gatewayvalidate").css("display", "none");
 		$(".submaskvalidate").css("display", "none");
 		$('.settip').empty();
-		$('.settip').append('设置命令已下发，请尝试重新连接');
+		$('.settip').append(nv == "zh-CN"?"设置命令已下发，请尝试重新连接":"Sending config, pls try to reload...");
 		$.ajax({
 			 type: "GET",
 			 async:false,
@@ -173,14 +210,14 @@ function gbl_setIp() {
 			 success: function(data){
                  if(data.sts == 1){
                      $('.settip').empty();
-                     $('.settip').append('设置命令已下发，请尝试重新连接');
+                     $('.settip').append(nv == "zh-CN"?"设置命令已下发，请尝试重新连接":"Sending config, pls try to reload...");
                  }else if(data.sts == 5){
-                     alert("权限不足，请与管理员联系");
+                     alert(nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                  }
 			 },    
 			 error : function(err) {
                  $('.settip').empty();
-                 $('.settip').append('下发失败，未知错误!');
+                 $('.settip').append(nv == "zh-CN"?"下发失败，未知错误!":"Sending failed, unknown error!");
 			 }   
 		});
 	});
@@ -194,29 +231,41 @@ function gbl_password() {
     $('.main-content').append(
         '<div class="src_content">'
             +'<fieldset>'
-                +'<legend>修改密码</legend>'
+                +'<legend class="i18n_CHANGEPASSWORD">CHANGE PASSWORD</legend>'
                 +'<div class="register_form">'
                     +'<div class="register_formrow">'
-                        +'<div class="register_item rlb"><label>原密码</label></div>'
+                        +'<div class="register_item rlb"><label class="i18n_OLDPASSWORD">Old Password</label></div>'
                         +'<div class="register_item rip"><input type="password" class="oldpassword" placeholder="password" /> </div>'
                     +'</div>'
                     +'<div class="register_formrow">'
-                        +'<div class="register_item rlb"><label>新密码</label></div>'
+                        +'<div class="register_item rlb"><label class="i18n_NEWPASSWORD">New Password</label></div>'
                         +'<div class="register_item rip"><input type="password" class="newpassword" placeholder="Password" /> </div>'
                     +'</div>'
                     +'<div class="register_formrow">'
-                        +'<div class="register_item rlb"><label>密码确认</label></div>'
+                        +'<div class="register_item rlb"><label class="i18n_CONFIRMPASSWORD">Password Conform</label></div>'
                         +'<div class="register_item rip"><input type="password" class="cpassword" placeholder="Password" /> </div>'
                     +'</div>'
                 +'</div>'
                 +'<div class="src_btn">'
-                    +'<button class="btn_submit">修改</button>'
+                    +'<button class="btn_submit i18n_MODIFY">Modify</button>'
                     +'<p></p>'
                 +'</div>'
             +'</fieldset>'
         +'</div>'
     );
-
+    $.i18n.properties({
+        name : nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : nv,
+        callback : function() {//加载成功后设置显示内容
+            $('.i18n_CHANGEPASSWORD').html($.i18n.prop('CHANGEPASSWORD'));
+            $('.i18n_OLDPASSWORD').html($.i18n.prop('OLDPASSWORD'));
+            $('.i18n_NEWPASSWORD').html($.i18n.prop('NEWPASSWORD'));
+            $('.i18n_CONFIRMPASSWORD').html($.i18n.prop('CONFIRMPASSWORD'));           
+            $('.i18n_MODIFY')[0].textContent = $.i18n.prop('MODIFY');            
+        }
+    });
     $( ".btn_submit" ).button({
         icons: {
             primary: "ui-icon-gear"
@@ -224,7 +273,11 @@ function gbl_password() {
     }).click(function( event ) {
         event.preventDefault();
         if($(".newpassword").val() != $(".cpassword").val()){
-            alert("两次新密码输入不一致");
+            alert(nv == "zh-CN"?"两次新密码输入不一致":"Two new password input is not consistent.");
+            return;
+        }
+        if($(".oldpassword").val() == "" || $(".newpassword").val() == ""){
+            alert(nv == "zh-CN"?"密码不能为空.":"Password can not be null.");
             return;
         }
         var strjson = '{oldpassword:'+$(".oldpassword").val() + ',newpassword:'+ $(".newpassword").val()
@@ -240,13 +293,13 @@ function gbl_password() {
                     $(".oldpassword").val("");
                     $(".newpassword").val("");
                     $(".cpassword").val("");
-                    alert("密码修改成功");
+                    alert(nv == "zh-CN"?"密码修改成功":"Password changed successful.");
                 }else if(data.sts == 5){
-                    alert("权限不足，请与管理员联系");
+                    alert(nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                 }
             },
             error : function(err) {
-                alert("异常！====="+err);
+                //alert("异常！====="+err);
             }
         });
     });
@@ -260,26 +313,26 @@ function gbl_monitor() {
     $('.main-content').append(
         '<div class="src_content">'
             +'<fieldset>'
-                +'<legend>输出通道[1] 比特率</legend>'
+                +'<legend class="i18n_M1BIT">OUTPUT[1] BIT</legend>'
                 +'<div id="canvasDiv">'
                 +'</div>'
             +'</fieldset>'
             +'<div class="outsts">'
-                +'<lable class="outch1">输出通道[CHN-1]溢出</lable>'
+                +'<lable class="outch1 i18n_M1OVERFLOW">OUTPUT[CHN-1]OVERFLOW</lable>'
                 +'<img class="outch1stsimg stsimg" />'
             +'</div>'
             +'<fieldset>'
-                +'<legend>输出通道[2] 比特率</legend>'
+                +'<legend class="i18n_M2BIT">OUTPUT[2] BIT</legend>'
                     +'<div id="canvasDiv2">'
                 +'</div>'
             +'</fieldset>'
             +'<div class="outsts">'
-                +'<lable class="outch2">输出通道[CHN-2]溢出</lable>'
+                +'<lable class="outch2 i18n_M2OVERFLOW">OUTPUT[CHN-2]OVERFLOW</lable>'
                 +'<img class="outch2stsimg stsimg" />'
             +'</div>'
             +'<table class="monitortable">'
                 +'<tr>'
-                    +'<td><label>有效输入数据丢失</label></td>'
+                    +'<td><label class="i18n_DATADROP">Valid input data loss</label></td>'
                     +'<td><img class="inchsts1img stsimg" src="img/circle16_green.ico" /></td>'
                     +'<td><img class="inchsts2img stsimg" src="img/circle16_green.ico" /></td>'
                     +'<td><img class="inchsts3img stsimg" src="img/circle16_green.ico" /></td>'
@@ -290,7 +343,7 @@ function gbl_monitor() {
                     +'<td><img class="inchsts8img stsimg" src="img/circle16_green.ico" /></td>'
                 +'</tr>'
                 +'<tr>'
-                    +'<td class="tbl_right"><label>通道</label></td>'
+                    +'<td class="tbl_right"><label class="i18n_CHANNEL">CHANNEL</label></td>'
                     +'<td class="tbl_center"><label>[1]</label></td>'
                     +'<td class="tbl_center"><label>[2]</label></td>'
                     +'<td class="tbl_center"><label>[3]</label></td>'
@@ -303,7 +356,22 @@ function gbl_monitor() {
             +'</table>'
         +'</div>'
     );
-     var flow = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    
+    $.i18n.properties({
+        name : nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : nv,
+        callback : function() {//加载成功后设置显示内容
+            $('.i18n_M1BIT').html($.i18n.prop('M1BIT'));
+            $('.i18n_M1OVERFLOW').html($.i18n.prop('M1OVERFLOW'));
+            $('.i18n_M2BIT').html($.i18n.prop('i18n_M2BIT'));
+            $('.i18n_M2OVERFLOW').html($.i18n.prop('M2OVERFLOW'));           
+            $('.i18n_DATADROP').html($.i18n.prop('DATADROP'));
+            $('.i18n_CHANNEL').html($.i18n.prop('CHANNEL'));    
+        }
+    });
+    var flow = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     var flow2 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     //创建随机数据源
     var create = function (){
@@ -328,7 +396,7 @@ function gbl_monitor() {
         width : 800,
         height : 150,
         footnote : {
-            text:'单位：Mb',
+            text: nv == "zh-CN"?"单位：Mb":"Unit",
             color:'#black'
         },
         sub_option:{
@@ -379,7 +447,7 @@ function gbl_monitor() {
         width : 800,
         height : 150,
         footnote : {
-            text:'单位：Mb',
+            text: nv == "zh-CN"?"单位：Mb":"Unit",
             color:'#black'
         },
         sub_option:{
