@@ -705,7 +705,6 @@ function readprgs(){
                 type: "GET",
                 async:false,
                 url: "http://"+globalObj.localip+":4000/do/programs/getprg?inch="+i,
-                // data: {ip:"192.168.1.134", inch:2},
                 dataType: "json",
                 success: function(data){
                     data = JSON.stringify(data).replace('\\','');
@@ -722,8 +721,7 @@ function readprgs(){
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel,
-        // data: {ip:"192.168.1.134", inch:2},
+        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel+"&isEnableOutChannel=1",
         dataType: "json",
         success: function(data){
             if(data.sts == 1){
@@ -769,8 +767,7 @@ function readoutprgs(channeltree, snt){
     $.ajax({
         type: "GET",
         async:false,
-        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel,
-        // data: {ip:"192.168.1.134", inch:2},
+        url: "http://"+globalObj.localip+":4000/do/programs/getoutprg?inch="+ globalObj._channel+"&isEnableOutChannel=0",
         dataType: "json",
         success: function(data){
             if(data.sts == 1){
@@ -807,10 +804,10 @@ function devinfo_output(devType){
 		$('.main-content').append(
 			'<div id="devoutput">'
 				+'<ul>'
-					+'<li><a href="#tabs-1" class="i18n_OUTPUT1">输出通道1</a></li>'
-					+'<li><a href="#tabs-2" class="i18n_TABSTRUCT1">表结构1</a></li>'
-					+'<li><a href="#tabs-3" class="i18n_OUTPUT2">输出通道2</a></li>'
-					+'<li><a href="#tabs-4" class="i18n_TABSTRUCT2">表结构2</a></li>'
+					+'<li><a href="#tabs-1" class="i18n_OUTPUT1">OUTPUT1</a></li>'
+					+'<li><a href="#tabs-2" class="i18n_TABSTRUCT1">LIST STRUCTURE1</a></li>'
+					+'<li><a href="#tabs-3" class="i18n_OUTPUT2">OUTPUT2</a></li>'
+					+'<li><a href="#tabs-4" class="i18n_TABSTRUCT2">LIST STRUCTURE2</a></li>'
 				+'</ul>'
 				+'<div id="tabs-1">'
 					+'<div class="clearfix">'
@@ -818,10 +815,10 @@ function devinfo_output(devType){
 						+'<div id="channel" class="program"></div>'
 					+'</div>'
 					+'<div class="tbn_div">'
-                        +'<button id="output-search" class="i18n_BTNSEARCH">搜索</button>'
-						+'<button id="output-read" class="i18n_BTNREAD">读取</button>'
-						+'<button id="output-table" class="i18n_BTNMAKETABLE">制表</button>'
-						+'<button id="output-write" class="i18n_BTNAPPLY">应用</button>'					
+                        +'<button id="output-search" class="i18n_BTNSEARCH">Search</button>'
+						+'<button id="output-read" class="i18n_BTNREAD">Read</button>'
+						+'<button id="output-table" class="i18n_BTNMAKETABLE">MAKE TABLE</button>'
+						+'<button id="output-write" class="i18n_BTNAPPLY">Apply</button>'					
 					+'</div>'
 				+'</div>'
 				+'<div id="tabs-2">'
@@ -839,9 +836,9 @@ function devinfo_output(devType){
 						+'<div id="channel2" class="program"></div>'
 					+'</div>'
 					+'<div class="tbn_div">'
-						+'<button id="output-read2" class="i18n_BTNREAD">读取</button>'
-						+'<button id="output-table2" class="i18n_BTNMAKETABLE">制表</button>'
-						+'<button id="output-write2" class="i18n_BTNAPPLY">应用</button>'					
+						+'<button id="output-read2" class="i18n_BTNREAD">Read</button>'
+						+'<button id="output-table2" class="i18n_BTNMAKETABLE">MAKE TABLE</button>'
+						+'<button id="output-write2" class="i18n_BTNAPPLY">Apply</button>'					
 					+'</div>'
 				+'</div>'
 				+'<div id="tabs-4">'
@@ -859,9 +856,9 @@ function devinfo_output(devType){
 	$('.main-content').append(
 		'<div id="dialog-NIT" title="NIT">'
 			+'<div class="nit_edit">'
-				+'<label class="i18n_NETID">网络ID &nbsp</label>'
+				+'<label class="i18n_NETID">NETID &nbsp</label>'
 				+'<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nit_id" value="" />&nbsp&nbsp(HEX)<br/>'
-				+'<label class="i18n_NETNAME">网络名称</label>'
+				+'<label class="i18n_NETNAME">NET NAME</label>'
 				+'<input type="text" class="nit_name" value=""/>'
 				+'<br/>'
 				+'<textarea rows="8" style="width:350px;margin-left:30px">'
@@ -870,119 +867,119 @@ function devinfo_output(devType){
 		+'</div>'
 		+'<!-- Definition of context menu -->'
 		+'<ul id="table_menu" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-            +'<li class="menu_editstr"><a href="#editstr" class="i18n_EDITSTR"><span class="ui-icon ui-icon-pencil"></span>编辑这个传输流</a></li>'
-            +'<li class="menu_deletestr"><a href="#deletestr" class="i18n_DELETESTR"><span class="ui-icon ui-icon-closethick"></span>删除这个传输流</a></li>'
+			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
+            +'<li class="menu_editstr"><a href="#editstr" class="i18n_EDITSTR"><span class="ui-icon ui-icon-pencil"></span>STREAM EDIT</a></li>'
+            +'<li class="menu_deletestr"><a href="#deletestr" class="i18n_DELETESTR"><span class="ui-icon ui-icon-closethick"></span>STREAM DELETE</a></li>'
             +'<li class="menu_hr">---</li>'
-            +'<li class="menu_edit"><a href="#edit" class="i18n_EDIT"><span class="ui-icon ui-icon-pencil"></span>编辑段</a></li>'
-			+'<li class="menu_add"><a href="#add" class="i18n_ADD"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
-			+'<li class="menu_delete"><a href="#delete" class="i18n_DELETE"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
-            +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELETEALL"><span class="ui-icon ui-icon-closethick"></span>删除所有段</a></li>'
-            +'<li class="menu_deleteallstr"><a href="#deleteallstr" class="i18n_DELETEALLSTR"><span class="ui-icon ui-icon-closethick"></span>删除所有传输流</a></li>'
+            +'<li class="menu_edit"><a href="#edit" class="i18n_EDIT"><span class="ui-icon ui-icon-pencil"></span>EDIT SECTION</a></li>'
+			+'<li class="menu_add"><a href="#add" class="i18n_ADD"><span class="ui-icon ui-icon-plusthick"></span>ADD SECTION</a></li>'
+			+'<li class="menu_delete"><a href="#delete" class="i18n_DELETE"><span class="ui-icon ui-icon-closethick"></span>DELETE SECTION</a></li>'
+            +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELETEALL"><span class="ui-icon ui-icon-closethick"></span>DEL ALL SECTIONS</a></li>'
+            +'<li class="menu_deleteallstr"><a href="#deleteallstr" class="i18n_DELETEALLSTR"><span class="ui-icon ui-icon-closethick"></span>DEL ALL STREAMS</a></li>'
 			+'<li class="menu_hr">---</li>'
-            +'<li class="menu_addstrc"><a href="#addstrc" class="i18n_ADDSTRC"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-C]</a></li>'
-            +'<li class="menu_addstrs"><a href="#addstrs" class="i18n_ADDSTRS"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-S]</a></li>'
-            +'<li class="menu_addstrt"><a href="#addstrt" class="i18n_ADDSTRT"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-T]</a></li>'
-			+'<li class="menu_import"><a href="#import" class="i18n_NITIMPORT"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'			
-			+'<li class="menu_export"><a href="#export" class="i18n_NITEXPORT"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'			
+            +'<li class="menu_addstrc"><a href="#addstrc" class="i18n_ADDSTRC"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-C]</a></li>'
+            +'<li class="menu_addstrs"><a href="#addstrs" class="i18n_ADDSTRS"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-S]</a></li>'
+            +'<li class="menu_addstrt"><a href="#addstrt" class="i18n_ADDSTRT"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-T]</a></li>'
+			+'<li class="menu_import"><a href="#import" class="i18n_NITIMPORT"><span class="ui-icon ui-icon-pencil"></span>NIT IMPORT</a></li>'			
+			+'<li class="menu_export"><a href="#export" class="i18n_NITEXPORT"><span class="ui-icon ui-icon-closethick"></span>NIT EXPORT</a></li>'			
 			
 		+'</ul>'
 		+'<ul id="table_menu2" class="contextMenu ui-helper-hidden">'
-            +'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-            +'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
-            +'<li class="menu_editstr"><a href="#editstr" class="i18n_EDITSTR"><span class="ui-icon ui-icon-pencil"></span>编辑这个传输流</a></li>'
-            +'<li class="menu_deletestr"><a href="#deletestr" class="i18n_DELETESTR"><span class="ui-icon ui-icon-closethick"></span>删除这个传输流</a></li>'
+            +'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+            +'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
+            +'<li class="menu_editstr"><a href="#editstr" class="i18n_EDITSTR"><span class="ui-icon ui-icon-pencil"></span>STREAM EDIT</a></li>'
+            +'<li class="menu_deletestr"><a href="#deletestr" class="i18n_DELETESTR"><span class="ui-icon ui-icon-closethick"></span>STREAM DELETE</a></li>'
             +'<li class="menu_hr">---</li>'
-            +'<li class="menu_edit"><a href="#edit" class="i18n_EDIT"><span class="ui-icon ui-icon-pencil"></span>编辑段</a></li>'
-            +'<li class="menu_add"><a href="#add" class="i18n_ADD"><span class="ui-icon ui-icon-plusthick"></span>添加段</a></li>'
-            +'<li class="menu_delete"><a href="#delete" class="i18n_DELETE"><span class="ui-icon ui-icon-closethick"></span>删除段</a></li>'
-            +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELETEALL"><span class="ui-icon ui-icon-closethick"></span>删除所有段</a></li>'
-            +'<li class="menu_deleteallstr"><a href="#deleteallstr" class="i18n_DELETEALLSTR"><span class="ui-icon ui-icon-closethick"></span>删除所有传输流</a></li>'
+            +'<li class="menu_edit"><a href="#edit" class="i18n_EDIT"><span class="ui-icon ui-icon-pencil"></span>EDIT SECTION</a></li>'
+            +'<li class="menu_add"><a href="#add" class="i18n_ADD"><span class="ui-icon ui-icon-plusthick"></span>ADD SECTION</a></li>'
+            +'<li class="menu_delete"><a href="#delete" class="i18n_DELETE"><span class="ui-icon ui-icon-closethick"></span>DELETE SECTION</a></li>'
+            +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELETEALL"><span class="ui-icon ui-icon-closethick"></span>DEL ALL SECTIONS</a></li>'
+            +'<li class="menu_deleteallstr"><a href="#deleteallstr" class="i18n_DELETEALLSTR"><span class="ui-icon ui-icon-closethick"></span>DEL ALL STREAMS</a></li>'
             +'<li class="menu_hr">---</li>'
-            +'<li class="menu_addstrc"><a href="#addstrc" class="i18n_ADDSTRC"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-C]</a></li>'
-            +'<li class="menu_addstrs"><a href="#addstrs" class="i18n_ADDSTRS"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-S]</a></li>'
-            +'<li class="menu_addstrt"><a href="#addstrt" class="i18n_ADDSTRT"><span class="ui-icon ui-icon-plusthick"></span>添加传输流[DVB-T]</a></li>'
-            +'<li class="menu_import"><a href="#import" class="i18n_NITIMPORT"><span class="ui-icon ui-icon-pencil"></span>NIT表导入</a></li>'
-            +'<li class="menu_export"><a href="#export" class="i18n_NITEXPORT"><span class="ui-icon ui-icon-closethick"></span>NIT表导出</a></li>'
+            +'<li class="menu_addstrc"><a href="#addstrc" class="i18n_ADDSTRC"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-C]</a></li>'
+            +'<li class="menu_addstrs"><a href="#addstrs" class="i18n_ADDSTRS"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-S]</a></li>'
+            +'<li class="menu_addstrt"><a href="#addstrt" class="i18n_ADDSTRT"><span class="ui-icon ui-icon-plusthick"></span>ADD STREAM[DVB-T]</a></li>'
+            +'<li class="menu_import"><a href="#import" class="i18n_NITIMPORT"><span class="ui-icon ui-icon-pencil"></span>NIT IMPORT</a></li>'
+            +'<li class="menu_export"><a href="#export" class="i18n_NITEXPORT"><span class="ui-icon ui-icon-closethick"></span>NIT EXPORT</a></li>'
 
         +'</ul>'
 		+'<!-- Definition of context menu -->'
 		+'<ul id="program_menu" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
 			+'<li>---</li>'
-			+'<li class="menu_delete"><a href="#delete" class="i18n_DELPRG"><span class="ui-icon ui-icon-closethick"></span>删除这个节目</a></li>'
-			+'<li class="menu_edit"><a href="#edit" class="i18n_EDITPRG"><span class="ui-icon ui-icon-pencil"></span>编辑这个节目</a></li>'			
-			+'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELALLDESC"><span class="ui-icon ui-icon-closethick"></span>删除下一级所有自增描述符</a></li>'			
-			+'<li class="menu_add"><a href="#add" class="i18n_ADDDESC"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
+			+'<li class="menu_delete"><a href="#delete" class="i18n_DELPRG"><span class="ui-icon ui-icon-closethick"></span>Program DELETE</a></li>'
+			+'<li class="menu_edit"><a href="#edit" class="i18n_EDITPRG"><span class="ui-icon ui-icon-pencil"></span>Program EDIT</a></li>'			
+			+'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELALLDESC"><span class="ui-icon ui-icon-closethick"></span>Delete the next level descriptors</a></li>'			
+			+'<li class="menu_add"><a href="#add" class="i18n_ADDDESC"><span class="ui-icon ui-icon-plusthick"></span>Add descriptors</a></li>'
 			
-			+'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall" class="i18n_DELALLPRG"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
-            +'<li class="menu_chndelete" style="display:none"><a href="#chndelete" class="i18n_DELCHALLPRG"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
-            +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus" class="i18n_DELAUTOALLPRG"><span class="ui-icon ui-icon-closethick"></span>删除所有自增节目</a></li>'
+			+'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall" class="i18n_DELALLPRG"><span class="ui-icon ui-icon-closethick"></span>DEL ADD Programs</a></li>'
+            +'<li class="menu_chndelete" style="display:none"><a href="#chndelete" class="i18n_DELCHALLPRG"><span class="ui-icon ui-icon-closethick"></span>Delete all programs on this channel</a></li>'
+            +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus" class="i18n_DELAUTOALLPRG"><span class="ui-icon ui-icon-closethick"></span>Delete all self increasing programs</a></li>'
             +'<li>---</li>'
-			+'<li class="menu_prgitems" style="display:none"><a href="#itmes" class="i18n_ITEM"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'			
-			+'<li class="menu_re_prg" style="display:none"><a href="#re_prg" class="i18n_REPRGID"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'			
-			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid" class="i18n_REPRGPID"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
-            +'<li class="menu_cus_add" style="display:none"><a href="#cus_add" class="i18n_ADDAUTOPRG"><span class="ui-icon ui-icon-add"></span>添加自增节目</a></li>'
-			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans" class="i18n_PIDTRANS"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
+			+'<li class="menu_prgitems" style="display:none"><a href="#itmes" class="i18n_ITEM"><span class="ui-icon ui-icon-tag"></span>ITEM</a></li>'			
+			+'<li class="menu_re_prg" style="display:none"><a href="#re_prg" class="i18n_REPRGID"><span class="ui-icon ui-icon-refresh"></span>Re distribution program number</a></li>'			
+			+'<li class="menu_re_pid" style="display:none"><a href="#re_pid" class="i18n_REPRGPID"><span class="ui-icon ui-icon-refresh"></span>Re distribution PID</a></li>'
+            +'<li class="menu_cus_add" style="display:none"><a href="#cus_add" class="i18n_ADDAUTOPRG"><span class="ui-icon ui-icon-add"></span>Add self increasing program</a></li>'
+			+'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans" class="i18n_PIDTRANS"><span class="ui-icon ui-icon-pin-s"></span>PID Transmission</a></li>'
 
 		+'</ul>'
 		+'<ul id="inputprg_menu" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
 			+'<li>---</li>'
-            +'<li class="menu_search"><a href="#search" class="i18n_CHSEARCH"><span class="ui-icon ui-icon-search"></span>搜索此通道</a></li>'
-			+'<li class="menu_delete"><a href="#delete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+            +'<li class="menu_search"><a href="#search" class="i18n_CHSEARCH"><span class="ui-icon ui-icon-search"></span>SEARCH</a></li>'
+			+'<li class="menu_delete"><a href="#delete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>Delete all programs on this channel</a></li>'
 		+'</ul>'
 		+'<ul id="program_menu2" class="contextMenu ui-helper-hidden">'
-        +'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-        +'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+        +'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+        +'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
         +'<li>---</li>'
-        +'<li class="menu_delete"><a href="#delete" class="i18n_DELPRG"><span class="ui-icon ui-icon-closethick"></span>删除这个节目</a></li>'
-        +'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>编辑这个节目</a></li>'
-        +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELALLDESC"><span class="ui-icon ui-icon-closethick"></span>删除下一级所有自增描述符</a></li>'
-        +'<li class="menu_add"><a href="#add" class="i18n_ADDDESC"><span class="ui-icon ui-icon-plusthick"></span>添加自增描述符</a></li>'
+        +'<li class="menu_delete"><a href="#delete" class="i18n_DELPRG"><span class="ui-icon ui-icon-closethick"></span>Program DELETE</a></li>'
+        +'<li class="menu_edit"><a href="#edit"><span class="ui-icon ui-icon-pencil"></span>Program EDIT</a></li>'
+        +'<li class="menu_deleteall"><a href="#deleteall" class="i18n_DELALLDESC"><span class="ui-icon ui-icon-closethick"></span>Delete the next level descriptors</a></li>'
+        +'<li class="menu_add"><a href="#add" class="i18n_ADDDESC"><span class="ui-icon ui-icon-plusthick"></span>Add descriptors</a></li>'
 
-        +'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall" class="i18n_DELALLPRG"><span class="ui-icon ui-icon-closethick"></span>删除所有节目</a></li>'
-        +'<li class="menu_chndelete" style="display:none"><a href="#chndelete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
-        +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus" class="i18n_DELAUTOALLPRG"><span class="ui-icon ui-icon-closethick"></span>删除所有自增节目</a></li>'
+        +'<li class="menu_prgdeleteall" style="display:none"><a href="#prgdeleteall" class="i18n_DELALLPRG"><span class="ui-icon ui-icon-closethick"></span>DEL ALL Programs</a></li>'
+        +'<li class="menu_chndelete" style="display:none"><a href="#chndelete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>Delete all programs on this channel</a></li>'
+        +'<li class="menu_prgdeletecus" style="display:none"><a href="#prgdeletecus" class="i18n_DELAUTOALLPRG"><span class="ui-icon ui-icon-closethick"></span>Delete all self increasing programs</a></li>'
         +'<li>---</li>'
-        +'<li class="menu_prgitems" style="display:none"><a href="#itmes" class="i18n_ITEM"><span class="ui-icon ui-icon-tag"></span>选项</a></li>'
-        +'<li class="menu_re_prg" style="display:none"><a href="#re_prg" class="i18n_REPRGID"><span class="ui-icon ui-icon-refresh"></span>重新分配节目号</a></li>'
-        +'<li class="menu_re_pid" style="display:none"><a href="#re_pid" class="i18n_REPRGPID"><span class="ui-icon ui-icon-refresh"></span>重新分配PID</a></li>'
-        +'<li class="menu_cus_add" style="display:none"><a href="#cus_add" class="i18n_ADDAUTOPRG"><span class="ui-icon ui-icon-add"></span>添加自增节目</a></li>'
-        +'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans" class="i18n_PIDTRANS"><span class="ui-icon ui-icon-pin-s"></span>PID透传</a></li>'
+        +'<li class="menu_prgitems" style="display:none"><a href="#itmes" class="i18n_ITEM"><span class="ui-icon ui-icon-tag"></span>ITEM</a></li>'
+        +'<li class="menu_re_prg" style="display:none"><a href="#re_prg" class="i18n_REPRGID"><span class="ui-icon ui-icon-refresh"></span>Re distribution program number</a></li>'
+        +'<li class="menu_re_pid" style="display:none"><a href="#re_pid" class="i18n_REPRGPID"><span class="ui-icon ui-icon-refresh"></span>Re distribution PID</a></li>'
+        +'<li class="menu_cus_add" style="display:none"><a href="#cus_add" class="i18n_ADDAUTOPRG"><span class="ui-icon ui-icon-add"></span>Add self increasing program</a></li>'
+        +'<li class="menu_pidtrans" style="display:none"><a href="#pidtrans" class="i18n_PIDTRANS"><span class="ui-icon ui-icon-pin-s"></span>PID Transmission</a></li>'
 
         +'</ul>'
 		+'<ul id="inputprg_menu2" class="contextMenu ui-helper-hidden">'
-			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>展开所有子节点</a></li>'
-			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>收起节点</a></li>'
+			+'<li class="menu_expandall"><a href="#expandall" class="i18n_EXPANDALL"><span class="ui-icon ui-icon-folder-open"></span>EXPAND ALL</a></li>'
+			+'<li class="menu_collasp"><a href="#collasp" class="i18n_COLLASP"><span class="ui-icon ui-icon-folder-collapsed"></span>COLLASP</a></li>'
 			+'<li>---</li>'
-        +'<li class="menu_search"><a href="#search" class="i18n_CHSEARCH"><span class="ui-icon ui-icon-search"></span>搜索此通道</a></li>'
-        +'<li class="menu_delete"><a href="#delete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>删除此通道下所有节目</a></li>'
+        +'<li class="menu_search"><a href="#search" class="i18n_CHSEARCH"><span class="ui-icon ui-icon-search"></span>SEARCH</a></li>'
+        +'<li class="menu_delete"><a href="#delete" class="i18n_CHDELALL"><span class="ui-icon ui-icon-closethick"></span>Delete all programs on this channel</a></li>'
 		+'</ul>'
-		+'<div id="dialog-items" class="i18n_OUTCHSET" title="输出通道设置">'
+		+'<div id="dialog-items" class="i18n_OUTCHSET" title="Output channel setting">'
 			+'<table class="tbl_items">'
 				+'<tr>'
-					+'<td><label class="i18n_STREAMID">传输流ID</label></td><td><input type="text" class="item_transid" value="" /></td>'
+					+'<td><label class="i18n_STREAMID">STREAM ID</label></td><td><input type="text" class="item_transid" value="" /></td>'
 				+'</tr>'
 				+'<tr>'
-					+'<td><label class="i18n_NETWORKID">网络ID</label></td><td><input type="text" class="item_netid" value="" /></td>'
+					+'<td><label class="i18n_NETWORKID">NET ID</label></td><td><input type="text" class="item_netid" value="" /></td>'
 				+'</tr>'
 				+'<tr>'
-					+'<td><label class="i18n_ORINETWORKID">原始网络ID</label></td><td><input type="text" class="item_orignetid" value="" /></td>'
+					+'<td><label class="i18n_ORINETWORKID">Original network ID</label></td><td><input type="text" class="item_orignetid" value="" /></td>'
 				+'</tr>'
 				+'<tr>'
-					+'<td><label class="i18n_OUTBITS">输出总码率  (Kpbs)</label></td><td><input type="text" class="item_out" value="" /></td>'
+					+'<td><label class="i18n_OUTBITS">Total output rate  (Kpbs)</label></td><td><input type="text" class="item_out" value="" /></td>'
 				+'</tr>'
 				+'<tr>'
-					+'<td><input class="autoinc_ver i18n_AUTOVERSION" type="checkbox">    自动增长版本号</input></td><td><label class="item_version">2</label></td>'
+					+'<td><input class="autoinc_ver i18n_AUTOVERSION" type="checkbox">    AUTO increasing Version</input></td><td><label class="item_version">2</label></td>'
 				+'</tr>'
 			+'</table>'
-			+'<input type="checkbox" class="pat_auto i18n_SORTID">    当生成PAT时按业务ID排序</input>'
+			+'<input type="checkbox" class="pat_auto i18n_SORTID">    When PAT is generated by the business ID sort</input>'
 			+'<fieldset>'
-				+'<legend class="i18n_CHOOSETABLE">选择需要的表</legend>'
+				+'<legend class="i18n_CHOOSETABLE">Select the required table</legend>'
 					+'<input type="checkbox" class="sl_pat">    PAT</input>'
 					+'<input type="checkbox" class="sl_pmt">    PMT</input>'
 					+'<input type="checkbox" class="sl_sdt">    SDT</input>'
@@ -991,31 +988,129 @@ function devinfo_output(devType){
 			+'</fieldset>'
 			+'<label id="tag_channel" style="display:none"></label>'
 		+'</div>'
-		+'<div id="dialog-descriptor" class="i18n_DESC" title="描述符">'
+		+'<div id="dialog-descriptor" class="i18n_DESC" title="Descriptor">'
 			+'<div class="clearfix">'
 				+'<div class="tbl_descriptor">'
 					+'<table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_descriptor"></table>'
 				+'</div>'				
 				+'<div class="desc_content">'
 					+'<h3>User define descrptor</h3>'
-					+'<label>标签</label> &nbsp&nbsp&nbsp&nbsp <input class="desc_tag" value="" />&nbsp&nbsp (Hex  eg:4A)'
+					+'<label class="i18n_TAG">TAG</label> &nbsp&nbsp&nbsp&nbsp <input class="desc_tag" value="" />&nbsp&nbsp (Hex  eg:4A)'
 					+'<br />'
-					+'<label>长度</label> &nbsp&nbsp&nbsp&nbsp <label class="desc_length"></label>'
+					+'<label class="i18n_LENGTH">LENGTH</label> &nbsp&nbsp&nbsp&nbsp <label class="desc_length"></label>'
 					+'<br />'
-					+'<label style="float:left">字节</label> <textarea class="desc_bytes" row="6"></textarea> <br/><br/>'
-					+'<h5>空格分离每个字节，值为十六进制.例：2D 3C 14</h5>'
+					+'<label style="float:left" class="i18n_BYTE">BYTE</label> <textarea class="desc_bytes" row="6"></textarea> <br/><br/>'
+					+'<h5 class="i18n_TIPS1">Space to separate each byte，Hex value. E.G.：2D 3C 14</h5>'
 				+'</div>'
 			+'</div>'
 		+'</div>'
-        +'<div id="progress-dialog" title="搜索">'
-            +'<div class="progress-label" data-ch = 1>正在准备搜索...</div>'
+        +'<div id="progress-dialog" title="SEARCH">'
+            +'<div class="progress-label" data-ch = 1><label class="i18n_SEARCHING">Preparing to search...</label></div>'
             +'<div id="progressbar"></div>'
         +'</div>'
-        +'<div id="progress-notification" title="通知">'
-            +'<p>正在应用,请稍后...</p>'
+        +'<div id="progress-notification" title="NOTE">'
+            +'<p class="i18n_APPLYING">Applying, Please waiting...</p>'
         +'</div>'
 	);
 	
+	$.i18n.properties({
+        name : globalObj._nv, //资源文件名称
+        path : '/i18n/', //资源文件路径
+        mode : 'map', //用Map的方式使用资源文件中的值
+        language : globalObj._nv,
+        callback : function() {//加载成功后设置显示内容
+			$('.i18n_OUTPUT1')[0].textContent = $.i18n.prop('OUTPUT1');
+			$('.i18n_OUTPUT2')[0].textContent = $.i18n.prop('OUTPUT2');
+			$('.i18n_TABSTRUCT1')[0].textContent = $.i18n.prop('TABSTRUCT1');
+			$('.i18n_TABSTRUCT2')[0].textContent = $.i18n.prop('TABSTRUCT2');
+			$('.i18n_BTNSEARCH')[0].textContent = $.i18n.prop('BTNSEARCH');
+			$('.i18n_BTNREAD')[0].textContent = $.i18n.prop('BTNREAD');
+			$('.i18n_BTNREAD')[1].textContent = $.i18n.prop('BTNREAD');
+			$('.i18n_BTNMAKETABLE')[0].textContent = $.i18n.prop('BTNMAKETABLE');
+			$('.i18n_BTNMAKETABLE')[1].textContent = $.i18n.prop('BTNMAKETABLE'); 
+			$('.i18n_BTNAPPLY')[0].textContent = $.i18n.prop('BTNAPPLY');
+			$('.i18n_BTNAPPLY')[1].textContent = $.i18n.prop('BTNAPPLY');
+			$('.i18n_NETID').html($.i18n.prop('NETID'));
+			$('.i18n_NETNAME').html($.i18n.prop('NETNAME'));
+			$('.i18n_EXPANDALL')[0].textContent = $.i18n.prop('EXPANDALL');
+			$('.i18n_EXPANDALL')[1].textContent = $.i18n.prop('EXPANDALL');
+			$('.i18n_EXPANDALL')[2].textContent = $.i18n.prop('EXPANDALL');
+			$('.i18n_EXPANDALL')[3].textContent = $.i18n.prop('EXPANDALL');
+			$('.i18n_EXPANDALL')[4].textContent = $.i18n.prop('EXPANDALL');
+            $('.i18n_COLLASP')[0].textContent = $.i18n.prop('COLLASP');
+			$('.i18n_COLLASP')[1].textContent = $.i18n.prop('COLLASP');
+			$('.i18n_COLLASP')[2].textContent = $.i18n.prop('COLLASP');
+			$('.i18n_COLLASP')[3].textContent = $.i18n.prop('COLLASP');
+			$('.i18n_COLLASP')[4].textContent = $.i18n.prop('COLLASP');            
+			$('.i18n_EDITSTR')[0].textContent = $.i18n.prop('EDITSTR');
+			$('.i18n_EDITSTR')[1].textContent = $.i18n.prop('EDITSTR');			
+			$('.i18n_DELETESTR')[0].textContent = $.i18n.prop('DELETESTR');
+			$('.i18n_DELETESTR')[1].textContent = $.i18n.prop('DELETESTR');			
+			$('.i18n_EDIT')[0].textContent = $.i18n.prop('EDIT');
+			$('.i18n_EDIT')[1].textContent = $.i18n.prop('EDIT');			
+			$('.i18n_ADD')[0].textContent = $.i18n.prop('ADD');
+			$('.i18n_ADD')[1].textContent = $.i18n.prop('ADD');
+			$('.i18n_DELETE')[0].textContent = $.i18n.prop('DELETE');
+			$('.i18n_DELETE')[1].textContent = $.i18n.prop('DELETE');
+			$('.i18n_DELETEALL')[0].textContent = $.i18n.prop('DELETEALL');
+			$('.i18n_DELETEALL')[1].textContent = $.i18n.prop('DELETEALL');			
+			$('.i18n_DELETEALLSTR')[0].textContent = $.i18n.prop('DELETEALLSTR');
+			$('.i18n_DELETEALLSTR')[1].textContent = $.i18n.prop('DELETEALLSTR');
+			$('.i18n_ADDSTRC')[0].textContent = $.i18n.prop('ADDSTRC');
+			$('.i18n_ADDSTRC')[1].textContent = $.i18n.prop('ADDSTRC');
+			$('.i18n_ADDSTRS')[0].textContent = $.i18n.prop('ADDSTRS');
+			$('.i18n_ADDSTRS')[1].textContent = $.i18n.prop('ADDSTRS');
+			$('.i18n_ADDSTRT')[0].textContent = $.i18n.prop('ADDSTRT');
+			$('.i18n_ADDSTRT')[1].textContent = $.i18n.prop('ADDSTRT');
+			$('.i18n_NITIMPORT')[0].textContent = $.i18n.prop('NITIMPORT');
+			$('.i18n_NITIMPORT')[1].textContent = $.i18n.prop('NITIMPORT');
+			$('.i18n_NITEXPORT')[0].textContent = $.i18n.prop('NITEXPORT');
+			$('.i18n_NITEXPORT')[1].textContent = $.i18n.prop('NITEXPORT');
+			$('.i18n_DELPRG')[0].textContent = $.i18n.prop('DELPRG');
+			$('.i18n_DELPRG')[1].textContent = $.i18n.prop('DELPRG');
+			$('.i18n_EDITPRG')[0].textContent = $.i18n.prop('EDITPRG');
+			$('.i18n_DELALLDESC')[0].textContent = $.i18n.prop('DELALLDESC');
+			$('.i18n_DELALLDESC')[1].textContent = $.i18n.prop('DELALLDESC');			
+			$('.i18n_ADDDESC')[0].textContent = $.i18n.prop('ADDDESC');
+			$('.i18n_ADDDESC')[1].textContent = $.i18n.prop('ADDDESC');
+			$('.i18n_DELALLPRG')[0].textContent = $.i18n.prop('DELALLPRG');
+			$('.i18n_DELALLPRG')[1].textContent = $.i18n.prop('DELALLPRG');
+			$('.i18n_DELCHALLPRG')[0].textContent = $.i18n.prop('DELCHALLPRG');
+			$('.i18n_DELAUTOALLPRG')[0].textContent = $.i18n.prop('DELAUTOALLPRG');
+			$('.i18n_DELAUTOALLPRG')[1].textContent = $.i18n.prop('DELAUTOALLPRG');			
+			$('.i18n_ITEM')[0].textContent = $.i18n.prop('ITEM');
+			$('.i18n_ITEM')[1].textContent = $.i18n.prop('ITEM');
+			$('.i18n_REPRGID')[0].textContent = $.i18n.prop('REPRGID');
+			$('.i18n_REPRGID')[1].textContent = $.i18n.prop('REPRGID');
+			$('.i18n_REPRGPID')[0].textContent = $.i18n.prop('REPRGPID');
+			$('.i18n_REPRGPID')[1].textContent = $.i18n.prop('REPRGPID');
+			$('.i18n_ADDAUTOPRG')[0].textContent = $.i18n.prop('ADDAUTOPRG');
+			$('.i18n_ADDAUTOPRG')[1].textContent = $.i18n.prop('ADDAUTOPRG');
+			$('.i18n_PIDTRANS')[0].textContent = $.i18n.prop('PIDTRANS');
+			$('.i18n_PIDTRANS')[1].textContent = $.i18n.prop('PIDTRANS');
+			$('.i18n_CHSEARCH')[0].textContent = $.i18n.prop('CHSEARCH');
+			$('.i18n_CHSEARCH')[1].textContent = $.i18n.prop('CHSEARCH');
+			$('.i18n_CHDELALL')[0].textContent = $.i18n.prop('CHDELALL');
+			$('.i18n_CHDELALL')[1].textContent = $.i18n.prop('CHDELALL');
+			$('.i18n_OUTCHSET')[0].title = $.i18n.prop('OUTCHSET');			
+			$('.i18n_STREAMID').html($.i18n.prop('STREAMID'));
+			$('.i18n_NETWORKID').html($.i18n.prop('NETWORKID'));
+			$('.i18n_ORINETWORKID').html($.i18n.prop('ORINETWORKID'));
+			$('.i18n_OUTBITS').html($.i18n.prop('OUTBITS'));
+			var xcz = $('.i18n_AUTOVERSION');
+			$('.i18n_AUTOVERSION')[0].nextSibling.data = $.i18n.prop('AUTOVERSION');
+			$('.i18n_SORTID')[0].nextSibling.data = $.i18n.prop('SORTID');
+			$('.i18n_CHOOSETABLE').html($.i18n.prop('CHOOSETABLE'));
+			$('.i18n_DESC')[0].title = $.i18n.prop('DESC');
+			$('.i18n_TAG').html($.i18n.prop('TAG'));
+			$('.i18n_LENGTH').html($.i18n.prop('LENGTH'));
+			$('.i18n_BYTE').html($.i18n.prop('BYTE'));
+			$('.i18n_TIPS1').html($.i18n.prop('TIPS1'));
+			$('.i18n_SEARCHING').html($.i18n.prop('SEARCHING'));
+			$('.i18n_APPLYING').html($.i18n.prop('APPLYING'));
+        }
+    });
+
 	//描述符表
 	$('#tbl_descriptor').dataTable( {
 		"data": dataSet1,
@@ -1025,8 +1120,8 @@ function devinfo_output(devType){
 		"searching":   false,
 		"scrollCollapse": true,
 		"columns": [
-			{ "title": "标签", "width":"40%" },
-			{ "title": "描述符"}
+			{ "title": globalObj._nv == "zh-CN"?"标签":"TAG", "width":"40%" },
+			{ "title": globalObj._nv == "zh-CN"?"描述符":"DESC"}
 		]
 	});	 	
 
@@ -1043,7 +1138,6 @@ function devinfo_output(devType){
                 type: "GET",
                 async:false,
                 url: "http://"+globalObj.localip+":4000/do/programs/getglobalinfo?channel="+globalObj._channel,
-                // data: {ip:"192.168.1.134", inch:2},
                 dataType: "json",
                 success: function(data){
                     globalObj._intChannelCntMax = data._intChannelCntMax;
@@ -1072,10 +1166,6 @@ function devinfo_output(devType){
                     dataType: "json",
                     success: function(data){
                         //更新进度条
-                        if(data.sts != 0){
-                            //alert("搜索出现异常!!");
-                            //return;
-                        }
                         if(globalObj._intChannelCntMax == i){
                             progressbar.progressbar( "value", 10 * 10 );
                         }else{
@@ -1086,7 +1176,6 @@ function devinfo_output(devType){
 
                     },
                     error : function(err) {
-                        alert("异常！====="+JSON.stringify(err));
                     }
                 });
             }
@@ -1098,7 +1187,6 @@ function devinfo_output(devType){
         primary: "ui-icon-comment"
       }
     }).click(function( event ) {
-        //event.preventDefault();
         globalObj._channel = 1;
 		readprgs();
     });
@@ -1111,7 +1199,7 @@ function devinfo_output(devType){
         event.preventDefault();
         globalObj._channel = 1;
         if(globalObj._selectcount > 29){
-            alert("制表节目数已溢出!");
+            alert(globalObj._nv == "zh-CN"?"制表节目数已溢出!":"Program number overflow!");
             return;
         }
 		$("#out_tree").fancytree("getTree").reload();
@@ -1124,9 +1212,8 @@ function devinfo_output(devType){
         primary: "ui-icon-pencil"
       }
     }).click(function( event ) {
-        //event.preventDefault();
         if(globalObj._selectcount > 29){
-            alert("制表节目已溢出!");
+            alert(globalObj._nv == "zh-CN"?"制表节目数已溢出!":"Program number overflow!");
             return;
         }
         dig_notification.dialog( "open" );
@@ -1137,7 +1224,7 @@ function devinfo_output(devType){
 			 dataType: "json",
 			 success: function(data){
                  if(data.sts == 5){
-                     alert("权限不足，请与管理员联系");
+                     alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                  }else if(data.sts == 9){
                      window.location = "/login.esp";
                  }
@@ -1147,7 +1234,6 @@ function devinfo_output(devType){
                  dig_notification.dialog( "close" );
 			 }
 		});
-		//alert('------------------!!!');
     });
 	
 	$( "#output-read2" ).button({
@@ -1168,7 +1254,7 @@ function devinfo_output(devType){
         event.preventDefault();
         globalObj._channel = 2;
         if(globalObj._selectcount2 > 29){
-            alert("制表节目数已溢出!");
+            alert(globalObj._nv == "zh-CN"?"制表节目数已溢出!":"Program number overflow!");
             return;
         }
         globalObj.localip = window.location.href.substr(7, window.location.href.indexOf(':', 7) - 7);
@@ -1182,7 +1268,7 @@ function devinfo_output(devType){
     }).click(function( event ) {
         //event.preventDefault();
         if(globalObj._selectcount2 > 29){
-            alert("制表节目已溢出!");
+            alert(globalObj._nv == "zh-CN"?"制表节目数已溢出!":"Program number overflow!");
             return;
         }
         dig_notification.dialog( "open" );
@@ -1193,7 +1279,7 @@ function devinfo_output(devType){
             dataType: "json",
             success: function(data){
                 if(data.sts == 5){
-                    alert("权限不足，请与管理员联系");
+                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                 }else if(data.sts == 9){
                     window.location = "/login.esp";
                 }
@@ -1439,7 +1525,7 @@ function devinfo_output(devType){
                     }
 
                 }
-                prgnode.setTitle("节目: "+ globalObj._selectcount);
+                prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount);
                 prgnode.render();
                 checkselectedprg(data.node.key, data.node.selected, selnode);
                 data.node.toggleSelected();
@@ -1537,7 +1623,7 @@ function devinfo_output(devType){
 						data.node.remove();
                         globalObj._selectcount--;
                         var prgnode = channeltree.getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount);
                         prgnode.render();
                         var devnode = $("#devlist").fancytree("getTree").getNodeByKey(nodekey);
                         if(devnode != null){
@@ -1610,11 +1696,11 @@ function devinfo_output(devType){
                                             $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
 										},		
 										"columns": [
-											{ "title": "序号" },
-											{ "title": "输入通道", "width": "70px"},
-											{ "title": "流类型"},
-											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" }
+											{ "title": globalObj._nv == "zh-CN"?"序号":"NO." },
+											{ "title": globalObj._nv == "zh-CN"?"输入通道":"INPUT", "width": "70px"},
+											{ "title": globalObj._nv == "zh-CN"?"流类型":"StreamType"},
+											{ "title": globalObj._nv == "zh-CN"?"输入PID(Hex)":"IN-PID(Hex)"},
+											{ "title": globalObj._nv == "zh-CN"?"输出PID(Hex)":"OUT-PID(Hex)" }
 										]
 									});
                                     globalObj._tbl_edit.fnDraw();
@@ -1653,7 +1739,7 @@ function devinfo_output(devType){
                             globalObj._selectcount--;
                         }
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
                         break;
@@ -1709,11 +1795,11 @@ function devinfo_output(devType){
                                     $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
                                 },
                                 "columns": [
-                                    { "title": "序号" },
-                                    { "title": "输入通道", "width": "70px"},
-                                    { "title": "流类型"},
-                                    { "title": "输入PID(Hex)"},
-                                    { "title": "输出PID(Hex)" }
+                                    { "title": globalObj._nv == "zh-CN"?"序号":"NO." },
+									{ "title": globalObj._nv == "zh-CN"?"输入通道":"INPUT", "width": "70px"},
+									{ "title": globalObj._nv == "zh-CN"?"流类型":"StreamType"},
+									{ "title": globalObj._nv == "zh-CN"?"输入PID(Hex)":"IN-PID(Hex)"},
+									{ "title": globalObj._nv == "zh-CN"?"输出PID(Hex)":"OUT-PID(Hex)" }
                                 ]
                             });
                             $('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -1743,7 +1829,7 @@ function devinfo_output(devType){
                             }
                         });
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
                         break;
@@ -1763,7 +1849,7 @@ function devinfo_output(devType){
                             }
                         });
                         var prgnode = $("#channel").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
 						break;
@@ -1837,7 +1923,7 @@ function devinfo_output(devType){
                                     //获取输出通道信息
                                     readoutprgs(channeltree, globalObj._selectcount);
                                 }else if(data.sts == 5){
-                                    alert("权限不足，请与管理员联系");
+                                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                     return;
                                 }
                             },
@@ -1857,7 +1943,7 @@ function devinfo_output(devType){
                                 //获取输出通道信息
                                 readoutprgs(channeltree, globalObj._selectcount);
                             }else if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 return;
                             }
                         },
@@ -1881,44 +1967,37 @@ function devinfo_output(devType){
 										pidData[pidData.length] = item;					
 									});
 								}
-								//编辑数据流表
-								//if ( $.fn.dataTable.isDataTable( '#tbl_pid' ) ) {
-									//$('#tbl_pid').dataTable().fnClearTable();
-									//if(pidData.length != 0){
-									//	$('#tbl_pid').dataTable().fnAddData(pidData);
-									//}
-								//}else{
-									//PID表
-                                    globalObj._tbl_pid = $('#tbl_pid').dataTable( {
-										"data": pidData,
-										"order": [[ 0, "asc" ]],
-                                        "bDestroy" : true,
-										"paging":   false,
-										"info":     false,
-										"searching":   false,
-										"scrollCollapse": true,
-										"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
-											$('td:eq(1)', nRow).html( '<input type="text" pattern="([0-9]{1}$)" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1] + '"></input>' );
-											$('td:eq(2)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2] + '"></input>' );
-											$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
-										},
-										"columns": [
-											{ "title": "序号", "width": "60px" },
-											{ "title": "通道"},
-											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" }
-										]
-									});
-                                    $('#tbl_pid').dataTable().fnDraw();
-									$('#tbl_pid tbody').on( 'click', 'tr', function () {
-										if ( $(this).hasClass('selected') ) {
-											$(this).removeClass('selected');
-										}else {
-											$('#tbl_pid').DataTable().$('tr.selected').removeClass('selected');
-											$(this).addClass('selected');
-										}
-									} );
-								//}
+								//PID表
+								globalObj._tbl_pid = $('#tbl_pid').dataTable( {
+									"data": pidData,
+									"order": [[ 0, "asc" ]],
+									"bDestroy" : true,
+									"paging":   false,
+									"info":     false,
+									"searching":   false,
+									"scrollCollapse": true,
+									"fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+										$('td:eq(1)', nRow).html( '<input type="text" pattern="([0-9]{1}$)" id="p_ch'+iDisplayIndex+ '" name="p_ch'+iDisplayIndex+ '" value="'+ aData[1] + '"></input>' );
+										$('td:eq(2)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_oldpid'+iDisplayIndex+ '" name="p_oldpid'+iDisplayIndex+ '" value="'+ aData[2] + '"></input>' );
+										$('td:eq(3)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="p_newpid'+iDisplayIndex+ '" name="p_newpid'+iDisplayIndex+ '" value="'+ aData[3] + '"></input>' );
+									},
+									"columns": [
+										{ "title": globalObj._nv == "zh-CN"?"序号":"NO.", "width": "60px" },
+										{ "title": globalObj._nv == "zh-CN"?"通道":"CH"},
+										{ "title": globalObj._nv == "zh-CN"?"输入PID(Hex)":"IN-PID(Hex)"},
+										{ "title": globalObj._nv == "zh-CN"?"输出PID(Hex)":"OUT-PID(Hex)" }
+									]
+								});
+								$('#tbl_pid').dataTable().fnDraw();
+								$('#tbl_pid tbody').on( 'click', 'tr', function () {
+									if ( $(this).hasClass('selected') ) {
+										$(this).removeClass('selected');
+									}else {
+										$('#tbl_pid').DataTable().$('tr.selected').removeClass('selected');
+										$(this).addClass('selected');
+									}
+								} );
+								
 							 },    
 							 error : function(err) {      
 							 }   
@@ -1933,8 +2012,6 @@ function devinfo_output(devType){
 			}
 		},
 		click: function(event, data) {
-			// We should not toggle, if target was "checkbox", because this
-			// would result in double-toggle (i.e. no toggle)
 			if( $.ui.fancytree.getEventTargetType(event) === "title" ){
 			  data.node.toggleSelected();
 			}
@@ -2012,7 +2089,6 @@ function devinfo_output(devType){
 						data.node.setExpanded(true);
 						$.each(nodes, function(index,item){
 							item.setExpanded(true);
-							//item.render();
 						});
 						break;
 					} case '#collasp': {
@@ -2059,7 +2135,7 @@ function devinfo_output(devType){
                                     dialog_NIT.dialog( "close" );
                                     return;
                                 }else if(data.sts == 5){
-                                    alert("权限不足，请与管理员联系");
+                                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 }else if(data.sts == 9){
                                     window.location = "/login.esp";
                                     return;
@@ -2082,7 +2158,7 @@ function devinfo_output(devType){
                                     dialog_NIT.dialog( "close" );
                                     return;
                                 }else if(res.sts == 5){
-                                    alert("权限不足，请与管理员联系");
+                                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 }else if(res.sts == 9){
                                     window.location = "/login.esp";
                                     return;
@@ -2122,11 +2198,11 @@ function devinfo_output(devType){
                             dataType: "json",
                             success: function(res){
                                 if(res.sts == 0){
-                                    alert("读取流错误!");
+                                    alert(globalObj._nv == "zh-CN"?"读取流错误!":"Read Stream Error!");
                                     dialog_NIT.dialog( "close" );
                                     return;
                                 }else if(res.sts == 5){
-                                    alert("权限不足，请与管理员联系");
+                                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 }else if(res.sts == 9){
                                     window.location = "/login.esp";
                                     return;
@@ -2169,7 +2245,7 @@ function devinfo_output(devType){
                                     dialog_NIT.dialog( "close" );
                                     return;
                                 }else if(data.sts == 5){
-                                    alert("权限不足，请与管理员联系");
+                                    alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 }else if(data.sts == 9){
                                     window.location = "/login.esp";
                                     return;
@@ -2227,7 +2303,6 @@ function devinfo_output(devType){
 						data.node.setExpanded(true);
 						$.each(nodes, function(index,item){
 							item.setExpanded(true);
-							//item.render();
 						});
 						break;
 					} case '#collasp': {
@@ -2262,7 +2337,6 @@ function devinfo_output(devType){
                                         $.each(treeData1[0].children, function(index,item){
                                             data.node.addChildren(item);
                                         });
-                                        //data.node.addChildren(treeData1);
                                         readoutprgs($("#channel2").fancytree("getTree"),0);
                                         createTable();
                                         dig_notification.dialog( "close" );
@@ -2411,7 +2485,7 @@ function devinfo_output(devType){
                     }
 
                 }
-                prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount2);
                 prgnode.render();
                 checkselectedprg(data.node.key, data.node.selected, data.node);
                 data.node.toggleSelected();
@@ -2508,7 +2582,7 @@ function devinfo_output(devType){
                         data.node.remove();
                         globalObj._selectcount2--;
                     var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(nodekey, false, snode);
 						break;
@@ -2578,11 +2652,11 @@ function devinfo_output(devType){
 											
 										},		
 										"columns": [
-											{ "title": "序号" },
-											{ "title": "输入通道", "width": "70px"},
-											{ "title": "流类型"},
-											{ "title": "输入PID(Hex)"},
-											{ "title": "输出PID(Hex)" }
+											{ "title": globalObj._nv == "zh-CN"?"序号":"NO." },
+											{ "title": globalObj._nv == "zh-CN"?"输入通道":"INPUT", "width": "70px"},
+											{ "title": globalObj._nv == "zh-CN"?"流类型":"StreamType"},
+											{ "title": globalObj._nv == "zh-CN"?"输入PID(Hex)":"IN-PID(Hex)"},
+											{ "title": globalObj._nv == "zh-CN"?"输出PID(Hex)":"OUT-PID(Hex)" }
 										]
 									});   
 									$('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -2621,7 +2695,7 @@ function devinfo_output(devType){
                             globalObj._selectcount2--;
                         }
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
                         break;
@@ -2677,11 +2751,11 @@ function devinfo_output(devType){
                                     $('td:eq(4)', nRow).html( '<input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" id="r_outpid'+iDisplayIndex+ '" name="r_outpid'+iDisplayIndex+ '" value="'+ aData[4] + '"></input>' );
                                 },
                                 "columns": [
-                                    { "title": "序号" },
-                                    { "title": "输入通道", "width": "70px"},
-                                    { "title": "流类型"},
-                                    { "title": "输入PID(Hex)"},
-                                    { "title": "输出PID(Hex)" }
+                                    { "title": globalObj._nv == "zh-CN"?"序号":"NO." },
+									{ "title": globalObj._nv == "zh-CN"?"输入通道":"INPUT", "width": "70px"},
+									{ "title": globalObj._nv == "zh-CN"?"流类型":"StreamType"},
+									{ "title": globalObj._nv == "zh-CN"?"输入PID(Hex)":"IN-PID(Hex)"},
+									{ "title": globalObj._nv == "zh-CN"?"输出PID(Hex)":"OUT-PID(Hex)" }
                                 ]
                             });
                             $('#tbl_editprg tbody').on( 'click', 'tr', function () {
@@ -2711,7 +2785,7 @@ function devinfo_output(devType){
                             }
                         });
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
                         break;
@@ -2731,7 +2805,7 @@ function devinfo_output(devType){
                             }
                         });
                         var prgnode = $("#channel2").fancytree("getTree").getNodeByKey("id1.0");
-                        prgnode.setTitle("节目: "+ globalObj._selectcount2);
+                        prgnode.setTitle(globalObj._nv == "zh-CN"?"节目: ":"Program: "+ globalObj._selectcount2);
                         prgnode.render();
                         checkselectedprg(data.node.key, false, snode);
 						break;
@@ -2802,7 +2876,7 @@ function devinfo_output(devType){
                                 //获取输出通道信息
                                 readoutprgs(channeltree, globalObj._selectcount2);
                             }else if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 return;
                             }
                         },
@@ -2822,7 +2896,7 @@ function devinfo_output(devType){
                                 //获取输出通道信息
                                 readoutprgs(channeltree, globalObj._selectcount2);
                             }else if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                                 return;
                             }
                         },
@@ -2941,7 +3015,7 @@ function devinfo_output(devType){
                         dataType: "json",
                         success: function(data){
                             if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                             }else if(data.sts == 9){
                                 window.location = "/login.esp";
                                 return;
@@ -2967,7 +3041,7 @@ function devinfo_output(devType){
                                 dialog_NIT.dialog( "close" );
                                 return;
                             }else if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                             }else if(data.sts == 9){
                                 window.location = "/login.esp";
                                 return;
@@ -2990,7 +3064,7 @@ function devinfo_output(devType){
                                 dialog_NIT.dialog( "close" );
                                 return;
                             }else if(res.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                             }else if(res.sts == 9){
                                 window.location = "/login.esp";
                                 return;
@@ -3030,11 +3104,11 @@ function devinfo_output(devType){
                         dataType: "json",
                         success: function(res){
                             if(res.sts == 0){
-                                alert("读取流错误!");
+                                alert(globalObj._nv == "zh-CN"?"读取流错误!":"Read Stream Error!");
                                 dialog_NIT.dialog( "close" );
                                 return;
                             }else if(res.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                             }else if(res.sts == 9){
                                 window.location = "/login.esp";
                                 return;
@@ -3077,7 +3151,7 @@ function devinfo_output(devType){
                                 dialog_NIT.dialog( "close" );
                                 return;
                             }else if(data.sts == 5){
-                                alert("权限不足，请与管理员联系");
+                                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                             }else if(data.sts == 9){
                                 window.location = "/login.esp";
                                 return;
@@ -3114,10 +3188,10 @@ function devinfo_output(devType){
 		width: 750,
 		modal: true,
 		buttons: {
-			"确定": function() {
+			"OK": function() {
 			  dialog_desc.dialog( "close" );
 			},
-			"取消": function() {
+			"Cancel": function() {
 			  dialog_desc.dialog( "close" );
 			}
 		}
@@ -3130,16 +3204,16 @@ function devinfo_output(devType){
         width: 700,
         modal: true,
         buttons: {
-            "添加":function() {
+            "ADD":function() {
                 $('#tbl_nitc').DataTable().row.add( [
                     0,
                     0
                 ] ).draw();
             } ,
-            "删除":function() {
+            "DELETE":function() {
                 $('#tbl_nitc').DataTable().row('.selected').remove().draw( false );
             },
-            "确定": function() {
+            "OK": function() {
                 var oristreamid = 0;
                 if(globalObj._channel == 1 && globalObj._prgoptflag == 0){
                     oristreamid = $("#out_tree").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
@@ -3169,10 +3243,10 @@ function devinfo_output(devType){
                     dataType: "json",
                     success: function(data){
                         if(data.sts == 0){
-                            alert("数据输入错误!!");
+                            alert(globalObj._nv == "zh-CN"?"数据输入错误!!":"DATA ERROR!!");
                             return;
                         }else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
                         //获取制表信息
                         createTable();
@@ -3195,16 +3269,16 @@ function devinfo_output(devType){
         width: 700,
         modal: true,
         buttons: {
-            "添加":function() {
+            "ADD":function() {
                 $('#tbl_nits').DataTable().row.add( [
                     0,
                     0
                 ] ).draw();
             } ,
-            "删除":function() {
+            "DELETE":function() {
                 $('#tbl_nits').DataTable().row('.selected').remove().draw( false );
             },
-            "确定": function() {
+            "OK": function() {
                 var oristreamid = 0;
                 if(globalObj._channel == 1 && globalObj._prgoptflag == 0){
                     oristreamid = $("#out_tree").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
@@ -3236,10 +3310,10 @@ function devinfo_output(devType){
                     dataType: "json",
                     success: function(data){
                         if(data.sts == 0){
-                            alert("数据输入错误!!");
+                            alert(globalObj._nv == "zh-CN"?"数据输入错误!!":"DATA ERROR!!");
                             return;
                         }else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
                         //获取制表信息
                         createTable();
@@ -3249,7 +3323,7 @@ function devinfo_output(devType){
                 });
                 dialog_nits.dialog( "close" );
             },
-            "取消": function() {
+            "CANCEL": function() {
                 dialog_nits.dialog( "close" );
             }
         }
@@ -3262,16 +3336,16 @@ function devinfo_output(devType){
         width: 700,
         modal: true,
         buttons: {
-            "添加":function() {
+            "ADD":function() {
                 $('#tbl_nitt').DataTable().row.add( [
                     0,
                     0
                 ] ).draw();
             } ,
-            "删除":function() {
+            "DELETE":function() {
                 $('#tbl_nitt').DataTable().row('.selected').remove().draw( false );
             },
-            "确定": function() {
+            "OK": function() {
                 var oristreamid = 0;
                 if(globalObj._channel == 1 && globalObj._prgoptflag == 0){
                     oristreamid = $("#out_tree").fancytree("getTree").getNodeByKey(globalObj._editnodekey).data.streamid;
@@ -3305,10 +3379,10 @@ function devinfo_output(devType){
                     dataType: "json",
                     success: function(data){
                         if(data.sts == 0){
-                            alert("数据输入错误!!");
+                            alert(globalObj._nv == "zh-CN"?"数据输入错误!!":"DATA ERROR!!");
                             return;
                         }else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
                         //获取制表信息
                         createTable();
@@ -3318,7 +3392,7 @@ function devinfo_output(devType){
                 });
                 dialog_nitt.dialog( "close" );
             },
-            "取消": function() {
+            "CANCEL": function() {
                 dialog_nitt.dialog( "close" );
             }
         }
@@ -3330,7 +3404,7 @@ function devinfo_output(devType){
 		width: 750,
 		modal: true,
 		buttons: {
-			"添加": function() {
+			"ADD": function() {
 				var index = Number(globalObj._tbl_pid[0].rows[globalObj._tbl_pid[0].rows.length - 1].firstChild.textContent);
 				if( index || (index == 0)){
 					index++;
@@ -3344,10 +3418,10 @@ function devinfo_output(devType){
 					0
 				] ).draw();
 			},
-			"删除": function() {
+			"DELETE": function() {
 				$('#tbl_pid').DataTable().row('.selected').remove().draw( false );
 			},
-			"确定": function() {
+			"OK": function() {
 				var jsonstr;
 				var data = $('#tbl_pid').DataTable().$('input').serialize();
 				if(data == ""){
@@ -3364,10 +3438,10 @@ function devinfo_output(devType){
 					 dataType: "json",
 					 success: function(data){
 						if(data.sts == 0){
-							alert("数据输入错误!!");
-							return;
-						}else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"数据输入错误!!":"DATA ERROR!!");
+                            return;
+                        }else if(data.sts == 5){
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
 						dialog_pid.dialog( "close" );
                          $('#tbl_pid').DataTable().destroy();
@@ -3378,7 +3452,7 @@ function devinfo_output(devType){
 				});
 				
 			},
-			"取消": function() {
+			"CANCEL": function() {
 				dialog_pid.dialog( "close" );
                 $('#tbl_pid').DataTable().destroy();
                 $('#tbl_pid').empty();
@@ -3393,10 +3467,10 @@ function devinfo_output(devType){
 		width: 450,
 		modal: true,
 		buttons: {
-			"确定": function() {
+			"OK": function() {
                 var nitid = parseInt($('.nit_id')[0].value, 16);
                 if($('.nit_name').val().length > 32){
-                    alert("名称太长，最多32字符.");
+                    alert(globalObj._nv == "zh-CN"?"名称太长，最多32字符.":"Name is too long, 32 length limited!");
                     return;
                 }
                 if(!isNaN(nitid)){
@@ -3418,7 +3492,7 @@ function devinfo_output(devType){
                             dialog_NIT.dialog( "close" );
                             return;
                         }else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }else if(data.sts == 9){
                             window.location = "/login.esp";
                             return;
@@ -3431,7 +3505,7 @@ function devinfo_output(devType){
                     }
                 });
 			},
-			"取消": function() {
+			"CANCEL": function() {
 			    dialog_NIT.dialog( "close" );
 			}
 		}
@@ -3444,7 +3518,7 @@ function devinfo_output(devType){
 		width: 900,
 		modal: true,
 		buttons: {
-			"添加":function() {
+			"ADD":function() {
                 var tblindex = Number(globalObj._tbl_edit[0].rows[globalObj._tbl_edit[0].rows.length - 1].firstChild.textContent);
                 if(isNaN(tblindex)){
                     tblindex = 0;
@@ -3457,13 +3531,13 @@ function devinfo_output(devType){
 					200
 				] ).draw();
 			} ,
-			"删除":function() {
+			"DELETE":function() {
 				$('#tbl_editprg').DataTable().row('.selected').remove().draw( false );
 			},
-			"确定": function() {
+			"OK": function() {
 				var strindex = "";
                 if($('.prg_name')[0].value == ""){
-                    alert("节目名称不能为空!");
+					alert(globalObj._nv == "zh-CN"?"节目名称不能为空.":"Name can not be null!");
                     return false;
                 }
 				for(var i=1;i<globalObj._tbl_edit[0].rows.length;i++){
@@ -3504,13 +3578,13 @@ function devinfo_output(devType){
                             readoutprgs(tmptree, snt);
                             $('.prg_prc').attr("disabled", true);
 						}else if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
 					 }
 				});
 				dialog_edit.dialog( "close" );
 			},
-			"取消": function() {
+			"CANCEL": function() {
 			    dialog_edit.dialog( "close" );
 			}
 		}
@@ -3521,7 +3595,7 @@ function devinfo_output(devType){
 		width: 470,
 		modal: true,
 		buttons: {							
-			"确定": function() {
+			"OK": function() {
 				var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ Number($('.item_netid').val()) + ',"streamId":' + Number($('.item_transid').val()) + ',"oringal_networkid":' + Number($('.item_orignetid').val()) + ',"outputRate":' + Number($('.item_out').val())+ ',"isAutoRaiseVersion":' + ($('.autoinc_ver')[0].checked == true?1:0) + ',"version":' + Number($('.item_version')[0].textContent) + ',"isAutoRankPAT":' + ($('.pat_auto')[0].checked == true?1:0) + ',"isNeedSend_cat":' + ($('.sl_cat')[0].checked == true?1:0) + ',"isNeedSend_nit":' + ($('.sl_nit')[0].checked == true?1:0) + ',"isNeedSend_pat":' + ($('.sl_pat')[0].checked == true?1:0) + ',"isNeedSend_pmt":' + ($('.sl_pmt')[0].checked == true?1:0) + ',"isNeedSend_sdt":' + ($('.sl_sdt')[0].checked == true?1:0) + '}';
 				//下发配置
 				$.ajax({
@@ -3532,7 +3606,7 @@ function devinfo_output(devType){
 					 dataType: "json",
 					 success: function(data){
 						if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
 						}
 					 },    
 					 error : function(err) {    
@@ -3540,10 +3614,10 @@ function devinfo_output(devType){
 				});
 				dig_itmes.dialog( "close" );
 			},
-			"取消": function() {
+			"CANCEL": function() {
 				dig_itmes.dialog( "close" );
 			},
-			"应用":function() {
+			"APPLY":function() {
                 var jsonstr = '{"channel":' +$('#tag_channel')[0].textContent + ',"networkId":'+ Number($('.item_netid').val()) + ',"streamId":' + Number($('.item_transid').val()) + ',"oringal_networkid":' + Number($('.item_orignetid').val()) + ',"outputRate":' + Number($('.item_out').val())+ ',"isAutoRaiseVersion":' + ($('.autoinc_ver')[0].checked == true?1:0) + ',"version":' + Number($('.item_version')[0].textContent) + ',"isAutoRankPAT":' + ($('.pat_auto')[0].checked == true?1:0) + ',"isNeedSend_cat":' + ($('.sl_cat')[0].checked == true?1:0) + ',"isNeedSend_nit":' + ($('.sl_nit')[0].checked == true?1:0) + ',"isNeedSend_pat":' + ($('.sl_pat')[0].checked == true?1:0) + ',"isNeedSend_pmt":' + ($('.sl_pmt')[0].checked == true?1:0) + ',"isNeedSend_sdt":' + ($('.sl_sdt')[0].checked == true?1:0) + '}';
                 //下发配置
                 $.ajax({
@@ -3554,7 +3628,7 @@ function devinfo_output(devType){
                     dataType: "json",
                     success: function(data){
                         if(data.sts == 5){
-                            alert("权限不足，请与管理员联系");
+                            alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
                         }
                     },
                     error : function(err) {
@@ -3581,7 +3655,7 @@ function devinfo_output(devType){
     progressbar.progressbar({
         value: true,
         change: function() {
-            progressLabel.text( "正在搜索第 " + $('.progress-label')[0].dataset.ch + " 通道" );
+            progressLabel.text( globalObj._nv == "zh-CN"?("正在搜索第 "+ $('.progress-label')[0].dataset.ch + " 通道"):("Searching "+ $('.progress-label')[0].dataset.ch + " Channel"));
         },
         complete: function() {
             $('.progress-label')[0].dataset.ch = 1;

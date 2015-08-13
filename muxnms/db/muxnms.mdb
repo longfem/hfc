@@ -26,8 +26,7 @@
             'level': { type: 'int' },
             'logtime': { type: 'int' },
         },
-        data: [
-            [ 1,'root','用户登录',1,1439348696,],
+        data: [           
         ],
     },
 }
