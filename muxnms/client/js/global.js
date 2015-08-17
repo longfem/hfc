@@ -365,7 +365,7 @@ function gbl_monitor() {
         callback : function() {//加载成功后设置显示内容
             $('.i18n_M1BIT').html($.i18n.prop('M1BIT'));
             $('.i18n_M1OVERFLOW').html($.i18n.prop('M1OVERFLOW'));
-            $('.i18n_M2BIT').html($.i18n.prop('i18n_M2BIT'));
+            $('.i18n_M2BIT').html($.i18n.prop('M2BIT'));
             $('.i18n_M2OVERFLOW').html($.i18n.prop('M2OVERFLOW'));           
             $('.i18n_DATADROP').html($.i18n.prop('DATADROP'));
             $('.i18n_CHANNEL').html($.i18n.prop('CHANNEL'));    

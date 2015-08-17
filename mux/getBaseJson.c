@@ -13,7 +13,7 @@ void getbaseJson(char *ip, char *outprg){
 	if(strcmp("101", str)){
 		cJSON_AddStringToObject(baseinfo,"devType", "8合2复用器");
 	}else if(strcmp("102", str)){
-		cJSON_AddStringToObject(baseinfo,"devType", "8合1复用器");
+		cJSON_AddStringToObject(baseinfo,"devType", "MUX8in1");
 	}else if(strcmp("201", str)){
 		cJSON_AddStringToObject(baseinfo,"devType", "4合1QAM调制器");
 	}else if(strcmp("211", str)){

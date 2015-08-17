@@ -4,7 +4,7 @@
 #include "datastructdef.h"
 #include "list.h"
 
-void getPrgsJson(char *ip, int inChn, char *outprg);
-void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst);
-void getoutprgsJson(char *ip, int inChn, char *outprg);
+void getPrgsJson(char *ip, int inChn, char *outprg, char *lan);
+void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst, char *lan);
+void getoutprgsJson(char *ip, int inChn, char *outprg, char *lan);
 #endif 

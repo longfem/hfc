@@ -74,12 +74,12 @@
          <div class="main-content">
              <!--  CONTENT  -->			 
 		</div>		 		 
-        <div id="dialog-form" title="编辑节目">
+        <div id="dialog-form" class="i18n_HEDITPRG" title="EDIT PROGRAM">
         <table class="tbl_program">
             <tr>
-                <td><label>名称</label></td>
+                <td><label class="i18n_HNAME">NAME</label></td>
                 <td><input type="text" class="prg_name" value="" /></td>
-                <td><label>业务类型</label></td>
+                <td><label class="i18n_HBUSTYPE">TYPE</label></td>
                 <td>
                     <select id="r_servicetype" style="width:250px">
                         <option value ="1">[1]digital television service</option><option value ="2">[2]digital radio sound service</option>
@@ -99,13 +99,13 @@
                         </select></td>
                 </tr>
             <tr>
-                <td><label>提供商名称</label></td>
+                <td><label class="i18n_HPRONAME"> Provider Name</label></td>
                 <td><input type="text" class="prg_merchant" value="" /></td>
-                <td><label>节目号</label></td>
+                <td><label class="i18n_HPRGID">PROGRAM ID</label></td>
                 <td><input type="text" style="width:50px" class="prg_no" value="" /> <label>PMT_PID(Hex)</label><input style="width:50px" type="text" class="prg_pid" value="1389" /></td>
                 </tr>
             <tr>
-                <td><label>PRC通道</label></td>
+                <td><label class="i18n_HPRCCH">PRC CH</label></td>
                 <td><input disabled="disabled" type="text" class="prg_prc" value="2" /></td>
                 <td><label>PRC_PID(Hex)</label></td>
                 <td><input type="text" style="width:50px" class="prg_prc1" value="488" /> --><input style="width:50px" type="text" class="prg_prc2" value="488" /><input style="margin-left:10px" type="checkbox" />加扰 </td>
@@ -115,17 +115,17 @@
             <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_editprg"></table>
             </div>
         </div>
-        <div id="dialog-NITC" class="dialog-nit" title="电缆传输系统描述符">
+        <div id="dialog-NITC" class="dialog-nit i18n_HNITC" title="Cable transmission system descriptor">
             <div class="nit_section">
-                <label>传输流ID &nbsp</label>
+                <label class="i18n_HSTREAMID">STREAMID &nbsp</label>
                 <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nitc_id" value="" />
-                <label>原始网络ID &nbsp</label>
+                <label class="i18n_HORINETID">ORINETWORKID &nbsp</label>
                 <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nitc_netid" value="" /><br/>
-                <label>频率</label>
+                <label class="i18n_HHZ">Frequency</label>
                 <input type="text" class="nitc_hz" value=""/>
                 <label>(KHz)eg:312000</label>
                 <br/>
-                <label>符号率</label>
+                <label class="i18n_HSYMBOL">Symbol Rate</label>
                 <input type="text" class="nitc_ksm" value=""/>
                 <label>(KSymbol)eg:27450</label>
                 <br/>
@@ -145,7 +145,7 @@
                     <option value ="5">[5]7/8 conv.code rate</option>
                     <option value ="15">[15]no conv.code</option>
                 </select><br/>
-                <label>调制方式</label>
+                <label class="i18n_HQAMTYPE">Modulation Mode</label>
                 <select id="nitc_qam" style="width:250px">
                     <option value ="0">[0]not defined</option>
                     <option value ="1">[1]16 QAM</option>
@@ -155,7 +155,7 @@
                     <option value ="5">[5]256 QAM</option>
                 </select><br/>
                 <fieldset>
-                    <legend>业务列表</legend>
+                    <legend class="i18n_HBUSLIST">Business List</legend>
                     <div class="tbl_nit">
                         <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_nitc"></table>
                     </div>
@@ -163,21 +163,21 @@
             </div>
         </div>
     </div>
-    <div id="dialog-NITS" class="dialog-nit" title="卫星传输系统描述符">
+    <div id="dialog-NITS" class="dialog-nit i18n_HNITS" title="Satellite transmission system descriptor">
         <div class="nit_section">
-            <label>传输流ID &nbsp</label>
+            <label class="i18n_HSTREAMID">STREAMID &nbsp</label>
             <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nits_id" value="" />
-            <label>原始网络ID &nbsp</label>
+            <label class="i18n_HORINETID">ORINETWORKID &nbsp</label>
             <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nits_netid" value="" /><br/>
-            <label>频率</label>
+            <label class="i18n_HHZ">Frequency</label>
             <input type="text" class="nits_hz" value=""/>
             <label>(KHz)eg:312000</label>
             <br/>
-            <label>符号率</label>
+            <label class="i18n_HSYMBOL">Symbol Rate</label>
             <input type="text" class="nits_ksm" value=""/>
             <label>(KSymbol)eg:27450</label>
             <br/>
-            <label>轨道位置</label>
+            <label class="i18n_HPATHPOS">Orbit Position</label>
             <input type="text" class="nits_path" value=""/>
             <label>eg:192</label>
             <br/>
@@ -198,56 +198,56 @@
                 <option value ="5">[5]7/8 conv.code rate</option>
                 <option value ="15">[15]no conv.code</option>
             </select><br/>
-            <label>调制方式</label>
+            <label class="i18n_HQAMTYPE">Modulation Mode</label>
             <select id="nits_qpsk" style="width:250px">
                 <option value ="0">[0]not defined</option>
                 <option value ="1">[1]QPSK</option>
             </select><br/>
-            <label>东西部标示</label>
+            <label class="i18n_HWETIP">East-West Marks</label>
             <select id="nits_tip" style="width:250px">
                 <option value ="0">[0]indicate the western position</option>
                 <option value ="1">[1]indicate the eastern position</option>
             </select><br/>
             <fieldset>
-                <legend>业务列表</legend>
+                <legend class="i18n_HBUSLIST">Business List</legend>
                 <div class="tbl_nit">
                     <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_nits"></table>
                 </div>
             </fieldset>
         </div>
     </div>
-    <div id="dialog-NITT" class="dialog-nit" title="地面传输系统描述符">
+    <div id="dialog-NITT" class="dialog-nit i18n_HNITT" title="Ground transport system descriptor">
         <div class="nit_section">
-            <label>传输流ID &nbsp</label>
+            <label class="i18n_HSTREAMID">STREAMID &nbsp</label>
             <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nitt_id" value="" />
-            <label>原始网络ID &nbsp</label>
+            <label class="i18n_HORINETID">ORINETWORKID &nbsp</label>
             <input type="text" pattern="(^0x[a-f0-9]{1,4}$)|(^0X[A-F0-9]{1,4}$)|(^[A-F0-9]{1,4}$)|(^[a-f0-9]{1,4}$)" class="nitt_netid" value="" /><br/>
-            <label>频率</label>
+            <label class="i18n_HHZ">Frequency</label>
             <input type="text" class="nitt_hz" value=""/>
             <label>(Hz)[10:42949672950]</label>
             <br/>
-            <label>带宽</label>
+            <label class="i18n_HBANDWIDTH">Bandwidth</label>
             <select id="nitt_bandwidth" style="width:250px">
                 <option value ="0">[0]8 MHz</option>
                 <option value ="1">[1]7 MHz</option>
                 <option value ="2">[2]6 MHz</option>
                 <option value ="3">[3]5 MHz</option>
             </select><br/>
-            <label>星座模式</label>
+            <label class="i18n_HCONSTELL">Constellation Model</label>
             <select id="nitt_constell" style="width:250px">
                 <option value ="0">[0]QPSK</option>
                 <option value ="1">[1]16 - QAM</option>
                 <option value ="2">[2]64 - QAM</option>
                 <option value ="3">[3]reserved</option>
             </select><br/>
-            <label>传输模式</label>
+            <label class="i18n_HTRANSMODE">Transmission Mode</label>
             <select id="nitt_transmissionMode" style="width:250px">
                 <option value ="0">[0]2K mode</option>
                 <option value ="1">[1]8K mode</option>
                 <option value ="2">[2]4K mode</option>
                 <option value ="3">[3]reserved</option>
             </select><br/>
-            <label>传输层次</label>
+            <label class="i18n_HHIERARCHY">Transport Hierarchy</label>
             <select id="nitt_hierarchy" style="width:250px">
                 <option value ="0">[0]non-hierarchical,native interleaver</option>
                 <option value ="1">[1]a=1,native interleaver</option>
@@ -274,7 +274,7 @@
                 <option value ="3">[3]5/6</option>
                 <option value ="4">[4]7/8</option>
             </select><br/>
-            <label>保护间隔</label>
+            <label class="i18n_HGI">Protection Interval</label>
             <select id="nitt_gi" style="width:250px">
                 <option value ="0">[0]1/32</option>
                 <option value ="1">[1]1/16</option>
@@ -282,7 +282,7 @@
                 <option value ="3">[3]1/4</option>
             </select><br/>
             <fieldset>
-                <legend>业务列表</legend>
+                <legend class="i18n_HBUSLIST">Business List</legend>
                 <div class="tbl_nit">
                     <table cellpadding="0" cellspacing="0" border="0" class="cell-border compact hover" id="tbl_nitt"></table>
                 </div>
@@ -402,6 +402,37 @@
 				$('.i18n_EXPORT')[0].textContent = $.i18n.prop('EXPORT');
 				$('.i18n_EXIT').html($.i18n.prop('EXIT'));
 				
+				$('.i18n_HEDITPRG')[0].title = $.i18n.prop('HEDITPRG');
+				$('.i18n_HNITC')[0].title = $.i18n.prop('HNITC');
+				$('.i18n_HNITS')[0].title = $.i18n.prop('HNITS');
+				$('.i18n_HNITT')[0].title = $.i18n.prop('HNITT');
+				$('.i18n_HNAME').html($.i18n.prop('HNAME'));
+				$('.i18n_HBUSTYPE').html($.i18n.prop('HBUSTYPE'));
+				$('.i18n_HPRONAME').html($.i18n.prop('HPRONAME'));
+				$('.i18n_HPRGID').html($.i18n.prop('HPRGID'));
+				$('.i18n_HPRCCH').html($.i18n.prop('HPRCCH'));
+				$('.i18n_HSTREAMID')[0].textContent = $.i18n.prop('HSTREAMID');
+				$('.i18n_HSTREAMID')[1].textContent = $.i18n.prop('HSTREAMID');
+				$('.i18n_HSTREAMID')[2].textContent = $.i18n.prop('HSTREAMID');
+				$('.i18n_HORINETID')[0].textContent = $.i18n.prop('HORINETID');
+				$('.i18n_HORINETID')[1].textContent = $.i18n.prop('HORINETID');
+				$('.i18n_HORINETID')[2].textContent = $.i18n.prop('HORINETID');
+				$('.i18n_HHZ')[0].textContent = $.i18n.prop('HHZ');
+				$('.i18n_HHZ')[1].textContent = $.i18n.prop('HHZ');
+				$('.i18n_HHZ')[2].textContent = $.i18n.prop('HHZ');
+				$('.i18n_HSYMBOL')[0].textContent = $.i18n.prop('HSYMBOL');
+				$('.i18n_HSYMBOL')[1].textContent = $.i18n.prop('HSYMBOL');
+				$('.i18n_HQAMTYPE')[0].textContent = $.i18n.prop('HQAMTYPE');
+				$('.i18n_HQAMTYPE')[1].textContent = $.i18n.prop('HQAMTYPE');
+				$('.i18n_HBUSLIST')[0].textContent = $.i18n.prop('HBUSLIST');
+				$('.i18n_HBUSLIST')[1].textContent = $.i18n.prop('HBUSLIST');
+				$('.i18n_HPATHPOS').html($.i18n.prop('HPATHPOS'));
+				$('.i18n_HWETIP').html($.i18n.prop('HWETIP'));
+				$('.i18n_HBANDWIDTH').html($.i18n.prop('HBANDWIDTH'));				
+				$('.i18n_HCONSTELL').html($.i18n.prop('HCONSTELL'));
+				$('.i18n_HTRANSMODE').html($.i18n.prop('HTRANSMODE'));				
+				$('.i18n_HHIERARCHY').html($.i18n.prop('HHIERARCHY'));
+				$('.i18n_HGI').html($.i18n.prop('HGI'));
 			}
 		});
 		function toHome() {

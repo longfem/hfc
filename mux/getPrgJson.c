@@ -6,7 +6,7 @@
 
 ClsProgram_st clsProgram;
 
-void getprgsJson(char *ip, int inChn, char *outprg){
+void getprgsJson(char *ip, int inChn, char *outprg, char *lan){
 	int i = 0, j = 0, res = 0;	
 	char str[200] = {0};
 	char idstr[100] = {0};
@@ -41,7 +41,11 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
-			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			if(!strcmp(lan, "zh-CN")){
+				sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			}else{
+				sprintf(str,"Program %d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );		
+			}
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
 			cJSON_AddTrueToObject(prgjson,"folder");
@@ -212,7 +216,11 @@ void getprgsJson(char *ip, int inChn, char *outprg){
         }
 
 		//添加通道节点TITLE
-		sprintf(str,"通道%d(ASI-%d)  -  原始网络ID=0x%04X,传输流ID=0x%04X",ptmpPrgInfo->chnId, ptmpPrgInfo->chnId, ptmpPrgInfo->networkId, ptmpPrgInfo->streamId );
+		if(!strcmp(lan, "zh-CN")){
+			sprintf(str,"通道%d(ASI-%d)  -  原始网络ID=0x%04X,传输流ID=0x%04X",ptmpPrgInfo->chnId, ptmpPrgInfo->chnId, ptmpPrgInfo->networkId, ptmpPrgInfo->streamId );
+		}else{
+			sprintf(str,"Channel%d(ASI-%d)  -  OriNetworkID=0x%04X,StreamID=0x%04X",ptmpPrgInfo->chnId, ptmpPrgInfo->chnId, ptmpPrgInfo->networkId, ptmpPrgInfo->streamId );
+		}
 		cJSON_AddStringToObject(channeljson,"title", str);
 
 		prgjsonstring = cJSON_PrintUnformatted(channelsarray);
@@ -233,7 +241,11 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 		cJSON_AddStringToObject(channeljson,"key", idstr);
 		cJSON_AddStringToObject(channeljson,"icon", "img/channel_in.ico");
 		//添加通道节点TITLE
-		sprintf(str,"通道%d(ASI-%d)", inChn, inChn);
+		if(!strcmp(lan, "zh-CN")){
+			sprintf(str,"通道%d(ASI-%d)", inChn, inChn);
+		}else{
+			sprintf(str,"Channel%d(ASI-%d)", inChn, inChn);
+		}
 		cJSON_AddStringToObject(channeljson,"title", str);
 		prgjsonstring = cJSON_PrintUnformatted(channelsarray);		
 		memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
@@ -245,7 +257,7 @@ void getprgsJson(char *ip, int inChn, char *outprg){
 	
 }
 
-void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
+void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst, char *lan){
     int i = 0, j = 0;
     char str[200] = {0};
     char idstr[100] = {0};
@@ -261,8 +273,12 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
         //添加节目节点TITLE
         memset(idstr, 0, sizeof(idstr));
         memcpy(idstr, userprg->prgName, userprg->prgNameLen);
-        sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",userprg->prgNum, userprg->prgNum, userprg->pmtPid, userprg->newPcrPid, idstr );
-        memset(idstr, 0, sizeof(idstr));
+		if(!strcmp(lan, "zh-CN")){
+			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",userprg->prgNum, userprg->prgNum, userprg->pmtPid, userprg->newPcrPid, idstr );
+		}else{
+			sprintf(str,"Program %d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",userprg->prgNum, userprg->prgNum, userprg->pmtPid, userprg->newPcrPid, idstr );
+		}
+		memset(idstr, 0, sizeof(idstr));
         cJSON_AddStringToObject(prgjson,"title", str);
         cJSON_AddTrueToObject(prgjson,"folder");
         cJSON_AddFalseToObject(prgjson,"expanded");
@@ -400,7 +416,7 @@ void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst){
     }
 }
 
-void getoutprgsJson(char *ip, int inChn, char *outprg){
+void getoutprgsJson(char *ip, int inChn, char *outprg, char *lan){
 	int i = 0;
 	char str[200] = {0};
 	char idstr[100] = {0};
@@ -420,7 +436,11 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 			//添加节目节点TITLE					
 			memset(idstr, 0, sizeof(idstr));
 			memcpy(idstr, ptmpPrgInfo->prgName, ptmpPrgInfo->prgNameLen);
-			sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			if(!strcmp(lan, "zh-CN")){
+				sprintf(str,"节目%d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			}else{
+				sprintf(str,"Program %d(0X%x):PID(0X%x) PCR_PID(0X%x) - %s",ptmpPrgInfo->prgNum, ptmpPrgInfo->prgNum, ptmpPrgInfo->pmtPid, ptmpPrgInfo->newPcrPid, idstr );
+			}
 			memset(idstr, 0, sizeof(idstr));
 			cJSON_AddStringToObject(prgjson,"title", str);
 			cJSON_AddTrueToObject(prgjson,"folder");
@@ -564,7 +584,7 @@ void getoutprgsJson(char *ip, int inChn, char *outprg){
 		}
 	}
 	if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
-        adduserprgjson(basearry, pst);
+        adduserprgjson(basearry, pst, lan);
 	}
 	list_t *caIdenList = &pst->caNode.caIdenList;
 	if(list_len(caIdenList)>0){

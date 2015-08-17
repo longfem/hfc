@@ -7,7 +7,7 @@ extern ClsProgram_st clsProgram;
 extern ClsMux_st *pclsMux;
 extern ClsParams_st *pdb;
 
-void getTableJson(int channel, char *outprg, int flag){
+void getTableJson(int channel, char *outprg, int flag, char *lan){
 	char str[100] = {0};
 	char idstr[100] = {0};
 	int i = 0, j = 0, k = 0;
@@ -37,7 +37,11 @@ void getTableJson(int channel, char *outprg, int flag){
 				switch(i){
 					case 1:
 						memset(str, 0, sizeof(str));
-						sprintf(str,"版本：%02d", p_pat->version_number);
+						if(!strcmp(lan, "zh-CN")){
+							sprintf(str,"版本：%02d", p_pat->version_number);
+						}else{
+							sprintf(str,"Version:%02d", p_pat->version_number);
+						}
 						cJSON_AddStringToObject(subTablejson,"title", str);
 						cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 						break;
@@ -67,12 +71,20 @@ void getTableJson(int channel, char *outprg, int flag){
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				if(i == 0){
 					memset(str, 0, sizeof(str));
-					sprintf(str,"网络ID (0x%04x)", p_program->pid);
+					if(!strcmp(lan, "zh-CN")){
+						sprintf(str,"网络ID (0x%04x)", p_program->pid);
+					}else{
+						sprintf(str,"NETWORKID (0x%04x)", p_program->pid);
+					}
 					cJSON_AddStringToObject(subTablejson,"title", str);
 					cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
 				}else{
 					memset(str, 0, sizeof(str));
-					sprintf(str,"业务 (0x%04x) PMTPid=(0x%04x)", p_program->program_number, p_program->pid);
+					if(!strcmp(lan, "zh-CN")){
+						sprintf(str,"业务 (0x%04x) PMTPid=(0x%04x)", p_program->program_number, p_program->pid);
+					}else{
+						sprintf(str,"Business (0x%04x) PMTPid=(0x%04x)", p_program->program_number, p_program->pid);
+					}
 					cJSON_AddStringToObject(subTablejson,"title", str);
 					cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
 				}
@@ -132,7 +144,11 @@ void getTableJson(int channel, char *outprg, int flag){
 							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
 							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							memset(str, 0, sizeof(str));
-							sprintf(str,"版本：%02d", p_pmt->version_number );
+							if(!strcmp(lan, "zh-CN")){
+								sprintf(str,"版本：%02d", p_pmt->version_number );
+							}else{
+								sprintf(str,"Version: %02d", p_pmt->version_number );
+							}
 							cJSON_AddStringToObject(subTablejson,"title", str);
 							cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 							break;
@@ -154,7 +170,11 @@ void getTableJson(int channel, char *outprg, int flag){
 							sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
 							cJSON_AddStringToObject(subTablejson,"key", idstr);
 							memset(str, 0, sizeof(str));
-							sprintf(str,"业务ID 0x%04x", p_pmt->program_number );
+							if(!strcmp(lan, "zh-CN")){
+								sprintf(str,"业务ID 0x%04x", p_pmt->program_number );
+							}else{
+								sprintf(str,"Business ID 0x%04x", p_pmt->program_number );
+							}
 							cJSON_AddStringToObject(subTablejson,"title", str);
 							cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 							break;
@@ -185,8 +205,12 @@ void getTableJson(int channel, char *outprg, int flag){
 									cJSON_AddFalseToObject(subTablejson,"expanded");
 									sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
 									cJSON_AddStringToObject(subTablejson,"key", idstr);
-									memset(str, 0, sizeof(str));						
-									sprintf(str,"流 %d pid(0x%x) MPEG2 Video", 2, pdataStreamList->outPid);
+									memset(str, 0, sizeof(str));
+									if(!strcmp(lan, "zh-CN")){
+										sprintf(str,"流 %d pid(0x%x) MPEG2 Video", 2, pdataStreamList->outPid);
+									}else{
+										sprintf(str,"Stream %d pid(0x%x) MPEG2 Video", 2, pdataStreamList->outPid);
+									}
 									cJSON_AddStringToObject(subTablejson,"title", str);
 									cJSON_AddStringToObject(subTablejson,"icon", "img/favicon.ico");
 									
@@ -235,8 +259,13 @@ void getTableJson(int channel, char *outprg, int flag){
 									cJSON_AddFalseToObject(subTablejson,"expanded");
 									sprintf(idstr, "id1.2.%d.%d", i, j);//1.2.1.1
 									cJSON_AddStringToObject(subTablejson,"key", idstr);
-									memset(str, 0, sizeof(str));						
-									sprintf(str,"流 %d pid(0x%x) MPEG2 Audio", 4, pdataStreamList->outPid);
+									memset(str, 0, sizeof(str));
+									if(!strcmp(lan, "zh-CN")){
+										sprintf(str,"流 %d pid(0x%x) MPEG2 Audio", 4, pdataStreamList->outPid);
+									}else{
+										sprintf(str,"Stream %d pid(0x%x) MPEG2 Audio", 4, pdataStreamList->outPid);
+									}
+									
 									cJSON_AddStringToObject(subTablejson,"title", str);
 									cJSON_AddStringToObject(subTablejson,"icon", "img/audio.ico");
 									
@@ -303,19 +332,31 @@ void getTableJson(int channel, char *outprg, int flag){
 				switch(i){
 					case 1:
 						memset(str, 0, sizeof(str));
-						sprintf(str,"版本：%02d", p_sdt->version_number );
+						if(!strcmp(lan, "zh-CN")){
+							sprintf(str,"版本：%02d", p_sdt->version_number );
+						}else{
+							sprintf(str,"Version：%02d", p_sdt->version_number );
+						}
 						cJSON_AddStringToObject(subTablejson,"title", str);
 						cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 						break;
 					case 2: 
 						memset(str, 0, sizeof(str));
-						sprintf(str,"传输流ID 0x%04x", p_sdt->transport_stream_id );
+						if(!strcmp(lan, "zh-CN")){
+							sprintf(str,"传输流ID 0x%04x", p_sdt->transport_stream_id );
+						}else{
+							sprintf(str,"StreamID 0x%04x", p_sdt->transport_stream_id );
+						}
 						cJSON_AddStringToObject(subTablejson,"title", str);
 						cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 						break;
 					case 3:
 						memset(str, 0, sizeof(str));
-						sprintf(str,"原始网络ID (0x%04x)", p_sdt->original_network_id );
+						if(!strcmp(lan, "zh-CN")){
+							sprintf(str,"原始网络ID (0x%04x)", p_sdt->original_network_id );
+						}else{
+							sprintf(str,"OriNetworkID (0x%04x)", p_sdt->original_network_id );
+						}
 						cJSON_AddStringToObject(subTablejson,"title", str);
 						cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
 						break;
@@ -333,7 +374,11 @@ void getTableJson(int channel, char *outprg, int flag){
 				sprintf(idstr, "id1.3.%d", i+4);//1.3.4.1
 				cJSON_AddStringToObject(subTablejson,"key", idstr);
 				memset(str, 0, sizeof(str));
-				sprintf(str,"业务[0x%04x] EIT Sched[%s] EIT PF[%s] RunningStatus[Running]", p_last_sdtPrgName_t->service_id, p_last_sdtPrgName_t->EIT_schedule_flag==0?"NOT Present":"Present", p_last_sdtPrgName_t->EIT_present_following_flag==0?"NOT Present":"Present");
+				if(!strcmp(lan, "zh-CN")){
+					sprintf(str,"业务[0x%04x] EIT Sched[%s] EIT PF[%s] RunningStatus[Running]", p_last_sdtPrgName_t->service_id, p_last_sdtPrgName_t->EIT_schedule_flag==0?"NOT Present":"Present", p_last_sdtPrgName_t->EIT_present_following_flag==0?"NOT Present":"Present");
+				}else{
+					sprintf(str,"Business[0x%04x] EIT Sched[%s] EIT PF[%s] RunningStatus[Running]", p_last_sdtPrgName_t->service_id, p_last_sdtPrgName_t->EIT_schedule_flag==0?"NOT Present":"Present", p_last_sdtPrgName_t->EIT_present_following_flag==0?"NOT Present":"Present");
+				}
 				cJSON_AddStringToObject(subTablejson,"title", str);
 				cJSON_AddStringToObject(subTablejson,"icon", "img/notebook.ico");
 				
@@ -374,7 +419,11 @@ void getTableJson(int channel, char *outprg, int flag){
             cJSON_AddFalseToObject(subTablejson,"folder");
             cJSON_AddStringToObject(subTablejson,"key", "id1.4.1");
             memset(str, 0, sizeof(str));
-            sprintf(str,"版本：%02d", p_cat->version_number );
+			if(!strcmp(lan, "zh-CN")){
+				sprintf(str,"版本：%02d", p_cat->version_number );
+			}else{
+				sprintf(str,"Version: %02d", p_cat->version_number );
+			}
             cJSON_AddStringToObject(subTablejson,"title", str);
             cJSON_AddStringToObject(subTablejson,"icon", "img/star.ico");
             CA_descriptor *calist = p_cat->caIdenList;
@@ -412,7 +461,11 @@ void getTableJson(int channel, char *outprg, int flag){
                 cJSON_AddStringToObject(subTablejson,"key", "id1.5.1");
                 cJSON_AddStringToObject(subTablejson,"icon", "img/channel_out.ico");
                 memset(str, 0, sizeof(str));
-                sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
+				if(!strcmp(lan, "zh-CN")){
+					sprintf(str,"网络段ID[0x%04x] 名称[%s]", nist->networkId, nist->nameList->data);
+				}else{
+					sprintf(str,"Network Section ID[0x%04x] Name[%s]", nist->networkId, nist->nameList->data);
+				}
                 cJSON_AddStringToObject(subTablejson,"title", str);
                 //nit section steam
                 if(nist->streamLoopLen > 0){
@@ -438,8 +491,12 @@ void getTableJson(int channel, char *outprg, int flag){
                         cJSON_AddStringToObject(streamjson,"key", idstr);
                         cJSON_AddStringToObject(streamjson,"icon", "img/favicon.ico");
                         memset(str, 0, sizeof(str));
-                        sprintf(str,"传输流ID[0x%04x] 原始网络ID[0x%04x]", streamLoop->streamId, streamLoop->original_network_id);
-                        cJSON_AddStringToObject(streamjson,"title", str);
+						if(!strcmp(lan, "zh-CN")){
+							sprintf(str,"传输流ID[0x%04x] 原始网络ID[0x%04x]", streamLoop->streamId, streamLoop->original_network_id);
+						}else{
+							sprintf(str,"StreamID[0x%04x] OriNetworkID[0x%04x]", streamLoop->streamId, streamLoop->original_network_id);
+						}
+						cJSON_AddStringToObject(streamjson,"title", str);
                         streamLoop++;
                     }
                 }
@@ -482,7 +539,7 @@ int OutPsiTable_inSdt_search_prgInfo(sdt_senction_st *p_sdt, int seriveid, char 
 							{
 								memcpy(prgName, desList->data+iTagAddr, serviceNameLen);
 							}else{
-								memcpy(prgName, "未命名", 6);
+								memcpy(prgName, "Undefined", 6);
 							}
 						}
 						desList++;

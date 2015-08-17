@@ -37,7 +37,7 @@ var programData = [
 		{title: globalObj._nv == "zh-CN"?"通道8 (ASI-8)":"CHANNEL8 (ASI-8)", folder: true, chnid:8, key: "id1.8", expanded: true, "icon": "img/channel_out.ico"},
 		{title: globalObj._nv == "zh-CN"?"用户自定义":"CUSTOM", folder: true, chnid:9, key: "id1.9", expanded: true, "icon": "img/book.ico"}
 	  ]
-	}	
+	}
 ];
 
 var dataSet = [
@@ -800,7 +800,7 @@ function devinfo_output(devType){
         clearInterval(globalObj.timerID);
     }
 	$('.main-content').empty();
-	if(devType == "8合1复用器"){
+	if(devType == "MUX8in1"){
 		$('.main-content').append(
 			'<div id="devoutput">'
 				+'<ul>'
@@ -1012,7 +1012,6 @@ function devinfo_output(devType){
             +'<p class="i18n_APPLYING">Applying, Please waiting...</p>'
         +'</div>'
 	);
-	
 	$.i18n.properties({
         name : globalObj._nv, //资源文件名称
         path : '/i18n/', //资源文件路径
@@ -1097,7 +1096,6 @@ function devinfo_output(devType){
 			$('.i18n_NETWORKID').html($.i18n.prop('NETWORKID'));
 			$('.i18n_ORINETWORKID').html($.i18n.prop('ORINETWORKID'));
 			$('.i18n_OUTBITS').html($.i18n.prop('OUTBITS'));
-			var xcz = $('.i18n_AUTOVERSION');
 			$('.i18n_AUTOVERSION')[0].nextSibling.data = $.i18n.prop('AUTOVERSION');
 			$('.i18n_SORTID')[0].nextSibling.data = $.i18n.prop('SORTID');
 			$('.i18n_CHOOSETABLE').html($.i18n.prop('CHOOSETABLE'));

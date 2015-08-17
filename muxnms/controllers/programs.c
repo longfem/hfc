@@ -268,7 +268,8 @@ static void getprg(HttpConn *conn) {
     cchar *inChn = mprGetJson(jsonparam, "inch");
 	int inCh = atoi(inChn);
 	char pProg[204800] = {0};
-    getprgsJson(tmpip, inCh, pProg);
+	cchar *lan = getSessionVar("language");
+    getprgsJson(tmpip, inCh, pProg, lan);
 	render(pProg);
 
 }
@@ -289,7 +290,8 @@ static void getoutprg(HttpConn *conn) {
             RecordInputChnUseStatus(outChn);
         }
 	}
-	getoutprgsJson(tmpip, Chn - 1, outprg);
+	cchar *lan = getSessionVar("language");
+	getoutprgsJson(tmpip, Chn - 1, outprg, lan);
 	render(outprg);
 
 }
@@ -539,6 +541,7 @@ static void maketable(HttpConn *conn) {
 	int pos = 0, flag = 0;
 	char outstring[60960] = {0};
 	cchar *role = getSessionVar("role");
+	cchar *lan = getSessionVar("language");
 	if(role == NULL){
         rendersts(outstring, 9);
         render(outstring);
@@ -554,7 +557,7 @@ static void maketable(HttpConn *conn) {
 	//制表
 	flag = MakeTable(pos);
 	//获取制表后结果
-	getTableJson(pos, outstring, flag);
+	getTableJson(pos, outstring, flag, lan);
 	render(outstring);
 
 }
@@ -566,8 +569,8 @@ static void gettableinfo(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);
     pos = atoi(mprGetJson(jsonparam, "inch"));
 	//获取制表后结果
-
-	getTableJson(pos, outstring, 0);
+	cchar *lan = getSessionVar("language");
+	getTableJson(pos, outstring, 0, lan);
 	render(outstring);
 
 }
