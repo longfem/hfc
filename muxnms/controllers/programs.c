@@ -1703,6 +1703,24 @@ static void reprgpid(HttpConn *conn) {
     //ediClose(db);
 }
 
+static void downloads(HttpConn *conn) {
+	char str[32] = {0};
+	char outprg[20480] = {0};
+    cchar *role = getSessionVar("role");
+    if(role == NULL){
+        rendersts(str, 8);
+        render(str);
+        return;
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
+	getBackupJson(conn->rx->parsedUri->host, outprg);
+	render(outprg);
+}
+
 /*
     Dynamic module initialization
  */
@@ -1725,6 +1743,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-reprgnum", reprgnum);
 	espDefineAction(route, "programs-cmd-reprgpid", reprgpid);
 	espDefineAction(route, "programs-cmd-gettableinfo", gettableinfo);
+	espDefineAction(route, "programs-cmd-downloads", downloads);
 
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);

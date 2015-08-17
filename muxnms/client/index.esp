@@ -59,8 +59,8 @@
                          <li id="l6">
                              <a href="javascript:void(0)"><strong  class="i18n_BACKUP">BACKUP</strong></a>
 							 <ul>
-                                <li id="l61"><a href="javascript:alarm_output(2)" class="i18n_IMPORT">DATA IMPORT</a></li>
-                                <li id="l62"><a href="javascript:alarm_output(1)" class="i18n_EXPORT">DATA EXPORT</a></li> 
+                                <li id="l61"><a href="import.esp" class="i18n_IMPORT">DATA IMPORT</a></li>
+                                <li id="l62"><a href="javascript:gbl_download()" class="i18n_EXPORT">DATA EXPORT</a></li> 
                              </ul>
                          </li>
                          <li id="l7">
@@ -303,6 +303,8 @@
 	<script type="text/javascript" src="js/global.js"></script> 
 	<script type="text/javascript" src="js/alarm.js"></script> 
 	<script type="text/javascript" src="js/devinfo.js"></script>
+	<script src="lib/Blob.js" type="text/javascript"></script>
+	<script src="lib/FileSaver.js" type="text/javascript"></script>
 	<script src="lib/jquery.popup.js" type="text/javascript"></script>
 	<script src="lib/jquery.fancytree.menu.js" type="text/javascript"></script>
     <script type="text/javascript">		

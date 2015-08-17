@@ -643,3 +643,40 @@ function gbl_import() {
         +'</div>'
     );
 }
+
+function gbl_download() {
+    if(globalObj.timerID != undefined){
+        clearInterval(globalObj.timerID);
+    }
+    
+    function writeFile(data) {
+        var BB = this.Blob;
+        saveAs(
+              new BB(
+                  [data]
+                , {type: "text/plain;charset=" + document.characterSet}
+            )
+            , "bakup.json"
+        );
+      }
+    //get back up data
+    $.ajax({
+        type: "GET",
+        async: false,
+        url: "http://"+localip+":4000/do/programs/downloads",
+        dataType: "json",
+        success: function(data){
+            if(data.sts == 8){
+                window.location = "/login.esp";
+            }else if(data.sts == 5){
+                alert(globalObj._nv == "zh-CN"?"该用户权限不足.":"Permission Denied!");
+                return false;
+            }
+            writeFile(JSON.stringify(data));           
+             
+        },
+        error : function(err) {
+            alert("AJAX ERROR---downloads!!");
+        }
+    });
+}

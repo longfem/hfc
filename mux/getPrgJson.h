@@ -7,4 +7,5 @@
 void getPrgsJson(char *ip, int inChn, char *outprg, char *lan);
 void adduserprgjson(cJSON *basearry, ChannelProgramSt *pst, char *lan);
 void getoutprgsJson(char *ip, int inChn, char *outprg, char *lan);
+void getBackupJson(char *ip, char *outprg);
 #endif 

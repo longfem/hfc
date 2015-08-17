@@ -117,21 +117,7 @@ void RecordInputChnUseStatus(int outChnId)
             }
 
 	    }
-	}
-
-
-	// ChannelProgramSt *outpst = NULL;
- //    list_get(&(clsProgram.outPrgList), outChnId, &outpst);
-	// if (&outpst->dtPidList != NULL)
-	// {
-	//     for(i = 0;i < list_len(&outpst->dtPidList); i++){
- //            list_get(&outpst->dtPidList, i, &tmpPidInfo);
- //            if (tmpPidInfo->inChannel > 0 && tmpPidInfo->inChannel <= 16){
- //                clsProgram.needInputData[outChnId][tmpPidInfo->inChannel - 1] = 1;
- //            }
- //        }
-	// }
-	
+	}	
 }
 
 void InputMissShow(int inChnId, int validStatus, cJSON *chjson)
