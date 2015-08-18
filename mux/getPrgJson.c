@@ -648,7 +648,8 @@ void getBackupJson(char *ip, char *outprg){
     cJSON *iteminfo, *itemjson, *prgjsonlist, *prgjson;
 	Dev_prgInfo_st *ptmpPrgInfo;
 	ChannelProgramSt *pst = NULL;
-	int i = 0, j = 0, offset = 0, ch = 0;;
+	Nit_section_t *nist = NULL;
+	int i = 0, j = 0, offset = 0, ch = 0, chn = 0;
     char *prgjsonstring;
 	char str[32] = {0};
     char idstr[16] = {0};
@@ -670,42 +671,67 @@ void getBackupJson(char *ip, char *outprg){
 	cJSON_AddItemToObject(basejson,"_outPrg", prgjsonlist = cJSON_CreateObject());
 	for (ch = 0; ch < 2; ch++)
 	{
-		list_get(&clsProgram.outPrgList, ch, &pst);
-		memset(idstr, 0, sizeof(idstr));
-		sprintf(idstr, "prgcnt%d", ch);
-		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
-		if(list_len(&pst->prgNodes)>0){
-			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->prgNodes));
-			for(i=0; i<list_len(&pst->prgNodes); i++) {
-				list_get(&pst->prgNodes, i, &ptmpPrgInfo);
-				memset(idstr, 0, sizeof(idstr));
-				sprintf(idstr, "ch%dprg%d", ch, i);
-				cJSON_AddItemToObject(prgjsonlist, idstr, prgjson = cJSON_CreateObject());
-				cJSON_AddStringToObject(prgjson,"prgname", ptmpPrgInfo->prgName);
-				cJSON_AddNumberToObject(prgjson, "usernew", ptmpPrgInfo->userNew);
-				cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
-				cJSON_AddNumberToObject(prgjson, "chnid", ptmpPrgInfo->chnId);
-				cJSON_AddNumberToObject(prgjson, "pmtPid", ptmpPrgInfo->pmtPid);
-				cJSON_AddNumberToObject(prgjson, "streamcnt", ptmpPrgInfo->pdataStreamListLen);
-				if(ptmpPrgInfo->pdataStreamListLen > 0){
-					cJSON_AddItemToObject(prgjson, "_stream", iteminfo = cJSON_CreateObject());
-					DataStream_t *streaminfo = malloc(sizeof(DataStream_t));
-					offset = 0;
-					for(j=0; j<ptmpPrgInfo->pdataStreamListLen; j++) {
-						memcpy(streaminfo, ptmpPrgInfo->pdataStreamList+offset, sizeof(DataStream_t) );
-						offset += 1;
-						memset(idstr, 0, sizeof(idstr));
-						sprintf(idstr, "str%d", j);
-						cJSON_AddItemToObject(iteminfo, idstr, itemjson = cJSON_CreateObject());
-						cJSON_AddNumberToObject(itemjson, "streamtype", streaminfo->streamType);
-						cJSON_AddNumberToObject(itemjson, "index", streaminfo->index);
-						cJSON_AddNumberToObject(itemjson, "outPid", streaminfo->outPid);
+		for (chn = 0; chn < 8; chn++){
+			list_get(&clsProgram.outPrgList, chn, &pst);
+			memset(idstr, 0, sizeof(idstr));
+			sprintf(idstr, "ch%dprgcnt%d", ch, chn);
+			cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
+			if(list_len(&pst->prgNodes)>0){
+				cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->prgNodes));
+				for(i=0; i<list_len(&pst->prgNodes); i++) {
+					list_get(&pst->prgNodes, i, &ptmpPrgInfo);
+					memset(idstr, 0, sizeof(idstr));
+					sprintf(idstr, "ch%dchn%dprg%d", ch, chn, i);
+					cJSON_AddItemToObject(prgjsonlist, idstr, prgjson = cJSON_CreateObject());
+					cJSON_AddStringToObject(prgjson,"prgname", ptmpPrgInfo->prgName);
+					cJSON_AddNumberToObject(prgjson, "usernew", ptmpPrgInfo->userNew);
+					cJSON_AddNumberToObject(prgjson, "index", ptmpPrgInfo->index);
+					cJSON_AddNumberToObject(prgjson, "chnid", ptmpPrgInfo->chnId);
+					cJSON_AddNumberToObject(prgjson, "pmtPid", ptmpPrgInfo->pmtPid);
+					cJSON_AddNumberToObject(prgjson, "streamcnt", ptmpPrgInfo->pdataStreamListLen);
+					if(ptmpPrgInfo->pdataStreamListLen > 0){
+						cJSON_AddItemToObject(prgjson, "_stream", iteminfo = cJSON_CreateObject());
+						DataStream_t *streaminfo = malloc(sizeof(DataStream_t));
+						offset = 0;
+						for(j=0; j<ptmpPrgInfo->pdataStreamListLen; j++) {
+							memcpy(streaminfo, ptmpPrgInfo->pdataStreamList+offset, sizeof(DataStream_t) );
+							offset += 1;
+							memset(idstr, 0, sizeof(idstr));
+							sprintf(idstr, "str%d", j);
+							cJSON_AddItemToObject(iteminfo, idstr, itemjson = cJSON_CreateObject());
+							cJSON_AddNumberToObject(itemjson, "streamtype", streaminfo->streamType);
+							cJSON_AddNumberToObject(itemjson, "index", streaminfo->index);
+							cJSON_AddNumberToObject(itemjson, "outPid", streaminfo->outPid);
+						}
+						free(streaminfo);
 					}
-					free(streaminfo);
+					
 				}
-				
 			}
-		}
+			//ca
+			list_t *caIdenList = &pst->caNode.caIdenList;
+			memset(idstr, 0, sizeof(idstr));
+			sprintf(idstr, "cach%dchn%dcnt", ch, chn);
+			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(caIdenList));
+			if(list_len(caIdenList)>0){				
+				CA_descriptor *cades = NULL;
+				for(j=0;j<list_len(caIdenList);j++){
+					list_get(caIdenList, j, &cades);
+					memset(idstr, 0, sizeof(idstr));
+					sprintf(idstr, "cach%chn%dindex%d", ch, chn, j);
+					cJSON_AddItemToObject(prgjsonlist, idstr, prgjson = cJSON_CreateObject());
+					cJSON_AddNumberToObject(prgjson, "index", cades->index);
+					cJSON_AddNumberToObject(prgjson, "inChannel", cades->inChannel);
+					cJSON_AddNumberToObject(prgjson, "inCaSysId", cades->inCaSysId);
+					cJSON_AddNumberToObject(prgjson, "outCaSysId", cades->outCaSysId);
+					cJSON_AddNumberToObject(prgjson, "inCaPid", cades->inCaPid);
+					cJSON_AddNumberToObject(prgjson, "outCaPid", cades->outCaPid);
+					cJSON_AddNumberToObject(prgjson, "private_data_byte_len", cades->private_data_byte_len);
+					cJSON_AddStringToObject(prgjson, "private_data_byte", cades->private_data_byte);					
+				}
+			}
+		}		
+		
 		cJSON_AddItemToObject(basejson,"_pdb", iteminfo = cJSON_CreateObject());
 		cJSON_AddNumberToObject(iteminfo,"networkId", pdb->pvalueTree->poutChnArray[ch-1].networkId);
 		cJSON_AddNumberToObject(iteminfo,"streamId", pdb->pvalueTree->poutChnArray[ch-1].streamId);
@@ -721,9 +747,37 @@ void getBackupJson(char *ip, char *outprg){
 		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pmt);
 		cJSON_AddNumberToObject(iteminfo,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_sdt);
 		
+	}    
+	cJSON_AddItemToObject(basejson,"_nitsection", iteminfo = cJSON_CreateObject());
+	for (ch = 0; ch < 2; ch++)
+	{
+		list_get(&clsProgram.NitSection, ch, &nist);
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "_nit%d", ch);
+		cJSON_AddItemToObject(iteminfo, idstr, itemjson = cJSON_CreateObject());
+		cJSON_AddNumberToObject(itemjson, "networkId", nist->networkId);
+		cJSON_AddNumberToObject(itemjson, "version", nist->version);
+		cJSON_AddNumberToObject(itemjson, "nameListLen", nist->nameListLen);
+		cJSON_AddNumberToObject(itemjson, "streamLoopLen", nist->streamLoopLen);
+		if(nist->nameListLen > 0){
+			cJSON_AddNumberToObject(itemjson, "namedataLen", nist->nameList->dataLen);
+			cJSON_AddStringToObject(itemjson, "namedata", nist->nameList->data);
+		}
+		if(nist->streamLoopLen > 0){
+			Nit_streamLoop_t *streamLoop = nist->streamLoop;
+			for (i = 0; i < nist->streamLoopLen; i++){
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "_streamloop%d", i);
+				cJSON_AddItemToObject(itemjson, idstr, prgjsonlist = cJSON_CreateObject());
+				cJSON_AddNumberToObject(prgjsonlist, "streamId", streamLoop->streamId);
+				cJSON_AddNumberToObject(prgjsonlist, "original_network_id", streamLoop->original_network_id);
+				cJSON_AddNumberToObject(prgjsonlist, "BufferUn_stLen", streamLoop->BufferUn_stLen);
+				cJSON_AddNumberToObject(prgjsonlist, "streamdataLen", streamLoop->BufferUn_stList->bufLen);
+				cJSON_AddStringToObject(itemjson, "streamdata",  streamLoop->BufferUn_stList->pbuf);				
+				streamLoop++;
+			}
+		}
 	}
-	
-	
 	
 	prgjsonstring = cJSON_PrintUnformatted(basejson);
 	printf("----strlen=%d\n", strlen(prgjsonstring));
