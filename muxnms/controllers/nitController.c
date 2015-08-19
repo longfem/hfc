@@ -189,7 +189,6 @@ int Perform_S(MprJson *jsonparam, Nit_section_t *nist, int flag){
              return 0;
          ulongTmp = hz;
      }
-     printf("-------->>22\n");
      u32int = (unsigned int)ulongTmp/10;
      desBytes[i++] = (unsigned char)(u32int >> 24);
      desBytes[i++] = (unsigned char)(u32int >> 16);

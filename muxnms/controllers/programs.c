@@ -1721,6 +1721,218 @@ static void downloads(HttpConn *conn) {
 	render(outprg);
 }
 
+static void uploads(HttpConn *conn) {
+	printf("================>>>uploads start!!\n");
+	int i = 0, j = 0, ch = 0, chn = 0;
+	char str[32] = {0};
+	char idstr[16] = {0};
+	char optstr[256] = {0};
+    cchar *role = getSessionVar("role");
+	cchar *lan = getSessionVar("language");		
+    if(role == NULL){
+        redirect("/login.esp");
+    }
+    if((strcmp(role, "root") !=0) && (strcmp(role, "admin") !=0)){
+        rendersts(str, 5);//无权限
+        render(str);
+        return;
+    }
+	MprJson *jsonparam = httpGetParams(conn);	
+	cchar *upstring = mprGetJson(jsonparam, "updatas");	
+	MprJson *updatas = mprParseJson(upstring);
+	printf("==========uploads===========%s\n", mprJsonToString (updatas, MPR_JSON_QUOTES));
+	clsProgram.chnBypass2 = atoi(mprGetJson(updatas, "chnBypass2"));
+	clsProgram.chnBypassEnable = atoi(mprGetJson(updatas, "chnBypassEnable"));
+	MprJson *_needInputData = mprGetJsonObj(updatas, "_needInputData");
+	for (i = 0; i < clsProgram._intChannelCntMax; i++)
+	{
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch0id%d", i);
+		clsProgram.needInputData[0][i] = atoi(mprGetJson(_needInputData, idstr));	 
+	}
+	for (i = 0; i < clsProgram._intChannelCntMax; i++)
+	{
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch1id%d", i);
+		clsProgram.needInputData[1][i] = atoi(mprGetJson(_needInputData, idstr));	 
+	}
+	MprJson *_outPrg = mprGetJsonObj(updatas, "_outPrg");
+	Dev_prgInfo_st *PrgInfo = NULL;
+	ChannelProgramSt *pst = NULL;
+	Nit_section_t *nist = NULL;
+	MprJson *_Prg = NULL, *_pdb = NULL, *_nitsection = NULL;
+	MprJson *_Stream = NULL, *_nit = NULL;
+	MprJson *_Streamitem = NULL, *_canode = NULL;
+	//释放输入出通道节目占用的内存
+	for (ch = 0; ch < 2; ch++)
+	{
+		list_get(&(clsProgram.outPrgList), ch, &pst);
+		if( list_len(&pst->prgNodes) > 0){
+			freePrograms(&pst->prgNodes);
+		}
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%dprgcnt", ch);
+		if(atoi(mprGetJson(_outPrg, idstr) > 0){
+			for(i = 0; i<atoi(mprGetJson(_outPrg, idstr); i++ ){
+				PrgInfo = malloc(sizeof(Dev_prgInfo_st));
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "ch%dprg%d", ch, i);
+				_Prg = mprGetJsonObj(_outPrg, idstr);
+				PrgInfo->prgNameLen = atoi(mprGetJson(_Prg, "prgNameLen"));
+				PrgInfo->prgName = malloc(PrgInfo->prgNameLen);
+				memcpy(PrgInfo->prgName, mprGetJson(_Prg, "prgname"), PrgInfo->prgNameLen);
+				PrgInfo->userNew = atoi(mprGetJson(_Prg, "usernew"));
+				PrgInfo->index = atoi(mprGetJson(_Prg, "index"));
+				PrgInfo->chnId = atoi(mprGetJson(_Prg, "chnid"));
+				PrgInfo->pmtPid = atoi(mprGetJson(_Prg, "pmtPid"));				
+				PrgInfo->prgNum = atoi(mprGetJson(_Prg, "prgNum"));
+				PrgInfo->streamId = atoi(mprGetJson(_Prg, "streamId"));
+				PrgInfo->networkId = atoi(mprGetJson(_Prg, "networkId"));				
+				PrgInfo->oldPcrPid = atoi(mprGetJson(_Prg, "oldPcrPid"));
+				PrgInfo->newPcrPid = atoi(mprGetJson(_Prg, "newPcrPid"));
+				PrgInfo->providerNameLen = atoi(mprGetJson(_Prg, "providerNameLen"));
+				PrgInfo->providerName = malloc(PrgInfo->providerNameLen);
+				memcpy(PrgInfo->providerName, mprGetJson(_Prg, "prgname"), PrgInfo->providerNameLen);
+				PrgInfo->pdataStreamListLen = atoi(mprGetJson(_Prg, "streamcnt"));
+				if(PrgInfo->pdataStreamListLen > 0){
+					DataStream_t *pdataStreamInfo = malloc(PrgInfo->pdataStreamListLen * sizeof(DataStream_t) );
+					_Stream = mprGetJsonObj(_Prg, "_stream");
+					for(j=0;j<PrgInfo->pdataStreamListLen;j++){
+						memset(idstr, 0, sizeof(idstr));
+						sprintf(idstr, "str%d", j);
+						_Streamitem = mprGetJsonObj(_Stream, idstr);
+						pdataStreamInfo->streamType = atoi(mprGetJson(_Streamitem, "streamtype"));
+						pdataStreamInfo->index = atoi(mprGetJson(_Streamitem, "index"));
+						pdataStreamInfo->outPid = atoi(mprGetJson(_Streamitem, "outPid"));
+						pdataStreamInfo->inPid = pdataStreamInfo->outPid;
+						pdataStreamInfo->inChn = PrgInfo->chnId;
+						pdataStreamInfo++;
+					}
+				}
+				list_append(&pst->prgNodes, PrgInfo);				
+			}
+		}
+		//free calist
+		list_t *caIdenList = &pst->caNode.caIdenList;
+		freecanode(caIdenList);
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "cach%dcnt", ch);
+		if(atoi(mprGetJson(_outPrg, idstr)>0)){
+			list_init(caIdenList);
+			for(j=0; j<atoi(mprGetJson(_outPrg, idstr); j++ ){
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "cach%dindex%d", ch, j);
+				_canode = mprGetJsonObj(_outPrg, idstr);
+				CA_descriptor *cades = malloc(sizeof(CA_descriptor));
+				cades->index = atoi(mprGetJson(_canode, "index"));				
+				cades->inChannel = atoi(mprGetJson(_canode, "inChannel"));
+				cades->inCaSysId = atoi(mprGetJson(_canode, "inCaSysId"));
+				cades->outCaSysId = atoi(mprGetJson(_canode, "outCaSysId"));
+				cades->inCaPid = atoi(mprGetJson(_canode, "inCaPid"));
+				cades->outCaPid = atoi(mprGetJson(_canode, "outCaPid"));
+				cades->private_data_byte_len = atoi(mprGetJson(_canode, "private_data_byte_len"));
+				cades->private_data_byte = malloc(cades->private_data_byte_len);
+				memcpy(cades->private_data_byte, mprGetJson(_canode, "private_data_byte"), cades->private_data_byte_len);
+			}			
+		}
+		
+		_pdb = mprGetJsonObj(updatas, "_pdb");
+		pdb->pvalueTree->poutChnArray[ch-1].networkId = atoi(mprGetJson(_pdb, "networkId"));		
+		pdb->pvalueTree->poutChnArray[ch-1].streamId = atoi(mprGetJson(_pdb, "streamId"));
+		pdb->pvalueTree->poutChnArray[ch-1].oringal_networkid = atoi(mprGetJson(_pdb, "oringal_networkid"));
+		pdb->pvalueTree->poutChnArray[ch-1].outputRate = atoi(mprGetJson(_pdb, "outputRate"));
+		pdb->pvalueTree->poutChnArray[ch-1].isAutoRaiseVersion = atoi(mprGetJson(_pdb, "isAutoRaiseVersion"));
+		pdb->pvalueTree->poutChnArray[ch-1].version = atoi(mprGetJson(_pdb, "version"));
+		pdb->pvalueTree->poutChnArray[ch-1].isManualMapMode = atoi(mprGetJson(_pdb, "isManualMapMode"));
+		pdb->pvalueTree->poutChnArray[ch-1].isAutoRankPAT = atoi(mprGetJson(_pdb, "isAutoRankPAT"));
+		pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_cat = atoi(mprGetJson(_pdb, "isNeedSend_cat"));		
+		pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_nit = atoi(mprGetJson(_pdb, "isNeedSend_nit"));
+		pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pat = atoi(mprGetJson(_pdb, "isNeedSend_pat"));
+		pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pmt = atoi(mprGetJson(_pdb, "isNeedSend_pmt"));
+		pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_sdt = atoi(mprGetJson(_pdb, "isNeedSend_sdt"));
+		
+		_nitsection = mprGetJsonObj(updatas, "_nitsection");
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "_nit%d", ch);
+		_nit = mprGetJsonObj(_nitsection, idstr);		
+		list_get(&clsProgram.NitSection, ch-1, &nist);
+		if(nist->nameList->dataLen > 0){
+			free(nist->nameList->data);
+		}
+		free(nist->nameList);
+		Nit_streamLoop_t *streamLoop = nist->streamLoop;
+		for(i=0; i<nist->streamLoopLen;i++){
+			free(streamLoop->BufferUn_stList->pbuf);
+			free(streamLoop->BufferUn_stList);
+			streamLoop++;
+		}
+		if(nist->streamLoopLen > 0){
+			free(nist->streamLoop);
+		}
+		nist->networkId = atoi(mprGetJson(_nit, "networkId"));
+		nist->version = atoi(mprGetJson(_nit, "version"));
+		nist->nameListLen = atoi(mprGetJson(_nit, "nameListLen"));
+		nist->streamLoopLen = atoi(mprGetJson(_nit, "streamLoopLen"));
+		if(nist->nameListLen > 0){
+			for(i=0;i<nist->nameListLen;i++){
+				Commdes_t *nameList = malloc(sizeof(Commdes_t));
+				memset(nameList, 0 , sizeof(Commdes_t));
+				nameList->index = atoi(mprGetJson(_nit, "index"));
+				nameList->tag = atoi(mprGetJson(_nit, "tag"));
+				nameList->dataLen = atoi(mprGetJson(_nit, "namedataLen"));
+				nameList->data = malloc(sizeof(nameList->dataLen));
+				memset(nameList->data, 0, nameList->dataLen);
+				memcpy(nameList->data, mprGetJson(_nit, "namedataLen"), nameList->namedata);
+				nist->nameList = nameList;
+				nist->nameList++;
+			}
+		}
+		if(nist->streamLoopLen > 0){
+			Nit_streamLoop_t *newstreamLoop = malloc(nist->streamLoopLen * sizeof(Nit_streamLoop_t));
+			for(i=0;i<nist->streamLoopLen;i++){
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "_streamloop%d", i);
+				_Streamitem = mprGetJsonObj(_nit, idstr);
+				newstreamLoop->streamId = atoi(mprGetJson(_Streamitem, "streamId"));
+				newstreamLoop->original_network_id = atoi(mprGetJson(_Streamitem, "original_network_id"));
+				newstreamLoop->BufferUn_stLen = atoi(mprGetJson(_Streamitem, "BufferUn_stLen"));
+				newstreamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
+				newstreamLoop->BufferUn_stList->bufLen = atoi(mprGetJson(_Streamitem, "streamdataLen"));
+				newstreamLoop->BufferUn_stList->pbuf = malloc(sizeof(newstreamLoop->BufferUn_stList->bufLen));
+				memcpy(newstreamLoop->BufferUn_stList->pbuf, mprGetJson(_Streamitem, "streamdata"), newstreamLoop->BufferUn_stList->bufLen);
+				newstreamLoop++;
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	//add optlog
+    /*Edi *db = ediOpen("db/ipgw.mdb", "mdb", EDI_AUTO_SAVE);
+    EdiRec *optlog = ediCreateRec(db, "optlog");
+    if(optlog == NULL){
+       printf("================>>>optlog is NULL!!\n");
+    }
+    time_t curTime;
+    time(&curTime);
+	if(!strcmp(lan, "zh-CN")){
+		sprintf(optstr, "{'user': '%s', 'desc': '导入备份数据.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+	}else{
+		sprintf(optstr, "{'user': '%s', 'desc': 'Import backup datas.', 'level': '1', 'logtime':'%d'}", getSessionVar("userName"), curTime);
+	}
+    
+    MprJson  *row = mprParseJson(optstr);
+    if(ediSetFields(optlog, row) == 0){
+       printf("================>>>ediSetFields Failed!!\n");
+    }
+    ediUpdateRec(db, optlog);*/
+	redirect("/index.esp");
+}
+
 /*
     Dynamic module initialization
  */
@@ -1744,6 +1956,7 @@ ESP_EXPORT int esp_controller_muxnms_programs(HttpRoute *route, MprModule *modul
 	espDefineAction(route, "programs-cmd-reprgpid", reprgpid);
 	espDefineAction(route, "programs-cmd-gettableinfo", gettableinfo);
 	espDefineAction(route, "programs-cmd-downloads", downloads);
+	espDefineAction(route, "programs-cmd-uploads", uploads);
 
 #if SAMPLE_VALIDATIONS
     Edi *edi = espGetRouteDatabase(route);
