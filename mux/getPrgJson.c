@@ -649,7 +649,7 @@ void getBackupJson(char *ip, char *outprg){
 	Dev_prgInfo_st *ptmpPrgInfo;
 	ChannelProgramSt *pst = NULL;
 	Nit_section_t *nist = NULL;
-	int i = 0, j = 0, offset = 0, ch = 0, chn = 0;
+	int i = 0, j = 0, offset = 0, ch = 0;
     char *prgjsonstring;
 	char str[32] = {0};
     char idstr[16] = {0};
@@ -671,7 +671,7 @@ void getBackupJson(char *ip, char *outprg){
 	cJSON_AddItemToObject(basejson,"_outPrg", prgjsonlist = cJSON_CreateObject());
 	for (ch = 0; ch < 2; ch++)
 	{
-		list_get(&clsProgram.outPrgList, chn, &pst);
+		list_get(&clsProgram.outPrgList, ch, &pst);
 		memset(idstr, 0, sizeof(idstr));
 		sprintf(idstr, "ch%dprgcnt", ch);
 		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
@@ -736,8 +736,66 @@ void getBackupJson(char *ip, char *outprg){
 				cJSON_AddNumberToObject(prgjson, "private_data_byte_len", cades->private_data_byte_len);
 				cJSON_AddStringToObject(prgjson, "private_data_byte", cades->private_data_byte);					
 			}
-		}		
-		
+		}
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%dusrprgcnt", i);
+		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
+		if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
+			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->userPrgNodes));
+			User_prgInfo_t *userprg = NULL;
+			for(i=0; i<list_len(&pst->userPrgNodes); i++) {
+				list_get(&pst->userPrgNodes, i, &userprg);
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "ch%dusrprg%d", ch, i);
+				cJSON_AddItemToArray(prgjsonlist, prgjson = cJSON_CreateObject());
+				cJSON_AddStringToObject(prgjson,"prgname", userprg->prgName);
+				cJSON_AddNumberToObject(prgjson, "prgNameLen", userprg->prgNameLen);
+				cJSON_AddNumberToObject(prgjson, "prgNum", userprg->prgNum);
+				cJSON_AddNumberToObject(prgjson, "index", userprg->index);
+				cJSON_AddNumberToObject(prgjson, "pmtPid", userprg->pmtPid);				
+				cJSON_AddNumberToObject(prgjson, "streamId", userprg->streamId);
+				cJSON_AddNumberToObject(prgjson, "networkId", userprg->networkId);				
+				cJSON_AddNumberToObject(prgjson, "oldPcrPid", userprg->oldPcrPid);
+				cJSON_AddNumberToObject(prgjson, "newPcrPid", userprg->newPcrPid);				
+				cJSON_AddStringToObject(prgjson, "providerName", userprg->providerName);
+				cJSON_AddNumberToObject(prgjson, "providerNameLen", userprg->providerNameLen);				
+				cJSON_AddNumberToObject(prgjson, "streamcnt", userprg->pdataStreamListLen);
+				if(userprg->pdataStreamListLen > 0){
+					cJSON_AddItemToObject(prgjson, "_stream", iteminfo = cJSON_CreateObject());
+					DataStream_t *streaminfo = malloc(sizeof(DataStream_t));
+					offset = 0;
+					for(j=0; j<userprg->pdataStreamListLen; j++) {
+						memcpy(streaminfo, userprg->pdataStreamList+offset, sizeof(DataStream_t) );
+						offset += 1;
+						memset(idstr, 0, sizeof(idstr));
+						sprintf(idstr, "str%d", j);
+						cJSON_AddItemToObject(iteminfo, idstr, itemjson = cJSON_CreateObject());
+						cJSON_AddNumberToObject(itemjson, "streamtype", streaminfo->streamType);
+						cJSON_AddNumberToObject(itemjson, "index", streaminfo->index);
+						cJSON_AddNumberToObject(itemjson, "outPid", streaminfo->outPid);
+					}
+					free(streaminfo);
+				}
+			}	
+		}
+		//pid table
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%dpidcnt", i);
+		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
+		if((&pst->dtPidList != NULL)&&(list_len(&pst->dtPidList)>0)){
+			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->dtPidList));
+			MuxPidInfo_st *muxinfo = NULL;
+			for(i=0; i<list_len(&pst->dtPidList); i++) {
+				list_get(&pst->dtPidList, i, &muxinfo);
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "ch%dtbl%d", ch, i);
+				cJSON_AddItemToArray(prgjsonlist, prgjson = cJSON_CreateObject());
+				cJSON_AddNumberToObject(prgjson, "inChannel", muxinfo->inChannel);
+				cJSON_AddNumberToObject(prgjson, "oldPid", muxinfo->oldPid);
+				cJSON_AddNumberToObject(prgjson, "newPid", muxinfo->newPid);
+			}			
+		}
+		//pdb
 		cJSON_AddItemToObject(basejson,"_pdb", iteminfo = cJSON_CreateObject());
 		cJSON_AddNumberToObject(iteminfo,"networkId", pdb->pvalueTree->poutChnArray[ch-1].networkId);
 		cJSON_AddNumberToObject(iteminfo,"streamId", pdb->pvalueTree->poutChnArray[ch-1].streamId);
@@ -781,11 +839,12 @@ void getBackupJson(char *ip, char *outprg){
 				cJSON_AddNumberToObject(prgjsonlist, "original_network_id", streamLoop->original_network_id);
 				cJSON_AddNumberToObject(prgjsonlist, "BufferUn_stLen", streamLoop->BufferUn_stLen);
 				cJSON_AddNumberToObject(prgjsonlist, "streamdataLen", streamLoop->BufferUn_stList->bufLen);
-				cJSON_AddStringToObject(itemjson, "streamdata",  streamLoop->BufferUn_stList->pbuf);				
+				cJSON_AddStringToObject(prgjsonlist, "streamdata",  streamLoop->BufferUn_stList->pbuf);				
 				streamLoop++;
 			}
 		}
 	}
+
 	
 	prgjsonstring = cJSON_PrintUnformatted(basejson);
 	printf("----strlen=%d\n", strlen(prgjsonstring));
