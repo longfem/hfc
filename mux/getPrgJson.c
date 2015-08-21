@@ -780,7 +780,7 @@ void getBackupJson(char *ip, char *outprg){
 		}
 		//pid table
 		memset(idstr, 0, sizeof(idstr));
-		sprintf(idstr, "ch%dpidcnt", i);
+		sprintf(idstr, "ch%dpidcnt", ch);
 		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
 		if((&pst->dtPidList != NULL)&&(list_len(&pst->dtPidList)>0)){
 			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->dtPidList));

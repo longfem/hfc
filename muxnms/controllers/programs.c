@@ -1796,6 +1796,7 @@ static void uploads(HttpConn *conn) {
 				PrgInfo->pdataStreamListLen = atoi(mprGetJson(_Prg, "streamcnt"));
 				if(PrgInfo->pdataStreamListLen > 0){
 					DataStream_t *pdataStreamInfo = malloc(PrgInfo->pdataStreamListLen * sizeof(DataStream_t) );
+					PrgInfo->pdataStreamList = pdataStreamInfo;
 					_Stream = mprGetJsonObj(_Prg, "_stream");
 					for(j=0;j<PrgInfo->pdataStreamListLen;j++){
 						memset(idstr, 0, sizeof(idstr));
@@ -1834,6 +1835,81 @@ static void uploads(HttpConn *conn) {
 				cades->private_data_byte = malloc(cades->private_data_byte_len);
 				memcpy(cades->private_data_byte, mprGetJson(_canode, "private_data_byte"), cades->private_data_byte_len);
 			}			
+		}
+		//userprg		
+		if( list_len(&pst->userPrgNodes) > 0){
+			freePrograms(&pst->userPrgNodes);			
+		}
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%dusrprgcnt", i);
+		if(atoi(mprGetJson(_outPrg, idstr)>0)){
+			list_init(&pst->userPrgNodes);
+			for(j=0; j<atoi(mprGetJson(_outPrg, idstr); j++ ){
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "ch%dusrprg%d", ch, i);
+				_Prg = mprGetJsonObj(_outPrg, idstr);
+				User_prgInfo_t *userprg = malloc(sizeof(User_prgInfo_t));
+				userprg->prgNameLen = atoi(mprGetJson(_Prg, "prgNameLen"));
+				userprg->prgName = malloc(userprg->prgNameLen);
+				memset(userprg->prgName, 0, userprg->prgNameLen);
+				memcpy(userprg->prgName, mprGetJson(_Prg, "prgname"), userprg->prgNameLen);
+				userprg->prgNum = atoi(mprGetJson(_Prg, "prgNum"));				
+				userprg->index = atoi(mprGetJson(_Prg, "index"));
+				userprg->pmtPid = atoi(mprGetJson(_Prg, "pmtPid"));
+				userprg->streamId = atoi(mprGetJson(_Prg, "streamId"));
+				userprg->networkId = atoi(mprGetJson(_Prg, "networkId"));
+				userprg->oldPcrPid = atoi(mprGetJson(_Prg, "oldPcrPid"));				
+				userprg->newPcrPid = atoi(mprGetJson(_Prg, "newPcrPid"));
+				userprg->providerNameLen = atoi(mprGetJson(_Prg, "providerNameLen"));
+				if(userprg->providerNameLen > 0){
+					userprg->providerName = malloc(userprg->providerNameLen);
+					memset(userprg->providerName, 0, userprg->providerNameLen);
+					memcpy(userprg->providerName, mprGetJson(_Prg, "providerName"), userprg->providerNameLen);
+				}
+				userprg->pdataStreamListLen = atoi(mprGetJson(_Prg, "streamcnt"));
+				if(userprg->pdataStreamListLen > 0){
+					DataStream_t *pdataStreamInfo = malloc(userprg->pdataStreamListLen * sizeof(DataStream_t) );
+					userprg->pdataStreamList = pdataStreamInfo;
+					_Stream = mprGetJsonObj(_Prg, "_stream");
+					for(j=0;j<PrgInfo->pdataStreamListLen;j++){
+						memset(idstr, 0, sizeof(idstr));
+						sprintf(idstr, "str%d", j);
+						_Streamitem = mprGetJsonObj(_Stream, idstr);
+						pdataStreamInfo->streamType = atoi(mprGetJson(_Streamitem, "streamtype"));
+						pdataStreamInfo->index = atoi(mprGetJson(_Streamitem, "index"));
+						pdataStreamInfo->outPid = atoi(mprGetJson(_Streamitem, "outPid"));
+						pdataStreamInfo->inPid = pdataStreamInfo->outPid;
+						pdataStreamInfo->inChn = userprg->chnId;
+						pdataStreamInfo++;
+					}
+				}
+				list_append(&pst->userPrgNodes, userprg);					
+			}			
+		}
+		//pid table
+		//释放原dtPidList内存空间
+		MuxPidInfo_st *mpf = NULL;
+		if(list_len(&pst->dtPidList)>0){
+			for(i=list_len(&pst->dtPidList)-1;i>-1;i--){
+				list_get(&pst->dtPidList,i, &mpf);
+				free(mpf);
+				mpf = NULL;
+				list_pop_tail(&pst->dtPidList);
+			}
+		}
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%dpidcnt", ch);
+		if(atoi(mprGetJson(_outPrg, idstr))>0){
+			for(i=0;i<atoi(mprGetJson(_outPrg, idstr));i++){
+				memset(idstr, 0, sizeof(idstr));
+				sprintf(idstr, "ch%dtbl%d", ch, i);
+				_Stream = mprGetJsonObj(_outPrg, idstr);
+				mpf = malloc(sizeof(MuxPidInfo_st));
+				mpf->inChannel = atoi(mprGetJson(_Stream, "inChannel"));
+				mpf->oldPid = atoi(mprGetJson(_Stream, "oldPid"));
+				mpf->newPid = atoi(mprGetJson(_Stream, "newPid"));
+				list_append(&pst->dtPidList, mpf);
+			}
 		}
 		
 		_pdb = mprGetJsonObj(updatas, "_pdb");
