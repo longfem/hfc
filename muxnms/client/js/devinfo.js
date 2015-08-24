@@ -3254,7 +3254,7 @@ function devinfo_output(devType){
                 });
                 dialog_nitc.dialog( "close" );
             },
-            "取消": function() {
+            "CANCEL": function() {
                 dialog_nitc.dialog( "close" );
             }
         }

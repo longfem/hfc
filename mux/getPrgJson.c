@@ -738,7 +738,7 @@ void getBackupJson(char *ip, char *outprg){
 			}
 		}
 		memset(idstr, 0, sizeof(idstr));
-		sprintf(idstr, "ch%dusrprgcnt", i);
+		sprintf(idstr, "ch%dusrprgcnt", ch);
 		cJSON_AddNumberToObject(prgjsonlist, idstr, 0);
 		if((&pst->userPrgNodes != NULL)&&(list_len(&pst->userPrgNodes)>0)){
 			cJSON_AddNumberToObject(prgjsonlist, idstr, list_len(&pst->userPrgNodes));
@@ -811,10 +811,10 @@ void getBackupJson(char *ip, char *outprg){
 		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pmt);
 		cJSON_AddNumberToObject(iteminfo,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_sdt);
 		
-	}    
+	}	
 	cJSON_AddItemToObject(basejson,"_nitsection", iteminfo = cJSON_CreateObject());
 	for (ch = 0; ch < 2; ch++)
-	{
+	{		
 		list_get(&clsProgram.NitSection, ch, &nist);
 		memset(idstr, 0, sizeof(idstr));
 		sprintf(idstr, "_nit%d", ch);
@@ -823,9 +823,9 @@ void getBackupJson(char *ip, char *outprg){
 		cJSON_AddNumberToObject(itemjson, "version", nist->version);
 		cJSON_AddNumberToObject(itemjson, "nameListLen", nist->nameListLen);
 		cJSON_AddNumberToObject(itemjson, "streamLoopLen", nist->streamLoopLen);
-		if(nist->nameListLen > 0){
+		if(nist->nameListLen > 0 && nist->nameList != NULL){
 			cJSON_AddNumberToObject(itemjson, "index", nist->nameList->index);
-			cJSON_AddStringToObject(itemjson, "tag", nist->nameList->tag);
+			cJSON_AddNumberToObject(itemjson, "tag", nist->nameList->tag);
 			cJSON_AddNumberToObject(itemjson, "namedataLen", nist->nameList->dataLen);
 			cJSON_AddStringToObject(itemjson, "namedata", nist->nameList->data);
 		}
@@ -844,7 +844,7 @@ void getBackupJson(char *ip, char *outprg){
 			}
 		}
 	}
-
+	
 	
 	prgjsonstring = cJSON_PrintUnformatted(basejson);
 	printf("----strlen=%d\n", strlen(prgjsonstring));

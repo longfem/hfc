@@ -1723,7 +1723,7 @@ static void downloads(HttpConn *conn) {
 
 static void uploads(HttpConn *conn) {
 	printf("================>>>uploads start!!\n");
-	int i = 0, j = 0, ch = 0, chn = 0;
+	int i = 0, j = 0, ch = 0, len = 0;
 	char str[32] = {0};
 	char idstr[16] = {0};
 	char optstr[256] = {0};
@@ -1740,7 +1740,7 @@ static void uploads(HttpConn *conn) {
 	MprJson *jsonparam = httpGetParams(conn);	
 	cchar *upstring = mprGetJson(jsonparam, "updatas");	
 	MprJson *updatas = mprParseJson(upstring);
-	printf("==========uploads===========%s\n", mprJsonToString (updatas, MPR_JSON_QUOTES));
+	//printf("==========uploads===========%s\n", mprJsonToString (updatas, MPR_JSON_QUOTES));
 	clsProgram.chnBypass2 = atoi(mprGetJson(updatas, "chnBypass2"));
 	clsProgram.chnBypassEnable = atoi(mprGetJson(updatas, "chnBypassEnable"));
 	MprJson *_needInputData = mprGetJsonObj(updatas, "_needInputData");
@@ -1770,10 +1770,12 @@ static void uploads(HttpConn *conn) {
 		if( list_len(&pst->prgNodes) > 0){
 			freePrograms(&pst->prgNodes);
 		}
+		list_init(&pst->prgNodes);
 		memset(idstr, 0, sizeof(idstr));
 		sprintf(idstr, "ch%dprgcnt", ch);
-		if(atoi(mprGetJson(_outPrg, idstr) > 0){
-			for(i = 0; i<atoi(mprGetJson(_outPrg, idstr); i++ ){
+		len = atoi(mprGetJson(_outPrg, idstr));
+		if(len > 0){
+			for(i = 0; i<len; i++ ){
 				PrgInfo = malloc(sizeof(Dev_prgInfo_st));
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "ch%dprg%d", ch, i);
@@ -1810,7 +1812,7 @@ static void uploads(HttpConn *conn) {
 						pdataStreamInfo++;
 					}
 				}
-				list_append(&pst->prgNodes, PrgInfo);				
+				list_append(&pst->prgNodes, PrgInfo);	
 			}
 		}
 		//free calist
@@ -1818,9 +1820,10 @@ static void uploads(HttpConn *conn) {
 		freecanode(caIdenList);
 		memset(idstr, 0, sizeof(idstr));
 		sprintf(idstr, "cach%dcnt", ch);
-		if(atoi(mprGetJson(_outPrg, idstr)>0)){
+		len = atoi(mprGetJson(_outPrg, idstr));
+		if(len>0){
 			list_init(caIdenList);
-			for(j=0; j<atoi(mprGetJson(_outPrg, idstr); j++ ){
+			for(j=0; j<len; j++ ){
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "cach%dindex%d", ch, j);
 				_canode = mprGetJsonObj(_outPrg, idstr);
@@ -1836,18 +1839,20 @@ static void uploads(HttpConn *conn) {
 				memcpy(cades->private_data_byte, mprGetJson(_canode, "private_data_byte"), cades->private_data_byte_len);
 			}			
 		}
-		//userprg		
+		//userprg
 		if( list_len(&pst->userPrgNodes) > 0){
 			freePrograms(&pst->userPrgNodes);			
 		}
 		memset(idstr, 0, sizeof(idstr));
-		sprintf(idstr, "ch%dusrprgcnt", i);
-		if(atoi(mprGetJson(_outPrg, idstr)>0)){
+		sprintf(idstr, "ch%dusrprgcnt", ch);
+		len = atoi(mprGetJson(_outPrg, idstr));
+		if(len>0){
 			list_init(&pst->userPrgNodes);
-			for(j=0; j<atoi(mprGetJson(_outPrg, idstr); j++ ){
+			for(i=0; i<len; i++ ){
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "ch%dusrprg%d", ch, i);
 				_Prg = mprGetJsonObj(_outPrg, idstr);
+				printf("==========_Prg===========%s\n", mprJsonToString (_Prg, MPR_JSON_QUOTES));
 				User_prgInfo_t *userprg = malloc(sizeof(User_prgInfo_t));
 				userprg->prgNameLen = atoi(mprGetJson(_Prg, "prgNameLen"));
 				userprg->prgName = malloc(userprg->prgNameLen);
@@ -1879,16 +1884,16 @@ static void uploads(HttpConn *conn) {
 						pdataStreamInfo->index = atoi(mprGetJson(_Streamitem, "index"));
 						pdataStreamInfo->outPid = atoi(mprGetJson(_Streamitem, "outPid"));
 						pdataStreamInfo->inPid = pdataStreamInfo->outPid;
-						pdataStreamInfo->inChn = userprg->chnId;
 						pdataStreamInfo++;
 					}
 				}
-				list_append(&pst->userPrgNodes, userprg);					
+				list_append(&pst->userPrgNodes, userprg);			
 			}			
 		}
+		printf("-----------------666\n");
 		//pid table
 		//释放原dtPidList内存空间
-		MuxPidInfo_st *mpf = NULL;
+		/*MuxPidInfo_st *mpf = NULL;
 		if(list_len(&pst->dtPidList)>0){
 			for(i=list_len(&pst->dtPidList)-1;i>-1;i--){
 				list_get(&pst->dtPidList,i, &mpf);
@@ -1958,7 +1963,7 @@ static void uploads(HttpConn *conn) {
 				nameList->dataLen = atoi(mprGetJson(_nit, "namedataLen"));
 				nameList->data = malloc(sizeof(nameList->dataLen));
 				memset(nameList->data, 0, nameList->dataLen);
-				memcpy(nameList->data, mprGetJson(_nit, "namedataLen"), nameList->namedata);
+				memcpy(nameList->data, mprGetJson(_nit, "namedata"), nameList->dataLen);
 				nist->nameList = nameList;
 				nist->nameList++;
 			}
@@ -1978,7 +1983,7 @@ static void uploads(HttpConn *conn) {
 				memcpy(newstreamLoop->BufferUn_stList->pbuf, mprGetJson(_Streamitem, "streamdata"), newstreamLoop->BufferUn_stList->bufLen);
 				newstreamLoop++;
 			}
-		}
+		}*/
 	}
 	
 	
