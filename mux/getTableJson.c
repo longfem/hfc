@@ -399,9 +399,7 @@ void getTableJson(int channel, char *outprg, int flag, char *lan){
 		}else{
 			
 		}
-	}
-	
-	
+	}	
 	cJSON_AddItemToArray(tablesarray,tablejson = cJSON_CreateObject());
 	cJSON_AddTrueToObject(tablejson,"folder");
 	cJSON_AddFalseToObject(tablejson,"expanded");
@@ -503,7 +501,6 @@ void getTableJson(int channel, char *outprg, int flag, char *lan){
             }
         }
 	}	
-	
 	prgjsonstring = cJSON_PrintUnformatted(tablesarray);
 		
 	memcpy(outprg, prgjsonstring, strlen(prgjsonstring));
