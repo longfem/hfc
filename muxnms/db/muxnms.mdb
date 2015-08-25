@@ -26,7 +26,7 @@
             'level': { type: 'int' },
             'logtime': { type: 'int' },
         },
-        data: [            
+        data: [
         ],
     },
 }

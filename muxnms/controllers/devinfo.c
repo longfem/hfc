@@ -13,7 +13,7 @@ extern ClsProgram_st clsProgram;
 
 char *tmpip = "192.168.1.49";
 //conn->rx->parsedUri->host
-static void getDevinfo(HttpConn *conn) {
+static void getDevinfo(HttpConn *conn) {	
 	if(session("isAuthed") != NULL){
 		if (strcmp(session("isAuthed"),"true") != 0) {
 			render("login.esp");

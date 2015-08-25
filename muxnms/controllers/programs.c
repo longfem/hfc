@@ -1916,8 +1916,9 @@ static void uploads(HttpConn *conn) {
 				list_append(&pst->dtPidList, mpf);
 			}
 		}
-		
-		_pdb = mprGetJsonObj(updatas, "_pdb");
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%d_pdb", ch);
+		_pdb = mprGetJsonObj(updatas, idstr);
 		pdb->pvalueTree->poutChnArray[ch].networkId = atoi(mprGetJson(_pdb, "networkId"));		
 		pdb->pvalueTree->poutChnArray[ch].streamId = atoi(mprGetJson(_pdb, "streamId"));
 		pdb->pvalueTree->poutChnArray[ch].oringal_networkid = atoi(mprGetJson(_pdb, "oringal_networkid"));
@@ -1972,6 +1973,7 @@ static void uploads(HttpConn *conn) {
 		}
 		if(nist->streamLoopLen > 0){
 			Nit_streamLoop_t *newstreamLoop = malloc(nist->streamLoopLen * sizeof(Nit_streamLoop_t));
+			nist->streamLoop = newstreamLoop;
 			for(i=0;i<nist->streamLoopLen;i++){
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "_streamloop%d", i);
@@ -1981,8 +1983,14 @@ static void uploads(HttpConn *conn) {
 				newstreamLoop->BufferUn_stLen = atoi(mprGetJson(_Streamitem, "BufferUn_stLen"));
 				newstreamLoop->BufferUn_stList = malloc(sizeof(BufferUn_st));
 				newstreamLoop->BufferUn_stList->bufLen = atoi(mprGetJson(_Streamitem, "streamdataLen"));
-				newstreamLoop->BufferUn_stList->pbuf = malloc(sizeof(newstreamLoop->BufferUn_stList->bufLen));
-				memcpy(newstreamLoop->BufferUn_stList->pbuf, mprGetJson(_Streamitem, "streamdata"), newstreamLoop->BufferUn_stList->bufLen);
+				newstreamLoop->BufferUn_stList->pbuf = malloc(newstreamLoop->BufferUn_stList->bufLen);
+				memset(newstreamLoop->BufferUn_stList->pbuf, 0, newstreamLoop->BufferUn_stList->bufLen);
+				memcpy((unsigned char*)newstreamLoop->BufferUn_stList->pbuf, (unsigned char*)mprGetJson(_Streamitem, "streamdata"), newstreamLoop->BufferUn_stList->bufLen);
+				
+				for(j=0;j<newstreamLoop->BufferUn_stList->bufLen;j++){
+					printf("byte[%d]%02x--", j, newstreamLoop->BufferUn_stList->pbuf[j]);
+				}
+				printf("--\n");
 				newstreamLoop++;
 			}
 		}
@@ -1995,7 +2003,7 @@ static void uploads(HttpConn *conn) {
 	
 	
 	//add optlog
-    /*Edi *db = ediOpen("db/ipgw.mdb", "mdb", EDI_AUTO_SAVE);
+    Edi *db = ediOpen("db/ipgw.mdb", "mdb", EDI_AUTO_SAVE);
     EdiRec *optlog = ediCreateRec(db, "optlog");
     if(optlog == NULL){
        printf("================>>>optlog is NULL!!\n");
@@ -2012,7 +2020,7 @@ static void uploads(HttpConn *conn) {
     if(ediSetFields(optlog, row) == 0){
        printf("================>>>ediSetFields Failed!!\n");
     }
-    ediUpdateRec(db, optlog);*/
+    ediUpdateRec(db, optlog);
 	redirect("/index.esp");
 }
 

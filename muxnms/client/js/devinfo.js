@@ -3199,7 +3199,7 @@ function devinfo_output(devType){
     var dialog_nitc = $( "#dialog-NITC" ).dialog({
         autoOpen: false,
         height: 500,
-        width: 700,
+        width: 800,
         modal: true,
         buttons: {
             "ADD":function() {
@@ -3264,7 +3264,7 @@ function devinfo_output(devType){
     var dialog_nits = $( "#dialog-NITS" ).dialog({
         autoOpen: false,
         height: 550,
-        width: 700,
+        width: 800,
         modal: true,
         buttons: {
             "ADD":function() {
@@ -3331,7 +3331,7 @@ function devinfo_output(devType){
     var dialog_nitt = $( "#dialog-NITT" ).dialog({
         autoOpen: false,
         height: 550,
-        width: 700,
+        width: 800,
         modal: true,
         buttons: {
             "ADD":function() {

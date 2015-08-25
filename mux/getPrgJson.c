@@ -789,27 +789,29 @@ void getBackupJson(char *ip, char *outprg){
 				list_get(&pst->dtPidList, i, &muxinfo);
 				memset(idstr, 0, sizeof(idstr));
 				sprintf(idstr, "ch%dtbl%d", ch, i);
-				cJSON_AddItemToArray(prgjsonlist, prgjson = cJSON_CreateObject());
+				cJSON_AddItemToObject(prgjsonlist, idstr, prgjson = cJSON_CreateObject());
 				cJSON_AddNumberToObject(prgjson, "inChannel", muxinfo->inChannel);
 				cJSON_AddNumberToObject(prgjson, "oldPid", muxinfo->oldPid);
 				cJSON_AddNumberToObject(prgjson, "newPid", muxinfo->newPid);
 			}			
 		}
 		//pdb
-		cJSON_AddItemToObject(basejson,"_pdb", iteminfo = cJSON_CreateObject());
-		cJSON_AddNumberToObject(iteminfo,"networkId", pdb->pvalueTree->poutChnArray[ch-1].networkId);
-		cJSON_AddNumberToObject(iteminfo,"streamId", pdb->pvalueTree->poutChnArray[ch-1].streamId);
-		cJSON_AddNumberToObject(iteminfo,"oringal_networkid", pdb->pvalueTree->poutChnArray[ch-1].oringal_networkid);
-		cJSON_AddNumberToObject(iteminfo,"outputRate", pdb->pvalueTree->poutChnArray[ch-1].outputRate);
-		cJSON_AddNumberToObject(iteminfo,"isAutoRaiseVersion", pdb->pvalueTree->poutChnArray[ch-1].isAutoRaiseVersion);
-		cJSON_AddNumberToObject(iteminfo,"version", pdb->pvalueTree->poutChnArray[ch-1].version);
-		cJSON_AddNumberToObject(iteminfo,"isManualMapMode", pdb->pvalueTree->poutChnArray[ch-1].isManualMapMode);
-		cJSON_AddNumberToObject(iteminfo,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[ch-1].isAutoRankPAT);	
-		cJSON_AddNumberToObject(iteminfo,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_cat);
-		cJSON_AddNumberToObject(iteminfo,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_nit);
-		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pat);
-		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_pmt);
-		cJSON_AddNumberToObject(iteminfo,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[ch-1].isNeedSend_sdt);
+		memset(idstr, 0, sizeof(idstr));
+		sprintf(idstr, "ch%d_pdb", ch);
+		cJSON_AddItemToObject(basejson, idstr, iteminfo = cJSON_CreateObject());
+		cJSON_AddNumberToObject(iteminfo,"networkId", pdb->pvalueTree->poutChnArray[ch].networkId);
+		cJSON_AddNumberToObject(iteminfo,"streamId", pdb->pvalueTree->poutChnArray[ch].streamId);
+		cJSON_AddNumberToObject(iteminfo,"oringal_networkid", pdb->pvalueTree->poutChnArray[ch].oringal_networkid);
+		cJSON_AddNumberToObject(iteminfo,"outputRate", pdb->pvalueTree->poutChnArray[ch].outputRate);
+		cJSON_AddNumberToObject(iteminfo,"isAutoRaiseVersion", pdb->pvalueTree->poutChnArray[ch].isAutoRaiseVersion);
+		cJSON_AddNumberToObject(iteminfo,"version", pdb->pvalueTree->poutChnArray[ch].version);
+		cJSON_AddNumberToObject(iteminfo,"isManualMapMode", pdb->pvalueTree->poutChnArray[ch].isManualMapMode);
+		cJSON_AddNumberToObject(iteminfo,"isAutoRankPAT", pdb->pvalueTree->poutChnArray[ch].isAutoRankPAT);	
+		cJSON_AddNumberToObject(iteminfo,"isNeedSend_cat", pdb->pvalueTree->poutChnArray[ch].isNeedSend_cat);
+		cJSON_AddNumberToObject(iteminfo,"isNeedSend_nit", pdb->pvalueTree->poutChnArray[ch].isNeedSend_nit);
+		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pat", pdb->pvalueTree->poutChnArray[ch].isNeedSend_pat);
+		cJSON_AddNumberToObject(iteminfo,"isNeedSend_pmt", pdb->pvalueTree->poutChnArray[ch].isNeedSend_pmt);
+		cJSON_AddNumberToObject(iteminfo,"isNeedSend_sdt", pdb->pvalueTree->poutChnArray[ch].isNeedSend_sdt);
 		
 	}	
 	cJSON_AddItemToObject(basejson,"_nitsection", iteminfo = cJSON_CreateObject());
@@ -828,7 +830,7 @@ void getBackupJson(char *ip, char *outprg){
 			cJSON_AddNumberToObject(itemjson, "tag", nist->nameList->tag);
 			cJSON_AddNumberToObject(itemjson, "namedataLen", nist->nameList->dataLen);
 			cJSON_AddStringToObject(itemjson, "namedata", nist->nameList->data);
-		}
+		}		
 		if(nist->streamLoopLen > 0){
 			Nit_streamLoop_t *streamLoop = nist->streamLoop;
 			for (i = 0; i < nist->streamLoopLen; i++){
@@ -839,7 +841,7 @@ void getBackupJson(char *ip, char *outprg){
 				cJSON_AddNumberToObject(prgjsonlist, "original_network_id", streamLoop->original_network_id);
 				cJSON_AddNumberToObject(prgjsonlist, "BufferUn_stLen", streamLoop->BufferUn_stLen);
 				cJSON_AddNumberToObject(prgjsonlist, "streamdataLen", streamLoop->BufferUn_stList->bufLen);
-				cJSON_AddStringToObject(prgjsonlist, "streamdata",  streamLoop->BufferUn_stList->pbuf);				
+				cJSON_AddStringToObject(prgjsonlist, "streamdata",  (unsigned char *)streamLoop->BufferUn_stList->pbuf);
 				streamLoop++;
 			}
 		}
